@@ -1,8 +1,8 @@
 include(JgdParseArguments)
 include(JgdValidateArguments)
 include(JgdConfigPackageFileNames)
+include(JgdStandardDirs)
 include(CMakePackageConfigHelpers)
-include(GNUInstallDirs)
 
 #
 # A convenience function to create an executable and add it as a test in one
@@ -35,14 +35,12 @@ function(jgd_install_targets)
     set(do_version_file TRUE)
   endif()
 
-  set(name_version "${PROJECT_NAME}")
-  set(config_version_file "")
+  set(config_version_file)
   if(do_version_file)
     jgd_config_version_file_name(OUT_VAR config_version_file)
-    string(APPEND name_version "-${${PROJECT_NAME}_VERSION")
-
+    string(PREPEND config_version_file "${CMAKE_CURRENT_BINARY_DIR}/")
     write_basic_package_version_file(
-      "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/${config_version_file}"
+      "${CMAKE_CURRENT_BINARY_DIR}/${config_version_file}"
       VERSION ${${PROJECT_NAME}_VERSION}
       COMPATIBILITY AnyNewerVersion)
   endif()
@@ -54,12 +52,7 @@ function(jgd_install_targets)
 
   # Install headers
   if(ARGS_HEADERS)
-    set(include_dir
-        "${CMAKE_INSTALL_INCLUDEDIR}/${name_version}/${PROJECT_NAME}")
-    if(ARGS_COMPONENT)
-      string(APPEND include_dir "/${ARGS_COMPONENT}")
-    endif()
-
+    jgd_install_include_dir(COMPONENT "${component}" OUT_VAR include_dir)
     install(
       FILES "${ARGS_HEADERS}"
       DESTINATION "${include_dir}"
@@ -67,30 +60,29 @@ function(jgd_install_targets)
   endif()
 
   # Install cmake modules, including config package modules
-  set(cmake_destination "${CMAKE_INSTALL_DATAROOTDIR}/cmake/${name_version}")
-
-  jgd_config_file_name(COMPONENT "${component}" OUT_VAR config_file)
-  set(config_pkg_file
-      "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/${config_file}")
+  jgd_config_file_name(COMPONENT "${component}" OUT_VAR config_file_name)
+  set(config_pkg_file "${CMAKE_CURRENT_BINARY_DIR}/${config_file_name}")
   if(NOT EXISTS "${config_pkg_file}")
-    set(config_pkg_file "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-    message(
-      FATAL_ERROR
-        "Unable to install the targets ${ARGS_TARGETS} without a config file.
-    Expected ${config_pkg_file}, but the file could not be found. You may ")
+    set(config_pkg_file "${JGD_PROJECT_CMAKE_DIR}/${config_file_name}")
+    if(NOT_EXISTS "${config_pkg_file}")
+      message(
+        FATAL_ERROR
+          "Unable to install the targets ${ARGS_TARGETS} without a config file."
+          "Could not find the file ${config_file_name} in "
+          "${CMAKE_CURRENT_BINARY_DIR} or ${JGD_PROJECT_CMAKE_DIR}.")
+    endif()
   endif()
 
   set(config_files "${config_pkg_file}")
 
   if(do_version_file)
-    list(APPEND config_files
-         "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/${config_version_file}")
+    list(APPEND config_files "${config_version_file}")
   endif()
   if(ARGS_CMAKE_MODULES)
     list(APPEND config_files "${ARGS_CMAKE_MODULES}")
   endif()
 
-  install(FILES "${config_files}" DESTINATION ${cmake_destination})
+  install(FILES "${config_files}" DESTINATION "${JGD_INSTALL_CMAKE_DIR}")
 
   # Install targets via an export set
   install(TARGETS "${ARGS_TARGETS}" EXPORT export_set)
@@ -100,7 +92,7 @@ function(jgd_install_targets)
     EXPORT export_set
     FILE ${targets_file}
     NAMESPACE ${PROJECT_NAME}::
-    DESTINATION "${cmake_destination}"
+    DESTINATION "${JGD_INSTALL_CMAKE_DIR}"
     COMPONENT ${component})
 
 endfunction()
