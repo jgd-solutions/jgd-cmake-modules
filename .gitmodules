@@ -1,0 +1,3 @@
+[submodule "project-infrastructure"]
+	path = project-infrastructure
+	url = ../project-infrastructure
