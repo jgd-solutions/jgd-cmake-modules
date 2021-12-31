@@ -26,7 +26,7 @@ include(JgdValidateArguments)
 # PATHS: multi value arg; the paths to search for config-files for PACKAGE_NAME.
 # When omitted, CMAKE_CURRENT_BINARY_DIR will be used.
 #
-function(jgd_find_conan_package)
+macro(jgd_find_conan_package)
   jgd_parse_arguments(
     OPTIONS
     "OPTIONAL"
@@ -44,9 +44,11 @@ function(jgd_find_conan_package)
     set(req_msg "")
   endif()
 
+  set(comps_keyword "")
   set(comps_arg "")
   if(ARGS_COMPONENTS)
-    set(comps_arg "COMPONENTS ${ARGS_COMPONENTS}")
+    set(comps_keyword "COMPONENTS")
+    set(comps_arg "${ARGS_COMPONENTS}")
   endif()
 
   set(search_paths "${CMAKE_CURRENT_BINARY_DIR}")
@@ -54,12 +56,22 @@ function(jgd_find_conan_package)
     set(search_paths "${ARGS_PATHS}")
   endif()
 
+  set(original_prefix_path "${CMAKE_PREFIX_PATH}")
+  set(CMAKE_PREFIX_PATH "${search_paths}")
+
   find_package(
     "${ARGS_PACKAGE_NAME}"
     CONFIG
     ${req}
     NO_DEFAULT_PATH
+    ${comps_keyword}
     ${comps_arg}
     PATHS
-    ${search_paths})
-endfunction()
+    "${search_paths}")
+
+  unset(req)
+  unset(comps_keyword)
+  unset(search_paths)
+  set(CMAKE_PREFIX_PATH "${original_prefix_path}")
+  unset(original_prefix_path)
+endmacro()
