@@ -11,7 +11,9 @@ include(JgdValidateArguments)
 # but instead makes adding the project's default directories, following the
 # layout conventions, easier.
 #
-# Arguments: PROJECT: one value arg; the name of the project.
+# Arguments:
+#
+# PROJECT: one value arg; the name of the project.
 #
 # COMPONENTS: multi value arg; list of components that the PROJECT encapsulates.
 # Optional and shouldn't be used if the project doesn't contain any components.
