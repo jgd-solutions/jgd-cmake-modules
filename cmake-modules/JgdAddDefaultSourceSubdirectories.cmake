@@ -3,9 +3,10 @@ include(JgdValidateArguments)
 
 # Adds subdirectories following JGD's C++ project layout conventions, based on
 # the PROJECT and COMPONENTS arguments. That is, the relative directories
-# ./<project>-<component>/<project>/<component> or just ./<project> are added as
-# a subdirectories, depending upon if the project has components or not. These
-# paths are relative to the location of the calling CMake script.
+# ./<project>-<component>/<project>/<component> or just ./<project> and possibly
+# ./lib<project> are added as a subdirectories, depending upon if the project
+# has components or not. These paths are relative to the location of the calling
+# CMake script.
 #
 # This function is not meant as a complete replacement for add_subdirectory(),
 # but instead makes adding the project's default directories, following the
@@ -65,5 +66,18 @@ function(jgd_add_default_source_subdirectories)
           "${subdir_path} for project ${ARGS_PROJECT}. Directory does "
           "not exist.")
     endif()
+
+    # add additional library source subdirectory, if project is executable
+    string(REGEX REPLACE "^lib" "" no_lib "${ARGS_PROJECT}")
+    if("${no_lib}" STREQUAL "${ARGS_PROJECT}")
+      set(subdir_path "${PROJECT_SOURCE_DIR}/lib${ARGS_PROJECT}")
+      if(IS_DIRECTORY "${subdir_path}")
+        message(DEBUG "${CMAKE_CURRENT_FUNCTION}: Adding directory "
+                "${subdir_path} to project ${PROJECT_NAME}")
+        add_subdirectory(${subdir_path})
+      endif()
+    endif()
+
   endif()
+
 endfunction()
