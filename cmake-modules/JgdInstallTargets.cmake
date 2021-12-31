@@ -82,17 +82,22 @@ function(jgd_install_targets)
     list(APPEND config_files "${ARGS_CMAKE_MODULES}")
   endif()
 
-  install(FILES "${config_files}" DESTINATION "${JGD_INSTALL_CMAKE_DIR}")
+  install(FILES "${config_files}"
+          DESTINATION "${JGD_INSTALL_CMAKE_DESTINATION}")
 
   # Install targets via an export set
-  install(TARGETS "${ARGS_TARGETS}" EXPORT export_set)
+  install(
+    TARGETS "${ARGS_TARGETS}"
+    EXPORT export_set
+    INCLUDES
+    DESTINATION "${JGD_INSTALL_INTERFACE_INCLUDE_DIR}")
   jgd_config_targets_file_name(COMPONENT "${component}" OUT_VAR targets_file)
 
   install(
     EXPORT export_set
     FILE ${targets_file}
     NAMESPACE ${PROJECT_NAME}::
-    DESTINATION "${JGD_INSTALL_CMAKE_DIR}"
+    DESTINATION "${JGD_INSTALL_CMAKE_DESTINATION}"
     COMPONENT ${component})
 
 endfunction()
