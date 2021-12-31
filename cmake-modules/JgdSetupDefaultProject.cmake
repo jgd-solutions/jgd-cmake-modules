@@ -25,9 +25,6 @@ include(JgdStandardDirs)
 # project doesn't contain any components, or subdirectories aren't to be added
 # by this call (ADD_SUBDIRECTORIES isn't provided).
 #
-# CXX_STANDARD: on value arg; the default CXX_STANDARD property for subsequent
-# targets.
-#
 # ADD_SUBDIRECTORIES: option; if defined, will cause the function to add
 # subdirectories in accordance with JGD's project structure and any COMPONENTS
 # provided
@@ -46,14 +43,14 @@ macro(JGD_SETUP_DEFAULT_PROJECT)
     OPTIONS
     "ADD_SUBDIRECTORIES;WITH_TESTS;WITH_DOCS;WITHOUT_IPO;WITH_CONFIG_HEADER"
     ONE_VALUE_KEYWORDS
-    "PROJECT;CXX_STANDARD"
+    "PROJECT"
     MULTI_VALUE_KEYWORDS
     "COMPONENTS"
     ARGUMENTS
     "${ARGN}")
 
   # Argument Validation
-  jgd_validate_arguments(KEYWORDS "PROJECT;CXX_STANDARD")
+  jgd_validate_arguments(KEYWORDS "PROJECT")
   if(DEFINED ARGS_COMPONENTS AND NOT DEFINED ARGS_ADD_SUBDIRECTORIES)
     message(
       SEND_ERROR
@@ -75,8 +72,6 @@ macro(JGD_SETUP_DEFAULT_PROJECT)
   # default target property values
 
   # cmake-lint: disable=C0103
-  set(CMAKE_CXX_STANDARD ${ARGS_CXX_STANDARD})
-  set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
   set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
   set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
   set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
