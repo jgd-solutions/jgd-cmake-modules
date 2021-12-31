@@ -1,27 +1,30 @@
 include(JgdParseArguments)
 include(JgdValidateArguments)
+include(JgdStandardDirs.cmake)
+
+set(JGD_PROJECT_CMAKE_DIR "${PROJECT_SOURCE_DIR}/cmake")
+set(JGD_PROJECT_DATA_DIR "${PROJECT_SOURCE_DIR}/data")
+set(JGD_PROJECT_TESTS_DIR "${PROJECT_SOURCE_DIR}/tests")
+set(JGD_PROJECT_DOCS_DIR "${PROJECT_SOURCE_DIR}/docs")
 
 #
-# Enables testing for the current project by providing an option to
-# enable/disable tests, BUILD_TESTS, includes CTest CMake script, and adds the
-# 'tests' subdirectory to the project. CTests' CMake module provides a
-# BUILD_TESTING option, which is overriden by the BUILD_TESTS option intoduced
-# in by this function. By default, BUILD_TESTS=OFF.
+# Enables testing for the current project by including CTest CMake script, which
+# provides the BUILD_TESTING option, and adds the 'tests' subdirectory to the
+# project.
 #
 macro(JGD_SETUP_TESTS)
   jgd_parse_arguments(ARGUMENTS "${ARGN}")
   jgd_validate_arguments()
 
-  # Setup Testing
   include(CTest)
   if(BUILD_TESTING)
-    set(tests_dir "${PROJECT_SOURCE_DIR}/tests")
-    if(IS_DIRECTORY ${tests_dir})
-      add_subdirectory(${tests_dir})
+    if(IS_DIRECTORY "${JGD_PROJECT_TESTS_DIR}")
+      add_subdirectory("${JGD_PROJECT_TESTS_DIR}")
     else()
       message(
-        SEND_ERROR "BUILD_TESTS option specified as true, but tests directory "
-                   "(${tests_dir}) doesn't exist. Cannot build tests.")
+        SEND_ERROR
+          "BUILD_TESTING option is valid, but tests directory "
+          "(${JGD_PROJECT_TESTS_DIR}) doesn't exist. Cannot build tests.")
     endif()
   endif()
 

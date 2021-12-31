@@ -1,5 +1,6 @@
 include(JgdParseArguments)
 include(JgdValidateArguments)
+include(JgdStandardDirs)
 
 #
 # This macro sets up a basic CMake project. It sets default target properties,
@@ -80,16 +81,14 @@ macro(JGD_SETUP_DEFAULT_PROJECT)
   set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
   set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
-  set(proj_mod_path "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-  if(EXISTS ${proj_mod_path})
-    list(APPEND CMAKE_MODULE_PATH ${proj_mod_path})
+  if(EXISTS "${JGD_PROJECT_CMAKE_DIR }")
+    list(APPEND CMAKE_MODULE_PATH "${JGD_PROJECT_CMAKE_DIR}")
   endif()
 
   enable_language(CXX)
-  enable_testing()
+  include(CTest)
 
   if(ARGS_WITH_CONFIG_HEADER)
-    set(JGD_DATA_DIR "${PROJECT_SOURCE_DIR}/data")
     configure_file("${PROJECT_SOURCE_DIR}/cmake/${PROJECT_NAME}_config.hpp.in"
                    "${PROJECT_NAME}/${PROJECT_NAME}_config.hpp" @ONLY)
   endif()
