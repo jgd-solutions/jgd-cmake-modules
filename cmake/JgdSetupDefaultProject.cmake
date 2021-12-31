@@ -87,6 +87,7 @@ macro(JGD_SETUP_DEFAULT_PROJECT)
   endif()
 
   enable_language(CXX)
+  enable_testing()
 
   if(ARGS_WITH_CONFIG_HEADER)
     set(JGD_DATA_DIR "${PROJECT_SOURCE_DIR}/data")
@@ -100,9 +101,6 @@ macro(JGD_SETUP_DEFAULT_PROJECT)
   endif()
 
   if(ARGS_ADD_SUBDIRECTORIES)
-    if(BUILD_TESTING)
-      enable_testing() # so source subdirs can register tests
-    endif()
     include(JgdAddDefaultSourceSubdirectories)
     if(DEFINED ARGS_COMPOENTS)
       set(comps_args "COMPONENTS ${ARGS_COMPONENTS}")
