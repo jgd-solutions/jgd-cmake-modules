@@ -27,7 +27,10 @@ set(JGD_INSTALL_INTERFACE_INCLUDE_DIR
 #
 # Sets the variable specified by OUT_VAR to the installation directory
 # destination for public header files. Defined as a function because the path
-# depends on the component, if any, and the presence of version.
+# depends on the component, if any, and the presence of version. This
+# destination contains the include prefix that consumers will use
+# (#include<foo/bar/file.hpp>), unlike JGD_INSTALL_INTERFACE_INCLUDE_DIR,
+# thereby giving a direct path to where the appropriate header can be installed.
 #
 # Arguments:
 #
