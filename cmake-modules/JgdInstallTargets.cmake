@@ -98,8 +98,8 @@ function(jgd_install_targets)
     TARGETS ${ARGS_TARGETS}
     EXPORT export_set
     INCLUDES
-    DESTINATION "${JGD_INSTALL_INTERFACE_INCLUDE_DIR}")
-    COMPONENT ${component}
+    DESTINATION "${JGD_INSTALL_INTERFACE_INCLUDE_DIR}"
+    COMPONENT ${component})
   jgd_config_pkg_targets_file_name(COMPONENT "${component}" OUT_VAR
                                    targets_file)
 

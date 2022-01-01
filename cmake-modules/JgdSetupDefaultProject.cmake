@@ -98,7 +98,7 @@ macro(JGD_SETUP_DEFAULT_PROJECT)
 
   if(ARGS_CONFIGURE_PKG_CONFIG_FILES)
     include(JgdFileNaming)
-    foreach(component "${JGD_PROJECT_COMPONENTS}")
+    foreach(component ${JGD_PROJECT_COMPONENTS})
       jgd_config_pkg_file_name(COMPONENT "${component}" OUT_VAR
                                config_file_name)
       jgd_config_pkg_in_file_name(COMPONENT "${component}" OUT_VAR
