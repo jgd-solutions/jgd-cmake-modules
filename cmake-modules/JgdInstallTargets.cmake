@@ -19,11 +19,14 @@ include(CMakePackageConfigHelpers)
 #
 # TARGETS: multi-value arg; the targets to install.
 #
-# HEADERS: multi-value arg; the interface header files of the TARGETS which will
-# be installed.
+# HEADERS: multi-value arg; list of the interface header files of the TARGETS
+# which will be installed. Relative paths are evaluated with respect to
+# CMAKE_CURRENT_SOURCE_DIR, as defined by CMake's install() command.
 #
-# CMAKE_MODULES: multi-value arg; CMake modules to install, in addition to the
-# project's config package files.
+# CMAKE_MODULES: multi-value arg; directories housing CMake modules (*.cmake) to
+# install in addition to the project's config package files. Relative paths are
+# evaluated with respect to CMAKE_CURRENT_SOURCE_DIR, as defined by CMake's
+# install() command.
 #
 # COMPONENT: one-value arg; the component under which the artifacts will be
 # intalled. Optional - PROJECT_NAME will be used, if not provided.
@@ -58,16 +61,16 @@ function(jgd_install_targets)
 
   # Install headers
   if(ARGS_HEADERS)
-    jgd_install_include_dir(COMPONENT ${component} OUT_VAR include_dir)
+    jgd_install_include_destination(COMPONENT ${component} OUT_VAR include_dst)
     install(
       FILES "${ARGS_HEADERS}"
-      DESTINATION "${include_dir}"
+      DESTINATION "${include_dst}"
       COMPONENT ${component})
   endif()
 
   # Install cmake modules, including config package modules
   jgd_config_pkg_file_name(COMPONENT "${component}" OUT_VAR config_file_name)
-  set(config_pkg_file "${CMAKE_CURRENT_BINARY_DIR}/${config_file_name}")
+  set(config_pkg_file "${JGD_CONFIG_PKG_FILE_DESTINATION}/${config_file_name}")
   if(NOT EXISTS "${config_pkg_file}")
     set(config_pkg_file "${JGD_PROJECT_CMAKE_DIR}/${config_file_name}")
     if(NOT EXISTS "${config_pkg_file}")
@@ -75,7 +78,7 @@ function(jgd_install_targets)
         FATAL_ERROR
           "Unable to install the targets ${ARGS_TARGETS} without a config "
           "file. Could not find the file ${config_file_name} in "
-          "${CMAKE_CURRENT_BINARY_DIR} or ${JGD_PROJECT_CMAKE_DIR}.")
+          "${JGD_CONFIG_PKG_FILE_DESTINATION} or ${JGD_PROJECT_CMAKE_DIR}.")
     endif()
   endif()
 

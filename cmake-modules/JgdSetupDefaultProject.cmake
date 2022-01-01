@@ -93,10 +93,12 @@ macro(JGD_SETUP_DEFAULT_PROJECT)
              "${PROJECT_NAME}. Could not find file ${in_header_file}.")
     endif()
 
-    configure_file("${in_header_file}" "${PROJECT_NAME}/${header_name}" @ONLY)
+    configure_file("${in_header_file}"
+                   "${JGD_CONFIG_HEADER_DESTINATION}/${header_name}" @ONLY)
   endif()
 
   if(ARGS_CONFIGURE_PKG_CONFIG_FILES)
+    include(CMakePackageConfigHelpers)
     include(JgdFileNaming)
     foreach(component ${JGD_PROJECT_COMPONENTS})
       jgd_config_pkg_file_name(COMPONENT "${component}" OUT_VAR
@@ -111,7 +113,10 @@ macro(JGD_SETUP_DEFAULT_PROJECT)
           "component ${component}.")
       endif()
 
-      configure_file("${in_config_file}" "${config_file_name}" @ONLY)
+      configure_package_config_file(
+        "${in_config_file}"
+        "${JGD_CONFIG_PKG_FILE_DESTINATION}/${config_file_name}"
+        INSTALL_DESTINATION "${JGD_INSTALL_CMAKE_DESTINATION}")
     endforeach()
   endif()
 
