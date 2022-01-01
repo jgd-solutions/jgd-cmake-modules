@@ -70,11 +70,11 @@ function(jgd_install_targets)
   set(config_pkg_file "${CMAKE_CURRENT_BINARY_DIR}/${config_file_name}")
   if(NOT EXISTS "${config_pkg_file}")
     set(config_pkg_file "${JGD_PROJECT_CMAKE_DIR}/${config_file_name}")
-    if(NOT_EXISTS "${config_pkg_file}")
+    if(NOT EXISTS "${config_pkg_file}")
       message(
         FATAL_ERROR
-          "Unable to install the targets ${ARGS_TARGETS} without a config file."
-          "Could not find the file ${config_file_name} in "
+          "Unable to install the targets ${ARGS_TARGETS} without a config "
+          "file. Could not find the file ${config_file_name} in "
           "${CMAKE_CURRENT_BINARY_DIR} or ${JGD_PROJECT_CMAKE_DIR}.")
     endif()
   endif()
