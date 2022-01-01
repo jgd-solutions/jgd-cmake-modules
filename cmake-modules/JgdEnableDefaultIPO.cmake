@@ -10,7 +10,7 @@ include(JgdValidateArguments)
 # each target's default INTERPROCEDURAL_OPTIMIZATION value to TRUE, but they can
 # be overridden on a target-by-target basis.
 #
-macro(JGD_ENABLE_DEFAULT_IPO)
+function(jgd_enable_default_ipo)
   jgd_parse_arguments(ARGUMENTS "${ARGN}")
   jgd_validate_arguments()
 
@@ -18,11 +18,11 @@ macro(JGD_ENABLE_DEFAULT_IPO)
   include(CheckIPOSupported)
   check_ipo_supported(RESULT ipo_supported OUTPUT err_msg)
   if(ipo_supported)
-    set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+    set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE PARENT_SCOPE)
   else()
     message(
       WARNING
         "Interprocedural linker optimization is not supported: ${err_msg}\n"
         "Continuing without it.")
   endif()
-endmacro()
+function()
