@@ -6,7 +6,9 @@ include(JgdStandardDirs)
 # This macro sets up a basic CMake project. It sets default target properties,
 # handles tests and docs options, and adds default subdirectories following
 # JGD's C++ project layout conventions. It does not create the project, as CMake
-# doesn't support the project() command via a macro.
+# doesn't support the project() command via a macro. The variable
+# JGD_PROJECT_COMPONENTS will be set to a list of the PROJECT_NAME and all the
+# COMPONENTS.
 #
 # Call this macro in the top-level CMakeLists.txt to create a new, default
 # project following JGD's default conventions.
