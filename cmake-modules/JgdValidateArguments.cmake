@@ -41,7 +41,6 @@ function(jgd_validate_arguments)
   endif()
 
   # Argument Validation for the caller's arguments
-  message(STATUS "ins keywords: ${INS_KEYWORDS}")
   foreach(keyword ${INS_KEYWORDS})
     set(parsed_var ${INS_PREFIX}_${keyword})
     if(NOT DEFINED ${parsed_var})
