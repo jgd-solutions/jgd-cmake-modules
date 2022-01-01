@@ -113,7 +113,7 @@ function(jgd_config_pkg_in_file_name)
 
   jgd_config_pkg_file_name(COMPONENT "${ARGS_COMPONENT}" ${proj_keyword}
                            "${ARGS_PROJECT}" OUT_VAR config_file_name)
-  set("${OUT_VAR}"
+  set(${ARGS_OUT_VAR}
       "${config_file_name}.in"
       PARENT_SCOPE)
 endfunction()
@@ -204,7 +204,7 @@ function(jgd_config_header_file_name)
     set(project "${ARGS_PROJECT}")
   endif()
 
-  set("${OUT_VAR}"
+  set(${ARGS_OUT_VAR}
       "${project}_config.hpp"
       PARENT_SCOPE)
 endfunction()
@@ -234,7 +234,7 @@ function(jgd_config_header_in_file_name)
   jgd_config_header_file_name(${proj_keyword} "${ARGS_PROJECT}" OUT_VAR
                               header_file_name)
 
-  set("${OUT_VAR}"
+  set(${ARGS_OUT_VAR}
       "${header_file_name}.in"
       PARENT_SCOPE)
 endfunction()
