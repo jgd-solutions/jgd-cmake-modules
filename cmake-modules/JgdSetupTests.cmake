@@ -2,11 +2,6 @@ include(JgdParseArguments)
 include(JgdValidateArguments)
 include(JgdStandardDirs.cmake)
 
-set(JGD_PROJECT_CMAKE_DIR "${PROJECT_SOURCE_DIR}/cmake")
-set(JGD_PROJECT_DATA_DIR "${PROJECT_SOURCE_DIR}/data")
-set(JGD_PROJECT_TESTS_DIR "${PROJECT_SOURCE_DIR}/tests")
-set(JGD_PROJECT_DOCS_DIR "${PROJECT_SOURCE_DIR}/docs")
-
 #
 # Enables testing for the current project by including CTest CMake script, which
 # provides the BUILD_TESTING option, and adds the 'tests' subdirectory to the
