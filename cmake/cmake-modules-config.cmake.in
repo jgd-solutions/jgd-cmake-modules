@@ -1,0 +1,4 @@
+include(JgdFileNaming)
+jgd_config_targets_file_name(PROJECT "@PROJECT_NAME@" OUT_VAR target_file_name)
+include("${CMAKE_CURRENT_LIST_DIR}/${target_file_name}")
+unset(target_file_name)
