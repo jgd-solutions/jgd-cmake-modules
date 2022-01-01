@@ -69,12 +69,17 @@ function(jgd_config_pkg_file_name)
   jgd_parse_arguments(ONE_VALUE_KEYWORDS "COMPONENT;PROJECT;OUT_VAR" ARGUMENTS
                       "${ARGN}")
   jgd_validate_arguments(KEYWORDS "OUT_VAR")
+  set(proj_keyword "")
+  if(ARGS_PROJECT)
+    set(proj_keyword "PROJECT")
+  endif()
+
   _jgd_kebab_file_name(
     COMPONENT
     "${ARGS_COMPONENT}"
     SUFFIX
     "config.cmake"
-    PROJECT
+    ${proj_keyword}
     "${ARGS_PROJECT}"
     OUT_VAR
     "${ARGS_OUT_VAR}")
@@ -101,7 +106,12 @@ function(jgd_config_pkg_in_file_name)
   jgd_parse_arguments(ONE_VALUE_KEYWORDS "COMPONENT;PROJECT;OUT_VAR" ARGUMENTS
                       "${ARGN}")
   jgd_validate_arguments(KEYWORDS "OUT_VAR")
-  jgd_config_pkg_file_name(COMPONENT "${ARGS_COMPONENT}" PROJECT
+  set(proj_keyword "")
+  if(ARGS_PROJECT)
+    set(proj_keyword "PROJECT")
+  endif()
+
+  jgd_config_pkg_file_name(COMPONENT "${ARGS_COMPONENT}" ${proj_keyword}
                            "${ARGS_PROJECT}" OUT_VAR config_file_name)
   set("${OUT_VAR}"
       "${config_file_name}.in"
@@ -125,8 +135,13 @@ endfunction()
 function(jgd_config_pkg_version_file_name)
   jgd_parse_arguments(ONE_VALUE_KEYWORDS "PROJECT;OUT_VAR" ARGUMENTS "${ARGN}")
   jgd_validate_arguments(KEYWORDS "OUT_VAR")
-  _jgd_kebab_file_name(SUFFIX "config-version.cmake" PROJECT "${ARGS_PROJECT}"
-                       OUT_VAR "${ARGS_OUT_VAR}")
+  set(proj_keyword "")
+  if(ARGS_PROJECT)
+    set(proj_keyword "PROJECT")
+  endif()
+
+  _jgd_kebab_file_name(SUFFIX "config-version.cmake" ${proj_keyword}
+                       "${ARGS_PROJECT}" OUT_VAR "${ARGS_OUT_VAR}")
 endfunction()
 
 #
@@ -150,12 +165,17 @@ function(jgd_config_pkg_targets_file_name)
   jgd_parse_arguments(ONE_VALUE_KEYWORDS "COMPONENT;PROJECT;OUT_VAR" ARGUMENTS
                       "${ARGN}")
   jgd_validate_arguments(KEYWORDS "OUT_VAR")
+  set(proj_keyword "")
+  if(ARGS_PROJECT)
+    set(proj_keyword "PROJECT")
+  endif()
+
   _jgd_kebab_file_name(
     COMPONENT
     "${ARGS_COMPONENT}"
     SUFFIX
     "targets.cmake"
-    PROJECT
+    ${proj_keyword}
     "${ARGS_PROJECT}"
     OUT_VAR
     "${ARGS_OUT_VAR}")
@@ -206,7 +226,13 @@ endfunction()
 function(jgd_config_header_in_file_name)
   jgd_parse_arguments(ONE_VALUE_KEYWORDS "PROJECT;OUT_VAR" ARGUMENTS "${ARGN}")
   jgd_validate_arguments(KEYWORDS "OUT_VAR")
-  jgd_config_header_file_(PROJECT "${ARGS_PROJECT}" OUT_VAR header_file_name)
+  set(proj_keyword "")
+  if(ARGS_PROJECT)
+    set(proj_keyword "PROJECT")
+  endif()
+
+  jgd_config_header_file_name(${proj_keyword} "${ARGS_PROJECT}" OUT_VAR
+                              header_file_name)
 
   set("${OUT_VAR}"
       "${header_file_name}.in"
