@@ -65,7 +65,7 @@ endmacro()
 # OUT_VAR: one-value arg; the name of the output variable which will store the
 # resulting file name.
 #
-function(jgd_config_file_name)
+function(jgd_config_pkg_file_name)
   jgd_parse_arguments(ONE_VALUE_KEYWORDS "COMPONENT;PROJECT;OUT_VAR" ARGUMENTS
                       "${ARGN}")
   jgd_validate_arguments(KEYWORDS "OUT_VAR")
@@ -97,26 +97,22 @@ endfunction()
 # OUT_VAR: one-value arg; the name of the output variable which will store the
 # resulting file name.
 #
-function(jgd_in_config_file_name)
+function(jgd_config_pkg_in_file_name)
   jgd_parse_arguments(ONE_VALUE_KEYWORDS "COMPONENT;PROJECT;OUT_VAR" ARGUMENTS
                       "${ARGN}")
   jgd_validate_arguments(KEYWORDS "OUT_VAR")
-  _jgd_kebab_file_name(
-    COMPONENT
-    "${ARGS_COMPONENT}"
-    SUFFIX
-    "config.cmake.in"
-    PROJECT
-    "${ARGS_PROJECT}"
-    OUT_VAR
-    "${ARGS_OUT_VAR}")
+  jgd_config_pkg_file_name(COMPONENT "${ARGS_COMPONENT}" PROJECT
+                           "${ARGS_PROJECT}" OUT_VAR config_file_name)
+  set("${OUT_VAR}"
+      "${config_file_name}.in"
+      PARENT_SCOPE)
 endfunction()
 
 #
 # Constructs a consistent kebab-case config version file name based on the
 # PROJECT argument or the PROJECT_NAME variable. The resuling file will be
 # placed in the variable specified by OUT_VAR. Result will be
-# <PROJECT_NAME>-[COMPONENT-]config-version.cmake
+# <PROJECT_NAME>-config-version.cmake
 #
 # Arguments:
 #
@@ -126,7 +122,7 @@ endfunction()
 # OUT_VAR: one-value arg; the name of the output variable which will store the
 # resulting file name.
 #
-function(jgd_config_version_file_name)
+function(jgd_config_pkg_version_file_name)
   jgd_parse_arguments(ONE_VALUE_KEYWORDS "PROJECT;OUT_VAR" ARGUMENTS "${ARGN}")
   jgd_validate_arguments(KEYWORDS "OUT_VAR")
   _jgd_kebab_file_name(SUFFIX "config-version.cmake" PROJECT "${ARGS_PROJECT}"
@@ -150,7 +146,7 @@ endfunction()
 # OUT_VAR: one-value arg; the name of the output variable which will store the
 # resulting file name.
 #
-function(jgd_config_targets_file_name)
+function(jgd_config_pkg_targets_file_name)
   jgd_parse_arguments(ONE_VALUE_KEYWORDS "COMPONENT;PROJECT;OUT_VAR" ARGUMENTS
                       "${ARGN}")
   jgd_validate_arguments(KEYWORDS "OUT_VAR")
@@ -163,4 +159,56 @@ function(jgd_config_targets_file_name)
     "${ARGS_PROJECT}"
     OUT_VAR
     "${ARGS_OUT_VAR}")
+endfunction()
+
+#
+# Constructs a consistent snake-case config header file name based on the
+# PROJECT argument or the PROJECT_NAME variable. The resuling file will be
+# placed in the variable specified by OUT_VAR. Result will be
+# <PROJECT_NAME>_config.hpp
+#
+# Arguments:
+#
+# PROJECT: on-value arg; override of PROJECT_NAME. Optional - if not provided,
+# PROJECT_NAME will be used, which is more common.
+#
+# OUT_VAR: one-value arg; the name of the output variable which will store the
+# resulting file name.
+#
+function(jgd_config_header_file_name)
+  jgd_parse_arguments(ONE_VALUE_KEYWORDS "PROJECT;OUT_VAR" ARGUMENTS "${ARGN}")
+  jgd_validate_arguments(KEYWORDS "OUT_VAR")
+
+  set(project "${PROJECT_NAME}")
+  if(ARGS_PROJECT)
+    set(project "${ARGS_PROJECT}")
+  endif()
+
+  set("${OUT_VAR}"
+      "${project}_config.hpp"
+      PARENT_SCOPE)
+endfunction()
+
+#
+# Constructs a consistent snake-case input config header file name based on the
+# PROJECT argument or the PROJECT_NAME variable. The resuling file will be
+# placed in the variable specified by OUT_VAR. Result will be
+# <PROJECT_NAME>_config.hpp.in
+#
+# Arguments:
+#
+# PROJECT: on-value arg; override of PROJECT_NAME. Optional - if not provided,
+# PROJECT_NAME will be used, which is more common.
+#
+# OUT_VAR: one-value arg; the name of the output variable which will store the
+# resulting file name.
+#
+function(jgd_config_header_in_file_name)
+  jgd_parse_arguments(ONE_VALUE_KEYWORDS "PROJECT;OUT_VAR" ARGUMENTS "${ARGN}")
+  jgd_validate_arguments(KEYWORDS "OUT_VAR")
+  jgd_config_header_file_(PROJECT "${ARGS_PROJECT}" OUT_VAR header_file_name)
+
+  set("${OUT_VAR}"
+      "${header_file_name}.in"
+      PARENT_SCOPE)
 endfunction()
