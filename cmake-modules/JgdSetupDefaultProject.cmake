@@ -33,8 +33,9 @@ include(JgdFileNaming)
 # CONFIGURE_HEADER: option; if defined, will configure a project configuration
 # header from an appropriately named input file in the project's cmake directory
 #
-# CONFIGURE_PKG_CONFIG_FILE: option; if defined, will create a pkconfiguration
-# header from an appropriately named input file in the project's cmake directory
+# CONFIGURE_PKG_CONFIG_FILES: option; if defined, will configure config-file
+# package files from the appropriately named input files in the project's cmake
+# directory for the project and all provided COMPONENTS.
 #
 macro(JGD_SETUP_DEFAULT_PROJECT)
   jgd_parse_arguments(
@@ -44,7 +45,7 @@ macro(JGD_SETUP_DEFAULT_PROJECT)
     "WITH_DOCS"
     "WITH_IPO"
     "CONFIGURE_CONFIG_HEADER"
-    "CONFIGURE_PKG_CONFIG_FILE"
+    "CONFIGURE_PKG_CONFIG_FILES"
     MULTI_VALUE_KEYWORDS
     "COMPONENTS"
     ARGUMENTS
@@ -92,16 +93,25 @@ macro(JGD_SETUP_DEFAULT_PROJECT)
     configure_file("${in_header_file}" "${PROJECT_NAME}/${header_name}" @ONLY)
   endif()
 
-  if(ARGS_CONFIGURE_PKG_CONFIG_FILE)
-    jgd_config_pkg_file_name(OUT_VAR config_file_name)
-    jgd_config_pkg_in_file_name(OUT_VAR in_config_file)
-    string(PREPEND in_config_file "${JGD_PROJECT_CMAKE_DIR}/")
-    if(NOT EXISTS "${in_config_file}")
-      messag(FATAL_ERROR "Cannot configure a package config file for project "
-             "${PROJECT_NAME}. Could not find file ${in_config_file}.")
-    endif()
+  if(ARGS_CONFIGURE_PKG_CONFIG_FILES)
+    set(components "${ARGS_COMPONENTS}")
+    list(PREPEND components "${PROJECT_NAME}")
 
-    configure_file("${in_config_file}" "${config_file_name}" @ONLY)
+    foreach(component ${components})
+      jgd_config_pkg_file_name(COMPONENT "${component}" OUT_VAR
+                               config_file_name)
+      jgd_config_pkg_in_file_name(COMPONENT "${component}" OUT_VAR
+                                  in_config_file)
+      string(PREPEND in_config_file "${JGD_PROJECT_CMAKE_DIR}/")
+      if(NOT EXISTS "${in_config_file}")
+        messag(
+          FATAL_ERROR "Cannot configure a package config file for project "
+          "${PROJECT_NAME}. Could not find file ${in_config_file} for "
+          "component ${component}.")
+      endif()
+
+      configure_file("${in_config_file}" "${config_file_name}" @ONLY)
+    endforeach()
   endif()
 
   if(ARGS_WITH_IPO)
