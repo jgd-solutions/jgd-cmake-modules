@@ -3,10 +3,11 @@ include(JgdValidateArguments)
 
 #
 # Private macro to the module. Constructs a consistent kebab-case file name
-# based on the PROJECT_NAME, the provided COMPONENT, and SUFFIX arguments. The
-# resuling file will be placed in the variable specified by OUT_VAR. Result will
-# be <PROJECT_NAME>-[COMPONENT-]<suffix>, where suffix is the provided suffix
-# with leading dashes removed.
+# based on the PROJECT argument or the PROJECT_NAME variable, the provided
+# COMPONENT, and SUFFIX arguments. The resuling file will be placed in the
+# variable specified by OUT_VAR. Result will be
+# <PROJECT_NAME>-[COMPONENT-]<suffix>, where suffix is the provided suffix with
+# leading dashes removed.
 #
 # Arguments:
 #
@@ -16,110 +17,150 @@ include(JgdValidateArguments)
 # SUFFIX: one-value arg; the suffix to append to the generated kebab-case file
 # name. Ex. ".cmake"
 #
+# PROJECT: on-value arg; override of PROJECT_NAME. Optional - if not provided,
+# PROJECT_NAME will be used, which is more common.
+#
 # OUT_VAR: one-value arg; the name of the output variable which will store the
 # resulting file name.
 #
 macro(_JGD_KEBAB_FILE_NAME)
-  jgd_parse_arguments(ONE_VALUE_KEYWORDS "COMPONENT;SUFFIX;OUT_VAR" ARGUMENTS
-                      "${ARGN}")
+  jgd_parse_arguments(ONE_VALUE_KEYWORDS "COMPONENT;SUFFIX;PROJECT;OUT_VAR"
+                      ARGUMENTS "${ARGN}")
   jgd_validate_arguments(KEYWORDS "SUFFIX;OUT_VAR")
+
+  set(project "${PROJECT_NAME}")
+  if(ARGS_PROJECT)
+    set(project "${ARGS_PROJECT}")
+  endif()
 
   # remove leading '-' from suffix, if it was provided
   string(REGEX REPLACE "^-" "" suffix "${ARGS_SUFFIX}")
 
   # Empty component/no component provided or component is project
-  if(NOT ARGS_COMPONENT OR ("${ARGS_COMPONENT}" STREQUAL "${PROJECT_NAME}"))
+  if(NOT ARGS_COMPONENT OR ("${ARGS_COMPONENT}" STREQUAL "${project}"))
     set(${ARGS_OUT_VAR}
-        "${PROJECT_NAME}-${suffix}"
+        "${project}-${suffix}"
         PARENT_SCOPE)
   else()
     set(${ARGS_OUT_VAR}
-        "${PROJECT_NAME}-${ARGS_COMPONENT}-${suffix}"
+        "${project}-${ARGS_COMPONENT}-${suffix}"
         PARENT_SCOPE)
   endif()
 endmacro()
 
 #
-# Constructs a consistent kebab-case config file name based on the PROJECT_NAME
-# and the provided COMPONENT. The resuling file will be placed in the variable
-# specified by OUT_VAR. Result will be <PROJECT_NAME>-[COMPONENT-]config.cmake
+# Constructs a consistent kebab-case config file name based on the PROJECT
+# argument or the PROJECT_NAME variable, and the provided COMPONENT. The
+# resuling file will be placed in the variable specified by OUT_VAR. Result will
+# be <PROJECT_NAME>-[COMPONENT-]config.cmake
 #
 # Arguments:
 #
 # COMPONENT: one-value arg; specifies the component that the file will describe.
 # Optional.
+#
+# PROJECT: on-value arg; override of PROJECT_NAME. Optional - if not provided,
+# PROJECT_NAME will be used, which is more common.
 #
 # OUT_VAR: one-value arg; the name of the output variable which will store the
 # resulting file name.
 #
 function(jgd_config_file_name)
-  jgd_parse_arguments(ONE_VALUE_KEYWORDS "COMPONENT;OUT_VAR" ARGUMENTS
+  jgd_parse_arguments(ONE_VALUE_KEYWORDS "COMPONENT;PROJECT;OUT_VAR" ARGUMENTS
                       "${ARGN}")
   jgd_validate_arguments(KEYWORDS "OUT_VAR")
-  _jgd_kebab_file_name(COMPONENT "${ARGS_COMPONENT}" SUFFIX "config.cmake"
-                       OUT_VAR "${ARGS_OUT_VAR}")
+  _jgd_kebab_file_name(
+    COMPONENT
+    "${ARGS_COMPONENT}"
+    SUFFIX
+    "config.cmake"
+    PROJECT
+    "${ARGS_PROJECT}"
+    OUT_VAR
+    "${ARGS_OUT_VAR}")
 endfunction()
 
 #
-# Constructs a consistent kebab-case input config file name based on the
-# PROJECT_NAME and the provided COMPONENT. The resuling file will be placed in
-# the variable specified by OUT_VAR. Result will be
-# <PROJECT_NAME>-[COMPONENT-]config.cmake.in
+# Constructs a consistent kebab-case input config file name based on the PROJECT
+# argument or the PROJECT_NAME variable, and the provided COMPONENT. The
+# resuling file will be placed in the variable specified by OUT_VAR. Result will
+# be <PROJECT_NAME>-[COMPONENT-]config.cmake.in
 #
 # Arguments:
 #
 # COMPONENT: one-value arg; specifies the component that the file will describe.
 # Optional.
+#
+# PROJECT: on-value arg; override of PROJECT_NAME. Optional - if not provided,
+# PROJECT_NAME will be used, which is more common.
 #
 # OUT_VAR: one-value arg; the name of the output variable which will store the
 # resulting file name.
 #
 function(jgd_in_config_file_name)
-  jgd_parse_arguments(ONE_VALUE_KEYWORDS "COMPONENT;OUT_VAR" ARGUMENTS
+  jgd_parse_arguments(ONE_VALUE_KEYWORDS "COMPONENT;PROJECT;OUT_VAR" ARGUMENTS
                       "${ARGN}")
   jgd_validate_arguments(KEYWORDS "OUT_VAR")
-  _jgd_kebab_file_name(COMPONENT "${ARGS_COMPONENT}" SUFFIX "config.cmake.in"
-                       OUT_VAR "${ARGS_OUT_VAR}")
+  _jgd_kebab_file_name(
+    COMPONENT
+    "${ARGS_COMPONENT}"
+    SUFFIX
+    "config.cmake.in"
+    PROJECT
+    "${ARGS_PROJECT}"
+    OUT_VAR
+    "${ARGS_OUT_VAR}")
 endfunction()
 
 #
 # Constructs a consistent kebab-case config version file name based on the
-# PROJECT_NAME and the provided COMPONENT. The resuling file will be placed in
-# the variable specified by OUT_VAR. Result will be
+# PROJECT argument or the PROJECT_NAME variable. The resuling file will be
+# placed in the variable specified by OUT_VAR. Result will be
 # <PROJECT_NAME>-[COMPONENT-]config-version.cmake
 #
 # Arguments:
 #
-# COMPONENT: one-value arg; specifies the component that the file will describe.
-# Optional.
+# PROJECT: on-value arg; override of PROJECT_NAME. Optional - if not provided,
+# PROJECT_NAME will be used, which is more common.
 #
 # OUT_VAR: one-value arg; the name of the output variable which will store the
 # resulting file name.
 #
 function(jgd_config_version_file_name)
-  jgd_parse_arguments(ONE_VALUE_KEYWORDS "OUT_VAR" ARGUMENTS "${ARGN}")
+  jgd_parse_arguments(ONE_VALUE_KEYWORDS "PROJECT;OUT_VAR" ARGUMENTS "${ARGN}")
   jgd_validate_arguments(KEYWORDS "OUT_VAR")
-  set(${ARGS_OUT_VAR} "${PROJECT_NAME}-config-version.cmake")
+  _jgd_kebab_file_name(SUFFIX "config-version.cmake" PROJECT "${ARGS_PROJECT}"
+                       OUT_VAR "${ARGS_OUT_VAR}")
 endfunction()
 
 #
 # Constructs a consistent kebab-case config version file name based on the
-# PROJECT_NAME and the provided COMPONENT. The resuling file will be placed in
-# the variable specified by OUT_VAR. Result will be
-# <PROJECT_NAME>-[COMPONENT-]targets.cmake
+# PROJECT argument or the PROJECT_NAME variable, and the provided COMPONENT. The
+# resuling file will be placed in the variable specified by OUT_VAR. Result will
+# be <PROJECT_NAME>-[COMPONENT-]targets.cmake
 #
 # Arguments:
 #
 # COMPONENT: one-value arg; specifies the component that the file will describe.
 # Optional.
 #
+# PROJECT: on-value arg; override of PROJECT_NAME. Optional - if not provided,
+# PROJECT_NAME will be used, which is more common.
+#
 # OUT_VAR: one-value arg; the name of the output variable which will store the
 # resulting file name.
 #
 function(jgd_config_targets_file_name)
-  jgd_parse_arguments(ONE_VALUE_KEYWORDS "COMPONENT;OUT_VAR" ARGUMENTS
+  jgd_parse_arguments(ONE_VALUE_KEYWORDS "COMPONENT;PROJECT;OUT_VAR" ARGUMENTS
                       "${ARGN}")
   jgd_validate_arguments(KEYWORDS "OUT_VAR")
-  _jgd_kebab_file_name(COMPONENT "${ARGS_COMPONENT}" SUFFIX "targets.cmake"
-                       OUT_VAR "${ARGS_OUT_VAR}")
+  _jgd_kebab_file_name(
+    COMPONENT
+    "${ARGS_COMPONENT}"
+    SUFFIX
+    "targets.cmake"
+    PROJECT
+    "${ARGS_PROJECT}"
+    OUT_VAR
+    "${ARGS_OUT_VAR}")
 endfunction()
