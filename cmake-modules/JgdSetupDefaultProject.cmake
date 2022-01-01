@@ -58,6 +58,13 @@ macro(JGD_SETUP_DEFAULT_PROJECT)
         "provided. COMPONENTS have no affect.")
   endif()
 
+  if(NOT PROJECT_NAME)
+    message(
+      FATAL_ERROR
+        "A project must be defined to setup a default project. Call CMake's"
+        "project() command prior to using jgd_setup_default_project.")
+  endif()
+
   # Start Project Definition
 
   # default target property values
