@@ -41,7 +41,7 @@ function(jgd_validate_arguments)
   endif()
 
   # Argument Validation for the caller's arguments
-  foreach(keyword ${INS_KEYWORDS})
+  foreach(keyword "${INS_KEYWORDS}")
     set(parsed_var ${INS_PREFIX}_${keyword})
     if(NOT DEFINED ${parsed_var})
       message(FATAL_ERROR "${parsed_var} was not provided or may be missing "

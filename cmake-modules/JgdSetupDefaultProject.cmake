@@ -1,7 +1,6 @@
 include(JgdParseArguments)
 include(JgdValidateArguments)
 include(JgdStandardDirs)
-include(JgdFileNaming)
 
 #
 # This macro sets up a basic CMake project. It sets default target properties,
@@ -80,6 +79,8 @@ macro(JGD_SETUP_DEFAULT_PROJECT)
   endif()
 
   include(CTest)
+  set(JGD_PROJECT_COMPONENTS "${ARGS_COMPONENTS}")
+  list(PREPEND JGD_PROJECT_COMPONENTS "${PROJECT_NAME}")
 
   if(ARGS_CONFIGURE_CONFIG_HEADER)
     jgd_config_header_file_name(OUT_VAR header_name)
@@ -94,10 +95,8 @@ macro(JGD_SETUP_DEFAULT_PROJECT)
   endif()
 
   if(ARGS_CONFIGURE_PKG_CONFIG_FILES)
-    set(components "${ARGS_COMPONENTS}")
-    list(PREPEND components "${PROJECT_NAME}")
-
-    foreach(component ${components})
+    include(JgdFileNaming)
+    foreach(component "${JGD_PROJECT_COMPONENTS}")
       jgd_config_pkg_file_name(COMPONENT "${component}" OUT_VAR
                                config_file_name)
       jgd_config_pkg_in_file_name(COMPONENT "${component}" OUT_VAR

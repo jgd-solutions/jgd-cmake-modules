@@ -33,7 +33,7 @@ function(jgd_add_default_source_subdirectories)
   # Add Source File Subdirectories
   if(DEFINED ARGS_COMPONENTS)
     # add all components' subdirectories
-    foreach(component ${ARGS_COMPONENTS})
+    foreach(component "${ARGS_COMPONENTS}")
       string(JOIN "-" comp_dir ${project} ${component})
       set(subdir_path
           "${${project}_SOURCE_DIR}/${comp_dir}/${project}/${component}")
