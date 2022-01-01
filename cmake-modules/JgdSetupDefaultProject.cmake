@@ -14,7 +14,7 @@ include(JgdFileNaming)
 #
 # Arguments:
 #
-# COMPONENTS: muli value arg; list of components that the project encapsulates.
+# COMPONENTS: muli-value arg; list of components that the project encapsulates.
 # Used to derive source directories to add as subdirectories, following JGD's
 # C++ project layout conventions. Is optional, and shouldn't be used if the
 # project doesn't contain any components, or subdirectories aren't to be added
@@ -50,7 +50,6 @@ macro(JGD_SETUP_DEFAULT_PROJECT)
     ARGUMENTS
     "${ARGN}")
 
-  # Argument Validation
   jgd_validate_arguments()
   if(DEFINED ARGS_COMPONENTS AND NOT DEFINED ARGS_ADD_SUBDIRECTORIES)
     message(
@@ -68,11 +67,10 @@ macro(JGD_SETUP_DEFAULT_PROJECT)
   set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
   set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
-  if(EXISTS "${JGD_PROJECT_CMAKE_DIR }")
+  if(EXISTS "${JGD_PROJECT_CMAKE_DIR}")
     list(APPEND CMAKE_MODULE_PATH "${JGD_PROJECT_CMAKE_DIR}")
   endif()
 
-  enable_language(CXX)
   include(CTest)
 
   if(ARGS_CONFIGURE_CONFIG_HEADER)
