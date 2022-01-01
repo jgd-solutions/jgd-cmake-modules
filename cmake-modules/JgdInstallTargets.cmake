@@ -5,22 +5,28 @@ include(JgdStandardDirs)
 include(CMakePackageConfigHelpers)
 
 #
-# A convenience function to create an executable and add it as a test in one
-# command.  An executable with name EXECUTABLE will be created from the sources
-# provided to SOURCES. This executable will then be registered as a test with
-# name NAME, or EXECUTABLE, if NAME is not provided.
+# Executes the appropriate commands to export and install the provided TARGETS
+# and install all other associated files, like project CMake modules and
+# headers, as a config-file package. The artifacts will be installed under the
+# COMPONENT provided, or a default global component with the name PROJECT_NAME.
+# All exported TARGETS have the namespace prefix 'PROJECT_NAME::'.
+#
+# A config-file per target is expected to be present, as it's required for
+# config-file packages, and will be installed.  Installation locations follow
+# those in JgdStandardDirs and file names follow those in JgdFileNaming.
 #
 # Arguments:
 #
-# EXECUTABLE: one value arg; the name of the test executable to generate.
+# TARGETS: multi-value arg; the targets to install.
 #
-# NAME: one value arg; the name of the test to register with CTest. Will be set
-# to EXECUTABLE, if not provided.
+# HEADERS: multi-value arg; the interface header files of the TARGETS which will
+# be installed.
 #
-# SOURCES: multi value arg; the sources to create EXECUTABLE from.
+# CMAKE_MODULES: multi-value arg; CMake modules to install, in addition to the
+# project's config package files.
 #
-# LIBS: multi value arg; list of libraries to privately link against the test
-# executable. Commonly the library under test. Optional.
+# COMPONENT: one-value arg; the component under which the artifacts will be
+# intalled. Optional - PROJECT_NAME will be used, if not provided.
 #
 function(jgd_install_targets)
   jgd_parse_arguments(ONE_VALUE_KEYWORDS "COMPONENT" MULTI_VALUE_KEYWORDS
@@ -47,16 +53,16 @@ function(jgd_install_targets)
 
   set(component "${PROJECT_NAME}")
   if(ARGS_COMPONENT)
-    set(component "${ARGS_COMPONENT}")
+    set(component ${ARGS_COMPONENT})
   endif()
 
   # Install headers
   if(ARGS_HEADERS)
-    jgd_install_include_dir(COMPONENT "${component}" OUT_VAR include_dir)
+    jgd_install_include_dir(COMPONENT ${component} OUT_VAR include_dir)
     install(
       FILES "${ARGS_HEADERS}"
       DESTINATION "${include_dir}"
-      COMPONENT "${component}")
+      COMPONENT ${component})
   endif()
 
   # Install cmake modules, including config package modules
@@ -82,15 +88,18 @@ function(jgd_install_targets)
     list(APPEND config_files "${ARGS_CMAKE_MODULES}")
   endif()
 
-  install(FILES "${config_files}"
-          DESTINATION "${JGD_INSTALL_CMAKE_DESTINATION}")
+  install(
+    FILES "${config_files}"
+    DESTINATION "${JGD_INSTALL_CMAKE_DESTINATION}"
+    COMPONENT ${component})
 
   # Install targets via an export set
   install(
-    TARGETS "${ARGS_TARGETS}"
+    TARGETS ${ARGS_TARGETS}
     EXPORT export_set
     INCLUDES
     DESTINATION "${JGD_INSTALL_INTERFACE_INCLUDE_DIR}")
+    COMPONENT ${component}
   jgd_config_pkg_targets_file_name(COMPONENT "${component}" OUT_VAR
                                    targets_file)
 
