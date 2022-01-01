@@ -1,6 +1,7 @@
 include(JgdParseArguments)
 include(JgdValidateArguments)
 include(JgdStandardDirs)
+include(JgdFileNaming)
 
 #
 # This macro sets up a basic CMake project. It sets default target properties,
@@ -9,17 +10,11 @@ include(JgdStandardDirs)
 # doesn't support the project() command via a macro.
 #
 # Call this macro in the top-level CMakeLists.txt to create a new, default
-# project following JGD's default conventions. No project version is specified,
-# as that is to be managed by conan, and installation directives aren't added,
-# as conan can generate those.
+# project following JGD's default conventions.
 #
 # Arguments:
 #
-# PROJECT: one value arg; the name of the project to setup and the source
-# subdirectory to add if no COMPONENTS are specified and ADD_SUBDIRECTORIES is
-# defined
-#
-# COMPONENTS: muli value arg; list of components that the PROJECT encapsulates.
+# COMPONENTS: muli value arg; list of components that the project encapsulates.
 # Used to derive source directories to add as subdirectories, following JGD's
 # C++ project layout conventions. Is optional, and shouldn't be used if the
 # project doesn't contain any components, or subdirectories aren't to be added
@@ -33,38 +28,35 @@ include(JgdStandardDirs)
 #
 # WITH_DOCS: option; if defined, will setup documentation generation
 #
-# WITHOUT_IPO: option; if defined, will disable interprocedural optimization
+# WITH_IPO: option; if defined, will enable interprocedural optimization
 #
-# WITH_CONFIG_HEADER: options; if defined, will create a configuration header
-# from an appropriately named input file in the project's cmake directory
+# CONFIGURE_HEADER: option; if defined, will configure a project configuration
+# header from an appropriately named input file in the project's cmake directory
+#
+# CONFIGURE_PKG_CONFIG_FILE: option; if defined, will create a pkconfiguration
+# header from an appropriately named input file in the project's cmake directory
 #
 macro(JGD_SETUP_DEFAULT_PROJECT)
   jgd_parse_arguments(
     OPTIONS
-    "ADD_SUBDIRECTORIES;WITH_TESTS;WITH_DOCS;WITHOUT_IPO;WITH_CONFIG_HEADER"
-    ONE_VALUE_KEYWORDS
-    "PROJECT"
+    "ADD_SUBDIRECTORIES"
+    "WITH_TESTS"
+    "WITH_DOCS"
+    "WITH_IPO"
+    "CONFIGURE_CONFIG_HEADER"
+    "CONFIGURE_PKG_CONFIG_FILE"
     MULTI_VALUE_KEYWORDS
     "COMPONENTS"
     ARGUMENTS
     "${ARGN}")
 
   # Argument Validation
-  jgd_validate_arguments(KEYWORDS "PROJECT")
+  jgd_validate_arguments()
   if(DEFINED ARGS_COMPONENTS AND NOT DEFINED ARGS_ADD_SUBDIRECTORIES)
     message(
       SEND_ERROR
-        "COMPONENTS was provided to ${CMAKE_CURRENT_FUNCTION} but "
-        "ADD_SUBDIRECTORIES option was not provided. COMPONENTS have no affect."
-    )
-  endif()
-
-  # Validate environment
-  if(NOT ${PROJECT_NAME} STREQUAL ${ARGS_PROJECT})
-    message(
-      FATAL_ERROR
-        "Project provided to ${CMAKE_CURRENT_FUNCTION}, ${ARGS_PROJECT} "
-        "doesn't match current CMake project.")
+        "COMPONENTS was provided but ADD_SUBDIRECTORIES option was not "
+        "provided. COMPONENTS have no affect.")
   endif()
 
   # Start Project Definition
@@ -83,12 +75,31 @@ macro(JGD_SETUP_DEFAULT_PROJECT)
   enable_language(CXX)
   include(CTest)
 
-  if(ARGS_WITH_CONFIG_HEADER)
-    configure_file("${PROJECT_SOURCE_DIR}/cmake/${PROJECT_NAME}_config.hpp.in"
-                   "${PROJECT_NAME}/${PROJECT_NAME}_config.hpp" @ONLY)
+  if(ARGS_CONFIGURE_CONFIG_HEADER)
+    jgd_config_header_file_name(OUT_VAR header_name)
+    jgd_config_header_in_file_name(OUT_VAR in_header_file)
+    string(PREPEND in_header_file "${JGD_PROJECT_CMAKE_DIR}/")
+    if(NOT EXISTS "${in_header_file}")
+      messag(FATAL_ERROR "Cannot configure a configuration header for project "
+             "${PROJECT_NAME}. Could not find file ${in_header_file}.")
+    endif()
+
+    configure_file("${in_header_file}" "${PROJECT_NAME}/${header_name}" @ONLY)
   endif()
 
-  if(NOT ARGS_WITHOUT_IPO)
+  if(ARGS_CONFIGURE_PKG_CONFIG_FILE)
+    jgd_config_pkg_file_name(OUT_VAR config_file_name)
+    jgd_config_pkg_in_file_name(OUT_VAR in_config_file)
+    string(PREPEND in_config_file "${JGD_PROJECT_CMAKE_DIR}/")
+    if(NOT EXISTS "${in_config_file}")
+      messag(FATAL_ERROR "Cannot configure a package config file for project "
+             "${PROJECT_NAME}. Could not find file ${in_config_file}.")
+    endif()
+
+    configure_file("${in_config_file}" "${config_file_name}" @ONLY)
+  endif()
+
+  if(ARGS_WITH_IPO)
     include(JgdEnableDefaultIPO)
     jgd_enable_default_ipo()
   endif()
@@ -98,7 +109,7 @@ macro(JGD_SETUP_DEFAULT_PROJECT)
     if(DEFINED ARGS_COMPOENTS)
       set(comps_args "COMPONENTS ${ARGS_COMPONENTS}")
     endif()
-    jgd_add_default_source_subdirectories(PROJECT ${ARGS_PROJECT} ${comps_args})
+    jgd_add_default_source_subdirectories(PROJECT ${PROJECT_NAME} ${comps_args})
   endif()
 
   if(ARGS_WITH_TESTS)
