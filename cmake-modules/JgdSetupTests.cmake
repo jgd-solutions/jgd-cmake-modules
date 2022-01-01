@@ -1,6 +1,6 @@
 include(JgdParseArguments)
 include(JgdValidateArguments)
-include(JgdStandardDirs.cmake)
+include(JgdStandardDirs)
 
 #
 # Enables testing for the current project by including CTest CMake script, which
