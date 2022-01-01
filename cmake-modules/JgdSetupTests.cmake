@@ -7,7 +7,7 @@ include(JgdStandardDirs.cmake)
 # provides the BUILD_TESTING option, and adds the 'tests' subdirectory to the
 # project.
 #
-macro(JGD_SETUP_TESTS)
+function(JGD_SETUP_TESTS)
   jgd_parse_arguments(ARGUMENTS "${ARGN}")
   jgd_validate_arguments()
 
@@ -23,4 +23,4 @@ macro(JGD_SETUP_TESTS)
     endif()
   endif()
 
-endmacro()
+function()
