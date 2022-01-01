@@ -22,5 +22,4 @@ function(JGD_SETUP_TESTS)
           "(${JGD_PROJECT_TESTS_DIR}) doesn't exist. Cannot build tests.")
     endif()
   endif()
-
-function()
+endfunction()
