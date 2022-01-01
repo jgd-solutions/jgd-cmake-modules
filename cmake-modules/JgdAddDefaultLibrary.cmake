@@ -54,7 +54,7 @@ function(jgd_add_default_library)
   if("${ARGS_TYPE}" STREQUAL "INTERFACE")
     set(include_access "INTERFACE")
   else()
-    target_compile_options(${PROJECT_NAME}
+    target_compile_options("${ARGS_LIBRARY}"
                            PRIVATE ${JGD_DEFAULT_COMPILE_OPTIONS})
   endif()
 
