@@ -5,6 +5,53 @@ include(JgdStandardDirs)
 include(CMakePackageConfigHelpers)
 
 #
+# Private function to the module. For each path in PATHS, if the path is a
+# directory, the enclosed files matching GLOB will be expanded into the list
+# specified by OUT_FILES. These expanded paths will be given relative to
+# CMAKE_CURRENT_SOURCE_DIR. Paths that refer directly to files will be directly
+# added to the list specified by OUT_FILES.
+#
+# Arguments:
+#
+# PATHS: multi-value arg; list of input paths to expand
+#
+# OUT_FILES: one-value arg; the name of the variable that will store the list of
+# file paths.
+#
+# GLOB: one-value arg; the GLOBBING expression for files within directory paths.
+# The final globbing expression, used to get files within the directory path, is
+# directory_path/GLOB
+#
+function(_expand_dirs)
+  jgd_parse_arguments(ONE_VALUE_KEYWORDS "OUT_FILES;GLOB" MULTI_VALUE_KEYWORDS
+                      "PATHS" ARGUMENTS "${ARGN}")
+  jgd_validate_arguments(KEYWORDS "PATHS;OUT_FILES;GLOB")
+
+  set(file_paths)
+  foreach(in_path ${ARGS_PATHS})
+    # if(IS_DIRECTORY) isn't well defined for rel paths
+    file(REAL_PATH "${in_path}" full_path)
+
+    if(IS_DIRECTORY "${full_path}")
+      file(
+        GLOB_RECURSE expand_files FOLLOW_SYMLINKS
+        LIST_DIRECTORIES TRUE
+        RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}"
+        "${full_path}/${ARGS_GLOB}")
+      if(expand_files)
+        list(APPEND file_paths ${expand_files})
+      endif()
+    else()
+      list(APPEND file_paths "${full_path}")
+    endif()
+  endforeach()
+
+  set(${ARGS_OUT_FILES}
+      ${file_paths}
+      PARENT_SCOPE)
+endfunction()
+
+#
 # Executes the appropriate commands to export and install the provided TARGETS
 # and install all other associated files, like project CMake modules and
 # headers, as a config-file package. The artifacts will be installed under the
@@ -21,12 +68,19 @@ include(CMakePackageConfigHelpers)
 #
 # HEADERS: multi-value arg; list of the interface header files of the TARGETS
 # which will be installed. Relative paths are evaluated with respect to
-# CMAKE_CURRENT_SOURCE_DIR, as defined by CMake's install() command.
+# CMAKE_CURRENT_SOURCE_DIR, as defined by CMake's install() command. If any of
+# the provided paths are directories, the entire recursive directory contents
+# will be installed, limited to files with the extension '.hpp'. Nested
+# directories will be retained in the installed path, but the given directory
+# will not.
 #
-# CMAKE_MODULES: multi-value arg; directories housing CMake modules (*.cmake) to
-# install in addition to the project's config package files. Relative paths are
-# evaluated with respect to CMAKE_CURRENT_SOURCE_DIR, as defined by CMake's
-# install() command.
+# CMAKE_MODULES: multi-value arg; list of CMake modules to install in addition
+# to the project's config package files. Relative paths are evaluated with
+# respect to CMAKE_CURRENT_SOURCE_DIR, as defined by CMake's install() command.
+# If any of the provided paths are directories, the entire recursive directory
+# contents will be installed, limited to files with the extension '.cmake'.
+# Nested directories will be retained in the installed path, but the given
+# directory will not.
 #
 # COMPONENT: one-value arg; the component under which the artifacts will be
 # intalled. Optional - PROJECT_NAME will be used, if not provided.
@@ -61,15 +115,18 @@ function(jgd_install_targets)
 
   # Install headers
   if(ARGS_HEADERS)
-    jgd_install_include_destination(COMPONENT ${component} OUT_VAR include_dst)
-    install(
-      FILES "${ARGS_HEADERS}"
-      DESTINATION "${include_dst}"
-      COMPONENT ${component})
+    _expand_dirs(PATHS ${ARGS_HEADERS} OUT_FILES header_files GLOB "*.hpp")
+    if(header_files)
+      install(
+        FILES ${header_files}
+        DESTINATION "${include_dst}"
+        COMPONENT ${component})
+    endif()
   endif()
 
   # Install cmake modules, including config package modules
   jgd_config_pkg_file_name(COMPONENT "${component}" OUT_VAR config_file_name)
+
   set(config_pkg_file "${JGD_CONFIG_PKG_FILE_DESTINATION}/${config_file_name}")
   if(NOT EXISTS "${config_pkg_file}")
     set(config_pkg_file "${JGD_PROJECT_CMAKE_DIR}/${config_file_name}")
@@ -87,12 +144,17 @@ function(jgd_install_targets)
   if(do_version_file)
     list(APPEND config_files "${config_version_file}")
   endif()
+
   if(ARGS_CMAKE_MODULES)
-    list(APPEND config_files "${ARGS_CMAKE_MODULES}")
+    _expand_dirs(PATHS ${ARGS_CMAKE_MODULES} OUT_FILES module_files GLOB
+                 "*.cmake")
+    if(module_files)
+      list(APPEND config_files ${module_files})
+    endif()
   endif()
 
   install(
-    FILES "${config_files}"
+    FILES ${config_files}
     DESTINATION "${JGD_INSTALL_CMAKE_DESTINATION}"
     COMPONENT ${component})
 
