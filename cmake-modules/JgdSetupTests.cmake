@@ -7,7 +7,7 @@ include(JgdStandardDirs)
 # provides the BUILD_TESTING option, and adds the 'tests' subdirectory to the
 # project.
 #
-function(JGD_SETUP_TESTS)
+function(jgd_setup_tests)
   jgd_parse_arguments(ARGUMENTS "${ARGN}")
   jgd_validate_arguments()
 
