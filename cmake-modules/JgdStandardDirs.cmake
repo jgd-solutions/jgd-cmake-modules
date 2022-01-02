@@ -13,7 +13,7 @@ set(JGD_CONFIG_PKG_FILE_DESTINATION "${CMAKE_BINARY_DIR}/${PROJECT_NAME}")
 # Install Directories
 include(GNUInstallDirs)
 if(${PROJECT_NAME}_VERSION)
-  set(_name_version "${PROJECT_NAME}-${${PROJECT_NAME}_VERSION}")
+  set(_name_version "${PROJECT_NAME}-${PROJECT_VERSION}")
 else()
   set(_name_version "${PROJECT_NAME}")
 endif()
