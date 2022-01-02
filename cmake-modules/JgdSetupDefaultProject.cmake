@@ -91,8 +91,9 @@ macro(JGD_SETUP_DEFAULT_PROJECT)
     jgd_config_header_in_file_name(OUT_VAR in_header_file)
     string(PREPEND in_header_file "${JGD_PROJECT_CMAKE_DIR}/")
     if(NOT EXISTS "${in_header_file}")
-      messag(FATAL_ERROR "Cannot configure a configuration header for project "
-             "${PROJECT_NAME}. Could not find file ${in_header_file}.")
+      message(
+        FATAL_ERROR "Cannot configure a configuration header for project "
+                    "${PROJECT_NAME}. Could not find file ${in_header_file}.")
     endif()
 
     configure_file("${in_header_file}"
