@@ -2,6 +2,7 @@ include_guard()
 
 include(JgdParseArguments)
 include(JgdValidateArguments)
+include(JgdCanonicalStructure)
 
 #
 # A convenience function to create an executable and add it as a test in one
@@ -25,6 +26,15 @@ function(jgd_add_test_executable)
   jgd_parse_arguments(ONE_VALUE_KEYWORDS "EXECUTABLE;NAME" MULTI_VALUE_KEYWORDS
                       "SOURCES;LIBS" ARGUMENTS "${ARGN}")
   jgd_validate_arguments(KEYWORDS "EXECUTABLE;SOURCES")
+
+  foreach(source ${ARGS_SOURCES})
+    set(regex "${JGD_HEADER_REGEX}|${JGD_TEST_SOURCE_REGEX}")
+    string(REGEX MATCH "${regex}" matched "${source}")
+    if(NOT matched)
+      message(FATAL_ERROR "Provided source file, ${source}, does not match the"
+                          "regex for test executable sources, ${regex}.")
+    endif()
+  endforeach()
 
   set(test_name "${ARGS_NAME}")
   if(NOT ARGS_NAME)

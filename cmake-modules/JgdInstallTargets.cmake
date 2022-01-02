@@ -4,6 +4,7 @@ include(JgdParseArguments)
 include(JgdValidateArguments)
 include(JgdFileNaming)
 include(JgdStandardDirs)
+include(JgdCanonicalStructure)
 include(CMakePackageConfigHelpers)
 
 #
@@ -106,7 +107,7 @@ function(jgd_install_targets)
     string(PREPEND config_version_file "${CMAKE_CURRENT_BINARY_DIR}/")
     write_basic_package_version_file(
       "${config_version_file}"
-      VERSION ${${PROJECT_NAME}_VERSION}
+      VERSION ${PROJECT_VERSION}
       COMPATIBILITY AnyNewerVersion)
   endif()
 
@@ -117,7 +118,8 @@ function(jgd_install_targets)
 
   # Install headers
   if(ARGS_HEADERS)
-    _expand_dirs(PATHS ${ARGS_HEADERS} OUT_FILES header_files GLOB "*.hpp")
+    _expand_dirs(PATHS ${ARGS_HEADERS} OUT_FILES header_files GLOB
+                 "*${JGD_HEADER_EXTENSION}")
     if(header_files)
       install(
         FILES ${header_files}

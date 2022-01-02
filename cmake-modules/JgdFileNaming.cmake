@@ -2,6 +2,7 @@ include_guard()
 
 include(JgdParseArguments)
 include(JgdValidateArguments)
+include(JgdCanonicalStructure)
 
 #
 # Private macro to the module. Constructs a consistent kebab-case file name
@@ -91,7 +92,8 @@ endfunction()
 # Constructs a consistent kebab-case input config file name based on the PROJECT
 # argument or the PROJECT_NAME variable, and the provided COMPONENT. The
 # resuling file will be placed in the variable specified by OUT_VAR. Result will
-# be <PROJECT_NAME>-[COMPONENT-]config.cmake.in
+# be <PROJECT_NAME>-[COMPONENT-]config.cmake.<JGD_IN_FILE_EXTENSION>, ex.
+# proj-comp-config.cmake.in
 #
 # Arguments:
 #
@@ -116,7 +118,7 @@ function(jgd_config_pkg_in_file_name)
   jgd_config_pkg_file_name(COMPONENT "${ARGS_COMPONENT}" ${proj_keyword}
                            "${ARGS_PROJECT}" OUT_VAR config_file_name)
   set(${ARGS_OUT_VAR}
-      "${config_file_name}.in"
+      "${config_file_name}.${JGD_IN_FILE_EXTENSION}"
       PARENT_SCOPE)
 endfunction()
 
@@ -187,7 +189,7 @@ endfunction()
 # Constructs a consistent snake-case config header file name based on the
 # PROJECT argument or the PROJECT_NAME variable. The resuling file will be
 # placed in the variable specified by OUT_VAR. Result will be
-# <PROJECT_NAME>_config.hpp
+# <PROJECT_NAME>_config.<JGD_HEADER_EXTENSION>, ex. proj_config.hpp
 #
 # Arguments:
 #
@@ -207,7 +209,7 @@ function(jgd_config_header_file_name)
   endif()
 
   set(${ARGS_OUT_VAR}
-      "${project}_config.hpp"
+      "${project}_config.${JGD_HEADER_EXTENSION}"
       PARENT_SCOPE)
 endfunction()
 
@@ -215,7 +217,8 @@ endfunction()
 # Constructs a consistent snake-case input config header file name based on the
 # PROJECT argument or the PROJECT_NAME variable. The resuling file will be
 # placed in the variable specified by OUT_VAR. Result will be
-# <PROJECT_NAME>_config.hpp.in
+# <PROJECT_NAME>_config.<JGD_HEADER_EXTENSION>.<JGD_IN_FILE_EXTENSION>, ex.
+# proj_config.hpp.in
 #
 # Arguments:
 #
@@ -237,6 +240,6 @@ function(jgd_config_header_in_file_name)
                               header_file_name)
 
   set(${ARGS_OUT_VAR}
-      "${header_file_name}.in"
+      "${header_file_name}.${JGD_IN_FILE_EXTENSION}"
       PARENT_SCOPE)
 endfunction()
