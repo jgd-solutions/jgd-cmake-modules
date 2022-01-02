@@ -118,7 +118,7 @@ function(jgd_config_pkg_in_file_name)
   jgd_config_pkg_file_name(COMPONENT "${ARGS_COMPONENT}" ${proj_keyword}
                            "${ARGS_PROJECT}" OUT_VAR config_file_name)
   set(${ARGS_OUT_VAR}
-      "${config_file_name}.${JGD_IN_FILE_EXTENSION}"
+      "${config_file_name}${JGD_IN_FILE_EXTENSION}"
       PARENT_SCOPE)
 endfunction()
 
@@ -209,7 +209,7 @@ function(jgd_config_header_file_name)
   endif()
 
   set(${ARGS_OUT_VAR}
-      "${project}_config.${JGD_HEADER_EXTENSION}"
+      "${project}_config${JGD_HEADER_EXTENSION}"
       PARENT_SCOPE)
 endfunction()
 
@@ -240,6 +240,6 @@ function(jgd_config_header_in_file_name)
                               header_file_name)
 
   set(${ARGS_OUT_VAR}
-      "${header_file_name}.${JGD_IN_FILE_EXTENSION}"
+      "${header_file_name}${JGD_IN_FILE_EXTENSION}"
       PARENT_SCOPE)
 endfunction()
