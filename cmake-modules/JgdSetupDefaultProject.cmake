@@ -110,10 +110,11 @@ macro(JGD_SETUP_DEFAULT_PROJECT)
                                   in_config_file)
       string(PREPEND in_config_file "${JGD_PROJECT_CMAKE_DIR}/")
       if(NOT EXISTS "${in_config_file}")
-        messag(
-          FATAL_ERROR "Cannot configure a package config file for project "
-          "${PROJECT_NAME}. Could not find file ${in_config_file} for "
-          "component ${component}.")
+        message(
+          FATAL_ERROR
+            "Cannot configure a package config file for project "
+            "${PROJECT_NAME}. Could not find file ${in_config_file} for "
+            "component ${component}.")
       endif()
 
       configure_package_config_file(
