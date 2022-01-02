@@ -1,3 +1,5 @@
+include_guard()
+
 include(JgdParseArguments)
 include(JgdValidateArguments)
 

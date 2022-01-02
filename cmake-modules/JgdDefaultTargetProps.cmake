@@ -1,3 +1,5 @@
+include_guard()
+
 # cmake-lint: disable=C0301
 set(JGD_DEFAULT_COMPILE_OPTIONS
     $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:

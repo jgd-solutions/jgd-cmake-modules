@@ -1,3 +1,5 @@
+include_guard()
+
 # Project Directories
 set(JGD_PROJECT_CMAKE_DIR "${PROJECT_SOURCE_DIR}/cmake")
 set(JGD_PROJECT_DATA_DIR "${PROJECT_SOURCE_DIR}/data")
