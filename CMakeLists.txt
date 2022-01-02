@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.17)
+cmake_minimum_required(VERSION 3.20)
 project(cmake-modules LANGUAGES NONE)
 
 list(PREPEND CMAKE_MODULE_PATH "cmake-modules")
