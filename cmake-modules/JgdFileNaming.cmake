@@ -4,6 +4,9 @@ include(JgdParseArguments)
 include(JgdValidateArguments)
 include(JgdCanonicalStructure)
 
+# non-config package cmake modules
+set(JGD_CMAKE_MODULE_REGEX "^([A-Z][a-z]*)+\.cmake")
+
 #
 # Private macro to the module. Constructs a consistent kebab-case file name
 # based on the PROJECT argument or the PROJECT_NAME variable, the provided
