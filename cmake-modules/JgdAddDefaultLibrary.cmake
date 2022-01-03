@@ -3,7 +3,7 @@ include_guard()
 include(JgdParseArguments)
 include(JgdValidateArguments)
 include(JgdDefaultTargetProps)
-include(JgdCanonicalStructure)
+include(JgdFileNaming)
 
 #
 # Creates a library called LIBRARY, of the specified TYPE, with the default

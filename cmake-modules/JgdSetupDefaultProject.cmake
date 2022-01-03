@@ -83,8 +83,7 @@ macro(JGD_SETUP_DEFAULT_PROJECT)
   endif()
 
   include(CTest)
-  set(JGD_PROJECT_COMPONENTS "${ARGS_COMPONENTS}")
-  list(PREPEND JGD_PROJECT_COMPONENTS "${PROJECT_NAME}")
+  set(JGD_PROJECT_COMPONENTS "${PROJECT_NAME};${ARGS_COMPONENTS}")
 
   if(ARGS_CONFIGURE_CONFIG_HEADER)
     jgd_config_header_file_name(OUT_VAR header_name)
@@ -104,9 +103,9 @@ macro(JGD_SETUP_DEFAULT_PROJECT)
     include(CMakePackageConfigHelpers)
     include(JgdFileNaming)
     foreach(component ${JGD_PROJECT_COMPONENTS})
-      jgd_config_pkg_file_name(COMPONENT "${component}" OUT_VAR
+      jgd_pkg_config_file_name(COMPONENT "${component}" OUT_VAR
                                config_file_name)
-      jgd_config_pkg_in_file_name(COMPONENT "${component}" OUT_VAR
+      jgd_pkg_config_in_file_name(COMPONENT "${component}" OUT_VAR
                                   in_config_file)
       string(PREPEND in_config_file "${JGD_PROJECT_CMAKE_DIR}/")
       if(NOT EXISTS "${in_config_file}")
@@ -119,7 +118,7 @@ macro(JGD_SETUP_DEFAULT_PROJECT)
 
       configure_package_config_file(
         "${in_config_file}"
-        "${JGD_CONFIG_PKG_FILE_DESTINATION}/${config_file_name}"
+        "${JGD_PKG_CONFIG_FILE_DESTINATION}/${config_file_name}"
         INSTALL_DESTINATION "${JGD_INSTALL_CMAKE_DESTINATION}")
     endforeach()
   endif()

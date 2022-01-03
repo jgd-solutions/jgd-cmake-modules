@@ -4,13 +4,25 @@ include(JgdParseArguments)
 include(JgdValidateArguments)
 include(JgdCanonicalStructure)
 
-# non-config package cmake modules
+# non-package-config cmake modules
 set(JGD_CMAKE_MODULE_REGEX "^([A-Z][a-z]*)+\.cmake")
+set(JGD_LIB_PREFIX "lib")
+
+# create regexs of file names based on file extensions from
+# JgdCanonicalStructure. Variables of the same name, but with _EXTENSION
+# replaced with _REGEX
+foreach(ext_var
+        JGD_HEADER_EXTENSION;JGD_SOURCE_EXTENSION;JGD_TEST_SOURCE_EXTENSION
+        JGD_MODULE_EXTENSION;JGD_IN_FILE_EXTENSION)
+  string(REPLACE "_EXTENSION" "_REGEX" regex_var "${ext_var}")
+  string(REPLACE "." "\\." ${regex_var} "${${ext_var}}")
+  set(${regex_var} "[a-z][a-z_0-9]*${${regex_var}}$")
+endforeach()
 
 #
 # Private macro to the module. Constructs a consistent kebab-case file name
 # based on the PROJECT argument or the PROJECT_NAME variable, the provided
-# COMPONENT, and SUFFIX arguments. The resuling file will be placed in the
+# COMPONENT, and SUFFIX arguments. The resuling file name will be placed in the
 # variable specified by OUT_VAR. Result will be
 # <PROJECT_NAME>-[COMPONENT-]<suffix>, where suffix is the provided suffix with
 # leading dashes removed.
@@ -55,10 +67,10 @@ macro(_JGD_KEBAB_FILE_NAME)
 endmacro()
 
 #
-# Constructs a consistent kebab-case config file name based on the PROJECT
-# argument or the PROJECT_NAME variable, and the provided COMPONENT. The
-# resuling file will be placed in the variable specified by OUT_VAR. Result will
-# be <PROJECT_NAME>-[COMPONENT-]config.cmake
+# Constructs a consistent kebab-case package configuration file name based on
+# the PROJECT argument or the PROJECT_NAME variable, and the provided COMPONENT.
+# The The resuling file name will be placed in the variable specified by
+# OUT_VAR. Result will be <PROJECT_NAME>-[COMPONENT-]config.cmake
 #
 # Arguments:
 #
@@ -71,7 +83,7 @@ endmacro()
 # OUT_VAR: one-value arg; the name of the output variable which will store the
 # resulting file name.
 #
-function(jgd_config_pkg_file_name)
+function(jgd_pkg_config_file_name)
   jgd_parse_arguments(ONE_VALUE_KEYWORDS "COMPONENT;PROJECT;OUT_VAR" ARGUMENTS
                       "${ARGN}")
   jgd_validate_arguments(KEYWORDS "OUT_VAR")
@@ -92,10 +104,11 @@ function(jgd_config_pkg_file_name)
 endfunction()
 
 #
-# Constructs a consistent kebab-case input config file name based on the PROJECT
-# argument or the PROJECT_NAME variable, and the provided COMPONENT. The
-# resuling file will be placed in the variable specified by OUT_VAR. Result will
-# be <PROJECT_NAME>-[COMPONENT-]config.cmake.<JGD_IN_FILE_EXTENSION>, ex.
+# Constructs a consistent kebab-case input package configuration file name based
+# on the PROJECT argument or the PROJECT_NAME variable, and the provided
+# COMPONENT. The resuling file name will be placed in the variable specified by
+# OUT_VAR. Result will be
+# <PROJECT_NAME>-[COMPONENT-]config.cmake.<JGD_IN_FILE_EXTENSION>, ex.
 # proj-comp-config.cmake.in
 #
 # Arguments:
@@ -109,7 +122,7 @@ endfunction()
 # OUT_VAR: one-value arg; the name of the output variable which will store the
 # resulting file name.
 #
-function(jgd_config_pkg_in_file_name)
+function(jgd_pkg_config_in_file_name)
   jgd_parse_arguments(ONE_VALUE_KEYWORDS "COMPONENT;PROJECT;OUT_VAR" ARGUMENTS
                       "${ARGN}")
   jgd_validate_arguments(KEYWORDS "OUT_VAR")
@@ -118,7 +131,7 @@ function(jgd_config_pkg_in_file_name)
     set(proj_keyword "PROJECT")
   endif()
 
-  jgd_config_pkg_file_name(COMPONENT "${ARGS_COMPONENT}" ${proj_keyword}
+  jgd_pkg_config_file_name(COMPONENT "${ARGS_COMPONENT}" ${proj_keyword}
                            "${ARGS_PROJECT}" OUT_VAR config_file_name)
   set(${ARGS_OUT_VAR}
       "${config_file_name}${JGD_IN_FILE_EXTENSION}"
@@ -126,9 +139,11 @@ function(jgd_config_pkg_in_file_name)
 endfunction()
 
 #
-# Constructs a consistent kebab-case config version file name based on the
-# PROJECT argument or the PROJECT_NAME variable. The resuling file will be
-# placed in the variable specified by OUT_VAR. Result will be
+# Constructs a consistent kebab-case package version file name based on the
+# PROJECT argument or the PROJECT_NAME variable. These files are optionally
+# installed alongside the package configuration file to provide version
+# information for 'config-file' packages. The resuling file name will be placed
+# in the variable specified by OUT_VAR. Result will be
 # <PROJECT_NAME>-config-version.cmake
 #
 # Arguments:
@@ -139,7 +154,7 @@ endfunction()
 # OUT_VAR: one-value arg; the name of the output variable which will store the
 # resulting file name.
 #
-function(jgd_config_pkg_version_file_name)
+function(jgd_pkg_version_file_name)
   jgd_parse_arguments(ONE_VALUE_KEYWORDS "PROJECT;OUT_VAR" ARGUMENTS "${ARGN}")
   jgd_validate_arguments(KEYWORDS "OUT_VAR")
   set(proj_keyword "")
@@ -152,10 +167,11 @@ function(jgd_config_pkg_version_file_name)
 endfunction()
 
 #
-# Constructs a consistent kebab-case config version file name based on the
-# PROJECT argument or the PROJECT_NAME variable, and the provided COMPONENT. The
-# resuling file will be placed in the variable specified by OUT_VAR. Result will
-# be <PROJECT_NAME>-[COMPONENT-]targets.cmake
+# Constructs a consistent kebab-case targets file name based on the PROJECT
+# argument or the PROJECT_NAME variable, and the provided COMPONENT. Targets
+# files are part of 'config-file' pckages. The resuling file name will be placed
+# in the variable specified by OUT_VAR. The result will be
+# <PROJECT_NAME>-[COMPONENT-]targets.cmake
 #
 # Arguments:
 #
@@ -168,7 +184,7 @@ endfunction()
 # OUT_VAR: one-value arg; the name of the output variable which will store the
 # resulting file name.
 #
-function(jgd_config_pkg_targets_file_name)
+function(jgd_pkg_targets_file_name)
   jgd_parse_arguments(ONE_VALUE_KEYWORDS "COMPONENT;PROJECT;OUT_VAR" ARGUMENTS
                       "${ARGN}")
   jgd_validate_arguments(KEYWORDS "OUT_VAR")
@@ -190,7 +206,7 @@ endfunction()
 
 #
 # Constructs a consistent snake-case config header file name based on the
-# PROJECT argument or the PROJECT_NAME variable. The resuling file will be
+# PROJECT argument or the PROJECT_NAME variable. The resuling file name will be
 # placed in the variable specified by OUT_VAR. Result will be
 # <PROJECT_NAME>_config.<JGD_HEADER_EXTENSION>, ex. proj_config.hpp
 #
@@ -218,7 +234,7 @@ endfunction()
 
 #
 # Constructs a consistent snake-case input config header file name based on the
-# PROJECT argument or the PROJECT_NAME variable. The resuling file will be
+# PROJECT argument or the PROJECT_NAME variable. The resuling file name will be
 # placed in the variable specified by OUT_VAR. Result will be
 # <PROJECT_NAME>_config.<JGD_HEADER_EXTENSION>.<JGD_IN_FILE_EXTENSION>, ex.
 # proj_config.hpp.in

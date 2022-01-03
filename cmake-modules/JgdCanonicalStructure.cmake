@@ -1,29 +1,20 @@
 include_guard()
+#
 # Canonical project structure, refined for JGD
 #
 # Refinements:
 #
-# * file names are lower snake case
+# * from the list of appropriate file names file names, lower snake case is
+#   chosen, enforced in JgdFileNaming
 
 include(JgdParseArguments)
 include(JgdValidateArguments)
 
-set(JGD_LIB_PREFIX "lib")
 set(JGD_HEADER_EXTENSION ".hpp")
 set(JGD_SOURCE_EXTENSION ".cpp")
 set(JGD_TEST_SOURCE_EXTENSION ".test.cpp")
 set(JGD_MODULE_EXTENSION ".mpp") # cmake doesn't support modules, but for future
 set(JGD_IN_FILE_EXTENSION ".in")
-
-# create regexs of file names based on file extensions above. Variables of the
-# same name, but with _EXTENSION replaced with _REGEX
-foreach(ext_var
-        JGD_HEADER_EXTENSION;JGD_SOURCE_EXTENSION;JGD_TEST_SOURCE_EXTENSION
-        JGD_MODULE_EXTENSION;JGD_IN_FILE_EXTENSION)
-  string(REPLACE "_EXTENSION" "_REGEX" regex_var "${ext_var}")
-  string(REPLACE "." "\\." ${regex_var} "${${ext_var}}")
-  set(${regex_var} "[a-z][a-z_0-9]*${${regex_var}}$")
-endforeach()
 
 #
 # Sets the variable specified by OUT_VAR to the canonical project path for a

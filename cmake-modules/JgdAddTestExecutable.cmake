@@ -2,7 +2,7 @@ include_guard()
 
 include(JgdParseArguments)
 include(JgdValidateArguments)
-include(JgdCanonicalStructure)
+include(JgdFileNaming)
 
 #
 # A convenience function to create an executable and add it as a test in one
