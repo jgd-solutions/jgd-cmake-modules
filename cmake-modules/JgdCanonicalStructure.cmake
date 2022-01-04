@@ -1,4 +1,5 @@
 include_guard()
+
 #
 # Canonical project structure, refined for JGD
 #
@@ -22,8 +23,8 @@ set(JGD_IN_FILE_EXTENSION ".in")
 # Sets the variable specified by OUT_VAR to the canonical project path for a
 # library component, considering the PROJECT_NAME and COMPONENT argument. The
 # resulting path is absolute, and will be
-# /PROJECT_NAME-COMPONENT/PROJECT_NAME/COMPONENT, with respect to the current
-# project's source directory. Ex. .../proj-comp/proj/comp
+# /<PROJECT_NAME>-<COMPONENT>/<PROJECT_NAME>/<COMPONENT>, with respect to the
+# PROJECT_SOURCE_DIR. Ex. .../proj-comp/proj/comp
 #
 # Arguments:
 #
@@ -46,9 +47,9 @@ endfunction()
 #
 # Sets the variable specified by OUT_VAR to the canonical project path for a
 # single library of PROJECT_NAME, regardless of if PROJECT_NAME is a library or
-# executable. The resulting path is absolute, and will be /libNAME, with respect
-# to the current project's source directory, where NAME is the PROJECT_NAME
-# without any lib prefix. Ex. .../libproj
+# executable. The resulting path is absolute, and will be
+# /<JGD_LIB_PREFIX><name>, with respect to PROJECT_SOURCE_DIR, where 'name' is
+# the PROJECT_NAME without any lib prefix. Ex.  .../libproj
 #
 # Arguments:
 #
@@ -67,9 +68,9 @@ endfunction()
 #
 # Sets the variable specified by OUT_VAR to the canonical project path for a
 # single executable of PROJECT_NAME, regardless of if PROJECT_NAME is a library
-# or executable. The resulting path is absolute, and will be /NAME, with respect
-# to the current project's source directory, where NAME is the PROJECT_NAME
-# without any lib prefix. Ex. .../proj
+# or executable. The resulting path is absolute, and will be /<name>, with
+# respect to PROJECT_SOURCE_DIR, where 'name' is the PROJECT_NAME without any
+# lib prefix. Ex. .../proj
 #
 # Arguments:
 #
