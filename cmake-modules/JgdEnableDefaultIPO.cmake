@@ -20,11 +20,13 @@ function(jgd_enable_default_ipo)
   include(CheckIPOSupported)
   check_ipo_supported(RESULT ipo_supported OUTPUT err_msg)
   if(ipo_supported)
-    set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE PARENT_SCOPE)
+    set(CMAKE_INTERPROCEDURAL_OPTIMIZATION
+        TRUE
+        PARENT_SCOPE)
   else()
     message(
       WARNING
         "Interprocedural linker optimization is not supported: ${err_msg}\n"
         "Continuing without it.")
   endif()
-function()
+endfunction()
