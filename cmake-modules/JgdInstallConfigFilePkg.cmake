@@ -30,12 +30,14 @@ function(_expand_dirs)
                       "PATHS" ARGUMENTS "${ARGN}")
   jgd_validate_arguments(KEYWORDS "PATHS;OUT_FILES;GLOB")
 
+  # Fill list with all file paths
   set(file_paths)
   foreach(in_path ${ARGS_PATHS})
-    # if(IS_DIRECTORY) isn't well defined for rel paths
+    # convert to abs path; if(IS_DIRECTORY) isn't well defined for rel. paths
     file(REAL_PATH "${in_path}" full_path)
 
     if(IS_DIRECTORY "${full_path}")
+      # extract files within directory
       file(
         GLOB_RECURSE expand_files FOLLOW_SYMLINKS
         LIST_DIRECTORIES false
@@ -45,10 +47,12 @@ function(_expand_dirs)
         list(APPEND file_paths ${expand_files})
       endif()
     else()
+      # directly add file
       list(APPEND file_paths "${full_path}")
     endif()
   endforeach()
 
+  # Set out var
   set(${ARGS_OUT_FILES}
       ${file_paths}
       PARENT_SCOPE)
@@ -61,18 +65,19 @@ endfunction()
 # installing, any TARGETS provided are exported under the namespace
 # 'PROJECT_NAME::'. If HEADERS is provided, these exported targets will have
 # their INTERFACE_INCLUDE_DIRECTORIES property set to
-# JGD_INSTALL_INTERFACE_INCLUDE_DIR, such that consumers can use the headers.
+# JGD_INSTALL_INTERFACE_INCLUDE_DIR, such that consumers can use the interface
+# headers.
 #
-# Multiple calls to this function can be made, to install various components,
-# but each call expects an appropriately named config-file to be present. All
-# file names follow those in JgdFileNaming and installation locations follow
-# those in JgdStandardDirs.
+# Multiple calls to this function can be made to install various components, but
+# each call expects an appropriately named config-file to be present. All file
+# names follow those in JgdFileNaming and installation locations follow those in
+# JgdStandardDirs.
 #
 # Arguments:
 #
-# COMPONENT: one-value arg; the package component component currently being
-# installed. This is the component under which the artifacts will be installed.
-# Optional - PROJECT_NAME will be used, if not provided.
+# COMPONENT: one-value arg; the package component currently being installed.
+# Artifacts will be installed under this component. Optional - PROJECT_NAME will
+# be used, if not provided.
 #
 # TARGETS: multi-value arg; the targets to install. Optional.
 #
@@ -105,6 +110,12 @@ function(jgd_install_config_file_pkg)
     set(do_version_file TRUE)
   endif()
 
+  set(component "${PROJECT_NAME}")
+  if(ARGS_COMPONENT)
+    set(component ${ARGS_COMPONENT})
+  endif()
+
+  # Create package version file
   set(config_version_file)
   if(do_version_file)
     jgd_pkg_version_file_name(OUT_VAR config_version_file)
@@ -113,11 +124,6 @@ function(jgd_install_config_file_pkg)
       "${config_version_file}"
       VERSION ${PROJECT_VERSION}
       COMPATIBILITY AnyNewerVersion)
-  endif()
-
-  set(component "${PROJECT_NAME}")
-  if(ARGS_COMPONENT)
-    set(component ${ARGS_COMPONENT})
   endif()
 
   # Install headers
@@ -151,6 +157,7 @@ function(jgd_install_config_file_pkg)
   # Install cmake modules, including config package modules
   jgd_pkg_config_file_name(COMPONENT "${component}" OUT_VAR config_file_name)
 
+  # search for main package config-file
   set(config_pkg_file "${JGD_PKG_CONFIG_FILE_DESTINATION}/${config_file_name}")
   if(NOT EXISTS "${config_pkg_file}")
     set(config_pkg_file "${JGD_PROJECT_CMAKE_DIR}/${config_file_name}")
@@ -163,12 +170,13 @@ function(jgd_install_config_file_pkg)
     endif()
   endif()
 
+  # add package config files
   set(config_files "${config_pkg_file}")
-
   if(do_version_file)
     list(APPEND config_files "${config_version_file}")
   endif()
 
+  # add additional cmake module
   if(ARGS_CMAKE_MODULES)
     _expand_dirs(PATHS ${ARGS_CMAKE_MODULES} OUT_FILES module_files GLOB
                  "*.cmake")
@@ -190,7 +198,7 @@ function(jgd_install_config_file_pkg)
             "'${JGD_CMAKE_MODULE_REGEX}'. CMake modules: ${incorrect_files}")
       endif()
 
-      # add correct files, to be installed
+      # add only correctly named files to be installed
       list(APPEND config_files "${correct_files}")
     endif()
   endif()
@@ -221,5 +229,4 @@ function(jgd_install_config_file_pkg)
       DESTINATION "${JGD_INSTALL_CMAKE_DESTINATION}"
       COMPONENT ${component})
   endif()
-
 endfunction()
