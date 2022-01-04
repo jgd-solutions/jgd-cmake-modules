@@ -92,7 +92,7 @@ endfunction()
 # Nested directories will be retained in the installed path, but the given
 # directory will not.
 #
-function(jgd_install_package)
+function(jgd_install_config_file_pkg)
   jgd_parse_arguments(ONE_VALUE_KEYWORDS "COMPONENT" MULTI_VALUE_KEYWORDS
                       "TARGETS;HEADERS;CMAKE_MODULES" ARGUMENTS "${ARGN}")
   jgd_validate_arguments(ONE_OF_KEYWORDS "TARGETS;HEADERS;CMAKE_MODULES")
