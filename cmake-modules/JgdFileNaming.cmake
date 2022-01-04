@@ -23,7 +23,7 @@ endforeach()
 #
 # Private macro to the module. Constructs a consistent kebab-case file name
 # based on the PROJECT argument or the PROJECT_NAME variable, the provided
-# COMPONENT, and SUFFIX arguments. The resuling file name will be placed in the
+# COMPONENT, and SUFFIX arguments. The resulting file name will be placed in the
 # variable specified by OUT_VAR. Result will be
 # <PROJECT_NAME>-[COMPONENT-]<suffix>, where suffix is the provided suffix with
 # leading dashes removed.
