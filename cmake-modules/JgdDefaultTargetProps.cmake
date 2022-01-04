@@ -16,15 +16,17 @@ set(JGD_DEFAULT_COMPILE_OPTIONS
     /W4>)
 
 #
-# Sets the variable specified by OUT_VAR to the default include path for the
-# CMAKE_CURRENT_SOURCE_DIR, following the canonical project structure. The
-# canonical subdirectories given by JgdCanonicalStructure are compared as
+# Sets the variable specified by OUT_VAR to the default include paths for the
+# CMAKE_CURRENT_SOURCE_DIR, following the canonical project structure.  First,
+# the canonical subdirectories given by JgdCanonicalStructure are compared as
 # prefixes against CMAKE_CURRENT_SOURCE_DIR to find which canonical subdirectory
-# the current source directory is/is within. If matched, the resulting path will
+# the current source directory is/is within. If matched, a resulting path will
 # be set such that the include prefix is always <project>[/component]/, plus the
 # nested directories within the matched canonical directory that the current
-# directory exists within. The result can be optionally wrapped in a
-# BUILD_INTERFACE generator expression.
+# directory exists within. Second, the PROJECT_BINARY_DIR is added for any
+# generated headers, which should be generated in
+# PROJECT_BINARY_DIR/PROJECT_NAME/... . The result can be optionally wrapped in
+# a BUILD_INTERFACE generator expression.
 #
 # Arguments:
 #
@@ -39,7 +41,7 @@ set(JGD_DEFAULT_COMPILE_OPTIONS
 # in a BUILD_INTERFACE expression. Ex. $<BUILD_INTERFACE:path> Optional - if
 # omitted, the raw include directory path will be returned.
 #
-function(jgd_default_include_dir)
+function(jgd_default_include_dirs)
   jgd_parse_arguments(OPTIONS "BUILD_INTERFACE" ONE_VALUE_KEYWORDS
                       "COMPONENT;OUT_VAR" ARGUMENTS "${ARGN}")
   jgd_validate_arguments(KEYWORDS "OUT_VAR")
@@ -80,9 +82,10 @@ function(jgd_default_include_dir)
     cmake_path(GET include_dir PARENT_PATH include_dir)
   endforeach()
 
+  set(include_dirs "${include_dir};${PROJECT_BINARY_DIR}")
   if(ARGS_BUILD_INTERFACE)
-    set(${OUT_VAR} "$<BUILD_INTERFACE:${include_dir}>")
+    set(${OUT_VAR} "$<BUILD_INTERFACE:${include_dirs}>")
   else()
-    set(${OUT_VAR} "${include_dir}")
+    set(${OUT_VAR} "${include_dirs}")
   endif()
 endfunction()
