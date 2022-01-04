@@ -7,20 +7,19 @@ include(JgdFileNaming)
 
 #
 # A convenience function to create an executable and add it as a test in one
-# command, while also setting default target properties.  An executable with
-# name EXECUTABLE will be created from the sources provided to SOURCES. This
-# executable will then be registered as a test with name NAME, or EXECUTABLE, if
-# NAME is not provided. Default properties will be set to the defaults in
-# JgdDefaultTargetProps.
+# command, while also setting default target properties from
+# JgdDefaultTargetProps.  An executable with name EXECUTABLE will be created
+# from the sources provided to SOURCES. This executable will then be registered
+# as a test with name NAME, or EXECUTABLE, if NAME is not provided.
 #
 # Arguments:
 #
-# EXECUTABLE: one value arg; the name of the test executable to generate.
+# EXECUTABLE: one-value arg; the name of the test executable to generate.
 #
-# NAME: one value arg; the name of the test to register with CTest. Will be set
-# to EXECUTABLE, if not provided.
+# NAME: one-value arg; the name of the test to register with CTest. Optional -
+# will be set to EXECUTABLE, if not provided.
 #
-# SOURCES: multi value arg; the sources to create EXECUTABLE from.
+# SOURCES: multi-value arg; the sources to create EXECUTABLE from.
 #
 # LIBS: multi value arg; list of libraries to privately link against the test
 # executable. Commonly the library under test. Optional.
