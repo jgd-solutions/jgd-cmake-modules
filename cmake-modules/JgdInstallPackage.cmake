@@ -55,25 +55,32 @@ function(_expand_dirs)
 endfunction()
 
 #
-# Executes the appropriate commands to export and install the provided TARGETS
-# and install all other associated files, like project CMake modules and
-# headers, as a config-file package. The artifacts will be installed under the
-# COMPONENT provided, or a default global component with the name PROJECT_NAME.
-# All exported TARGETS have the namespace prefix 'PROJECT_NAME::'.
+# Installs a config-file package and its associated artifacts.  The provided
+# TARGETS, HEADERS, and CMAKE_MODULES will be installed under the COMPONENT
+# provided, or the default global component of PROJECT_NAME. Prior to
+# installing, any TARGETS provided are exported under the namespace
+# 'PROJECT_NAME::'. If HEADERS is provided, these exported targets will have
+# their INTERFACE_INCLUDE_DIRECTORIES property set to
+# JGD_INSTALL_INTERFACE_INCLUDE_DIR, such that consumers can use the headers.
 #
-# A config-file per target is expected to be present, as it's required for
-# config-file packages, and will be installed.  Installation locations follow
-# those in JgdStandardDirs and file names follow those in JgdFileNaming.
+# Multiple calls to this function can be made, to install various components,
+# but each call expects an appropriately named config-file to be present. All
+# file names follow those in JgdFileNaming and installation locations follow
+# those in JgdStandardDirs.
 #
 # Arguments:
 #
-# TARGETS: multi-value arg; the targets to install.
+# COMPONENT: one-value arg; the package component component currently being
+# installed. This is the component under which the artifacts will be installed.
+# Optional - PROJECT_NAME will be used, if not provided.
 #
-# HEADERS: multi-value arg; list of the interface header files of the TARGETS
+# TARGETS: multi-value arg; the targets to install. Optional.
+#
+# HEADERS: multi-value arg; list of the interface header files of the TARGETS,
 # which will be installed. Relative paths are evaluated with respect to
 # CMAKE_CURRENT_SOURCE_DIR, as defined by CMake's install() command. If any of
 # the provided paths are directories, the entire recursive directory contents
-# will be installed, limited to files with the extension '.hpp'. Nested
+# will be installed, limited to files that meet JGD_HEADER_REGEX. Nested
 # directories will be retained in the installed path, but the given directory
 # will not.
 #
@@ -81,14 +88,11 @@ endfunction()
 # to the project's config package files. Relative paths are evaluated with
 # respect to CMAKE_CURRENT_SOURCE_DIR, as defined by CMake's install() command.
 # If any of the provided paths are directories, the entire recursive directory
-# contents will be installed, limited to files with the extension '.cmake'.
+# contents will be installed, limited to files that meed JGD_CMAKE_MODULE_REGEX.
 # Nested directories will be retained in the installed path, but the given
 # directory will not.
 #
-# COMPONENT: one-value arg; the component under which the artifacts will be
-# installed. Optional - PROJECT_NAME will be used, if not provided.
-#
-function(jgd_install_targets)
+function(jgd_install_package)
   jgd_parse_arguments(ONE_VALUE_KEYWORDS "COMPONENT" MULTI_VALUE_KEYWORDS
                       "TARGETS;HEADERS;CMAKE_MODULES" ARGUMENTS "${ARGN}")
   jgd_validate_arguments(ONE_OF_KEYWORDS "TARGETS;HEADERS;CMAKE_MODULES")
@@ -153,8 +157,8 @@ function(jgd_install_targets)
     if(NOT EXISTS "${config_pkg_file}")
       message(
         FATAL_ERROR
-          "Unable to install the targets ${ARGS_TARGETS} without a config "
-          "file. Could not find the file ${config_file_name} in "
+          "Unable to install a config-file package without a config file. "
+          "Could not find the file ${config_file_name} in "
           "${JGD_PKG_CONFIG_FILE_DESTINATION} or ${JGD_PROJECT_CMAKE_DIR}.")
     endif()
   endif()
@@ -198,11 +202,15 @@ function(jgd_install_targets)
 
   # Install targets via an export set
   if(ARGS_TARGETS)
+    if(ARGS_HEADERS)
+      set(includes_dest
+          "INCLUDES DESTINATION ${JGD_INSTALL_INTERFACE_INCLUDE_DIR}")
+    endif()
+
     install(
       TARGETS ${ARGS_TARGETS}
       EXPORT export_set
-      INCLUDES
-      DESTINATION "${JGD_INSTALL_INTERFACE_INCLUDE_DIR}"
+      ${includes_dest}
       COMPONENT ${component})
     jgd_pkg_targets_file_name(COMPONENT "${component}" OUT_VAR targets_file)
 
