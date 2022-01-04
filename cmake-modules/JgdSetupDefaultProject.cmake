@@ -130,7 +130,7 @@ macro(JGD_SETUP_DEFAULT_PROJECT)
 
   if(ARGS_ADD_SUBDIRECTORIES)
     include(JgdAddDefaultSourceSubdirectories)
-    if(DEFINED ARGS_COMPOENTS)
+    if(DEFINED ARGS_COMPONENTS)
       set(comps_args "COMPONENTS ${ARGS_COMPONENTS}")
     endif()
     jgd_add_default_source_subdirectories(PROJECT ${PROJECT_NAME} ${comps_args})
