@@ -10,6 +10,8 @@ include_guard()
 include(JgdParseArguments)
 include(JgdValidateArguments)
 
+set(JGD_LIB_PREFIX "lib")
+
 set(JGD_HEADER_EXTENSION ".hpp")
 set(JGD_SOURCE_EXTENSION ".cpp")
 set(JGD_TEST_SOURCE_EXTENSION ".test.cpp")

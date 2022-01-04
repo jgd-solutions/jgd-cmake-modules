@@ -21,10 +21,10 @@ set(JGD_DEFAULT_COMPILE_OPTIONS
 # the canonical subdirectories given by JgdCanonicalStructure are compared as
 # prefixes against CMAKE_CURRENT_SOURCE_DIR to find which canonical subdirectory
 # the current source directory is/is within. If matched, a resulting path will
-# be set such that the include prefix is always <project>[/component]/, plus the
-# nested directories within the matched canonical directory that the current
-# directory exists within. Second, the PROJECT_BINARY_DIR is added for any
-# generated headers, which should be generated in
+# be set such that the include prefix is always <PROJECT_NAME>[/COMPONENT]/,
+# plus the nested directories within the matched canonical directory that the
+# current directory exists within. Second, the PROJECT_BINARY_DIR is added for
+# any generated headers, which should be generated in
 # PROJECT_BINARY_DIR/PROJECT_NAME/... . The result can be optionally wrapped in
 # a BUILD_INTERFACE generator expression.
 #

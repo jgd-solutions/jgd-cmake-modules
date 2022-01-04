@@ -9,13 +9,13 @@ include(JgdFileNaming)
 #
 # Creates a library with a generated name and the default target properties
 # defined in JgdDefaultTargetProps. The generated name will be
-# <JGD_LIB_PREFIX><NAME>[-COMPONENT], where NAME is PROJECT_NAME with any
+# <JGD_LIB_PREFIX><name>[-COMPONENT], where 'name' is PROJECT_NAME with any
 # JGD_LIB_PREFIX stripped, so all libraries are prefixed by a single
 # JGD_LIB_PREFIX. Ex. 1: libproj Ex. 2: libproj-core.
 #
 # Additionally, an ALIAS library is created for use within the build tree
 # (testing), regardless of if COMPONENT is provided. The alias will be
-# <PROJECT_NAME>::<LIB>, where LIB is either the generated library name or
+# <PROJECT_NAME>::<lib>, where 'lib' is either the generated library name or
 # LIBRARY, if overridden. That is, unless PROJECT_NAME starts with
 # JGD_LIB_PREFIX and COMPONENT is provied, where the alias will be
 # <PROJECT_NAME>::<COMPONENT>. Ex 1. libproj::libproj Ex 2. libproj::core Ex 3.

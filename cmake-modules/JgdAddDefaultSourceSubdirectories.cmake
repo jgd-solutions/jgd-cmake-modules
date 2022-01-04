@@ -28,12 +28,12 @@ endmacro()
 
 #
 # Adds subdirectories following JGD's project layout conventions, which are the
-# canonical project layout conventions. Component, single library, and
-# COMPONENTS argument. That is, the relative directories
-# ./<project>-<component>/<project>/<component> or just ./<project> and possibly
-# ./lib<project> are added as a subdirectories, depending upon if the project
-# has components or not. These paths are relative to the location of the calling
-# CMake script.
+# canonical project layout conventions. These canonical subdirectories are
+# provided by functions in  JgdCanonicalStructure. That is, if they exists, the
+# subdirectories ./<PROJECT_NAME>-<component>/<PROJECT_NAME>/<component>, if
+# COMPONENTS are provided, or just ./<JGD_LIB_PREFIX><name>, and ./<name> will
+# be added. Here, 'component' is an entry of COMPONENTS, and 'name' is
+# PROJECT_NAME with JGD_LIB_PREFIX stripped.
 #
 # This function is not meant as a complete replacement for add_subdirectory(),
 # but instead makes adding the project's default directories, following the
@@ -41,7 +41,7 @@ endmacro()
 #
 # Arguments:
 #
-# COMPONENTS: multi value arg; list of components that the PROJECT encapsulates.
+# COMPONENTS: multi-value arg; list of components that the PROJECT encapsulates.
 # Optional and shouldn't be used if the project doesn't contain any components.
 # Components that match the PROJECT_NAME will be ignored.
 #
