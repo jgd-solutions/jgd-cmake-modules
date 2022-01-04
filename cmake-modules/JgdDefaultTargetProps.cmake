@@ -84,8 +84,12 @@ function(jgd_default_include_dirs)
 
   set(include_dirs "${include_dir};${PROJECT_BINARY_DIR}")
   if(ARGS_BUILD_INTERFACE)
-    set(${ARGS_OUT_VAR} "$<BUILD_INTERFACE:${include_dirs}>")
+    set(${ARGS_OUT_VAR}
+        "$<BUILD_INTERFACE:${include_dirs}>"
+        PARENT_SCOPE)
   else()
-    set(${ARGS_OUT_VAR} "${include_dirs}")
+    set(${ARGS_OUT_VAR}
+        "${include_dirs}"
+        PARENT_SCOPE)
   endif()
 endfunction()
