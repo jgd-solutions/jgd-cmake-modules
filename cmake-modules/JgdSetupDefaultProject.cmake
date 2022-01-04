@@ -17,7 +17,7 @@ include(JgdStandardDirs)
 #
 # Arguments:
 #
-# COMPONENTS: muli-value arg; list of components that the project encapsulates.
+# COMPONENTS: multi-value arg; list of components that the project encapsulates.
 # Used to derive source directories to add as subdirectories, following JGD's
 # C++ project layout conventions. Is optional, and shouldn't be used if the
 # project doesn't contain any components, or subdirectories aren't to be added
@@ -27,7 +27,7 @@ include(JgdStandardDirs)
 # subdirectories in accordance with JGD's project structure and any COMPONENTS
 # provided
 #
-# WITH_TESTS: option; if defined, will setup automatied testing
+# WITH_TESTS: option; if defined, will setup automated testing
 #
 # WITH_DOCS: option; if defined, will setup documentation generation
 #
