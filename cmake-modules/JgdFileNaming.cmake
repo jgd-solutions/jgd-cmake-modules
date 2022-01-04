@@ -70,7 +70,7 @@ endmacro()
 #
 # Constructs a consistent kebab-case package configuration file name based on
 # the PROJECT argument or the PROJECT_NAME variable, and the provided COMPONENT.
-# The The resuling file name will be placed in the variable specified by
+# The The resulting file name will be placed in the variable specified by
 # OUT_VAR. Result will be <PROJECT_NAME>-[COMPONENT-]config.cmake
 #
 # Arguments:
@@ -107,7 +107,7 @@ endfunction()
 #
 # Constructs a consistent kebab-case input package configuration file name based
 # on the PROJECT argument or the PROJECT_NAME variable, and the provided
-# COMPONENT. The resuling file name will be placed in the variable specified by
+# COMPONENT. The resulting file name will be placed in the variable specified by
 # OUT_VAR. Result will be
 # <PROJECT_NAME>-[COMPONENT-]config.cmake.<JGD_IN_FILE_EXTENSION>, ex.
 # proj-comp-config.cmake.in
@@ -143,7 +143,7 @@ endfunction()
 # Constructs a consistent kebab-case package version file name based on the
 # PROJECT argument or the PROJECT_NAME variable. These files are optionally
 # installed alongside the package configuration file to provide version
-# information for 'config-file' packages. The resuling file name will be placed
+# information for 'config-file' packages. The resulting file name will be placed
 # in the variable specified by OUT_VAR. Result will be
 # <PROJECT_NAME>-config-version.cmake
 #
@@ -170,8 +170,8 @@ endfunction()
 #
 # Constructs a consistent kebab-case targets file name based on the PROJECT
 # argument or the PROJECT_NAME variable, and the provided COMPONENT. Targets
-# files are part of 'config-file' pckages. The resuling file name will be placed
-# in the variable specified by OUT_VAR. The result will be
+# files are part of 'config-file' packages. The resulting file name will be
+# placed in the variable specified by OUT_VAR. The result will be
 # <PROJECT_NAME>-[COMPONENT-]targets.cmake
 #
 # Arguments:
@@ -207,7 +207,7 @@ endfunction()
 
 #
 # Constructs a consistent snake-case config header file name based on the
-# PROJECT argument or the PROJECT_NAME variable. The resuling file name will be
+# PROJECT argument or the PROJECT_NAME variable. The resulting file name will be
 # placed in the variable specified by OUT_VAR. Result will be
 # <PROJECT_NAME>_config.<JGD_HEADER_EXTENSION>, ex. proj_config.hpp
 #
@@ -235,7 +235,7 @@ endfunction()
 
 #
 # Constructs a consistent snake-case input config header file name based on the
-# PROJECT argument or the PROJECT_NAME variable. The resuling file name will be
+# PROJECT argument or the PROJECT_NAME variable. The resulting file name will be
 # placed in the variable specified by OUT_VAR. Result will be
 # <PROJECT_NAME>_config.<JGD_HEADER_EXTENSION>.<JGD_IN_FILE_EXTENSION>, ex.
 # proj_config.hpp.in
