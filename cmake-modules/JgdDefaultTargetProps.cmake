@@ -16,7 +16,7 @@ set(JGD_DEFAULT_COMPILE_OPTIONS
     /W4>)
 
 #
-# Sets the variable specified by OUT_VAR to the default include paths for the
+# Sets the variable specified by OUT_VAR to the default include paths within the
 # CMAKE_CURRENT_SOURCE_DIR, following the canonical project structure.  First,
 # the canonical subdirectories given by JgdCanonicalStructure are compared as
 # prefixes against CMAKE_CURRENT_SOURCE_DIR to find which canonical subdirectory
@@ -27,6 +27,11 @@ set(JGD_DEFAULT_COMPILE_OPTIONS
 # any generated headers, which should be generated in
 # PROJECT_BINARY_DIR/PROJECT_NAME/... . The result can be optionally wrapped in
 # a BUILD_INTERFACE generator expression.
+#
+# Example: if CMAKE_CURRENT_SOURCE_DIR is path .../proj-comp/proj/comp/thing,
+# with respect to PROJECT_SOURCE_DIR, where PROJECT_NAME is "proj" and COMPONENT
+# is "comp", the source include directory will be proj/proj-comp. Then,
+# PROJECT_BINARY_DIR will be added.
 #
 # Arguments:
 #
