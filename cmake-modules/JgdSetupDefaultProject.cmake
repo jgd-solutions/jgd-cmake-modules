@@ -2,6 +2,7 @@ include_guard()
 
 include(JgdParseArguments)
 include(JgdValidateArguments)
+include(JgdFileNaming)
 include(JgdStandardDirs)
 
 #
@@ -79,7 +80,13 @@ macro(JGD_SETUP_DEFAULT_PROJECT)
   set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
   if(EXISTS "${JGD_PROJECT_CMAKE_DIR}")
-    list(APPEND CMAKE_MODULE_PATH "${JGD_PROJECT_CMAKE_DIR}")
+    file(
+      GLOB_RECURSE cmake_modules
+      LIST_DIRECTORIES false
+      "${JGD_PROJECT_CMAKE_DIR}/*.cmake")
+    if(cmake_modules)
+      list(APPEND CMAKE_MODULE_PATH "${JGD_PROJECT_CMAKE_DIR}")
+    endif()
   endif()
 
   include(CTest)
@@ -145,5 +152,4 @@ macro(JGD_SETUP_DEFAULT_PROJECT)
     include(JgdSetupDocs)
     jgd_setup_docs()
   endif()
-
 endmacro()
