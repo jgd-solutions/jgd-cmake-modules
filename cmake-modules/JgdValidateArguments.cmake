@@ -70,7 +70,7 @@ function(jgd_validate_arguments)
     endif()
   endforeach()
 
-  if(NOT at_least_one_defined)
+  if(INS_ONE_OF_KEYWORDS AND NOT at_least_one_defined)
     message(
       FATAL_ERROR
         "None of the following keywords were provided or may be missing their "

@@ -86,12 +86,12 @@ endfunction()
 # directory will not.
 #
 # COMPONENT: one-value arg; the component under which the artifacts will be
-# intalled. Optional - PROJECT_NAME will be used, if not provided.
+# installed. Optional - PROJECT_NAME will be used, if not provided.
 #
 function(jgd_install_targets)
   jgd_parse_arguments(ONE_VALUE_KEYWORDS "COMPONENT" MULTI_VALUE_KEYWORDS
                       "TARGETS;HEADERS;CMAKE_MODULES" ARGUMENTS "${ARGN}")
-  jgd_validate_arguments(KEYWORDS "TARGETS")
+  jgd_validate_arguments(ONE_OF_KEYWORDS "TARGETS;HEADERS;CMAKE_MODULES")
 
   # Setup
   set(do_version_file FALSE)
@@ -120,9 +120,25 @@ function(jgd_install_targets)
   if(ARGS_HEADERS)
     _expand_dirs(PATHS ${ARGS_HEADERS} OUT_FILES header_files GLOB
                  "*${JGD_HEADER_EXTENSION}")
-    if(header_files)
+    jgd_sep_correctly_named_files(
+      FILES
+      "${header_files}"
+      REGEX
+      "${JGD_HEADER_REGEX}"
+      OUT_CORRECT
+      correct_files
+      OUT_INCORRECT
+      incorrect_files)
+    if(incorrect_files)
+      message(
+        WARNING "The function ${CMAKE_CURRENT_FUNCTION} will not install the "
+                "following header files, as they don't meet the regex "
+                "'${JGD_HEADER_REGEX}'. Header files: ${incorrect_files}")
+    endif()
+
+    if(correct_files)
       install(
-        FILES ${header_files}
+        FILES ${correct_files}
         DESTINATION "${include_dst}"
         COMPONENT ${component})
     endif()
@@ -153,25 +169,21 @@ function(jgd_install_targets)
     _expand_dirs(PATHS ${ARGS_CMAKE_MODULES} OUT_FILES module_files GLOB
                  "*.cmake")
     if(module_files)
-      # filter out incorrectly named files warn about all of them, after
-      set(correct_files)
-      set(incorrect_files)
-      foreach(file ${module_files})
-        cmake_path(GET file FILENAME file_name)
-        string(REGEX MATCH "${JGD_CMAKE_MODULE_REGEX}" matched "${file_name}")
-        if(matched)
-          list(APPEND correct_files "${file}")
-        else()
-          list(APPEND incorrect_files "${file}")
-        endif()
-      endforeach()
-
-      if(incorrect_names)
+      jgd_sep_correctly_named_files(
+        FILES
+        "${module_files}"
+        REGEX
+        "${JGD_CMAKE_MODULE_REGEX}"
+        OUT_CORRECT
+        correct_files
+        OUT_INCORRECT
+        incorrect_files)
+      if(incorrect_files)
         message(
-          WARNING "The function ${CMAKE_CURRENT_FUNCTION} will not install the "
-                  "following CMake modules, as they don't meet the regex "
-                  "${JGD_CMAKE_MODULE_REGEX}. CMake modules: ${incorrect_names}"
-        )
+          WARNING
+            "The function ${CMAKE_CURRENT_FUNCTION} will not install the "
+            "following CMake modules, as they don't meet the regex "
+            "'${JGD_CMAKE_MODULE_REGEX}'. CMake modules: ${incorrect_files}")
       endif()
 
       # add correct files, to be installed
@@ -185,19 +197,21 @@ function(jgd_install_targets)
     COMPONENT ${component})
 
   # Install targets via an export set
-  install(
-    TARGETS ${ARGS_TARGETS}
-    EXPORT export_set
-    INCLUDES
-    DESTINATION "${JGD_INSTALL_INTERFACE_INCLUDE_DIR}"
-    COMPONENT ${component})
-  jgd_pkg_targets_file_name(COMPONENT "${component}" OUT_VAR targets_file)
+  if(ARGS_TARGETS)
+    install(
+      TARGETS ${ARGS_TARGETS}
+      EXPORT export_set
+      INCLUDES
+      DESTINATION "${JGD_INSTALL_INTERFACE_INCLUDE_DIR}"
+      COMPONENT ${component})
+    jgd_pkg_targets_file_name(COMPONENT "${component}" OUT_VAR targets_file)
 
-  install(
-    EXPORT export_set
-    FILE ${targets_file}
-    NAMESPACE ${PROJECT_NAME}::
-    DESTINATION "${JGD_INSTALL_CMAKE_DESTINATION}"
-    COMPONENT ${component})
+    install(
+      EXPORT export_set
+      FILE ${targets_file}
+      NAMESPACE ${PROJECT_NAME}::
+      DESTINATION "${JGD_INSTALL_CMAKE_DESTINATION}"
+      COMPONENT ${component})
+  endif()
 
 endfunction()

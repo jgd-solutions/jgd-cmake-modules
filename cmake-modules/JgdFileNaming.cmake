@@ -263,3 +263,56 @@ function(jgd_config_header_in_file_name)
       "${header_file_name}${JGD_IN_FILE_EXTENSION}"
       PARENT_SCOPE)
 endfunction()
+
+#
+# Separates the list of files, FILES, into two groups, OUT_CORRECT, if the file
+# name matches the provided REGEX and OUT_INCORRECT, otherwise. FILES is not
+# modified, and the file paths in the out-variables will be identical to those
+# provided in FILES. Directories will added if they meet the REGEX.
+#
+# Arguments:
+#
+# FILES: multi-value arg; list of file names or file paths to separate based on
+# the provided REGEX.
+#
+# REGEX: one-value arg; the regex to match each file name resolved from FILES
+# against.
+#
+# OUT_CORRECT: out-value arg; the name of the variable that will store the list
+# of correct matches.
+#
+# OUT_INCORRECT: out-value arg; the name of the variable that will store the
+# list of incorrect matches.
+#
+function(jgd_sep_correctly_named_files)
+  jgd_parse_arguments(ONE_VALUE_KEYWORDS "REGEX;OUT_CORRECT;OUT_INCORRECT"
+                      MULTI_VALUE_KEYWORDS "FILES" ARGUMENTS "${ARGN}")
+  jgd_validate_arguments(KEYWORDS "REGEX;FILES" ONE_OF_KEYWORDS
+                         "OUT_CORRECT;OUT_INCORRECT")
+
+  # filter out incorrectly named files warn about all of them, after
+  set(correct_files)
+  set(incorrect_files)
+  foreach(file ${ARGS_FILES})
+    cmake_path(GET file FILENAME file_name)
+    if(NOT file_name)
+      message(
+        FATAL_ERROR "The following path doesn't refer to a file name, it ends "
+                    "with a path separator: ${file}")
+    endif()
+
+    string(REGEX MATCH "${ARGS_REGEX}" matched "${file_name}")
+    if(matched)
+      list(APPEND correct_files "${file}")
+    else()
+      list(APPEND incorrect_files "${file}")
+    endif()
+  endforeach()
+
+  set(${ARGS_OUT_CORRECT}
+      "${correct_files}"
+      PARENT_SCOPE)
+  set(${ARGS_OUT_INCORRECT}
+      "${incorrect_files}"
+      PARENT_SCOPE)
+endfunction()
