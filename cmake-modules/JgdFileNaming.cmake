@@ -7,7 +7,7 @@ include(JgdCanonicalStructure)
 # non-package-config cmake modules
 set(JGD_CMAKE_MODULE_REGEX "^([A-Z][a-z]*)+\.cmake")
 
-# create regexs of file names based on file extensions from
+# Create regexs of file names based on file extensions from
 # JgdCanonicalStructure. Variables of the same name, but with _EXTENSION
 # replaced with _REGEX
 foreach(ext_var
@@ -23,13 +23,14 @@ endforeach()
 # based on the PROJECT argument or the PROJECT_NAME variable, the provided
 # COMPONENT, and SUFFIX arguments. The resulting file name will be placed in the
 # variable specified by OUT_VAR. Result will be
-# <PROJECT_NAME>-[COMPONENT-]<suffix>, where suffix is the provided suffix with
-# leading dashes removed.
+# <PROJECT_NAME>-[COMPONENT-]<suffix>, where 'suffix' is the provided suffix
+# with any leading dashes removed.
 #
 # Arguments:
 #
 # COMPONENT: one-value arg; specifies the component that the file will describe.
-# Optional.
+# A COMPONENT that matches PROJECT_NAME, or PROJECT, if provided, will be
+# ignored. Optional.
 #
 # SUFFIX: one-value arg; the suffix to append to the generated kebab-case file
 # name. Ex. ".cmake"
@@ -53,7 +54,7 @@ macro(_JGD_KEBAB_FILE_NAME)
   # remove leading '-' from suffix, if it was provided
   string(REGEX REPLACE "^-" "" suffix "${ARGS_SUFFIX}")
 
-  # Empty component/no component provided or component is project
+  # compose file name
   if(NOT ARGS_COMPONENT OR ("${ARGS_COMPONENT}" STREQUAL "${project}"))
     set(${ARGS_OUT_VAR}
         "${project}-${suffix}"
@@ -69,12 +70,14 @@ endmacro()
 # Constructs a consistent kebab-case package configuration file name based on
 # the PROJECT argument or the PROJECT_NAME variable, and the provided COMPONENT.
 # The The resulting file name will be placed in the variable specified by
-# OUT_VAR. Result will be <PROJECT_NAME>-[COMPONENT-]config.cmake
+# OUT_VAR. Result will be <PROJECT_NAME>-[COMPONENT-]config.cmake. Ex 1.
+# proj-config.cmake Ex 2. proj-comp-config.cmake.
 #
 # Arguments:
 #
 # COMPONENT: one-value arg; specifies the component that the file will describe.
-# Optional.
+# A COMPONENT that matches PROJECT_NAME, or PROJECT, if provided, will be
+# ignored. Optional.
 #
 # PROJECT: on-value arg; override of PROJECT_NAME. Optional - if not provided,
 # PROJECT_NAME will be used, which is more common.
@@ -97,7 +100,7 @@ function(jgd_pkg_config_file_name)
     SUFFIX
     "config.cmake"
     ${proj_keyword}
-    "${ARGS_PROJECT}"
+    ${ARGS_PROJECT}
     OUT_VAR
     "${ARGS_OUT_VAR}")
 endfunction()
@@ -107,13 +110,14 @@ endfunction()
 # on the PROJECT argument or the PROJECT_NAME variable, and the provided
 # COMPONENT. The resulting file name will be placed in the variable specified by
 # OUT_VAR. Result will be
-# <PROJECT_NAME>-[COMPONENT-]config.cmake.<JGD_IN_FILE_EXTENSION>, ex.
+# <PROJECT_NAME>-[COMPONENT-]config.cmake.<JGD_IN_FILE_EXTENSION>, Ex.
 # proj-comp-config.cmake.in
 #
 # Arguments:
 #
 # COMPONENT: one-value arg; specifies the component that the file will describe.
-# Optional.
+# A COMPONENT that matches PROJECT_NAME, or PROJECT, if provided, will be
+# ignored. Optional.
 #
 # PROJECT: on-value arg; override of PROJECT_NAME. Optional - if not provided,
 # PROJECT_NAME will be used, which is more common.
@@ -131,7 +135,7 @@ function(jgd_pkg_config_in_file_name)
   endif()
 
   jgd_pkg_config_file_name(COMPONENT "${ARGS_COMPONENT}" ${proj_keyword}
-                           "${ARGS_PROJECT}" OUT_VAR config_file_name)
+                           ${ARGS_PROJECT} OUT_VAR config_file_name)
   set(${ARGS_OUT_VAR}
       "${config_file_name}${JGD_IN_FILE_EXTENSION}"
       PARENT_SCOPE)
@@ -147,7 +151,7 @@ endfunction()
 #
 # Arguments:
 #
-# PROJECT: on-value arg; override of PROJECT_NAME. Optional - if not provided,
+# PROJECT: one-value arg; override of PROJECT_NAME. Optional - if not provided,
 # PROJECT_NAME will be used, which is more common.
 #
 # OUT_VAR: one-value arg; the name of the output variable which will store the
@@ -162,7 +166,7 @@ function(jgd_pkg_version_file_name)
   endif()
 
   _jgd_kebab_file_name(SUFFIX "config-version.cmake" ${proj_keyword}
-                       "${ARGS_PROJECT}" OUT_VAR "${ARGS_OUT_VAR}")
+                       ${ARGS_PROJECT} OUT_VAR "${ARGS_OUT_VAR}")
 endfunction()
 
 #
@@ -170,12 +174,13 @@ endfunction()
 # argument or the PROJECT_NAME variable, and the provided COMPONENT. Targets
 # files are part of 'config-file' packages. The resulting file name will be
 # placed in the variable specified by OUT_VAR. The result will be
-# <PROJECT_NAME>-[COMPONENT-]targets.cmake
+# <PROJECT_NAME>-[COMPONENT-]targets.cmake. Ex. proj-comp-targets.cmake.
 #
 # Arguments:
 #
 # COMPONENT: one-value arg; specifies the component that the file will describe.
-# Optional.
+# A COMPONENT that matches PROJECT_NAME, or PROJECT, if provided, will be
+# ignored. Optional.
 #
 # PROJECT: on-value arg; override of PROJECT_NAME. Optional - if not provided,
 # PROJECT_NAME will be used, which is more common.
@@ -198,7 +203,7 @@ function(jgd_pkg_targets_file_name)
     SUFFIX
     "targets.cmake"
     ${proj_keyword}
-    "${ARGS_PROJECT}"
+    ${ARGS_PROJECT}
     OUT_VAR
     "${ARGS_OUT_VAR}")
 endfunction()
@@ -288,10 +293,11 @@ function(jgd_sep_correctly_named_files)
   jgd_validate_arguments(KEYWORDS "REGEX;FILES" ONE_OF_KEYWORDS
                          "OUT_CORRECT;OUT_INCORRECT")
 
-  # filter out incorrectly named files warn about all of them, after
+  # Split input files into two lists
   set(correct_files)
   set(incorrect_files)
   foreach(file ${ARGS_FILES})
+    # get file name from each path
     cmake_path(GET file FILENAME file_name)
     if(NOT file_name)
       message(
@@ -299,6 +305,7 @@ function(jgd_sep_correctly_named_files)
                     "with a path separator: ${file}")
     endif()
 
+    # compare file name against regex
     string(REGEX MATCH "${ARGS_REGEX}" matched "${file_name}")
     if(matched)
       list(APPEND correct_files "${file}")
@@ -307,6 +314,7 @@ function(jgd_sep_correctly_named_files)
     endif()
   endforeach()
 
+  # Set out variables
   set(${ARGS_OUT_CORRECT}
       "${correct_files}"
       PARENT_SCOPE)
