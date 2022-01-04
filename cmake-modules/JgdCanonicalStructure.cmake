@@ -36,7 +36,7 @@ function(jgd_canonical_component_subdir)
                       "${ARGN}")
   jgd_validate_arguments(KEYWORDS "OUT_VAR;COMPONENT")
   string(JOIN "-" comp_dir ${PROJECT_NAME} ${ARGS_COMPONENT})
-  set(${OUT_VAR}
+  set(${ARGS_OUT_VAR}
       "${PROJECT_SOURCE_DIR}/${comp_dir}/${PROJECT_NAME}/${component}"
       PARENT_SCOPE)
 endfunction()
@@ -57,7 +57,7 @@ function(jgd_canonical_lib_subdir)
   jgd_parse_arguments(ONE_VALUE_KEYWORDS "OUT_VAR" ARGUMENTS "${ARGN}")
   jgd_validate_arguments(KEYWORDS "OUT_VAR")
   string(REGEX REPLACE "^${JGD_LIB_PREFIX}" "" no_lib "${PROJECT_NAME}")
-  set(${OUT_VAR}
+  set(${ARGS_OUT_VAR}
       "${PROJECT_SOURCE_DIR}/${JGD_LIB_PREFIX}${no_lib}"
       PARENT_SCOPE)
 endfunction()
@@ -78,7 +78,7 @@ function(jgd_canonical_exec_subdir)
   jgd_parse_arguments(ONE_VALUE_KEYWORDS "OUT_VAR" ARGUMENTS "${ARGN}")
   jgd_validate_arguments(KEYWORDS "OUT_VAR")
   string(REGEX REPLACE "^${JGD_LIB_PREFIX}" "" no_lib "${PROJECT_NAME}")
-  set(${OUT_VAR}
+  set(${ARGS_OUT_VAR}
       "${PROJECT_SOURCE_DIR}/${no_lib}"
       PARENT_SCOPE)
 endfunction()
