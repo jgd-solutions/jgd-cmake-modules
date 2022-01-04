@@ -3,7 +3,7 @@ include_guard()
 include(JgdParseArguments)
 include(JgdValidateArguments)
 include(JgdDefaultTargetProps)
-include(JgdAddTestExecutable)
+include(JgdFileNaming)
 
 #
 # A convenience function to create an executable and add it as a test in one
@@ -30,27 +30,36 @@ function(jgd_add_default_test_executable)
                       "SOURCES;LIBS" ARGUMENTS "${ARGN}")
   jgd_validate_arguments(KEYWORDS "EXECUTABLE;SOURCES")
 
-  set(name_keyword "")
+  # Verify source naming
+  foreach(source ${ARGS_SOURCES})
+    set(regex "${JGD_HEADER_REGEX}|${JGD_TEST_SOURCE_REGEX}")
+    string(REGEX MATCH "${regex}" matched "${source}")
+    if(NOT matched)
+      message(FATAL_ERROR "Provided source file, ${source}, does not match the"
+                          "regex for test executable sources, ${regex}.")
+    endif()
+  endforeach()
+
+  # Default test name
+  set(test_name "${ARGS_EXECUTABLE}")
   if(ARGS_NAME)
-    set(name_keyword "NAME")
+    set(test_name "${ARGS_NAME}")
   endif()
 
-  set(libs_keyword "")
+  # Test executable
+  add_executable("${ARGS_EXECUTABLE}" "${ARGS_SOURCES}")
+  add_test(NAME "${test_name}" COMMAND "${ARGS_EXECUTABLE}")
   if(ARGS_LIBS)
-    set(libs_keyword "LIBS")
+    target_link_libraries("${ARGS_EXECUTABLE}" PRIVATE "${ARGS_LIBS}")
   endif()
 
-  jgd_add_test_executable(
-    EXECUTABLE
-    "${ARGS_EXECUTABLE}"
-    ${name_keyword}
-    "${ARGS_NAME}"
-    ${libs_keyword}
-    "${ARGS_LIBS}"
-    SOURCES
-    "${ARGS_SOURCES}")
+  # Default properties
   target_compile_options("${ARGS_EXECUTABLE}"
                          PRIVATE ${JGD_DEFAULT_COMPILE_OPTIONS})
-  target_include_directories("${ARGS_EXECUTABLE}"
-                             PRIVATE ${JGD_DEFAULT_INCLUDE_DIRS})
+  set(comp_arg)
+  if(ARGS_COMPONENT)
+    set(comp_arg "COMPONENT ${ARGS_COMPONENT}")
+  endif()
+  jgd_default_include_dir(BUILD_INTERFACE ${comp_arg} OUT_VAR include_dir)
+  target_include_directories("${ARGS_EXECUTABLE}" PRIVATE ${include_dir})
 endfunction()
