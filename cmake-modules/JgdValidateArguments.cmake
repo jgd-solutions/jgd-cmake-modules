@@ -36,9 +36,10 @@ function(jgd_validate_arguments)
                         "${multiValueArgs}" ${ARGN})
 
   # Argument Validation of jgd_validate_arguments
-  if(NOT DEFINED INS_KEYWORDS
-     AND DEFINED WITHOUT_MISSING_VALUES_CHECK
-     AND DEFINED WITHOUT_UNPARSED_CHECK)
+  if(NOT INS_KEYWORDS
+     AND NOT INS_ONE_OF_KEYWORDS
+     AND WITHOUT_MISSING_VALUES_CHECK
+     AND WITHOUT_UNPARSED_CHECK)
     message(FATAL_ERROR "${CMAKE_CURRENT_FUNCTION} was called with all "
                         "available validations disabled.")
   endif()
@@ -78,14 +79,12 @@ function(jgd_validate_arguments)
   endif()
 
   # argument format validations
-  if(NOT DEFINED WITHOUT_MISSING_VALUES_CHECK
-     AND DEFINED ${INS_PREFIX}_KEYWORDS_MISSING_VALUES)
+  if(NOT WITHOUT_MISSING_VALUES_CHECK AND ${INS_PREFIX}_KEYWORDS_MISSING_VALUES)
     message(FATAL_ERROR "Keywords provided without any values: "
                         "${${INS_PREFIX}_KEYWORDS_MISSING_VALUES}")
   endif()
 
-  if(NOT DEFINED WITHOUT_UNPARSED_CHECK AND DEFINED
-                                            ${INS_PREFIX}_UNPARSED_ARGUMENTS)
+  if(NOT WITHOUT_UNPARSED_CHECK AND ${INS_PREFIX}_UNPARSED_ARGUMENTS)
     message(WARNING "Unparsed arguments provided: "
                     "${${INS_PREFIX}_UNPARSED_ARGUMENTS}")
   endif()
