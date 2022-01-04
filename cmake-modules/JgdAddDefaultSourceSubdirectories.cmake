@@ -17,7 +17,7 @@ include(JgdCanonicalStructure)
 #
 macro(_ADD_SUBDIR_CHECK)
   jgd_parse_arguments(ONE_VALUE_KEYWORDS "SUBDIR" ARGUMENTS "${ARGN}")
-  jgd_validate_arguments("SUBDIR")
+  jgd_validate_arguments(KEYWORDS "SUBDIR")
   if(IS_DIRECTORY "${ARGS_SUBDIR}")
     message(DEBUG "${CMAKE_CURRENT_FUNCTION}: Adding directory "
             "${ARGS_SUBDIR} to project ${PROJECT_NAME}")
