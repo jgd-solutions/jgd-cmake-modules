@@ -6,6 +6,7 @@ include(JgdCanonicalStructure)
 
 # non-package-config cmake modules
 set(JGD_CMAKE_MODULE_REGEX "^([A-Z][a-z]*)+\.cmake")
+
 set(JGD_LIB_PREFIX "lib")
 
 # create regexs of file names based on file extensions from

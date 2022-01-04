@@ -153,7 +153,29 @@ function(jgd_install_targets)
     _expand_dirs(PATHS ${ARGS_CMAKE_MODULES} OUT_FILES module_files GLOB
                  "*.cmake")
     if(module_files)
-      list(APPEND config_files ${module_files})
+      # filter out incorrectly named files warn about all of them, after
+      set(correct_files)
+      set(incorrect_files)
+      foreach(file ${module_files})
+        cmake_path(GET file FILENAME file_name)
+        string(REGEX MATCH "${JGD_CMAKE_MODULE_REGEX}" matched "${file_name}")
+        if(matched)
+          list(APPEND correct_files "${file}")
+        else()
+          list(APPEND incorrect_files "${file}")
+        endif()
+      endforeach()
+
+      if(incorrect_names)
+        message(
+          WARNING "The function ${CMAKE_CURRENT_FUNCTION} will not install the "
+                  "following CMake modules, as they don't meet the regex "
+                  "${JGD_CMAKE_MODULE_REGEX}. CMake modules: ${incorrect_names}"
+        )
+      endif()
+
+      # add correct files, to be installed
+      list(APPEND config_files "${correct_files}")
     endif()
   endif()
 
