@@ -4,10 +4,10 @@ include(JgdParseArguments)
 include(JgdValidateArguments)
 
 #
-# If IPO is supported, enable Interprocedural Linker Optimizations for  all
-# targets of a project, by setting the project wide
+# If Interprocedural Linker Optimizations (IPO) is supported, enable it for  all
+# targets of a project by setting the project wide
 # CMAKE_INTERPROCEDURAL_OPTIMIZATION variable to TRUE. Each target's
-# INTERPROCEDURAL_OPTIMIZATION property is defaulted to the value of
+# INTERPROCEDURAL_OPTIMIZATION property is defaulted to
 # CMAKE_INTERPROCEDURAL_OPTIMIZATION. Calling this function will thereby set
 # each target's default INTERPROCEDURAL_OPTIMIZATION value to TRUE, but they can
 # be overridden on a target-by-target basis.
