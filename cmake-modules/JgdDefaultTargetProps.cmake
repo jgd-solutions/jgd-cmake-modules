@@ -11,9 +11,39 @@ set(JGD_DEFAULT_COMPILE_OPTIONS
     -Wextra
     -Wpedantic
     -Wconversion
-    -Wsign-conversion>
+    -Wsign-conversion
+    -Weffc++>
     $<$<CXX_COMPILER_ID:MSVC>:
     /W4>)
+
+# Both a default target prop and part of canonical project structure
+set(JGD_LIB_PREFIX "${JGD_LIB_PREFIX}")
+
+#
+# Sets the variable specified by OUT_VAR to the default library output name.
+# This name will be <name>[-COMPONENT], where 'name' is PROJECT_NAME with any
+# leading JGD_LIB_PREFIX removed. When combined with the target's PREFIX
+# property, which should be set to JGD_LIB_PREFIX, the libraries file name on
+# disk will be <PREFIX><name>[-COMPONENT].
+#
+# Arguments:
+#
+# COMPONENT: one-value arg; the library component that the library output name
+# is naming.
+#
+# OUT_VAR: one-value arg; the name of the variable that will store the resulting
+# output name.
+#
+function(jgd_default_lib_output_name)
+  jgd_parse_arguments(ONE_VALUE_KEYWORDS "COMPONENT;OUT_VAR" ARGUMENTS
+                      "${ARGN}")
+  jgd_validate_arguments(KEYWORDS "OUT_VAR")
+  string(REGEX REPLACE "^${JGD_LIB_PREFIX}" "" no_prefix ${PROJECT_NAME})
+
+  set(${ARGS_OUT_VAR} "${no_prefix}" PARENT_SCOPE)
+  if(ARGS_COMPONENT AND (NOT "${ARGS_COMPONENT}" STREQUAL "${PROJECT_NAME}"))
+    set(${ARGS_OUT_VAR} "${ARGS_OUT_VAR}-${ARGS_COMPONENT}" PARENT_SCOPE)
+endfunction()
 
 #
 # Sets the variable specified by OUT_VAR to the default include paths within the

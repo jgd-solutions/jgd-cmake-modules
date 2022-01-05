@@ -8,23 +8,26 @@ include(JgdFileNaming)
 
 #
 # Creates a library with a generated name and the default target properties
-# defined in JgdDefaultTargetProps. The generated name will be
-# <JGD_LIB_PREFIX><name>[-COMPONENT], where 'name' is PROJECT_NAME with any
-# JGD_LIB_PREFIX stripped, so all libraries are prefixed by a single
-# JGD_LIB_PREFIX. Ex. 1: libproj Ex. 2: libproj-core.
+# defined in JgdDefaultTargetProps. These include the target's output name,
+# compile options, and include directories.
+#
+# The generated library name will be <JGD_LIB_PREFIX><name>[-COMPONENT], where
+# 'name' is PROJECT_NAME with any leading JGD_LIB_PREFIX removed. In the
+# situation that PROJECT_NAME starts with JGD_LIB_PREFIX and a COMPONENT is
+# provided, the generated name will then be <COMPONENT>. In both cases, 'name'
+# is PROJECT. Ex. 1.1: PROJECT_NAME=libproj -> libproj Ex 1.2: PROJECT_NAME=proj
+# -> libproj Ex 1.3: PROJECT_NAME=proj COMPONENT=core -> libproj-core Ex 2:
+# PROJECT_NAME=libproj COMPONENT=core -> core.
 #
 # Additionally, an ALIAS library is created for use within the build tree
 # (testing), regardless of if COMPONENT is provided. The alias will be
 # <PROJECT_NAME>::<lib>, where 'lib' is either the generated library name or
-# LIBRARY, if overridden. That is, unless PROJECT_NAME starts with
-# JGD_LIB_PREFIX and COMPONENT is provied, where the alias will be
-# <PROJECT_NAME>::<COMPONENT>. Ex 1. libproj::libproj Ex 2. libproj::core Ex 3.
-# proj::libproj Ex 4. proj::libproj-core
+# LIBRARY, if overridden.
 #
-# Lastly, if the library is prefixed with JGD_LIB_PREFIX, is STATIC or SHARED,
-# and JGD_LIB_PREFIX is the same as library's PREFIX property, JGD_LIB_PREFIX is
-# stripped from the library's output name, since the PREFIX property will be
-# prepended to the output name, automatically.
+# The libraries OUTPUT_NAME and PREFIX properties will only be set if the it is
+# a STATIC or SHARED library, which will be <name>[-COMPONENT] and
+# JGD_LIB_PREFIX, respectfully. This forms <JGD_LIB_PREFIX><name>[-COMPONENT] on
+# disk.
 #
 # Arguments:
 #
@@ -47,6 +50,7 @@ function(jgd_add_default_library)
   jgd_validate_arguments(KEYWORDS "SOURCES")
   if(NOT "${ARGS_COMPONENT}" STREQUAL "${PROJECT_NAME}")
     set(component "${ARGS_COMPONENT}")
+    set(comp_arg "COMPONENT ${component}")
   endif()
 
   # Verify source naming
@@ -69,7 +73,7 @@ function(jgd_add_default_library)
   endif()
 
   # Override library type with TYPE, if provided and supported
-  set(type)
+  set(lib_type)
   if(ARGS_TYPE)
     set(supported_types STATIC SHARED OBJECT INTERFACE)
     list(FIND supported_types "${ARGS_TYPE}" supported)
@@ -79,14 +83,14 @@ function(jgd_add_default_library)
           "Unsupported type ${ARGS_TYPE}. ${CMAKE_CURRENT_FUNCTION} must be "
           "called with one of: ${supported_types}")
     endif()
-    set(type "${ARGS_TYPE}")
+    set(lib_type "${ARGS_TYPE}")
   endif()
 
   # Add the library with alias
-  if("${type}" STREQUAL "INTERFACE")
+  if("${lib_type}" STREQUAL "INTERFACE")
     add_library("${library}" INTERFACE)
   else()
-    add_library("${library}" ${type} SOURCES "${ARGS_SOURCES}")
+    add_library("${library}" ${lib_type} SOURCES "${ARGS_SOURCES}")
   endif()
 
   set(alias "${PROJECT_NAME}::${library}")
@@ -95,28 +99,25 @@ function(jgd_add_default_library)
   endif()
   add_library(${alias} ALIAS ${ARGS_LIBRARY})
 
-  # Change output name
-  if("${type}" MATCHES "STATIC|SHARED")
-    get_target_property(prefix "${ARGS_LIBRARY}" PREFIX)
-    if("${prefix}" STREQUAL "${JGD_LIB_PREFIX}")
-      set_target_properties("${ARGS_LIBRARY}" PROPERTIES OUTPUT_NAME
-                                                         ${no_prefix})
-    endif()
+  # Set default target properties
+
+  # change output name
+  if(NOT lib_type OR "${lib_type}" MATCHES "STATIC|SHARED")
+    jgd_default_lib_output_name(${comp_arg} OUT_VAR out_name)
+    set_target_properties("${ARGS_LIBRARY}" PROPERTIES OUTPUT_NAME ${out_name}
+                                                       PREFIX ${JGD_LIB_PREFIX})
   endif()
 
-  # Set default target properties
+  # compile options
   set(include_access "PUBLIC")
-  if("${type}" STREQUAL "INTERFACE")
+  if("${lib_type}" STREQUAL "INTERFACE")
     set(include_access "INTERFACE")
   else()
     target_compile_options("${ARGS_LIBRARY}"
                            PRIVATE ${JGD_DEFAULT_COMPILE_OPTIONS})
   endif()
 
-  set(comp_arg)
-  if(component)
-    set(comp_arg "COMPONENT ${component}")
-  endif()
+  # include directories
   jgd_default_include_dirs(BUILD_INTERFACE ${comp_arg} OUT_VAR include_dirs)
   target_include_directories("${ARGS_LIBRARY}" ${include_access}
                              "${include_dirs}")
