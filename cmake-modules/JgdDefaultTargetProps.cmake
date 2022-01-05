@@ -38,16 +38,16 @@ function(jgd_default_lib_output_name)
   jgd_parse_arguments(ONE_VALUE_KEYWORDS "COMPONENT;OUT_VAR" ARGUMENTS
                       "${ARGN}")
   jgd_validate_arguments(KEYWORDS "OUT_VAR")
-  string(REGEX REPLACE "^${JGD_LIB_PREFIX}" "" no_prefix ${PROJECT_NAME})
 
-  set(${ARGS_OUT_VAR}
-      "${no_prefix}"
-      PARENT_SCOPE)
+  string(REGEX REPLACE "^${JGD_LIB_PREFIX}" "" no_prefix ${PROJECT_NAME})
+  set(out_name "${no_prefix}")
+
   if(ARGS_COMPONENT AND (NOT "${ARGS_COMPONENT}" STREQUAL "${PROJECT_NAME}"))
-    set(${ARGS_OUT_VAR}
-        "${ARGS_OUT_VAR}-${ARGS_COMPONENT}"
-        PARENT_SCOPE)
+    string(APPEND out_name "-${ARGS_COMPONENT}")
   endif()
+  set(${ARGS_OUT_VAR}
+      "${out_name}"
+      PARENT_SCOPE)
 endfunction()
 
 #

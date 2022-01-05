@@ -106,7 +106,7 @@ function(jgd_add_default_library)
 
   # change output name
   if(NOT lib_type OR "${lib_type}" MATCHES "STATIC|SHARED")
-    jgd_default_lib_output_name(OUT_VAR out_name ${comp_arg})
+    jgd_default_lib_output_name(${comp_arg} OUT_VAR out_name)
     set_target_properties("${library}" PROPERTIES OUTPUT_NAME ${out_name}
                                                   PREFIX ${JGD_LIB_PREFIX})
   endif()
