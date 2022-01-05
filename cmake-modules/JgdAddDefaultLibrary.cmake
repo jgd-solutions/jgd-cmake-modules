@@ -64,12 +64,19 @@ function(jgd_add_default_library)
   endforeach()
 
   # Generate library name
-  string(REGEX REPLACE "^${JGD_LIB_PREFIX}" "" no_prefix ${PROJECT_NAME})
-  set(library "${JGD_LIB_PREFIX}${no_prefix}")
   if(ARGS_LIBRARY)
     set(library "${ARGS_LIBRARY}")
-  elseif(component)
-    string(APPEND library "-${component}")
+  else()
+    string(REGEX REPLACE "^${JGD_LIB_PREFIX}" "" no_prefix ${PROJECT_NAME})
+    set(library "${JGD_LIB_PREFIX}${no_prefix}")
+
+    if(component)
+      if(${no_prefix} STREQUAL ${PROJECT_NAME})
+        string(APPEND library "-${component}")
+      else
+        set(library "${component}")
+      endif()
+    endif()
   endif()
 
   # Override library type with TYPE, if provided and supported
@@ -93,11 +100,7 @@ function(jgd_add_default_library)
     add_library("${library}" ${lib_type} SOURCES "${ARGS_SOURCES}")
   endif()
 
-  set(alias "${PROJECT_NAME}::${library}")
-  if((NOT ${no_prefix} STREQUAL ${PROJECT_NAME}) AND component)
-    set(alias "${PROJECT_NAME}::${component}")
-  endif()
-  add_library(${alias} ALIAS ${ARGS_LIBRARY})
+  add_library(${PROJECT_NAME}::${library} ALIAS ${library})
 
   # Set default target properties
 
