@@ -9,7 +9,7 @@ include(JgdFileNaming)
 #
 # Creates a library with a generated name and the default target properties
 # defined in JgdDefaultTargetProps. These include the target's output name,
-# compile options, and include directories.
+# compile options, PIC, and include directories.
 #
 # The generated library name will be <JGD_LIB_PREFIX><name>[-COMPONENT], where
 # 'name' is PROJECT_NAME with any leading JGD_LIB_PREFIX removed. In the
@@ -104,11 +104,16 @@ function(jgd_add_default_library)
 
   # Set default target properties
 
+  # PIC option
+  set_target_properties(
+    ${library} PROPERTIES POSITION_INDEPENDENT_CODE
+                          ${JGD_LIB_POSITION_INDEPENDENT_CODE})
+
   # change output name
   if(NOT lib_type OR "${lib_type}" MATCHES "STATIC|SHARED")
     jgd_default_lib_output_name(${comp_arg} OUT_VAR out_name)
-    set_target_properties("${library}" PROPERTIES OUTPUT_NAME ${out_name}
-                                                  PREFIX ${JGD_LIB_PREFIX})
+    set_target_properties(${library} PROPERTIES OUTPUT_NAME ${out_name}
+                                                PREFIX ${JGD_LIB_PREFIX})
   endif()
 
   # compile options
@@ -116,10 +121,10 @@ function(jgd_add_default_library)
   if("${lib_type}" STREQUAL "INTERFACE")
     set(include_access "INTERFACE")
   else()
-    target_compile_options("${library}" PRIVATE ${JGD_DEFAULT_COMPILE_OPTIONS})
+    target_compile_options(${library} PRIVATE ${JGD_DEFAULT_COMPILE_OPTIONS})
   endif()
 
   # include directories
   jgd_default_include_dirs(BUILD_INTERFACE ${comp_arg} OUT_VAR include_dirs)
-  target_include_directories("${library}" ${include_access} "${include_dirs}")
+  target_include_directories(${library} ${include_access} "${include_dirs}")
 endfunction()

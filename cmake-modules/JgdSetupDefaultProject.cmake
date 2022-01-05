@@ -11,7 +11,8 @@ include(JgdStandardDirs)
 # JGD's C++ project layout conventions. It does not create the project, as CMake
 # doesn't support the project() command via a macro. The variable
 # JGD_PROJECT_COMPONENTS will be set to a list of the PROJECT_NAME and all the
-# COMPONENTS.
+# COMPONENTS. The options BUILD_SHARED_LIBS, BUILD_TESTING, and BUILD_DOCS are
+# created.
 #
 # Call this macro in the top-level CMakeLists.txt to create a new, default
 # project following JGD's default conventions.
@@ -73,6 +74,7 @@ macro(JGD_SETUP_DEFAULT_PROJECT)
   endif()
 
   # Start Project Definition
+  option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
 
   # default target property values
 

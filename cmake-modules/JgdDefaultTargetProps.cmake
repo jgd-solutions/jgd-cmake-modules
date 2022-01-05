@@ -16,6 +16,8 @@ set(JGD_DEFAULT_COMPILE_OPTIONS
     $<$<CXX_COMPILER_ID:MSVC>:
     /W4>)
 
+set(JGD_LIB_POSITION_INDEPENDENT_CODE "${BUILD_SHARED_LIBS}")
+
 # Both a default target prop and part of canonical project structure
 set(JGD_LIB_PREFIX "${JGD_LIB_PREFIX}")
 
