@@ -3,6 +3,6 @@
 #include <single-exec-project/test.hpp>
 
 int main() {
-  std::cout << data_dir << std::endl;
-  return test();
+  using namespace single;
+  return (test() == 0) && !data_dir.empty();
 }

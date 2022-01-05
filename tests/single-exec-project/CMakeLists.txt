@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
 project(single-exec-project LANGUAGES CXX)
 
-# find_package(cmake-modules CONFIG REQUIRED)
-
 include(JgdSetupDefaultProject)
 jgd_setup_default_project(ADD_SUBDIRECTORIES CONFIGURE_CONFIG_HEADER WITH_IPO)
