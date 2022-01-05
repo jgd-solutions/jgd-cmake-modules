@@ -73,7 +73,7 @@ function(jgd_add_default_library)
     if(component)
       if(${no_prefix} STREQUAL ${PROJECT_NAME})
         string(APPEND library "-${component}")
-      else
+      else()
         set(library "${component}")
       endif()
     endif()
