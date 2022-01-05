@@ -6,12 +6,13 @@ include(JgdCanonicalStructure)
 
 #
 # Private macro to the module. After checking that it's a directory, appends the
-# given SUBDIR to the 'subdirs_added' variable, and unless NO_ADD is specified,
-# adds the given SUBDIR as a subdirectory.
+# given SUBDIR to the 'subdirs_added' variable, and unless NO_ADD_SUBDIRECTORY
+# is specified, adds the given SUBDIR as a subdirectory.
 #
 # Arguments:
 #
-# NO_ADD: option; specifies that SUBDIR should not be added as a subdirectory.
+# NO_ADD_SUBDIRECTORY: option; specifies that SUBDIR should not be added as a
+# subdirectory.
 #
 # SUBDIR: one-value arg; the path of the subdirectory to add to 'subdirs_added'
 # and, optionally add as a subdirectory with CMake's add_subdirectory() command.
@@ -19,13 +20,13 @@ include(JgdCanonicalStructure)
 # add_subdirectory().
 #
 macro(_ADD_SUBDIR_CHECK)
-  jgd_parse_arguments(OPTIONS "NO_ADD" ONE_VALUE_KEYWORDS "SUBDIR" ARGUMENTS
-                      "${ARGN}")
+  jgd_parse_arguments(OPTIONS "NO_ADD_SUBDIRECTORY" ONE_VALUE_KEYWORDS "SUBDIR"
+                      ARGUMENTS "${ARGN}")
   jgd_validate_arguments(KEYWORDS "SUBDIR")
 
   if(IS_DIRECTORY "${ARGS_SUBDIR}")
     list(APPEND subdirs_added "${ARGS_SUBDIR}")
-    if(NOT ARGS_NO_ADD)
+    if(NOT ARGS_NO_ADD_SUBDIRECTORY)
       message(DEBUG "${CMAKE_CURRENT_FUNCTION}: Adding directory "
               "${ARGS_SUBDIR} to project ${PROJECT_NAME}")
       add_subdirectory("${ARGS_SUBDIR}")
@@ -53,10 +54,10 @@ endmacro()
 # Optional and shouldn't be used if the project doesn't contain any components.
 # Components that match the PROJECT_NAME will be ignored.
 #
-function(jgd_default_source_subdirectories)
+function(jgd_add_default_source_subdirectories)
   jgd_parse_arguments(
     OPTIONS
-    "NO_ADD"
+    "NO_ADD_SUBDIRECTORY"
     ON_VALUE_KEYWORDS
     "OUT_VAR"
     MULTI_VALUE_KEYWORDS
@@ -66,9 +67,9 @@ function(jgd_default_source_subdirectories)
   jgd_validate_arguments()
 
   # more argument validation
-  if(ARGS_NO_ADD AND NOT ARGS_OUT_VAR)
+  if(ARGS_NO_ADD_SUBDIRECTORY AND NOT ARGS_OUT_VAR)
     messag(FATAL_ERROR "${CMAKE_CURRENT_FUNCTION} was called without OUT_VAR "
-           "and with NO_ADD set, rendering the function useless.")
+           "and with NO_ADD_SUBDIRECTORY set, rendering the function useless.")
   endif()
 
   # Setup
@@ -83,7 +84,7 @@ function(jgd_default_source_subdirectories)
       jgd_canonical_component_subdir(COMPONENT "${component}" OUT_VAR
                                      subdir_path)
       set(JGD_CURRENT_COMPONENT "${component}")
-      _add_subdir_check(${ARGS_NO_ADD} SUBDIR "${subdir_path}")
+      _add_subdir_check(${ARGS_NO_ADD_SUBDIRECTORY} SUBDIR "${subdir_path}")
       unset(JGD_CURRENT_COMPONENT)
 
       list(LENGTH subdirs_added new_len)
@@ -98,12 +99,12 @@ function(jgd_default_source_subdirectories)
   else()
     # add single library subdirectory, if it exists
     jgd_canonical_lib_subdir(OUT_VAR lib_subdir)
-    _add_subdir_check(${ARGS_NO_ADD} SUBDIR "${lib_subdir}")
+    _add_subdir_check(${ARGS_NO_ADD_SUBDIRECTORY} SUBDIR "${lib_subdir}")
   endif()
 
   # add executable source subdirectory, if it exists
   jgd_canonical_exec_subdir(OUT_VAR exec_subdir)
-  _add_subdir_check(${ARGS_NO_ADD} SUBDIR "${exec_subdir}")
+  _add_subdir_check(${ARGS_NO_ADD_SUBDIRECTORY} SUBDIR "${exec_subdir}")
 
   # Ensure at least one sub directory was added
   if(NOT subdirs_added)
