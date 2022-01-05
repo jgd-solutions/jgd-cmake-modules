@@ -22,7 +22,7 @@ unset(comp_config_name)
 file(
   GLOB_RECURSE module_files
   LIST_DIRECTORIES false
-  "${JGD_CMAKE_MODULE_REGEX}")
+  "*.cmake")
 if(module_files)
   list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")
 endif()

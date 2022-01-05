@@ -48,7 +48,7 @@ function(jgd_add_default_library)
   jgd_parse_arguments(ONE_VALUE_KEYWORDS "COMPONENT;LIBRARY;TYPE"
                       MULTI_VALUE_KEYWORDS "SOURCES" ARGUMENTS "${ARGN}")
   jgd_validate_arguments(KEYWORDS "SOURCES")
-  if(NOT "${ARGS_COMPONENT}" STREQUAL "${PROJECT_NAME}")
+  if(ARGS_COMPONENT AND NOT "${ARGS_COMPONENT}" STREQUAL "${PROJECT_NAME}")
     set(component "${ARGS_COMPONENT}")
     set(comp_arg COMPONENT ${component})
   endif()

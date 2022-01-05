@@ -28,9 +28,11 @@ include(JgdStandardDirs)
 # subdirectories in accordance with JGD's project structure and any COMPONENTS
 # provided
 #
-# WITH_TESTS: option; if defined, will setup automated testing
+# WITH_TESTS: option; if defined, will setup automated testing, which provides
+# the BUILD_TESTING option by including the CTest module.
 #
-# WITH_DOCS: option; if defined, will setup documentation generation
+# WITH_DOCS: option; if defined, will setup documentation generation, which
+# provides the BUILD_DOCS option.
 #
 # WITH_IPO: option; if defined, will enable interprocedural optimization
 #

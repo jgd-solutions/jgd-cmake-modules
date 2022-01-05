@@ -211,8 +211,8 @@ function(jgd_install_config_file_pkg)
   # Install targets via an export set
   if(ARGS_TARGETS)
     if(ARGS_HEADERS)
-      set(includes_dest
-          "INCLUDES DESTINATION ${JGD_INSTALL_INTERFACE_INCLUDE_DIR}")
+      set(includes_dest INCLUDES DESTINATION
+                        "${JGD_INSTALL_INTERFACE_INCLUDE_DIR}")
     endif()
 
     install(

@@ -4,13 +4,14 @@ include(JgdParseArguments)
 include(JgdValidateArguments)
 include(JgdDefaultTargetProps)
 include(JgdFileNaming)
+include(JgdStandardDirs)
 
 #
 # A convenience function to create an executable and add it as a test in one
-# command, while also setting default target properties from
-# JgdDefaultTargetProps.  An executable with name EXECUTABLE will be created
-# from the sources provided to SOURCES. This executable will then be registered
-# as a test with name NAME, or EXECUTABLE, if NAME is not provided.
+# command, while also setting default target compile options from
+# JgdDefaultTargetProps. An executable with name EXECUTABLE will be created from
+# the sources provided to SOURCES. This executable will then be registered as a
+# test with name NAME, or EXECUTABLE, if NAME is not provided.
 #
 # Arguments:
 #
@@ -30,8 +31,14 @@ function(jgd_add_default_test_executable)
   jgd_validate_arguments(KEYWORDS "EXECUTABLE;SOURCES")
 
   # Verify source naming
+
+  set(test_source_regex "${JGD_TEST_SOURCE_REGEX}") # unit tests
+  if("${CMAKE_CURRENT_SOURCE_DIR}" MATCHES "^${JGD_PROJECT_TESTS_DIR}")
+    set(test_source_regex "${JGD_SOURCE_REGEX}") # other tests & drivers
+  endif()
+
   foreach(source ${ARGS_SOURCES})
-    set(regex "${JGD_HEADER_REGEX}|${JGD_TEST_SOURCE_REGEX}")
+    set(regex "${JGD_HEADER_REGEX}|${test_source_regex}")
     string(REGEX MATCH "${regex}" matched "${source}")
     if(NOT matched)
       message(FATAL_ERROR "Provided source file, ${source}, does not match the"
@@ -55,10 +62,4 @@ function(jgd_add_default_test_executable)
   # Default properties
   target_compile_options("${ARGS_EXECUTABLE}"
                          PRIVATE ${JGD_DEFAULT_COMPILE_OPTIONS})
-  set(comp_arg)
-  if(ARGS_COMPONENT)
-    set(comp_arg COMPONENT ${ARGS_COMPONENT})
-  endif()
-  jgd_default_include_dirs(BUILD_INTERFACE ${comp_arg} OUT_VAR include_dirs)
-  target_include_directories("${ARGS_EXECUTABLE}" PRIVATE "${include_dirs}")
 endfunction()

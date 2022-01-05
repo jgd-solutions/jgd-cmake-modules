@@ -1,5 +1,5 @@
 #pragma once
 
-namespace compproject {
+namespace components {
 int reader();
 }

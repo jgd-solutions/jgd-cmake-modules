@@ -61,6 +61,7 @@ function(jgd_add_default_source_subdirectories)
                                      subdir_path)
       set(JGD_CURRENT_COMPONENT "${component}")
       _add_subdir_check(SUBDIR "${subdir_path}")
+      unset(JGD_CURRENT_COMPONENT)
       if(NOT subdirs_added)
         message(
           FATAL_ERROR

@@ -1,6 +1,6 @@
 #include <iostream>
-#include <single-exec-project/single-exec-project_config.hpp>
-#include <single-exec-project/test.hpp>
+#include <single-exec/single-exec_config.hpp>
+#include <single-exec/test.hpp>
 
 int main() {
   using namespace single;
