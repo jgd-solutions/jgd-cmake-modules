@@ -52,16 +52,16 @@ endfunction()
 
 #
 # Sets the variable specified by OUT_VAR to the default include paths within the
-# CMAKE_CURRENT_SOURCE_DIR, following the canonical project structure.  First,
-# the canonical subdirectories given by JgdCanonicalStructure are compared as
-# prefixes against CMAKE_CURRENT_SOURCE_DIR to find which canonical subdirectory
-# the current source directory is/is within. If matched, a resulting path will
-# be set such that the include prefix is always <PROJECT_NAME>[/COMPONENT]/,
-# plus the nested directories within the matched canonical directory that the
-# current directory exists within. Second, the PROJECT_BINARY_DIR is added for
-# any generated headers, which should be generated in
-# PROJECT_BINARY_DIR/PROJECT_NAME/... . The result can be optionally wrapped in
-# a BUILD_INTERFACE generator expression.
+# CMAKE_CURRENT_SOURCE_DIR, or SOURCE_DIR, following the canonical project
+# structure.  First, the canonical subdirectories given by JgdCanonicalStructure
+# are compared as prefixes against CMAKE_CURRENT_SOURCE_DIR/SOURCE_DIR to find
+# which canonical subdirectory the source directory is/is within. If matched, a
+# resulting path will be set such that the include prefix is always
+# <PROJECT_NAME>[/COMPONENT]/, plus the nested directories within the matched
+# canonical directory that the current directory exists within. Second, the
+# PROJECT_BINARY_DIR is added for any generated headers, which should be
+# generated in PROJECT_BINARY_DIR/PROJECT_NAME/... . The result can be
+# optionally wrapped in a BUILD_INTERFACE generator expression.
 #
 # Example: if CMAKE_CURRENT_SOURCE_DIR is path .../proj-comp/proj/comp/thing,
 # with respect to PROJECT_SOURCE_DIR, where PROJECT_NAME is "proj" and COMPONENT
@@ -69,6 +69,10 @@ endfunction()
 # PROJECT_BINARY_DIR will be added.
 #
 # Arguments:
+#
+# SOURCE_DIR: one-value arg; The source directory to calculate include
+# directories for. Overrides CMAKE_CURRENT_SOURCE_DIR. Optional -
+# CMAKE_CURRENT_SOURCE_DIR will be used by default.
 #
 # COMPONENT: one-value arg; the component in which the current directory exists.
 # Used to compute the canonical component subdirectory. A COMPONENT matching
@@ -83,11 +87,16 @@ endfunction()
 #
 function(jgd_default_include_dirs)
   jgd_parse_arguments(OPTIONS "BUILD_INTERFACE" ONE_VALUE_KEYWORDS
-                      "COMPONENT;OUT_VAR" ARGUMENTS "${ARGN}")
+                      "COMPONENT;OUT_VAR;SOURCE_DIR" ARGUMENTS "${ARGN}")
   jgd_validate_arguments(KEYWORDS "OUT_VAR")
 
-  set(current_dir "${CMAKE_CURRENT_SOURCE_DIR}")
-  set(include_dir)
+  # Override source directory, if argument is provided
+  set(source_dir "${CMAKE_CURRENT_SOURCE_DIR}")
+  if(ARGS_SOURCE_DIR)
+    set(source_dir "${ARGS_SOURCE_DIR}")
+  endif()
+
+  # Calculate canonical subdirectories
   jgd_canonical_exec_subdir(OUT_VAR exec_subdir)
   jgd_canonical_lib_subdir(OUT_VAR lib_subdir)
   if(ARGS_COMPONENT AND (NOT "${ARGS_COMPONENT}" STREQUAL "${PROJECT_NAME}"))
@@ -95,15 +104,16 @@ function(jgd_default_include_dirs)
                                    comp_subdir)
   endif()
 
-  # Track which canonical subdir matches current location and the number of
+  # Track which canonical subdir matches source location and the number of
   # parent traversals to create correct include prefix
-  if(comp_subdir AND ("${current_dir}" MATCHES "^${comp_subdir}"))
+  set(include_dir)
+  if(comp_subdir AND ("${source_dir}" MATCHES "^${comp_subdir}"))
     set(num_parents 2)
     set(include_dir "${comp_subdir}")
-  elseif("${current_dir}" MATCHES "^${lib_subdir}")
+  elseif("${source_dir}" MATCHES "^${lib_subdir}")
     set(num_parents 1)
     set(include_dir "${lib_subdir}")
-  elseif("${current_dir}" MATCHES "^${exec_subdir}")
+  elseif("${source_dir}" MATCHES "^${exec_subdir}")
     set(num_parents 1)
     set(include_dir "${exec_subdir}")
   else()
@@ -112,8 +122,8 @@ function(jgd_default_include_dirs)
     endif()
     message(
       FATAL_ERROR
-        "Unable to resolve default include directory. The current directory, "
-        "${current_dir}, is not within ${exec_subdir} OR ${lib_subdir}"
+        "Unable to resolve default include directory. The source directory, "
+        "${source_dir}, is not within ${exec_subdir} OR ${lib_subdir}"
         "${comp_err_msg}.")
   endif()
 
@@ -122,6 +132,7 @@ function(jgd_default_include_dirs)
     cmake_path(GET include_dir PARENT_PATH include_dir)
   endforeach()
 
+  # Set result
   set(include_dirs "${include_dir};${PROJECT_BINARY_DIR}")
   if(ARGS_BUILD_INTERFACE)
     set(${ARGS_OUT_VAR}
