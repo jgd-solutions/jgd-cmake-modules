@@ -40,9 +40,14 @@ function(jgd_default_lib_output_name)
   jgd_validate_arguments(KEYWORDS "OUT_VAR")
   string(REGEX REPLACE "^${JGD_LIB_PREFIX}" "" no_prefix ${PROJECT_NAME})
 
-  set(${ARGS_OUT_VAR} "${no_prefix}" PARENT_SCOPE)
+  set(${ARGS_OUT_VAR}
+      "${no_prefix}"
+      PARENT_SCOPE)
   if(ARGS_COMPONENT AND (NOT "${ARGS_COMPONENT}" STREQUAL "${PROJECT_NAME}"))
-    set(${ARGS_OUT_VAR} "${ARGS_OUT_VAR}-${ARGS_COMPONENT}" PARENT_SCOPE)
+    set(${ARGS_OUT_VAR}
+        "${ARGS_OUT_VAR}-${ARGS_COMPONENT}"
+        PARENT_SCOPE)
+  endif()
 endfunction()
 
 #
