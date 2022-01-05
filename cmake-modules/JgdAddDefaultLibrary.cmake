@@ -50,7 +50,7 @@ function(jgd_add_default_library)
   jgd_validate_arguments(KEYWORDS "SOURCES")
   if(NOT "${ARGS_COMPONENT}" STREQUAL "${PROJECT_NAME}")
     set(component "${ARGS_COMPONENT}")
-    set(comp_arg "COMPONENT ${component}")
+    set(comp_arg COMPONENT ${component})
   endif()
 
   # Verify source naming
@@ -97,7 +97,7 @@ function(jgd_add_default_library)
   if("${lib_type}" STREQUAL "INTERFACE")
     add_library("${library}" INTERFACE)
   else()
-    add_library("${library}" ${lib_type} SOURCES "${ARGS_SOURCES}")
+    add_library("${library}" ${lib_type} "${ARGS_SOURCES}")
   endif()
 
   add_library(${PROJECT_NAME}::${library} ALIAS ${library})
@@ -106,9 +106,9 @@ function(jgd_add_default_library)
 
   # change output name
   if(NOT lib_type OR "${lib_type}" MATCHES "STATIC|SHARED")
-    jgd_default_lib_output_name(${comp_arg} OUT_VAR out_name)
-    set_target_properties("${ARGS_LIBRARY}" PROPERTIES OUTPUT_NAME ${out_name}
-                                                       PREFIX ${JGD_LIB_PREFIX})
+    jgd_default_lib_output_name(OUT_VAR out_name ${comp_arg})
+    set_target_properties("${library}" PROPERTIES OUTPUT_NAME ${out_name}
+                                                  PREFIX ${JGD_LIB_PREFIX})
   endif()
 
   # compile options
@@ -116,12 +116,10 @@ function(jgd_add_default_library)
   if("${lib_type}" STREQUAL "INTERFACE")
     set(include_access "INTERFACE")
   else()
-    target_compile_options("${ARGS_LIBRARY}"
-                           PRIVATE ${JGD_DEFAULT_COMPILE_OPTIONS})
+    target_compile_options("${library}" PRIVATE ${JGD_DEFAULT_COMPILE_OPTIONS})
   endif()
 
   # include directories
   jgd_default_include_dirs(BUILD_INTERFACE ${comp_arg} OUT_VAR include_dirs)
-  target_include_directories("${ARGS_LIBRARY}" ${include_access}
-                             "${include_dirs}")
+  target_include_directories("${library}" ${include_access} "${include_dirs}")
 endfunction()
