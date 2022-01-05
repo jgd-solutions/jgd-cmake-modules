@@ -5,24 +5,31 @@ include(JgdValidateArguments)
 include(JgdCanonicalStructure)
 
 #
-# Private macro to the module. Simply adds the given SUBDIR as a subdirectory,
-# only after checking that it's a directory, then sets the subdirs_added
-# variable TRUE.
+# Private macro to the module. After checking that it's a directory, appends the
+# given SUBDIR to the 'subdirs_added' variable, and unless NO_ADD is specified,
+# adds the given SUBDIR as a subdirectory.
 #
 # Arguments:
 #
-# SUBDIR: one-value arg; the path of the subdirectory to add with CMake's
-# add_subdirectory() command. Can be absolute or relative to the current
-# directory, as defined by add_subdirectory().
+# NO_ADD: option; specifies that SUBDIR should not be added as a subdirectory.
+#
+# SUBDIR: one-value arg; the path of the subdirectory to add to 'subdirs_added'
+# and, optionally add as a subdirectory with CMake's add_subdirectory() command.
+# Can be absolute or relative to the current directory, as defined by
+# add_subdirectory().
 #
 macro(_ADD_SUBDIR_CHECK)
-  jgd_parse_arguments(ONE_VALUE_KEYWORDS "SUBDIR" ARGUMENTS "${ARGN}")
+  jgd_parse_arguments(OPTIONS "NO_ADD" ONE_VALUE_KEYWORDS "SUBDIR" ARGUMENTS
+                      "${ARGN}")
   jgd_validate_arguments(KEYWORDS "SUBDIR")
+
   if(IS_DIRECTORY "${ARGS_SUBDIR}")
-    message(DEBUG "${CMAKE_CURRENT_FUNCTION}: Adding directory "
-            "${ARGS_SUBDIR} to project ${PROJECT_NAME}")
-    add_subdirectory("${ARGS_SUBDIR}")
-    set(subdirs_added TRUE)
+    list(APPEND subdirs_added "${ARGS_SUBDIR}")
+    if(NOT ARGS_NO_ADD)
+      message(DEBUG "${CMAKE_CURRENT_FUNCTION}: Adding directory "
+              "${ARGS_SUBDIR} to project ${PROJECT_NAME}")
+      add_subdirectory("${ARGS_SUBDIR}")
+    endif()
   endif()
 endmacro()
 
@@ -46,23 +53,41 @@ endmacro()
 # Optional and shouldn't be used if the project doesn't contain any components.
 # Components that match the PROJECT_NAME will be ignored.
 #
-function(jgd_add_default_source_subdirectories)
-  jgd_parse_arguments(MULTI_VALUE_KEYWORDS "COMPONENTS" ARGUMENTS "${ARGN}")
+function(jgd_default_source_subdirectories)
+  jgd_parse_arguments(
+    OPTIONS
+    "NO_ADD"
+    ON_VALUE_KEYWORDS
+    "OUT_VAR"
+    MULTI_VALUE_KEYWORDS
+    "COMPONENTS"
+    ARGUMENTS
+    "${ARGN}")
   jgd_validate_arguments()
 
-  set(subdirs_added FALSE)
+  # more argument validation
+  if(ARGS_NO_ADD AND NOT ARGS_OUT_VAR)
+    messag(FATAL_ERROR "${CMAKE_CURRENT_FUNCTION} was called without OUT_VAR "
+           "and with NO_ADD set, rendering the function useless.")
+  endif()
+
+  # Setup
+  set(subdirs_added)
   list(REMOVE_ITEM ARGS_COMPONENTS "${PROJECT_NAME}")
 
   if(DEFINED ARGS_COMPONENTS)
     # add all components' subdirectories
     foreach(component ${ARGS_COMPONENTS})
-      set(subdirs_added FALSE)
+      list(LENGTH subdirs_added old_len)
+
       jgd_canonical_component_subdir(COMPONENT "${component}" OUT_VAR
                                      subdir_path)
       set(JGD_CURRENT_COMPONENT "${component}")
-      _add_subdir_check(SUBDIR "${subdir_path}")
+      _add_subdir_check(${ARGS_NO_ADD} SUBDIR "${subdir_path}")
       unset(JGD_CURRENT_COMPONENT)
-      if(NOT subdirs_added)
+
+      list(LENGTH subdirs_added new_len)
+      if(${new_len} EQUAL ${old_len})
         message(
           FATAL_ERROR
             "${CMAKE_CURRENT_FUNCTION} could not add subdirectory "
@@ -73,13 +98,14 @@ function(jgd_add_default_source_subdirectories)
   else()
     # add single library subdirectory, if it exists
     jgd_canonical_lib_subdir(OUT_VAR lib_subdir)
-    _add_subdir_check(SUBDIR "${lib_subdir}")
+    _add_subdir_check(${ARGS_NO_ADD} SUBDIR "${lib_subdir}")
   endif()
 
   # add executable source subdirectory, if it exists
   jgd_canonical_exec_subdir(OUT_VAR exec_subdir)
-  _add_subdir_check(SUBDIR "${exec_subdir}")
+  _add_subdir_check(${ARGS_NO_ADD} SUBDIR "${exec_subdir}")
 
+  # Ensure at least one sub directory was added
   if(NOT subdirs_added)
     message(
       FATAL_ERROR
@@ -88,6 +114,11 @@ function(jgd_add_default_source_subdirectories)
         "library subdirectory, ${lib_subdir}, nor the executable subdirectory, "
         "${exec_subdir}, exist.")
   endif()
-endfunction()
 
-# if always check for exec
+  # Set result variable
+  if(ARGS_OUT_VAR)
+    set(${ARGS_OUT_VAR}
+        "${subdirs_added}"
+        PARENT_SCOPE)
+  endif()
+endfunction()
