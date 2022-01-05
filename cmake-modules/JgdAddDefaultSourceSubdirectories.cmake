@@ -33,7 +33,8 @@ endmacro()
 # subdirectories ./<PROJECT_NAME>-<component>/<PROJECT_NAME>/<component>, if
 # COMPONENTS are provided, or just ./<JGD_LIB_PREFIX><name>, and ./<name> will
 # be added. Here, 'component' is an entry of COMPONENTS, and 'name' is
-# PROJECT_NAME with JGD_LIB_PREFIX stripped.
+# PROJECT_NAME with JGD_LIB_PREFIX stripped. The variable JGD_CURRENT_COMPONENT
+# will be set to 'component' before adding each component subdirectory.
 #
 # This function is not meant as a complete replacement for add_subdirectory(),
 # but instead makes adding the project's default directories, following the
@@ -58,6 +59,7 @@ function(jgd_add_default_source_subdirectories)
       set(subdirs_added FALSE)
       jgd_canonical_component_subdir(COMPONENT "${component}" OUT_VAR
                                      subdir_path)
+      set(JGD_CURRENT_COMPONENT "${component}")
       _add_subdir_check(SUBDIR "${subdir_path}")
       if(NOT subdirs_added)
         message(
