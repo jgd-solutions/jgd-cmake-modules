@@ -47,7 +47,7 @@ function(jgd_get_default_library_name)
   endif()
 
   # Set result
-  set(${OUT_VAR}
+  set(${ARGS_OUT_VAR}
       ${library}
       PARENT_SCOPE)
 endfunction()
