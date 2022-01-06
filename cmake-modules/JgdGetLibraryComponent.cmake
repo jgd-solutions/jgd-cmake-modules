@@ -21,8 +21,7 @@ include(JgdCanonicalStructure)
 # component.
 #
 function(jgd_get_library_component)
-  jgd_parse_arguments(ONE_VALUE_KEYWORDS "LIBRARY;OUT_VAR" ARGUMENTS
-                      "${ARGN}")
+  jgd_parse_arguments(ONE_VALUE_KEYWORDS "LIBRARY;OUT_VAR" ARGUMENTS "${ARGN}")
   jgd_validate_arguments(KEYWORDS "LIBRARY;OUT_VAR")
 
   set(component)
@@ -35,10 +34,13 @@ function(jgd_get_library_component)
     string(REPLACE "${exe_comp_lib_prefix}" "" component "${ARGS_LIBRARY}")
 
   elseif(NOT "${ARGS_LIBRARY}" MATCHES "^${JGD_LIB_PREFIX}")
-    # libraries that don't start with JGD_LIB_PREFIX are component libraries of the same name
-    set(component "${ARGS_LIBRAY}")
+    # libraries that don't start with JGD_LIB_PREFIX are component libraries of
+    # the same name
+    set(component "${ARGS_LIBRARY}")
   endif()
 
   # Set result
-  set(${ARGS_OUT_VAR} "${component}" PARENT_SCOPE)
-endif()
+  set(${ARGS_OUT_VAR}
+      "${component}"
+      PARENT_SCOPE)
+endfunction()

@@ -4,5 +4,5 @@
 
 int main() {
   using namespace single;
-  return (test() == 0) && !data_dir.empty();
+  return test() || data_dir.empty();
 }

@@ -93,7 +93,7 @@ function(jgd_default_include_dirs)
   jgd_validate_arguments(KEYWORDS "OUT_VAR")
 
   # Get the target's properties
-  get_target_property(source_dir ${ARGS_TARGET} TYPE)
+  get_target_property(source_dir ${ARGS_TARGET} SOURCE_DIR)
   get_target_property(target_type ${ARGS_TARGET} TYPE)
 
   # Helpful macro to check & emit error
@@ -116,6 +116,7 @@ function(jgd_default_include_dirs)
     set(include_dir "${exec_subdir}")
   else()
     jgd_get_library_component(LIBRARY "${ARGS_TARGET}" OUT_VAR component)
+    message(STATUS "libname: ${ARGS_TARGET} component: ${component}")
     if(component)
       # library component
       jgd_canonical_component_subdir(COMPONENT "${ARGS_COMPONENT}" OUT_VAR
