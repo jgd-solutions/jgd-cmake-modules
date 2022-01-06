@@ -6,9 +6,9 @@
  * This is a more detailed explanation of this file, but it's truly simple
  */
 
-#include <libdocs-proj/widget.hpp>
+#include <libsingle/widget.hpp>
 
-namespace docsproj {
+namespace single {
 
 /*!
  * \brief Uniformly produces Widgets based on a bunch of factors that couldn't
@@ -46,4 +46,4 @@ class Factory {
   Widget manufacture(const int scale = 1) const noexcept;
 };
 
-}  // namespace docsproj
+}  // namespace single

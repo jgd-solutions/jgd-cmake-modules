@@ -1,6 +1,6 @@
-#include <libdocs-proj/factory.hpp>
+#include <libsingle/factory.hpp>
 
-using namespace docsproj;
+using namespace single;
 
 Factory::Factory(const int factory_num) : factory_num{factory_num} {}
 

@@ -7,7 +7,7 @@
  * This is a more detailed explanation of this file, but it's truly simple
  */
 
-namespace docsproj {
+namespace single {
 
 /*!
  * \brief Forward declaration for friendship relationship
@@ -40,4 +40,4 @@ class Widget {
   constexpr int get_value() const noexcept { return this->value; }
 };
 
-}  // namespace docsproj
+}  // namespace single

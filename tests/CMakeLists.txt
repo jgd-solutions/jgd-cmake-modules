@@ -16,4 +16,4 @@ endmacro()
 
 _test_project("single-exec" "")
 _test_project("libcomponents" "")
-_test_project("libdocs-proj" "-DBUILD_DOCS=ON")
+_test_project("libsingle" "-DBUILD_DOCS=ON")
