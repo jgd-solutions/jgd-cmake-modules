@@ -6,6 +6,7 @@ include(JgdFileNaming)
 include(JgdStandardDirs)
 include(JgdCanonicalStructure)
 include(JgdExpandDirectories)
+include(JgdSeparateFileNames)
 include(CMakePackageConfigHelpers)
 
 #
@@ -80,14 +81,14 @@ function(jgd_install_config_file_pkg)
   if(ARGS_HEADERS)
     jgd_expand_directories(PATHS "${ARGS_HEADERS}" OUT_FILES header_files GLOB
                            "*${JGD_HEADER_EXTENSION}")
-    jgd_sep_correctly_named_files(
+    jgd_separate_file_names(
       FILES
       "${header_files}"
       REGEX
       "${JGD_HEADER_REGEX}"
-      OUT_CORRECT
+      OUT_MATCHED
       correct_files
-      OUT_INCORRECT
+      OUT_UNMATCHED
       incorrect_files)
     if(incorrect_files)
       message(
@@ -131,14 +132,14 @@ function(jgd_install_config_file_pkg)
     jgd_expand_directories(PATHS "${ARGS_CMAKE_MODULES}" OUT_FILES module_files
                            GLOB "*.cmake")
     if(module_files)
-      jgd_sep_correctly_named_files(
+      jgd_separate_file_names(
         FILES
         "${module_files}"
         REGEX
         "${JGD_CMAKE_MODULE_REGEX}"
-        OUT_CORRECT
+        OUT_MATCHED
         correct_files
-        OUT_INCORRECT
+        OUT_UNMATCHED
         incorrect_files)
       if(incorrect_files)
         message(
