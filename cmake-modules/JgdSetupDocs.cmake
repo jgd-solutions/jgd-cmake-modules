@@ -25,5 +25,4 @@ function(jgd_setup_docs)
           "exist. Cannot build docs.")
     endif()
   endif()
-
 endfunction()
