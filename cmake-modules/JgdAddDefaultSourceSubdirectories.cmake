@@ -42,7 +42,7 @@ endmacro()
 # COMPONENTS are provided, or just ./<JGD_LIB_PREFIX><name>, and ./<name> will
 # be added. Here, 'component' is an entry of COMPONENTS, and 'name' is
 # PROJECT_NAME with JGD_LIB_PREFIX stripped. The variable JGD_CURRENT_COMPONENT
-# will be set to 'component' before adding each component subdirectory.
+# will be set to the component before adding each component subdirectory.
 #
 # This function is not meant as a complete replacement for add_subdirectory(),
 # but instead makes adding the project's default directories, following the
@@ -53,6 +53,15 @@ endmacro()
 # COMPONENTS: multi-value arg; list of components that the PROJECT encapsulates.
 # Optional and shouldn't be used if the project doesn't contain any components.
 # Components that match the PROJECT_NAME will be ignored.
+#
+# NO_ADD_SUBDIRECTORY: one-value arg; when defined, will prevent the function
+# from adding the source subdirectories as project subdirectories with CMake's
+# add_subdirectory() command. The subdirectories will be added to the list
+# specified by OUT_VAR, and can be accessed there.
+#
+# OUT_VAR: one-value arg; the name of the list that will contain the added
+# subdirectories. This list will be populated regardless of if the
+# NO_ADD_SUBDIRECTORY was provided, or not.
 #
 function(jgd_add_default_source_subdirectories)
   jgd_parse_arguments(
