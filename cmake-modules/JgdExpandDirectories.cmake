@@ -35,7 +35,7 @@ function(jgd_expand_directories)
     if(IS_DIRECTORY "${full_path}")
       # extract files within directory
       file(
-        GLOB_RECURSE expand_files FOLLOW_SYMLINKS
+        GLOB_RECURSE expand_files
         LIST_DIRECTORIES false
         RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}"
         "${full_path}/${ARGS_GLOB}")
