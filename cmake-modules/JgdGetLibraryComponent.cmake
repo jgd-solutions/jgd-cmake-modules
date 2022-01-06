@@ -5,10 +5,11 @@ include(JgdValidateArguments)
 include(JgdCanonicalStructure)
 
 #
-# Resolves the component of the given library name specified by the LIBRARY
+# Resolves the component of the given library name provided by the LIBRARY
 # argument. The provided LIBRARY must have been created by JgdGetDefaultLibrary
-# name, or at least follow its semantics, for the component to be correctly
-# resolved. If the given library is not a component, the result will be an empty
+# name or at least follow its semantics for the component to be correctly
+# resolved. If the given library is not a component, including if the library is
+# only part of the project's parent component, the result will be an empty
 # string.
 #
 # Arguments:
