@@ -30,7 +30,9 @@ include(CMakePackageConfigHelpers)
 # Artifacts will be installed under this component. Optional - PROJECT_NAME will
 # be used, if not provided.
 #
-# TARGETS: multi-value arg; the targets to install. Optional.
+# TARGETS: multi-value arg; the targets to install. The target's headers will
+# not automatically be installed, they must be provided through HEADERS.
+# Optional.
 #
 # HEADERS: multi-value arg; list of the interface header files of the TARGETS,
 # which will be installed. Relative paths are evaluated with respect to
@@ -98,6 +100,8 @@ function(jgd_install_config_file_pkg)
     endif()
 
     if(correct_files)
+      jgd_install_include_destination(COMPONENT ${component} OUT_VAR
+                                      include_dst)
       install(
         FILES ${correct_files}
         DESTINATION "${include_dst}"

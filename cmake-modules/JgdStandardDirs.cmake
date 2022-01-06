@@ -37,7 +37,8 @@ set(JGD_INSTALL_INTERFACE_INCLUDE_DIR
 # Arguments:
 #
 # COMPONENT: one-value arg; the component to which the headers that will be
-# installed in this location belong. Optional
+# installed in this location belong. A component equal to PROJECT_NAME will be
+# ignored. Optional.
 #
 # OUT_VAR: one-value arg; the name of the output variable which will store the
 # header installation directory.

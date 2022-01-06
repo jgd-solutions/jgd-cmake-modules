@@ -64,16 +64,17 @@ endfunction()
 # provided TARGET. If TARGET was properly created in or within one of the
 # canonical subdirectories, provided by JgdCanonicalStructure, the resulting
 # path will be set such that the include prefix is always
-# <PROJECT_NAME>[/COMPONENT]/, plus the nested directories within the canonical
-# directory that the SOURCE_DIR exists within. PROJECT_BINARY_DIR is also added
-# for any generated headers, which should be generated in
+# <PROJECT_NAME>[/component]/, plus the nested directories within the canonical
+# directory that the SOURCE_DIR exists within. Here, 'component' is the resolved
+# component from TARGET, if TARGET is a component library. PROJECT_BINARY_DIR is
+# also added for any generated headers, which should be generated in
 # PROJECT_BINARY_DIR/PROJECT_NAME/... .  The result can be optionally wrapped in
 # a BUILD_INTERFACE generator expression.
 #
-# Example: if TARGET was created in .../proj-comp/proj/comp/thing, with respect
-# to PROJECT_SOURCE_DIR, where PROJECT_NAME is "proj" and COMPONENT is "comp",
-# the source include directory will be proj/proj-comp. Then, PROJECT_BINARY_DIR
-# will be added.
+# Example: if TARGET was created in .../proj-comp/proj/comp/thing/, with respect
+# to PROJECT_SOURCE_DIR, where PROJECT_NAME is "proj" and the target component
+# is "comp", the source include directory will be proj/proj-comp. Then,
+# PROJECT_BINARY_DIR will be added.
 #
 # Arguments:
 #

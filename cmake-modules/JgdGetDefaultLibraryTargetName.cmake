@@ -25,7 +25,7 @@ include(JgdCanonicalStructure)
 # OUT_VAR: one-value arg; the name of the variable that will store the library
 # name
 #
-function(jgd_get_default_library_name)
+function(jgd_get_default_library_target_name)
   jgd_parse_arguments(ONE_VALUE_KEYWORDS "COMPONENT;OUT_VAR" ARGUMENTS
                       "${ARGN}")
   jgd_validate_arguments(KEYWORDS OUT_VAR)
