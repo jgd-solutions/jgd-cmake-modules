@@ -46,6 +46,7 @@ function(jgd_add_default_executable)
   add_executable("${ARGS_EXECUTABLE}" "${ARGS_SOURCES}")
   target_compile_options("${ARGS_EXECUTABLE}"
                          PRIVATE ${JGD_DEFAULT_COMPILE_OPTIONS})
-  jgd_default_include_dirs(BUILD_INTERFACE OUT_VAR include_dirs)
+  jgd_default_include_dirs(TARGET ${executable} BUILD_INTERFACE OUT_VAR
+                           include_dirs)
   target_include_directories("${ARGS_EXECUTABLE}" PRIVATE "${include_dirs}")
 endfunction()
