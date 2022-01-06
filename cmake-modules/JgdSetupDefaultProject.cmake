@@ -35,10 +35,17 @@ include(JgdStandardDirs)
 # WITH_DOCS: option; if defined, will setup documentation generation, which
 # provides the BUILD_DOCS option.
 #
-# WITH_IPO: option; if defined, will enable interprocedural optimization
+# WITH_IPO: option; if defined, will enable interprocedural optimization for all
+# targets, by default. Targets can individually override this default value.
 #
-# CONFIGURE_HEADER: option; if defined, will configure a project configuration
-# header from an appropriately named input file in the project's cmake directory
+# WITH_BUILD_SHARED_LIBS: option; if defined, will provide the BUILD_SHARED_LIBS
+# option, which controls if static or dynamic project libraries will be built,
+# for libraries created without an type. Should only be set when the project's
+# libraries support being built into shared libraries.
+#
+# CONFIGURE_CONFIG_HEADER: option; if defined, will configure a project
+# configuration header from an appropriately named input file in the project's
+# cmake directory
 #
 # CONFIGURE_PKG_CONFIG_FILES: option; if defined, will configure config-file
 # package files from the appropriately named input files in the project's cmake
@@ -51,6 +58,7 @@ macro(JGD_SETUP_DEFAULT_PROJECT)
     "WITH_TESTS"
     "WITH_DOCS"
     "WITH_IPO"
+    "WITH_BUILD_SHARED_LIBS"
     "CONFIGURE_CONFIG_HEADER"
     "CONFIGURE_PKG_CONFIG_FILES"
     MULTI_VALUE_KEYWORDS
@@ -74,7 +82,10 @@ macro(JGD_SETUP_DEFAULT_PROJECT)
   endif()
 
   # Start Project Definition
-  option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
+  set(BUILD_SHARED_LIBS OFF)
+  if(ARGS_WITH_BUILD_SHARED_LIBS)
+    option(BUILD_SHARED_LIBS "Build using shared libraries" OFF)
+  endif()
 
   # default target property values
 
