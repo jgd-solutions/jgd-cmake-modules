@@ -6,14 +6,14 @@ include(JgdDefaultTargetProps)
 include(JgdFileNaming)
 
 #
-# A convenience function to create an executable and add it as a test in one
-# command.  An executable called EXECUTABLE will be created from the sources
-# provided to SOURCES. This executable will then be registered as a test with
-# name NAME, or EXECUTABLE, if NAME is not provided.
+# A convenience function to create an executable with default properties defined
+# in JgdDefaultTargetProps. An executable called PROJECT_NAME or EXECUTABLE, if
+# provided, will be created from the sources provided to SOURCES.
 #
 # Arguments:
 #
 # EXECUTABLE: one value arg; the name of the test executable to generate.
+# Optional - PROJECT_NAME will be used, if not provided.
 #
 # NAME: one value arg; the name of the test to register with CTest. Will be set
 # to EXECUTABLE, if not provided.
@@ -26,7 +26,11 @@ include(JgdFileNaming)
 function(jgd_add_default_executable)
   jgd_parse_arguments(ONE_VALUE_KEYWORDS "EXECUTABLE" MULTI_VALUE_KEYWORDS
                       "SOURCES" ARGUMENTS "${ARGN}")
-  jgd_validate_arguments(KEYWORDS "EXECUTABLE;SOURCES")
+  jgd_validate_arguments(KEYWORDS "SOURCES")
+  set(executable "${PROJECT_NAME}")
+  if(ARGS_EXECUTABLE)
+    set(executable "${ARGS_EXECUTABLE}")
+  endif()
 
   # Verify source naming
   foreach(source ${ARGS_SOURCES})
