@@ -12,16 +12,10 @@ include(JgdFileNaming)
 #
 # Arguments:
 #
-# EXECUTABLE: one value arg; the name of the test executable to generate.
-# Optional - PROJECT_NAME will be used, if not provided.
-#
-# NAME: one value arg; the name of the test to register with CTest. Will be set
-# to EXECUTABLE, if not provided.
+# EXECUTABLE: one value arg; the name of the executable to generate. Optional -
+# PROJECT_NAME will be used, if not provided.
 #
 # SOURCES: multi value arg; the sources to create EXECUTABLE from.
-#
-# LIBS: multi value arg; list of libraries to privately link against the test
-# executable. Commonly the library under test and testing framework. Optional.
 #
 function(jgd_add_default_executable)
   jgd_parse_arguments(ONE_VALUE_KEYWORDS "EXECUTABLE" MULTI_VALUE_KEYWORDS
