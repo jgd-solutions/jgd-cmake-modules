@@ -2,12 +2,26 @@ include_guard()
 
 include(JgdParseArguments)
 include(JgdValidateArguments)
-include(JgdAddDefaultSourceSubdirectories)
 include(JgdExpandDirectories)
 include(JgdCanonicalStructure)
-include(JgdDefaultTargetProps)
-include(JgdSeparateFileNames)
+include(JgdSeparateList)
 
+#
+# Creates a target, "doxygen-docs", that generates documentation of the provided
+# TARGETS using Doxygen. Doxygen will generate documentation from the header
+# files (those matching JGD_HEADER_EXTENSION) within the TARGETS'
+# INTERFACE_INCLUDE_DIRECTORIES. EXCLUDE_REGEX can be provided to exclude any of
+# these files or paths from Doxygen's input. The EXCLUDE_REGEX will be applied
+# to absolute paths.
+#
+# Arguments:
+#
+# TARGETS: multi-value arg; list of targets to generate Doxygen documentation
+# for.
+#
+# EXCLUDE_REGEX: one-value arg; Regular expression used to filter the TARGETS'
+# interface header files from being passed to Doxygen.
+#
 function(jgd_create_doxygen_target)
   jgd_parse_arguments(MULTI_VALUE_KEYWORDS "TARGETS;EXCLUDE_REGEX" ARGUMENTS
                       "${ARGN}")
@@ -39,8 +53,8 @@ function(jgd_create_doxygen_target)
 
     # Exclude header files based on provided regex
     if(ARGS_EXCLUDE_REGEX AND header_files)
-      jgd_separate_file_names(REGEX "${ARGS_EXCLUDE_REGEX}" FILES
-                              "${header_files}" OUT_UNMATCHED to_keep)
+      jgd_separate_list(REGEX "${ARGS_EXCLUDE_REGEX}" IN_LIST "${header_files}"
+                        OUT_UNMATCHED to_keep)
       set(header_files "${to_keep}")
       if(NOT to_keep)
         message(
@@ -49,7 +63,6 @@ function(jgd_create_doxygen_target)
                   "${ARGS_EXCLUDE_REGEX}: ${include_dirs}")
       endif()
     endif()
-
   endif()
 
   # Target to generate Doxygen documentation
