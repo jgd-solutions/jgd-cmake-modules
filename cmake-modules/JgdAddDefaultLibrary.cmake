@@ -111,6 +111,5 @@ function(jgd_add_default_library)
   # include directories
   jgd_default_include_dirs(TARGET ${library} BUILD_INTERFACE OUT_VAR
                            include_dirs)
-  message(STATUS "INCLUDE DIRS : ${include_dirs}")
   target_include_directories(${library} ${include_access} "${include_dirs}")
 endfunction()

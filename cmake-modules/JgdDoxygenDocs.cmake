@@ -19,12 +19,23 @@ include(JgdSeparateList)
 # TARGETS: multi-value arg; list of targets to generate Doxygen documentation
 # for.
 #
+# ADDITIONAL_PATHS; multi-value arg; list of paths to provide to Doxygen as
+# input in addition to the header files from TARGETS. If directories are
+# provided, CMake's doxygen_add_docs() command will automatically extract all
+# contained files that aren't excluded by their exclude patterns. The paths are
+# not subject to the EXCLUDE_REGEX.
+#
 # EXCLUDE_REGEX: one-value arg; Regular expression used to filter the TARGETS'
-# interface header files from being passed to Doxygen.
+# interface header files from being passed to Doxygen. Optional.
+#
+# README_MAIN_PAGE; option: both adds the current project's README.md file to
+# Doxygen's list of input files and sets DOXYGEN_USE_MDFILE_AS_MAINPAGE to it,
+# such that Doxygen will use the project's readme as the main page.
 #
 function(jgd_create_doxygen_target)
-  jgd_parse_arguments(MULTI_VALUE_KEYWORDS "TARGETS;EXCLUDE_REGEX" ARGUMENTS
-                      "${ARGN}")
+  jgd_parse_arguments(
+    MULTI_VALUE_KEYWORDS "TARGETS;ADDITIONAL_PATHS;EXCLUDE_REGEX" OPTIONS
+    "README_MAIN_PAGE" ARGUMENTS "${ARGN}")
   jgd_validate_arguments(KEYWORDS "TARGETS")
 
   # Extract all include directories from targets
@@ -65,9 +76,27 @@ function(jgd_create_doxygen_target)
     endif()
   endif()
 
+  # Append any additional paths to Doxygen's input
+  set(doxygen_input "${header_files}")
+  if(ARGS_ADDITIONAL_PATHS)
+    list(APPEND doxygen_input "${ARGS_ADDITIONAL_PATHS}")
+  endif()
+
+  # Set README.md as main page
+  if(ARGS_README_MAIN_PAGE)
+    set(readme "${PROJECT_SOURCE_DIR}/README.md")
+    if(NOT EXISTS "${readme}")
+      message(WARNING "The README_MAIN_PAGE option was specified but the "
+                      "README file doesn't exist: ${readme}")
+    endif()
+
+    set(DOXYGEN_USE_MDFILE_AS_MAINPAGE "${readme}")
+    list(APPEND doxygen_input "${readme}")
+  endif()
+
   # Target to generate Doxygen documentation
   set(DOXYGEN_STRIP_FROM_INC_PATH "${include_dirs}")
   set(DOXYGEN_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/doxygen")
-  doxygen_add_docs(doxygen-docs "${header_files}" ALL
+  doxygen_add_docs(doxygen-docs "${doxygen_input}" ALL
                    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
 endfunction()

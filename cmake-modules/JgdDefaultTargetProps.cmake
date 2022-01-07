@@ -116,7 +116,6 @@ function(jgd_default_include_dirs)
     set(include_dir "${exec_subdir}")
   else()
     jgd_get_library_component(LIBRARY "${ARGS_TARGET}" OUT_VAR component)
-    message(STATUS "libname: ${ARGS_TARGET} component: ${component}")
     if(component)
       # library component
       jgd_canonical_component_subdir(COMPONENT "${ARGS_COMPONENT}" OUT_VAR
