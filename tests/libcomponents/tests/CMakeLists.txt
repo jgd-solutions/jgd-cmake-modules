@@ -1,0 +1,9 @@
+include(JgdAddDefaultTestExecutable)
+jgd_add_default_test_executable(
+  EXECUTABLE
+  components-test
+  LIBS
+  libcomponents::core
+  libcomponents::extra
+  SOURCES
+  test.cpp)
