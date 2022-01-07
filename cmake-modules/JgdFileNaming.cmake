@@ -94,9 +94,13 @@ function(jgd_pkg_config_file_name)
     set(proj_keyword "PROJECT")
   endif()
 
+  set(component_arg)
+  if(ARGS_COMPONENT)
+    set(component_arg COMPONENT ${ARGS_COMPONENT})
+  endif()
+
   _jgd_kebab_file_name(
-    COMPONENT
-    "${ARGS_COMPONENT}"
+    ${component_arg}
     SUFFIX
     "config.cmake"
     ${proj_keyword}
@@ -134,8 +138,13 @@ function(jgd_pkg_config_in_file_name)
     set(proj_keyword "PROJECT")
   endif()
 
-  jgd_pkg_config_file_name(COMPONENT "${ARGS_COMPONENT}" ${proj_keyword}
-                           ${ARGS_PROJECT} OUT_VAR config_file_name)
+  set(component_arg)
+  if(ARGS_COMPONENT)
+    set(component_arg COMPONENT ${ARGS_COMPONENT})
+  endif()
+
+  jgd_pkg_config_file_name(${component_arg} ${proj_keyword} ${ARGS_PROJECT}
+                           OUT_VAR config_file_name)
   set(${ARGS_OUT_VAR}
       "${config_file_name}${JGD_IN_FILE_EXTENSION}"
       PARENT_SCOPE)
@@ -197,9 +206,13 @@ function(jgd_pkg_targets_file_name)
     set(proj_keyword "PROJECT")
   endif()
 
+  set(component_arg)
+  if(ARGS_COMPONENT)
+    set(component_arg COMPONENT ${ARGS_COMPONENT})
+  endif()
+
   _jgd_kebab_file_name(
-    COMPONENT
-    "${ARGS_COMPONENT}"
+    ${component_arg}
     SUFFIX
     "targets.cmake"
     ${proj_keyword}

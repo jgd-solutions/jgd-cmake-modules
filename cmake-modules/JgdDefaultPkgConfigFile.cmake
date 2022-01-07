@@ -5,7 +5,7 @@ find_dependency(cmake-modules CONFIG REQUIRED)
 
 include(JgdFileNaming)
 
-# Include main package config file
+# Include main targets file
 jgd_pkg_targets_file_name(PROJECT "@PROJECT_NAME@" OUT_VAR target_file_name)
 include("${CMAKE_CURRENT_LIST_DIR}/${target_file_name}")
 unset(target_file_name)

@@ -12,8 +12,8 @@ include(JgdFileNaming)
 #
 # Arguments:
 #
-# EXECUTABLE: one value arg; the name of the executable to generate. Optional -
-# PROJECT_NAME will be used, if not provided.
+# EXECUTABLE: one value arg; the override name of the executable to generate.
+# Optional - PROJECT_NAME will be used, if not provided.
 #
 # SOURCES: multi value arg; the sources to create EXECUTABLE from.
 #
@@ -37,10 +37,9 @@ function(jgd_add_default_executable)
   endforeach()
 
   # Executable with default properties
-  add_executable("${ARGS_EXECUTABLE}" "${ARGS_SOURCES}")
-  target_compile_options("${ARGS_EXECUTABLE}"
-                         PRIVATE ${JGD_DEFAULT_COMPILE_OPTIONS})
+  add_executable("${executable}" "${ARGS_SOURCES}")
+  target_compile_options("${executable}" PRIVATE ${JGD_DEFAULT_COMPILE_OPTIONS})
   jgd_default_include_dirs(TARGET ${executable} BUILD_INTERFACE OUT_VAR
                            include_dirs)
-  target_include_directories("${ARGS_EXECUTABLE}" PRIVATE "${include_dirs}")
+  target_include_directories("${executable}" PRIVATE "${include_dirs}")
 endfunction()
