@@ -81,7 +81,7 @@ function(jgd_install_config_file_pkg)
 
   # Install headers
   if(ARGS_HEADERS)
-    jgd_expand_directories(PATHS "${ARGS_HEADERS}" OUT_FILES header_files GLOB
+    jgd_expand_directories(PATHS "${ARGS_HEADERS}" OUT_VAR header_files GLOB
                            "*${JGD_HEADER_EXTENSION}")
     jgd_separate_file_names(
       FILES
@@ -133,7 +133,7 @@ function(jgd_install_config_file_pkg)
 
   # add additional cmake module
   if(ARGS_CMAKE_MODULES)
-    jgd_expand_directories(PATHS "${ARGS_CMAKE_MODULES}" OUT_FILES module_files
+    jgd_expand_directories(PATHS "${ARGS_CMAKE_MODULES}" OUT_VAR module_files
                            GLOB "*.cmake")
     if(module_files)
       jgd_separate_file_names(

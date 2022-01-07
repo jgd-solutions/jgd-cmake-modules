@@ -5,16 +5,15 @@ include(JgdValidateArguments)
 
 #
 # For each path in PATHS, if the path is a directory, the enclosed files
-# matching GLOB will be expanded into the list specified by OUT_FILES. These
-# expanded paths will be given relative to CMAKE_CURRENT_SOURCE_DIR. Paths that
-# refer directly to files will be directly added to the list specified by
-# OUT_FILES.
+# matching GLOB will be expanded into the list specified by OUT_VAR. Paths in
+# PATHS that refer directly to files will be directly added to the list
+# specified by OUT_VAR. However, all of the resulting paths will be absolute.
 #
 # Arguments:
 #
 # PATHS: multi-value arg; list of input paths to expand
 #
-# OUT_FILES: one-value arg; the name of the variable that will store the list of
+# OUT_VAR: one-value arg; the name of the variable that will store the list of
 # file paths.
 #
 # GLOB: one-value arg; the GLOBBING expression for files within directory paths.
@@ -22,9 +21,9 @@ include(JgdValidateArguments)
 # directory_path/GLOB
 #
 function(jgd_expand_directories)
-  jgd_parse_arguments(ONE_VALUE_KEYWORDS "OUT_FILES;GLOB" MULTI_VALUE_KEYWORDS
+  jgd_parse_arguments(ONE_VALUE_KEYWORDS "OUT_VAR;GLOB" MULTI_VALUE_KEYWORDS
                       "PATHS" ARGUMENTS "${ARGN}")
-  jgd_validate_arguments(KEYWORDS "PATHS;OUT_FILES;GLOB")
+  jgd_validate_arguments(KEYWORDS "PATHS;OUT_VAR;GLOB")
 
   # Fill list with all file paths
   set(file_paths)
@@ -37,7 +36,6 @@ function(jgd_expand_directories)
       file(
         GLOB_RECURSE expand_files
         LIST_DIRECTORIES false
-        RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}"
         "${full_path}/${ARGS_GLOB}")
       if(expand_files)
         list(APPEND file_paths ${expand_files})
@@ -49,7 +47,7 @@ function(jgd_expand_directories)
   endforeach()
 
   # Set out var
-  set(${ARGS_OUT_FILES}
+  set(${ARGS_OUT_VAR}
       ${file_paths}
       PARENT_SCOPE)
 endfunction()
