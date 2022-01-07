@@ -61,4 +61,7 @@ class CMakeModulesRecipe(ConanFile):
         pkg_config_file = path.join(
             cmake_install_dest, "{}-config.cmake".format(self.name)
         )
-        self.cpp_info.set_property("cmake_build_modules", [pkg_config_file])
+        build_modules = [pkg_config_file]
+
+        self.cpp_info.set_property("cmake_build_modules", build_modules)
+        self.cpp_info.build_modules = build_modules
