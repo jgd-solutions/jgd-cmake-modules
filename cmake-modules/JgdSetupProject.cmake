@@ -11,7 +11,7 @@ macro(_jgd_warn_set variable value)
   # will still override these values, but this warning is for improper usage.
   if(PROJECT_IS_TOP_LEVEL AND DEFINED ${variable})
     message(
-      WARNING
+      AUTHOR_WARNING
         "The variable ${variable} was set for project ${PROJECT_NAME} prior to "
         "calling jgd_setup_project. This variable will by overridden to the "
         "default value of ${value} in the project setup. If you wish to "
@@ -23,7 +23,7 @@ macro(_jgd_warn_set variable value)
       PARENT_SCOPE)
 endmacro()
 
-macro(jgd_check_set variable value)
+macro(_jgd_check_set variable value)
   if(NOT DEFINED ${variable})
     set(${variable}
         "${value}"
@@ -31,13 +31,11 @@ macro(jgd_check_set variable value)
   endif()
 endmacro()
 
+# JGD_PROJECT_PREFIX_NAME guards against basic project issues sets a bunch of
+# CMAKE_ variables to set default target properties & configure cmake operation
+# enables testing so it's never forgotten, even if there's no tests, it can
+# still be run
 function(jgd_setup_project)
-  jgd_parse_arguments(ARGUMENTS "${ARGN}")
-
-  set(prefix_temp)
-  string(TOUPPER ${PROJECT_NAME} prefix_temp)
-  string(REPLACE "-" "_" ${prefix_temp} JGD_PROJECT_PREFIX)
-
   # == Usage Guards ==
 
   # guard against running as script or forgetting project() command
@@ -54,7 +52,7 @@ function(jgd_setup_project)
     message(
       FATAL_ERROR
         "jgd_setup_project must be called in the same CMakeLists.txt file that "
-        "the project was defined in, using CMake's project() command.")
+        "the project was defined in, with CMake's project() command.")
   endif()
 
   # guard against in-source builds
@@ -63,6 +61,31 @@ function(jgd_setup_project)
       FATAL_ERROR
         "In-source builds not allowed. Please make and use a build directory.")
   endif()
+
+  # no project version specified
+  if(NOT DEFINED PROJECT_VERSION)
+    message(
+      AUTHOR_WARNING
+        "The project ${PROJECT_NAME} does not have a version defined. It's "
+        "recommended to provide the VERSION argument to CMake's project() "
+        "command, as it affects package installation and shared library "
+        "versioning")
+  endif()
+
+  # == Function Arguments Project Configuration  ==
+
+  jgd_parse_arguments(ONE_VALUE_KEYWORDS "PREFIX_NAME" ARGUMENTS "${ARGN}")
+
+  # project prefix name
+  if(ARGS_PREFIX_NAME)
+    set(project_prefix_name ${ARGS_PREFIX_NAME})
+  else()
+    string(TOUPPER ${PROJECT_NAME} prefix_temp)
+    string(REPLACE "-" "_" ${prefix_temp} project_prefix_name)
+  endif()
+  set(JGD_PROJECT_PREFIX_NAME
+      "${project_prefix_name}"
+      CACHE INTERNAL "")
 
   # == Variables Setting Default Target Properties ==
 
@@ -80,9 +103,9 @@ function(jgd_setup_project)
     _jgd_warn_set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${runtime_out_dir}")
   else()
     # welcome parent project's values, if defined
-    jgd_check_set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${archive_out_dir}")
-    jgd_check_set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${lib_out_dir}")
-    jgd_check_set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${runtime_out_dir}")
+    _jgd_check_set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${archive_out_dir}")
+    _jgd_check_set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${lib_out_dir}")
+    _jgd_check_set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${runtime_out_dir}")
   endif()
 
   # language standard requirements
@@ -148,4 +171,6 @@ function(jgd_setup_project)
     _jgd_warn_set(CMAKE_INSTALL_PREFIX "/opt/${PROJECT_NAME}" CACHE PATH
                   "Base installation location." FORCE)
   endif()
+
+  enable_testing()
 endfunction()
