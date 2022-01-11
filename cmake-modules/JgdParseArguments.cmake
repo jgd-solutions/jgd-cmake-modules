@@ -4,35 +4,121 @@ include(CMakeParseArguments)
 include(JgdValidateArguments)
 
 #
-# Simply a wrapper around cmake_parse_arguments that provides a consistent
-# prefix, ARGS, to the parsed arguments.
+# A wrapper around cmake_parse_arguments that provides a consistent prefix,
+# ARGS, to the parsed arguments, and argument validation.
 #
 # Arguments:
 #
-# OPTIONS: multi value arg; options for the calling function/macro
+# ARGUMENTS: multi-value arg; all the caller's arguments to parse
 #
-# ONE_VALUE_KEYWORDS: multi value arg; keywords of one-value arguments of
+# OPTIONS: multi-value arg; options for the calling function/macro
+#
+# ONE_VALUE_KEYWORDS: multi-value arg; keywords of one-value arguments of
 # calling function/macro
 #
-# MULTI_VALUE_KEYWORDS: multi value arg; keywords of multi-value arguments of
+# MULTI_VALUE_KEYWORDS: multi-value arg; keywords of multi-value arguments of
 # calling function/macro
 #
-# ARGUMENTS: multi value arg; all arguments of the calling function/macro to
-# parse
+# REQUIRES_ALL: multi-value arg; the keywords of the calling function/macro's
+# arguments that must all be provided. A fatal error will be emitted if all of
+# these arguments weren't provided. Can include any desired subset of OPTIONS,
+# ONE_VALUE_KEYWORDS, and MULTI_VALUE_KEYWORDS.
+#
+# REQUIRES_ANY: multi-value arg; the keywords of the calling function/macro's
+# arguments that must have at least one provided. A fatal error will be emitted
+# if none of these arguments were provided. Can include any desired subset of
+# OPTIONS, ONE_VALUE_KEYWORDS, and MULTI_VALUE_KEYWORDS.
+#
+# WITHOUT_MISSING_VALUES_CHECK: option; when defined, arguments with missing
+# values will be ignored
+#
+# WITHOUT_UNPARSED_CHECK: option; when defined, unparsed arguments (those that
+# were provided but were not expected by the function) will be ignored
 #
 macro(JGD_PARSE_ARGUMENTS)
   # Arguments to jgd_parse_arguments
-  set(options)
+  set(options WITHOUT_MISSING_VALUES_CHECK WITHOUT_UNPARSED_CHECK)
   set(one_value_keywords)
-  set(multi_value_keywords OPTIONS ONE_VALUE_KEYWORDS MULTI_VALUE_KEYWORDS
-                           ARGUMENTS)
+  set(multi_value_keywords ARGUMENTS OPTIONS ONE_VALUE_KEYWORDS
+                           MULTI_VALUE_KEYWORDS REQUIRES_ALL REQUIRES_ANY)
   cmake_parse_arguments(INS "${options}" "${one_value_keywords}"
                         "${multi_value_keywords}" ${ARGN})
 
-  # Argument Validation of jgd_parse_arguments
-  jgd_validate_arguments(KEYWORDS "ARGUMENTS" PREFIX "INS")
+  # == Argument Validation of jgd_parse_arguments ==
 
-  # Parse the caller's arguments
+  # must provide ARGUMENTS
+  if(NOT DEFINED INS_ARGUMENTS)
+    message(FATAL_ERROR "A list of function arguments must be provided "
+                        "through ARGUMENTS to jgd_parse_arguments")
+  endif()
+
+  # no missing values or unnecessary keywords
+  if(INS_KEYWORDS_MISSING_VALUES)
+    message(FATAL_ERROR "Keywords provided to jgd_parse_arguments without any "
+                        "values: ${INS_KEYWORDS_MISSING_VALUES}")
+  endif()
+  if(INS_UNPARSED_ARGUMENTS)
+    message(WARNING "Unparsed arguments provided to jgd_parse_arguments: "
+                    "${INS_UNPARSED_ARGUMENTS}")
+  endif()
+
+  # required keywords are a subset of the function's parsed keywords
+  list(APPEND parsed_keywords ${INS_OPTIONS} "${INS_ONE_VALUE_KEYWORDS}"
+       "${INS_MULTI_VALUE_KEYWORDS}")
+  list(APPEND required_keywords "${INS_REQUIRES_ALL}" "${INS_REQUIRES_ANY}")
+  foreach(req_keyword ${required_keywords})
+    list(FIND parsed_keywords "${req_keyword}" idx)
+    if(idx EQUAL -1)
+      message(
+        FATAL_ERROR
+          "The required keyword ${req_keyword} is not in the list of function "
+          "keywords ${parsed_keywords}. This keyword cannot be required if it "
+          "is not parsed by the function.")
+    endif()
+  endforeach()
+
+  # == Parse and Validate Caller's Arguments ==
+
+  # parse the caller's arguments
   cmake_parse_arguments(ARGS "${INS_OPTIONS}" "${INS_ONE_VALUE_KEYWORDS}"
                         "${INS_MULTI_VALUE_KEYWORDS}" "${INS_ARGUMENTS}")
+
+  # validate keywords that must all be present
+  foreach(keyword ${INS_REQUIRES_ALL})
+    set(parsed_var ARGS_${keyword})
+    if(NOT DEFINED ${parsed_var})
+      message(FATAL_ERROR "${keyword} was not provided or may be missing "
+                          "its value(s).")
+    endif()
+  endforeach()
+
+  # validate keywords that must have one present
+  if(INS_REQUIRES_ANY)
+    set(at_least_one_defined FALSE)
+    foreach(keyword ${INS_REQUIRES_ANY})
+      set(parsed_var ARGS_${keyword})
+      if(DEFINED parsed_var)
+        set(at_least_one_defined TRUE)
+        break()
+      endif()
+    endforeach()
+
+    if(NOT at_least_one_defined)
+      message(
+        FATAL_ERROR
+          "None of the following keywords were provided or may be missing their "
+          "values: ${INS_REQUIRES_ANY}")
+    endif()
+  endif()
+
+  # validate caller's argument format
+  if(NOT WITHOUT_MISSING_VALUES_CHECK AND ARGS_KEYWORDS_MISSING_VALUES)
+    message(FATAL_ERROR "Keywords provided without any values: "
+                        "${ARGS_KEYWORDS_MISSING_VALUES}")
+  endif()
+
+  if(NOT WITHOUT_UNPARSED_CHECK AND ARGS_UNPARSED_ARGUMENTS)
+    message(WARNING "Unparsed arguments provided: "
+                    "${ARGS_UNPARSED_ARGUMENTS}")
+  endif()
 endmacro()
