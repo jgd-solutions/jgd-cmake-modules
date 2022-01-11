@@ -32,6 +32,8 @@ Shouldn't be done but will try to support it.
 
 ## TODO
 
+- maybe check set is a recipe for disaster in subdirectories
+- default compile options
 - parse and validate in one call, makes no sense to require another call that only works in that spot
 - set(CMAKE_INSTALL_DOCDIR ${CMAKE_INSTALL_DATAROOTDIR}/doc/${PROJECT_NAME}) on each include of gnu install dirs
 - for things like prefix and include paths, etc. (those that are calculated or
