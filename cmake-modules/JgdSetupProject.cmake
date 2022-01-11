@@ -38,13 +38,13 @@ function(jgd_setup_project)
   jgd_check_set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
   jgd_check_set(CMAKE_OPTIMIZE_DEPENDENCIES TRUE)
 
-  # no compiler specific language extensions
+  # compiler specific language extensions
   get_property(languages GLOBAL PROPERTY ENABLED_LANGUAGES)
   foreach(lang ${languages})
     jgd_check_set(CMAKE_${lang}_EXTENSIONS FALSE)
   endforeach()
 
-  # hidden export visibility for shared & module libraries
+  # export visibility for shared & module libraries
   jgd_check_set(CMAKE_VISIBILITY_INLINES_HIDDEN TRUE)
   foreach(lang ${languages})
     jgd_check_set(CMAKE_${lang}_VISIBILITY_PRESET hidden)
