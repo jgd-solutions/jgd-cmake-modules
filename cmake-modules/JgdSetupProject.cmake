@@ -2,13 +2,12 @@ include_guard()
 
 include(JgdCheckSet)
 include(JgdParseArguments)
-include(JgdValidateArguments)
 include(CheckIPOSupported)
 include(GNUInstallDirs)
 
 function(jgd_setup_project)
-  jgd_parse_arguments(ONE_VALUE_KEYWORDS "PREFIX_NAME" ARGUMENTS "${ARGN}")
-  jgd_validate_arguments(KEYWORDS "OPTION_PREFIX")
+  jgd_parse_arguments(ONE_VALUE_KEYWORDS "PREFIX_NAME" REQUIRES_ALL
+                      "PREFIX_NAME" ARGUMENTS "${ARGN}")
 
   set(prefix_temp)
   string(TOUPPER ${PROJECT_NAME} prefix_temp)

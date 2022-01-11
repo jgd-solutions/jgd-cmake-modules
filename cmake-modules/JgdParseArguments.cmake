@@ -1,7 +1,6 @@
 include_guard()
 
 include(CMakeParseArguments)
-include(JgdValidateArguments)
 
 #
 # A wrapper around cmake_parse_arguments that provides a consistent prefix,

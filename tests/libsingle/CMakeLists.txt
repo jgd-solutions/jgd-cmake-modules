@@ -5,6 +5,8 @@ if(BUILD_DOCS)
   find_package(Doxygen REQUIRED COMPONENTS doxygen)
 endif()
 
-include(JgdSetupDefaultProject)
-jgd_setup_default_project(WITH_TESTS WITH_DOCS CONFIGURE_CONFIG_HEADER
-                          ADD_SUBDIRECTORIES)
+include(JgdSetupProject)
+include(JgdClangFormat)
+jgd_setup_project(WITH_TESTS WITH_DOCS CONFIGURE_CONFIG_HEADER
+                  ADD_SUBDIRECTORIES)
+jgd_create_clang_format_targets()
