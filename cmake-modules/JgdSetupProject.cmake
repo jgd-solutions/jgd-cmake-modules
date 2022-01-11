@@ -6,8 +6,7 @@ include(CheckIPOSupported)
 include(GNUInstallDirs)
 
 function(jgd_setup_project)
-  jgd_parse_arguments(ONE_VALUE_KEYWORDS "PREFIX_NAME" REQUIRES_ALL
-                      "PREFIX_NAME" ARGUMENTS "${ARGN}")
+  jgd_parse_arguments(ARGUMENTS "${ARGN}")
 
   set(prefix_temp)
   string(TOUPPER ${PROJECT_NAME} prefix_temp)
@@ -39,9 +38,14 @@ function(jgd_setup_project)
   jgd_check_set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
   jgd_check_set(CMAKE_OPTIMIZE_DEPENDENCIES TRUE)
 
+  # no compiler specific language extensions
+  get_property(languages GLOBAL PROPERTY ENABLED_LANGUAGES)
+  foreach(lang ${languages})
+    jgd_check_set(CMAKE_${lang}_EXTENSIONS FALSE)
+  endforeach()
+
   # hidden export visibility for shared & module libraries
   jgd_check_set(CMAKE_VISIBILITY_INLINES_HIDDEN TRUE)
-  get_property(languages GLOBAL PROPERTY ENABLED_LANGUAGES)
   foreach(lang ${languages})
     jgd_check_set(CMAKE_${lang}_VISIBILITY_PRESET hidden)
   endforeach()
@@ -51,7 +55,7 @@ function(jgd_setup_project)
     file(RELATIVE_PATH rel_path
          ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}
          ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR})
-    set(CMAKE_INSTALL_RPATH $ORIGIN $ORIGIN/${rel_path})
+    jgd_check_set(CMAKE_INSTALL_RPATH $ORIGIN $ORIGIN/${rel_path})
   endif()
 
   # interprocedural/link-time optimization
