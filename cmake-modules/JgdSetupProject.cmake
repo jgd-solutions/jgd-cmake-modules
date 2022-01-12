@@ -62,6 +62,18 @@ function(jgd_setup_project)
         "In-source builds not allowed. Please make and use a build directory.")
   endif()
 
+  # malformed project name
+  set(project_name_regex "^[a-z-]$")
+  string(REGEX MATCH "${project_name_regex}" name_correct "${PROJECT_NAME}")
+  if(NOT name_correct)
+    message(
+      FATAL_ERROR
+        "The project ${PROJECT_NAME} does not meet the required regex "
+        "${project_name_regex}. This should be the same name as the project's "
+        "root directory, and is required because it influences things like "
+        "target names and artifact output names.")
+  endif()
+
   # no project version specified
   if(NOT DEFINED PROJECT_VERSION)
     message(
@@ -135,11 +147,16 @@ function(jgd_setup_project)
   endforeach()
 
   # default transitive runtime search path (RPATH) for shared libraries
-  if(NOT CMAKE_SYSTEM_NAME MATCHES "Apple|Windows")
+  if(NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    if(CMAKE_SYSTEM_NAME STREQUAL "Apple")
+      set(rpath_base @loader_path)
+    else()
+      set(rpath_base $ORIGIN)
+    endif()
     file(RELATIVE_PATH rel_path
          ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}
          ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR})
-    _jgd_warn_set(CMAKE_INSTALL_RPATH $ORIGIN $ORIGIN/"${rel_path}")
+    _jgd_warn_set(CMAKE_INSTALL_RPATH ${rpath_base} ${rpath_base}/${rel_path})
   endif()
 
   # interprocedural/link-time optimization
