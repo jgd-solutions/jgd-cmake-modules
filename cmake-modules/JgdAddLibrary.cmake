@@ -10,6 +10,13 @@ function(jgd_add_default_library)
   # generate_export_header(${library} PREFIX_NAME ${JGD_PROJECT_PREFIX_NAME}
   # EXPORT_FILE_NAME .)
 
+  # warn about component name
+
+  add_library(${PROJECT_NAME}_${library}) # to avoid clashes with other targets
+                                          # if added as a subdirectory
+  add_library(${PROJECT_NAME}::${library} ALIAS ${library})
+  set_target_properties(MyProj_Algo PROPERTIES EXPORT_NAME ${library})
+
   if(PROJECT_VERSION)
     set_target_properties(
       ${library} PROPERTIES VERSION ${PROJECT_VERSION} SOVERSION

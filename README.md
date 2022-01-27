@@ -21,8 +21,13 @@ These are wrong. They leak information between projects and provide no configura
 
 ## Components
 
-Components are merely subsets of a project. By default, there is a parent component of the same name as the project that represents the entire project, including any sub-components that may exist.
-With the exception of the parent component, each component provides either a single library or single executable.
+Components are merely subsets of a project. In the vast majority of cases, these components represent libraries (one
+library per component) but may rarely represent an executable. For example, if a project produces multiple executables
+that are used together, such as a CLI and a daemon, these may be offered as components. By default, every project has
+a parent component of the same name as the project that represents the entire project, and links to any
+library components that may exist. Executable components are excluded, as executables simply aren't consumed together.
+The parent component can be used to link against every library offered by the project - something that doesn't
+make sense for
 
 ## Notes
 
@@ -32,17 +37,15 @@ Shouldn't be done but will try to support it.
 
 ## TODO
 
-- maybe check set is a recipe for disaster in subdirectories
 - default compile options
-- parse and validate in one call, makes no sense to require another call that only works in that spot
 - set(CMAKE_INSTALL_DOCDIR ${CMAKE_INSTALL_DATAROOTDIR}/doc/${PROJECT_NAME}) on each include of gnu install dirs
+
 - for things like prefix and include paths, etc. (those that are calculated or
   change per target) should these be passed down through variables or with functions?
+
 - how the f do we select lib types and how do the install components change those
 - look into iinstall components
-- generate export header per target
-- specify soversion and version on library targets
-- install targets providing runtime destination, library destination, archive destination
+- generate export header per library target
 - configuration headers
 - support usage as subproject
 - PIC
@@ -54,3 +57,5 @@ Shouldn't be done but will try to support it.
 
 - verify CMAKE_SYSTEM_NAME w/ linux clang
   GOOD
+
+- each executable has a private library
