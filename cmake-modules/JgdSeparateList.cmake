@@ -1,7 +1,6 @@
 include_guard()
 
 include(JgdParseArguments)
-include(JgdValidateArguments)
 
 #
 # Separates the IN_LIST into two groups: OUT_MATCHED, if the element matches the
@@ -28,10 +27,16 @@ include(JgdValidateArguments)
 #
 function(jgd_separate_list)
   jgd_parse_arguments(
-    ONE_VALUE_KEYWORDS "REGEX;OUT_MATCHED;OUT_UNMATCHED;TRANSFORM"
-    MULTI_VALUE_KEYWORDS "IN_LIST" ARGUMENTS "${ARGN}")
-  jgd_validate_arguments(KEYWORDS "REGEX;IN_LIST" ONE_OF_KEYWORDS
-                         "OUT_MATCHED;OUT_UNMATCHED")
+    ONE_VALUE_KEYWORDS
+    "REGEX;OUT_MATCHED;OUT_UNMATCHED;TRANSFORM"
+    MULTI_VALUE_KEYWORDS
+    "IN_LIST"
+    REQUIRES_ALL
+    "REGEX;IN_LIST"
+    REQUIRES_ANY
+    "OUT_MATCHED;OUT_UNMATCHED"
+    ARGUMENTS
+    "${ARGN}")
 
   set(supported_transforms "FILENAME")
   if(ARGS_TRANSFORM AND NOT "${ARGS_TRANSFORM}" MATCHES
