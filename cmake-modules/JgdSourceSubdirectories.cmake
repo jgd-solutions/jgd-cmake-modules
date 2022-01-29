@@ -55,7 +55,8 @@ endmacro()
 #
 # ADD_SUBDIRS: one-value arg; when defined, will cause the function to add the
 # source subdirectories as project subdirectories with CMake's
-# add_subdirectory() command.
+# add_subdirectory() command, in addition to adding them to the variable
+# specified by OUT_VAR.
 #
 # OUT_VAR: one-value arg; the name of the list that will contain the added
 # subdirectories. This list will be populated regardless of if the ADD_SUBDIRS
@@ -69,16 +70,10 @@ function(jgd_source_subdirectories)
     "OUT_VAR"
     MULTI_VALUE_KEYWORDS
     "LIB_COMPONENTS"
+    REQUIRES_ANY
+    "ADD_SUBDIRS;OUT_VAR"
     ARGUMENTS
     "${ARGN}")
-
-  # more argument validation
-  if(NOT ARGS_ADD_SUBDIRS AND NOT ARGS_OUT_VAR)
-    message(
-      FATAL_ERROR
-        "${CMAKE_CURRENT_FUNCTION} was called without OUT_VAR and without "
-        "ADD_SUBDIRS set, rendering the function useless.")
-  endif()
 
   # Setup
   set(subdirs_added)

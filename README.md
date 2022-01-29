@@ -38,7 +38,7 @@ Shouldn't be done but will try to support it.
 ## TODO
 
 - default compile options
-- set(CMAKE_INSTALL_DOCDIR ${CMAKE_INSTALL_DATAROOTDIR}/doc/${PROJECT_NAME}) on each include of gnu install dirs
+- set(CMAKE_INSTALL_DOCDIR \${CMAKE_INSTALL_DATAROOTDIR}/doc/\${PROJECT_NAME}) on each include of gnu install dirs
 
 - for things like prefix and include paths, etc. (those that are calculated or
   change per target) should these be passed down through variables or with functions?
