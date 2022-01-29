@@ -130,7 +130,14 @@ function(jgd_add_library)
   endif()
 
   # Export header
-  generate_export_header(${target_name} PREFIX_NAME ${JGD_PROJECT_PREFIX_NAME}
-                         BASE_NAME ${export_name})
+  string(REPLACE "-" "_" export_file_name "${export_name}_export.hpp")
+  generate_export_header(
+    ${target_name}
+    PREFIX_NAME
+    ${JGD_PROJECT_PREFIX_NAME}
+    BASE_NAME
+    ${export_name}
+    EXPORT_FILE_NAME
+    ${export_file_name})
 
 endfunction()

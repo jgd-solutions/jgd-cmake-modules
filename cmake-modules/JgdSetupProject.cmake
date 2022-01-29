@@ -95,9 +95,7 @@ function(jgd_setup_project)
     string(TOUPPER ${PROJECT_NAME} prefix_temp)
     string(REPLACE "-" "_" ${prefix_temp} project_prefix_name)
   endif()
-  set(JGD_PROJECT_PREFIX_NAME
-      "${project_prefix_name}"
-      CACHE INTERNAL "")
+  set(JGD_PROJECT_PREFIX_NAME "${project_prefix_name}")
 
   # == Variables Setting Default Target Properties ==
 
