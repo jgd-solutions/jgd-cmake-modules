@@ -63,7 +63,7 @@ function(jgd_setup_project)
   endif()
 
   # malformed project name
-  set(project_name_regex "^[a-z-]$")
+  set(project_name_regex "^[a-z][a-z-]*[a-z]$")
   string(REGEX MATCH "${project_name_regex}" name_correct "${PROJECT_NAME}")
   if(NOT name_correct)
     message(
@@ -189,5 +189,6 @@ function(jgd_setup_project)
                   "Base installation location." FORCE)
   endif()
 
+  # enable testing even if there are no tests, so ctest won't fail
   enable_testing()
 endfunction()

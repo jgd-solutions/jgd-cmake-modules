@@ -4,10 +4,16 @@ include(JgdParseArguments)
 include(JgdFileNaming)
 include(JgdTargetNaming)
 include(JgdSeparateList)
+include(JgdCanonicalStructure)
 include(JgdDefaultCompileOptions)
 include(GenerateExportHeader)
 
-# create build_shared option for component, if it's a component
+define_property(
+  TARGET
+  PROPERTY COMPONENT
+  BRIEF_DOCS "Component name."
+  FULL_DOCS
+    "The name of a library or executable component that the target represents.")
 
 function(jgd_add_library)
   jgd_parse_arguments(
@@ -20,8 +26,25 @@ function(jgd_add_library)
     ARGUMENTS
     "${ARGN}")
 
+  # Set library component
   if(ARGS_COMPONENT AND NOT ARGS_COMPONENT STREQUAL PROJECT_NAME)
     set(comp_arg COMPONENT ${ARGS_COMPONENT})
+    set_property(TARGET PROPERTY COMPONENT ${ARGS_COMPONENT})
+  endif()
+
+  # Ensure library is created in the appropriate canonical directory
+  if(DEFINED comp_arg)
+    jgd_canonical_lib_component_subdir(COMPONENT ${ARGS_COMPONENT} OUT_VAR
+                                       canonical_dir)
+    set(comp_err_msg "component (${ARGS_COMPONENT}) ")
+  else()
+    jgd_canonical_lib_subdir(OUT_VAR canonical_dir)
+  endif()
+  if(NOT CMAKE_CURRENT_SOURCE_DIR STREQUAL canonical_dir)
+    message(
+      FATAL_ERROR
+        "Creating a ${comp_err_msg}library for project ${PROJECT_NAME} must be "
+        "done in the canonical directory ${canonical_dir}.")
   endif()
 
   # Verify source naming
@@ -106,15 +129,8 @@ function(jgd_add_library)
                                 SOVERSION ${PROJECT_VERSION_MAJOR})
   endif()
 
-  # generate_export_header(${library} PREFIX_NAME ${JGD_PROJECT_PREFIX_NAME}
-  # EXPORT_FILE_NAME .)
-
-  # compile flags? include dirs?
-  target_compile_options(${target_name})
+  # Export header
+  generate_export_header(${target_name} PREFIX_NAME ${JGD_PROJECT_PREFIX_NAME}
+                         BASE_NAME ${export_name})
 
 endfunction()
-
-# PREFIX_BUILD_SHARED <-BUILD_SHARED_LIBS # create only if type isn't provided,
-# default to BUILD_SHARED_LIBS PREFIX_COMPONENT_BUILD_SHARED <-
-# PREFIX_BUILD_SHARED # create only if type isn't provided and component is
-# provided
