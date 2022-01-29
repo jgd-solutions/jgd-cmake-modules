@@ -31,7 +31,7 @@ macro(_jgd_check_set variable value)
   endif()
 endmacro()
 
-# JGD_PROJECT_PREFIX_NAME guards against basic project issues sets a bunch of
+# JGD_PROJECT_PREFIX_NAME, guards against basic project issues sets a bunch of
 # CMAKE_ variables to set default target properties & configure cmake operation
 # enables testing so it's never forgotten, even if there's no tests, it can
 # still be run
