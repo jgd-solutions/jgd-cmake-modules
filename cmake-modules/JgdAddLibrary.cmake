@@ -102,9 +102,14 @@ function(jgd_add_library)
     set(export_name ${library})
     set(output_name ${library})
   else()
-    jgd_library_target_name(${comp_arg} OUT_VAR target_name)
-    string(REPLACE "${PROJECT_NAME}_" "" export_name "${library}")
-    string(REGEX REPLACE "^${JGD_LIB_PREFIX}" "" output_name "${export_name}")
+    jgd_library_naming(
+      ${comp_arg}
+      OUT_TARGET_NAME
+      target_name
+      OUT_EXPORT_NAME
+      export_name
+      OUT_OUTPUT_NAME
+      output_name)
   endif()
 
   # Create library target
