@@ -1,0 +1,87 @@
+include_guard()
+
+include(JgdParseArguments)
+include(JgdFileNaming)
+include(JgdTargetNaming)
+include(JgdSeparateList)
+include(JgdCanonicalStructure)
+include(JgdDefaultCompileOptions)
+
+function(jgd_add_library)
+  jgd_parse_arguments(
+    OPTIONS
+    ONE_VALUE_KEYWORDS
+    "COMPONENT;EXECUTABLE"
+    MULTI_VALUE_KEYWORDS
+    "SOURCES"
+    REQUIRES_ALL
+    "SOURCES"
+    ARGUMENTS
+    "${ARGN}")
+
+  # Set executable component
+  if(DEFINED ARGS_COMPONENT AND NOT ARGS_COMPONENT STREQUAL PROJECT_NAME)
+    set(comp_arg COMPONENT ${ARGS_COMPONENT})
+  endif()
+
+  # == Usage Guards ==
+
+  # ensure executable is created in the appropriate canonical directory
+  jgd_canonical_exec_subdir(OUT_VAR canonical_dir)
+  if(NOT CMAKE_CURRENT_SOURCE_DIR STREQUAL canonical_dir)
+    message(
+      FATAL_ERROR "Creating an executable for project ${PROJECT_NAME} must be "
+                  "done in the canonical directory ${canonical_dir}.")
+  endif()
+
+  # verify source naming
+  set(regex "${JGD_HEADER_REGEX}|${JGD_SOURCE_REGEX}")
+  jgd_separate_list(IN_LIST "${ARGS_SOURCES}" TRANSFORM "FILENAME"
+                    OUT_UNMATCHED incorrectly_named)
+  if(incorrectly_named)
+    message(
+      FATAL_ERROR
+        "Provided source files do not match the regex for executable sources, "
+        "${regex}: ${incorrectly_named}.")
+  endif()
+
+  # == Library Configuration ==
+
+  # resolve executable names
+  if(DEFINED ARGS_EXECUTABLE)
+    set(target_name ${ARGS_EXECUTABLE})
+    set(export_name ${ARGS_EXECUTABLE})
+    set(output_name ${ARGS_EXECUTABLE})
+  else()
+    jgd_executable_naming(
+      ${comp_arg}
+      OUT_TARGET_NAME
+      target_name
+      OUT_EXPORT_NAME
+      export_name
+      OUT_OUTPUT_NAME
+      output_name)
+  endif()
+
+  # == Create Library Target ==
+
+  add_executable(${target_name} "${ARGS_SOURCES}")
+
+  # == Set Target Properties ==
+
+  # resolve include directories
+  jgd_canonical_include_dirs(TARGET ${target_name} OUT_VAR include_dirs)
+
+  # basic properties
+  set_target_properties(
+    ${target_name}
+    PROPERTIES OUTPUT_NAME ${output_name}
+               EXPORT_NAME ${export_name}
+               COMPILE_OPTIONS ${JGD_DEFAULT_COMPILE_OPTIONS}
+               INCLUDE_DIRECTORIES ${include_dirs})
+
+  # custom component property
+  if(DEFINED comp_arg)
+    set_target_properties(${target_name} PROPERTIES COMPONENT ${ARGS_COMPONENT})
+  endif()
+endfunction()

@@ -100,9 +100,9 @@ function(jgd_add_library)
 
   # resolve library names
   if(DEFINED ARGS_LIBRARY)
-    set(target_name "${ARGS_LIBRARY}")
-    set(export_name ${library})
-    set(output_name ${library})
+    set(target_name ${ARGS_LIBRARY})
+    set(export_name ${ARGS_LIBRARY})
+    set(output_name ${ARGS_LIBRARY})
   else()
     jgd_library_naming(
       ${comp_arg}
@@ -113,17 +113,6 @@ function(jgd_add_library)
       OUT_OUTPUT_NAME
       output_name)
   endif()
-
-  # Resolve include directories
-
-  # source include dir: up project and component name (canonical layout)
-  cmake_path(GET CMAKE_CURRENT_SOURCE_DIR PARENT_PATH include_dirs)
-  if(DEFINED comp_arg)
-    cmake_path(GET include_dirs PARENT_PATH include_dirs)
-  endif()
-
-  # append PROJECT_BINARY_DIR - root for generated headers
-  list(APPEND include_dirs "${PROJECT_BINARY_DIR}")
 
   # == Create Library Target ==
 
@@ -138,6 +127,9 @@ function(jgd_add_library)
   add_library(${PROJECT_NAME}::${export_name} ALIAS ${target_name})
 
   # == Set Target Properties ==
+
+  # resolve include directories
+  jgd_canonical_include_dirs(TARGET ${target_name} OUT_VAR include_dirs)
 
   # common properties. Some may be ignored by certain targets
   set_target_properties(

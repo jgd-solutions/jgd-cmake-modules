@@ -4,6 +4,13 @@ include(JgdParseArguments)
 include(CheckIPOSupported)
 include(GNUInstallDirs)
 
+define_property(
+  TARGET
+  PROPERTY COMPONENT
+  BRIEF_DOCS "Component name."
+  FULL_DOCS
+    "The name of a library or executable component that the target represents.")
+
 macro(_jgd_warn_set variable value)
   # can only enforce the guard if we're sure that it was set by this CMake
   # project. If this project was absorbed into the build of another project, by
