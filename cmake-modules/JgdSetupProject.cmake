@@ -89,7 +89,7 @@ function(jgd_setup_project)
   jgd_parse_arguments(ONE_VALUE_KEYWORDS "PREFIX_NAME" ARGUMENTS "${ARGN}")
 
   # project prefix name
-  if(ARGS_PREFIX_NAME)
+  if(DEFINED ARGS_PREFIX_NAME)
     set(project_prefix_name ${ARGS_PREFIX_NAME})
   else()
     string(TOUPPER ${PROJECT_NAME} prefix_temp)

@@ -27,7 +27,7 @@ function(jgd_add_library)
     "${ARGN}")
 
   # Set library component
-  if(ARGS_COMPONENT AND NOT ARGS_COMPONENT STREQUAL PROJECT_NAME)
+  if(DEFINED ARGS_COMPONENT AND NOT ARGS_COMPONENT STREQUAL PROJECT_NAME)
     set(comp_arg COMPONENT ${ARGS_COMPONENT})
     set_property(TARGET PROPERTY COMPONENT ${ARGS_COMPONENT})
   endif()
@@ -60,7 +60,7 @@ function(jgd_add_library)
 
   # Override library type with TYPE, if provided and supported
   set(lib_type "")
-  if(ARGS_TYPE)
+  if(DEFINED ARGS_TYPE)
     set(supported_types STATIC SHARED MODULE OBJECT INTERFACE)
     list(FIND supported_types "${ARGS_TYPE}" supported)
     if(supported EQUAL -1)
@@ -97,7 +97,7 @@ function(jgd_add_library)
   endif()
 
   # Library names
-  if(ARGS_LIBRARY)
+  if(DEFINED ARGS_LIBRARY)
     set(target_name "${ARGS_LIBRARY}")
     set(export_name ${library})
     set(output_name ${library})

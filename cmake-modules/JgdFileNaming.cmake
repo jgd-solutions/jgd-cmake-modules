@@ -45,7 +45,7 @@ macro(_JGD_KEBAB_FILE_NAME)
                       REQUIRES_ALL "SUFFIX;OUT_VAR" ARGUMENTS "${ARGN}")
   # project name
   set(project "${PROJECT_NAME}")
-  if(ARGS_PROJECT)
+  if(DEFINED ARGS_PROJECT)
     set(project "${ARGS_PROJECT}")
   endif()
 
@@ -87,12 +87,12 @@ function(jgd_pkg_config_file_name)
   jgd_parse_arguments(ONE_VALUE_KEYWORDS "COMPONENT;PROJECT;OUT_VAR"
                       REQUIRES_ALL "OUT_VAR" ARGUMENTS "${ARGN}")
   set(proj_keyword "")
-  if(ARGS_PROJECT)
+  if(DEFINED ARGS_PROJECT)
     set(proj_keyword "PROJECT")
   endif()
 
   set(component_arg)
-  if(ARGS_COMPONENT)
+  if(DEFINED ARGS_COMPONENT)
     set(component_arg COMPONENT ${ARGS_COMPONENT})
   endif()
 
@@ -130,12 +130,12 @@ function(jgd_pkg_config_in_file_name)
   jgd_parse_arguments(ONE_VALUE_KEYWORDS "COMPONENT;PROJECT;OUT_VAR"
                       REQUIRES_ALL "OUT_VAR" ARGUMENTS "${ARGN}")
   set(proj_keyword "")
-  if(ARGS_PROJECT)
+  if(DEFINED ARGS_PROJECT)
     set(proj_keyword "PROJECT")
   endif()
 
   set(component_arg)
-  if(ARGS_COMPONENT)
+  if(DEFINED ARGS_COMPONENT)
     set(component_arg COMPONENT ${ARGS_COMPONENT})
   endif()
 
@@ -166,7 +166,7 @@ function(jgd_pkg_version_file_name)
   jgd_parse_arguments(ONE_VALUE_KEYWORDS "PROJECT;OUT_VAR" REQUIRES_ALL
                       "OUT_VAR" ARGUMENTS "${ARGN}")
   set(proj_keyword "")
-  if(ARGS_PROJECT)
+  if(DEFINED ARGS_PROJECT)
     set(proj_keyword "PROJECT")
   endif()
 
@@ -197,12 +197,12 @@ function(jgd_pkg_targets_file_name)
   jgd_parse_arguments(ONE_VALUE_KEYWORDS "COMPONENT;PROJECT;OUT_VAR"
                       REQUIRES_ALL "OUT_VAR" ARGUMENTS "${ARGN}")
   set(proj_keyword "")
-  if(ARGS_PROJECT)
+  if(DEFINED ARGS_PROJECT)
     set(proj_keyword "PROJECT")
   endif()
 
   set(component_arg)
-  if(ARGS_COMPONENT)
+  if(DEFINED ARGS_COMPONENT)
     set(component_arg COMPONENT ${ARGS_COMPONENT})
   endif()
 
@@ -234,7 +234,7 @@ function(jgd_config_header_file_name)
   jgd_parse_arguments(ONE_VALUE_KEYWORDS "PROJECT;OUT_VAR" REQUIRES_ALL
                       "OUT_VAR" ARGUMENTS "${ARGN}")
   set(project "${PROJECT_NAME}")
-  if(ARGS_PROJECT)
+  if(DEFINED ARGS_PROJECT)
     set(project "${ARGS_PROJECT}")
   endif()
 
@@ -262,7 +262,7 @@ function(jgd_config_header_in_file_name)
   jgd_parse_arguments(ONE_VALUE_KEYWORDS "PROJECT;OUT_VAR" REQUIRES_ALL
                       "OUT_VAR" ARGUMENTS "${ARGN}")
   set(proj_keyword "")
-  if(ARGS_PROJECT)
+  if(DEFINED ARGS_PROJECT)
     set(proj_keyword "PROJECT")
   endif()
 

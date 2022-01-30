@@ -39,8 +39,8 @@ function(jgd_separate_list)
     "${ARGN}")
 
   set(supported_transforms "FILENAME")
-  if(ARGS_TRANSFORM AND NOT "${ARGS_TRANSFORM}" MATCHES
-                        "${supported_transforms}")
+  if(DEFINED ARGS_TRANSFORM AND NOT "${ARGS_TRANSFORM}" MATCHES
+                                "${supported_transforms}")
     message(FATAL_ERROR "The TRANSFORM of ${ARGS_TRANSFORM} is not supported. "
                         "It must be one of ${supported_transforms}.")
   endif()

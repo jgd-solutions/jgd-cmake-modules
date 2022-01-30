@@ -30,7 +30,7 @@ macro(_JGD_CHECK_ADD_SUBDIR)
 
   if(IS_DIRECTORY "${ARGS_SUBDIR}")
     list(APPEND subdirs_added "${ARGS_SUBDIR}")
-    if(ARGS_ADD_SUBDIRS)
+    if(DEFINED ARGS_ADD_SUBDIRS)
       message(DEBUG "${CMAKE_CURRENT_FUNCTION}: Adding directory "
               "${ARGS_SUBDIR} to project ${PROJECT_NAME}")
       add_subdirectory("${ARGS_SUBDIR}")
@@ -119,7 +119,7 @@ function(jgd_source_subdirectories)
   endif()
 
   # Set result variable
-  if(ARGS_OUT_VAR)
+  if(DEFINED ARGS_OUT_VAR)
     set(${ARGS_OUT_VAR}
         "${subdirs_added}"
         PARENT_SCOPE)

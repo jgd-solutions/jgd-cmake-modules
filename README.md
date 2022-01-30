@@ -37,7 +37,6 @@ Shouldn't be done but will try to support it.
 
 ## TODO
 
-- default compile options
 - set(CMAKE_INSTALL_DOCDIR \${CMAKE_INSTALL_DATAROOTDIR}/doc/\${PROJECT_NAME}) on each include of gnu install dirs
 
 - for things like prefix and include paths, etc. (those that are calculated or
@@ -45,10 +44,8 @@ Shouldn't be done but will try to support it.
 
 - how the f do we select lib types and how do the install components change those
 - look into iinstall components
-- generate export header per library target
 - configuration headers
 - support usage as subproject
-- PIC
 - include directories
 - tests
 
