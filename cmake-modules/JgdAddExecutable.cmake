@@ -7,15 +7,15 @@ include(JgdSeparateList)
 include(JgdCanonicalStructure)
 include(JgdDefaultCompileOptions)
 
-function(jgd_add_library)
+# again, artifacts
+function(jgd_add_executable)
   jgd_parse_arguments(
-    OPTIONS
     ONE_VALUE_KEYWORDS
     "COMPONENT;EXECUTABLE"
     MULTI_VALUE_KEYWORDS
-    "SOURCES"
+    "SOURCES;MAIN_SOURCES"
     REQUIRES_ALL
-    "SOURCES"
+    "MAIN_SOURCES"
     ARGUMENTS
     "${ARGN}")
 
@@ -36,8 +36,15 @@ function(jgd_add_library)
 
   # verify source naming
   set(regex "${JGD_HEADER_REGEX}|${JGD_SOURCE_REGEX}")
-  jgd_separate_list(IN_LIST "${ARGS_SOURCES}" TRANSFORM "FILENAME"
-                    OUT_UNMATCHED incorrectly_named)
+  jgd_separate_list(
+    IN_LIST
+    "${ARGS_SOURCES};${ARGS_MAIN_SOURCES}"
+    REGEX
+    "${regex}"
+    TRANSFORM
+    "FILENAME"
+    OUT_UNMATCHED
+    incorrectly_named)
   if(incorrectly_named)
     message(
       FATAL_ERROR
@@ -45,7 +52,7 @@ function(jgd_add_library)
         "${regex}: ${incorrectly_named}.")
   endif()
 
-  # == Library Configuration ==
+  # == Create Executable ==
 
   # resolve executable names
   if(DEFINED ARGS_EXECUTABLE)
@@ -63,14 +70,25 @@ function(jgd_add_library)
       output_name)
   endif()
 
-  # == Create Library Target ==
-
-  add_executable(${target_name} "${ARGS_SOURCES}")
-
-  # == Set Target Properties ==
-
   # resolve include directories
   jgd_canonical_include_dirs(TARGET ${target_name} OUT_VAR include_dirs)
+
+  # create library of executable's sources, allowing unit testing
+  add_library(${target_name}-object-lib OBJECT "${ARGS_SOURCES}")
+  set_target_properties(
+    ${target_name}-object-lib
+    PROPERTIES COMPILE_OPTIONS ${JGD_DEFAULT_COMPILE_OPTIONS}
+               INCLUDE_DIRECTORIES "${include_dirs}"
+               INTERFACE_INCLUDE_DIRECTORIES
+               "$<BUILD_INTERFACE:${include_dirs}>")
+
+  # create target
+  add_executable(${target_name} "${ARGS_MAIN_SOURCES}")
+
+  # alias with exported name for same name within source tree (test exec)
+  add_library(${PROJECT_NAME}::${export_name} ALIAS ${target_name})
+
+  # == Set Target Properties ==
 
   # basic properties
   set_target_properties(
@@ -78,7 +96,7 @@ function(jgd_add_library)
     PROPERTIES OUTPUT_NAME ${output_name}
                EXPORT_NAME ${export_name}
                COMPILE_OPTIONS ${JGD_DEFAULT_COMPILE_OPTIONS}
-               INCLUDE_DIRECTORIES ${include_dirs})
+               LINK_LIBRARIES ${target_name}-object-lib)
 
   # custom component property
   if(DEFINED comp_arg)
