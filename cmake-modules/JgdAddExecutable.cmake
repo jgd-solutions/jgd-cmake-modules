@@ -22,6 +22,7 @@ function(jgd_add_executable)
   # Set executable component
   if(DEFINED ARGS_COMPONENT AND NOT ARGS_COMPONENT STREQUAL PROJECT_NAME)
     set(comp_arg COMPONENT ${ARGS_COMPONENT})
+    set(comp_err_msg "n component (${ARGS_COMPONENT})")
   endif()
 
   # == Usage Guards ==
@@ -30,8 +31,9 @@ function(jgd_add_executable)
   jgd_canonical_exec_subdir(OUT_VAR canonical_dir)
   if(NOT CMAKE_CURRENT_SOURCE_DIR STREQUAL canonical_dir)
     message(
-      FATAL_ERROR "Creating an executable for project ${PROJECT_NAME} must be "
-                  "done in the canonical directory ${canonical_dir}.")
+      FATAL_ERROR
+        "Creating a${comp_err_msg} executable for project ${PROJECT_NAME} must "
+        "be done in the canonical directory ${canonical_dir}.")
   endif()
 
   # verify source naming
@@ -100,6 +102,6 @@ function(jgd_add_executable)
 
   # custom component property
   if(DEFINED comp_arg)
-    set_target_properties(${target_name} PROPERTIES COMPONENT ${ARGS_COMPONENT})
+    set_target_properties(${target_name} PROPERTIES ${comp_arg})
   endif()
 endfunction()

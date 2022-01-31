@@ -132,7 +132,6 @@ function(jgd_add_library)
 
   # == Set Target Properties ==
 
-  # resolve include directories
   jgd_canonical_include_dirs(TARGET ${target_name} OUT_VAR include_dirs)
 
   # common properties. Some may be ignored by certain targets
@@ -142,7 +141,7 @@ function(jgd_add_library)
                PREFIX ${JGD_LIB_PREFIX}
                EXPORT_NAME ${export_name}
                COMPILE_OPTIONS ${JGD_DEFAULT_COMPILE_OPTIONS}
-               INCLUDE_DIRECTORIES ${include_dirs}
+               INCLUDE_DIRECTORIES "${include_dirs}"
                INTERFACE_INCLUDE_DIRECTORIES
                "$<BUILD_INTERFACE:${include_dirs}>")
 
