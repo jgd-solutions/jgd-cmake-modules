@@ -26,7 +26,7 @@ class CMakeModulesRecipe(ConanFile):
     def export_sources(self):
         print("Exporting Sources")
         self.copy("CMakeLists.txt")
-        self.copy("{}/*".format(self.name))
+        self.copy("f{self.name}/*")
         self.copy("tests/*")
         self.copy("cmake/*")
 
@@ -57,9 +57,9 @@ class CMakeModulesRecipe(ConanFile):
         self.info.header_only()
 
     def package_info(self):
-        cmake_install_dest = path.join("share", "cmake", "{}".format(self.name))
+        cmake_install_dest = path.join("share", "cmake", "f{self.name}")
         pkg_configuration_file = path.join(
-            cmake_install_dest, "{}-config.cmake".format(self.name)
+            cmake_install_dest, "f{self.name}-config.cmake"
         )
         build_modules = [pkg_configuration_file]
 
