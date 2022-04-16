@@ -86,15 +86,14 @@ endmacro()
 #
 # Constructs a consistent kebab-case package configuration file name based on
 # the PROJECT argument or the PROJECT_NAME variable, and the provided COMPONENT.
-# The The resulting file name will be placed in the variable specified by
-# OUT_VAR. Result will be <PROJECT_NAME>-[COMPONENT-]config.cmake. Ex 1.
+# The resulting file name will be placed in the variable specified by OUT_VAR.
+# Result will be <PROJECT_NAME>-[COMPONENT-]config.cmake. Ex 1.
 # proj-config.cmake Ex 2. proj-comp-config.cmake.
 #
 # Arguments:
 #
 # COMPONENT: one-value arg; specifies the component that the file will describe.
-# A COMPONENT that matches PROJECT_NAME, or PROJECT, if provided, will be
-# ignored. Optional.
+# A COMPONENT that matches PROJECT_NAME or PROJECT will be ignored. Optional.
 #
 # PROJECT: on-value arg; override of PROJECT_NAME. Optional - if not provided,
 # PROJECT_NAME will be used, which is more common.
@@ -102,7 +101,7 @@ endmacro()
 # OUT_VAR: one-value arg; the name of the output variable which will store the
 # resulting file name.
 #
-function(jgd_pkg_config_file_name)
+function(jgd_pkg_configuration_file_name)
   _jgd_file_naming_arguments()
   _jgd_joined_file_name(${comp_arg} SUFFIX "config.cmake" ${proj_arg} OUT_VAR
                         "${ARGS_OUT_VAR}")

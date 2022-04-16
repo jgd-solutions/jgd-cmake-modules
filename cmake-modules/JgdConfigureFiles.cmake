@@ -5,7 +5,7 @@ include(JgdFileNaming)
 include(CMakePackageConfigHelpers)
 
 # without target -> for the project with target -> specifically for the target
-function(jgd_configure_pkg_config_file)
+function(jgd_configure_pkg_configuration_file)
   jgd_parse_arguments(ONE_VALUE_KEYWORDS "TARGET" ARGUMENTS "${ARGN}")
 
   # extract target's component property into an argument

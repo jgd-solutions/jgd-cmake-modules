@@ -18,7 +18,7 @@ set(_LAST_INSTALLED_PROJECT)
 
 # For each target, searches appropriate paths for pkg config files and sets
 # variable specified by out_var to a list of config-files to install
-function(_jgd_pkg_config_files targets out_var configure_first)
+function(_jgd_pkg_configuration_files targets out_var configure_first)
   set(install_cmake_files)
 
   # searches for file_name in standard cmake source locations
@@ -118,7 +118,7 @@ endfunction()
 function(jgd_install_config_file_pkg)
   jgd_parse_arguments(
     OPTIONS
-    "CONFIGURE_PKG_CONFIG_FILES"
+    "CONFIGURE_PKG_CONFIGURATION_FILES"
     MULTI_VALUE_KEYWORDS
     "TARGETS;CMAKE_MODULES"
     REQUIRES_ANY
@@ -157,7 +157,7 @@ function(jgd_install_config_file_pkg)
   endif()
 
   # Package config file(s)
-  _jgd_pkg_config_files("${ARGS_TARGETS}" config_pkg_files)
+  _jgd_pkg_configuration_files("${ARGS_TARGETS}" config_pkg_files)
   list(APPEND install_cmake_files "${config_pkg_files}")
 
   # Additional cmake modules
