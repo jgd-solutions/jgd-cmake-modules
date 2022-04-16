@@ -75,7 +75,7 @@ function(jgd_add_executable)
   # resolve include directories
   jgd_canonical_include_dirs(TARGET ${target_name} OUT_VAR include_dirs)
 
-  # create library of executable's sources, allowing unit testing
+  # create library of executable's objects, allowing unit testing
   add_library(${target_name}-object-lib OBJECT "${ARGS_SOURCES}")
   set_target_properties(
     ${target_name}-object-lib
@@ -86,8 +86,6 @@ function(jgd_add_executable)
 
   # create target
   add_executable(${target_name} "${ARGS_MAIN_SOURCES}")
-
-  # alias with exported name for same name within source tree (test exec)
   add_library(${PROJECT_NAME}::${export_name} ALIAS ${target_name})
 
   # == Set Target Properties ==

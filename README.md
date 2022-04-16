@@ -2,7 +2,7 @@
 
 ## Concept
 
-A set of CMake modules to easily and consistently create CMake based projects.
+A set of CMake modules to easily and consistently develop CMake based projects.
 
 ## Design
 
@@ -11,13 +11,9 @@ Each function is designed to produce reproducible results in any invocation.
 
 ## External requirements
 
-The source of external requirements are not defined in CMake.
+The provider of external requirements are not defined in CMake.
 This keeps the project agnostic to C++ package managers, system package managers, etc.
 All external requirements are to be found with find_package() and target_link_libraries()
-
-## Superprojects and subprojects
-
-These are wrong. They leak information between projects and provide no configuration granularity.
 
 ## Components
 

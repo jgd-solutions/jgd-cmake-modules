@@ -18,12 +18,11 @@ foreach(ext_var
 endforeach()
 
 #
-# Private macro to the module. Constructs a consistent kebab-case file name
-# based on the PROJECT argument or the PROJECT_NAME variable, the provided
-# COMPONENT, and SUFFIX arguments. The resulting file name will be placed in the
-# variable specified by OUT_VAR. Result will be
-# <PROJECT_NAME>-[COMPONENT-]<suffix>, where 'suffix' is the provided suffix
-# with any leading dashes removed.
+# Private macro to the module. Constructs a consistent file name based on the
+# PROJECT argument or the PROJECT_NAME variable, the provided COMPONENT, and
+# SUFFIX arguments. The resulting file name will be placed in the variable
+# specified by OUT_VAR. Result will be <PROJECT_NAME>-[COMPONENT-]<suffix>,
+# where 'suffix' is the provided suffix with any leading dashes removed.
 #
 # Arguments:
 #
@@ -40,27 +39,47 @@ endforeach()
 # OUT_VAR: one-value arg; the name of the output variable which will store the
 # resulting file name.
 #
-macro(_JGD_KEBAB_FILE_NAME)
-  jgd_parse_arguments(ONE_VALUE_KEYWORDS "COMPONENT;SUFFIX;PROJECT;OUT_VAR"
-                      REQUIRES_ALL "SUFFIX;OUT_VAR" ARGUMENTS "${ARGN}")
+macro(_JGD_JOINED_FILE_NAME)
+  jgd_parse_arguments(
+    ONE_VALUE_KEYWORDS "COMPONENT;DELIMITER;SUFFIX;PROJECT;OUT_VAR"
+    REQUIRES_ALL "SUFFIX;OUT_VAR" ARGUMENTS "${ARGN}")
   # project name
-  set(project "${PROJECT_NAME}")
   if(DEFINED ARGS_PROJECT)
-    set(project "${ARGS_PROJECT}")
+    set(project ${ARGS_PROJECT})
+  else()
+    set(projecft ${PROJECT_NAME})
   endif()
 
-  # remove leading '-' from suffix, if it was provided
-  string(REGEX REPLACE "^-" "" suffix "${ARGS_SUFFIX}")
+  if(DEFINED ARGS_DELIMITER)
+    set(delim ${ARGS_DELIMITER})
+  else()
+    set(delim "-")
+  endif()
+
+  # remove leading delimiters from suffix, if it was provided
+  string(REGEX REPLACE "^${delim}" "" suffix "${ARGS_SUFFIX}")
 
   # compose file name
   if(NOT ARGS_COMPONENT OR ("${ARGS_COMPONENT}" STREQUAL "${project}"))
     set(${ARGS_OUT_VAR}
-        "${project}-${suffix}"
+        "${project}${delim}${suffix}"
         PARENT_SCOPE)
   else()
     set(${ARGS_OUT_VAR}
-        "${project}-${ARGS_COMPONENT}-${suffix}"
+        "${project}${delim}${ARGS_COMPONENT}${delim}${suffix}"
         PARENT_SCOPE)
+  endif()
+endmacro()
+
+macro(_JGD_FILE_NAMING_ARGUMENTS)
+  jgd_parse_arguments(ONE_VALUE_KEYWORDS "COMPONENT;PROJECT;OUT_VAR"
+                      REQUIRES_ALL "OUT_VAR" ARGUMENTS "${ARGN}")
+  if(DEFINED ARGS_PROJECT)
+    set(proj_arg PROJECT ${ARGS_PROJECT})
+  endif()
+
+  if(DEFINED ARGS_COMPONENT)
+    set(comp_arg COMPONENT ${ARGS_COMPONENT})
   endif()
 endmacro()
 
@@ -84,66 +103,9 @@ endmacro()
 # resulting file name.
 #
 function(jgd_pkg_config_file_name)
-  jgd_parse_arguments(ONE_VALUE_KEYWORDS "COMPONENT;PROJECT;OUT_VAR"
-                      REQUIRES_ALL "OUT_VAR" ARGUMENTS "${ARGN}")
-  set(proj_keyword "")
-  if(DEFINED ARGS_PROJECT)
-    set(proj_keyword "PROJECT")
-  endif()
-
-  set(component_arg)
-  if(DEFINED ARGS_COMPONENT)
-    set(component_arg COMPONENT ${ARGS_COMPONENT})
-  endif()
-
-  _jgd_kebab_file_name(
-    ${component_arg}
-    SUFFIX
-    "config.cmake"
-    ${proj_keyword}
-    ${ARGS_PROJECT}
-    OUT_VAR
-    "${ARGS_OUT_VAR}")
-endfunction()
-
-#
-# Constructs a consistent kebab-case input package configuration file name based
-# on the PROJECT argument or the PROJECT_NAME variable, and the provided
-# COMPONENT. The resulting file name will be placed in the variable specified by
-# OUT_VAR. Result will be
-# <PROJECT_NAME>-[COMPONENT-]config.cmake.<JGD_IN_FILE_EXTENSION>, Ex.
-# proj-comp-config.cmake.in
-#
-# Arguments:
-#
-# COMPONENT: one-value arg; specifies the component that the file will describe.
-# A COMPONENT that matches PROJECT_NAME, or PROJECT, if provided, will be
-# ignored. Optional.
-#
-# PROJECT: on-value arg; override of PROJECT_NAME. Optional - if not provided,
-# PROJECT_NAME will be used, which is more common.
-#
-# OUT_VAR: one-value arg; the name of the output variable which will store the
-# resulting file name.
-#
-function(jgd_pkg_config_in_file_name)
-  jgd_parse_arguments(ONE_VALUE_KEYWORDS "COMPONENT;PROJECT;OUT_VAR"
-                      REQUIRES_ALL "OUT_VAR" ARGUMENTS "${ARGN}")
-  set(proj_keyword "")
-  if(DEFINED ARGS_PROJECT)
-    set(proj_keyword "PROJECT")
-  endif()
-
-  set(component_arg)
-  if(DEFINED ARGS_COMPONENT)
-    set(component_arg COMPONENT ${ARGS_COMPONENT})
-  endif()
-
-  jgd_pkg_config_file_name(${component_arg} ${proj_keyword} ${ARGS_PROJECT}
-                           OUT_VAR config_file_name)
-  set(${ARGS_OUT_VAR}
-      "${config_file_name}${JGD_IN_FILE_EXTENSION}"
-      PARENT_SCOPE)
+  _jgd_file_naming_arguments()
+  _jgd_joined_file_name(${comp_arg} SUFFIX "config.cmake" ${proj_arg} OUT_VAR
+                        "${ARGS_OUT_VAR}")
 endfunction()
 
 #
@@ -163,15 +125,9 @@ endfunction()
 # resulting file name.
 #
 function(jgd_pkg_version_file_name)
-  jgd_parse_arguments(ONE_VALUE_KEYWORDS "PROJECT;OUT_VAR" REQUIRES_ALL
-                      "OUT_VAR" ARGUMENTS "${ARGN}")
-  set(proj_keyword "")
-  if(DEFINED ARGS_PROJECT)
-    set(proj_keyword "PROJECT")
-  endif()
-
-  _jgd_kebab_file_name(SUFFIX "config-version.cmake" ${proj_keyword}
-                       ${ARGS_PROJECT} OUT_VAR "${ARGS_OUT_VAR}")
+  _jgd_file_naming_arguments()
+  _jgd_joined_file_name(SUFFIX "config-version.cmake" ${proj_arg} OUT_VAR
+                        ${ARGS_OUT_VAR})
 endfunction()
 
 #
@@ -194,26 +150,9 @@ endfunction()
 # resulting file name.
 #
 function(jgd_pkg_targets_file_name)
-  jgd_parse_arguments(ONE_VALUE_KEYWORDS "COMPONENT;PROJECT;OUT_VAR"
-                      REQUIRES_ALL "OUT_VAR" ARGUMENTS "${ARGN}")
-  set(proj_keyword "")
-  if(DEFINED ARGS_PROJECT)
-    set(proj_keyword "PROJECT")
-  endif()
-
-  set(component_arg)
-  if(DEFINED ARGS_COMPONENT)
-    set(component_arg COMPONENT ${ARGS_COMPONENT})
-  endif()
-
-  _jgd_kebab_file_name(
-    ${component_arg}
-    SUFFIX
-    "targets.cmake"
-    ${proj_keyword}
-    ${ARGS_PROJECT}
-    OUT_VAR
-    "${ARGS_OUT_VAR}")
+  _jgd_file_naming_arguments()
+  _jgd_joined_file_name(${comp_arg} SUFFIX "targets.cmake" ${proj_arg} OUT_VAR
+                        ${ARGS_OUT_VAR})
 endfunction()
 
 #
@@ -231,45 +170,13 @@ endfunction()
 # resulting file name.
 #
 function(jgd_config_header_file_name)
-  jgd_parse_arguments(ONE_VALUE_KEYWORDS "PROJECT;OUT_VAR" REQUIRES_ALL
-                      "OUT_VAR" ARGUMENTS "${ARGN}")
-  set(project "${PROJECT_NAME}")
-  if(DEFINED ARGS_PROJECT)
-    set(project "${ARGS_PROJECT}")
-  endif()
-
-  set(${ARGS_OUT_VAR}
-      "${project}_config${JGD_HEADER_EXTENSION}"
-      PARENT_SCOPE)
-endfunction()
-
-#
-# Constructs a consistent snake-case input config header file name based on the
-# PROJECT argument or the PROJECT_NAME variable. The resulting file name will be
-# placed in the variable specified by OUT_VAR. Result will be
-# <PROJECT_NAME>_config.<JGD_HEADER_EXTENSION>.<JGD_IN_FILE_EXTENSION>, ex.
-# proj_config.hpp.in
-#
-# Arguments:
-#
-# PROJECT: on-value arg; override of PROJECT_NAME. Optional - if not provided,
-# PROJECT_NAME will be used, which is more common.
-#
-# OUT_VAR: one-value arg; the name of the output variable which will store the
-# resulting file name.
-#
-function(jgd_config_header_in_file_name)
-  jgd_parse_arguments(ONE_VALUE_KEYWORDS "PROJECT;OUT_VAR" REQUIRES_ALL
-                      "OUT_VAR" ARGUMENTS "${ARGN}")
-  set(proj_keyword "")
-  if(DEFINED ARGS_PROJECT)
-    set(proj_keyword "PROJECT")
-  endif()
-
-  jgd_config_header_file_name(${proj_keyword} "${ARGS_PROJECT}" OUT_VAR
-                              header_file_name)
-
-  set(${ARGS_OUT_VAR}
-      "${header_file_name}${JGD_IN_FILE_EXTENSION}"
-      PARENT_SCOPE)
+  _jgd_file_naming_arguments()
+  _jgd_joined_file_name(
+    ${comp_arg}
+    DELIMITER
+    "_"
+    SUFFIX
+    "config${JGD_HEADER_EXTENSION}"
+    OUT_VAR
+    ${ARGS_OUT_VAR})
 endfunction()

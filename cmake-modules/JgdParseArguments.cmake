@@ -41,18 +41,12 @@ macro(JGD_PARSE_ARGUMENTS)
   set(multi_value_keywords ARGUMENTS OPTIONS ONE_VALUE_KEYWORDS
                            MULTI_VALUE_KEYWORDS REQUIRES_ALL REQUIRES_ANY)
   cmake_parse_arguments(INS "${options}" "${one_value_keywords}"
-                        "${multi_value_keywords}" ${ARGN})
+                        "${multi_value_keywords}" "${ARGN}")
 
   # == Argument Validation of jgd_parse_arguments ==
 
-  # must provide ARGUMENTS
-  if(NOT DEFINED INS_ARGUMENTS)
-    message(FATAL_ERROR "A list of function arguments must be provided "
-                        "through ARGUMENTS to jgd_parse_arguments")
-  endif()
-
-  # no missing values or unnecessary keywords
-  if(INS_KEYWORDS_MISSING_VALUES)
+  # no missing values or unnecessary keywords when arguments were provided
+  if(INS_KEYWORDS_MISSING_VALUES AND DEFINED INS_ARGUMENTS)
     message(FATAL_ERROR "Keywords provided to jgd_parse_arguments without any "
                         "values: ${INS_KEYWORDS_MISSING_VALUES}")
   endif()

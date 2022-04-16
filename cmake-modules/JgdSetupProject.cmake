@@ -5,6 +5,7 @@ include(JgdFileNaming)
 include(JgdStandardDirs)
 include(CheckIPOSupported)
 include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
 
 define_property(
   TARGET
@@ -14,11 +15,16 @@ define_property(
     "The name of a library or executable component that the target represents.")
 
 macro(_jgd_warn_set variable value)
-  # can only enforce the guard if we're sure that it was set by this CMake
-  # project. If this project was absorbed into the build of another project, by
+  # Values that will be overridden by the project setup and should therefore not
+  # be set prior to calling setup, unless it was explicity in the cache, which
+  # occurs when variables are specified on the command line. This guard can only
+  # be enforced if we're sure that it was set by this CMake project. If this
+  # project was absorbed into the build of another project, by
   # add_subdirectory(), the parent project may have set their own values. We
-  # will still override these values, but this warning is for improper usage.
-  if(PROJECT_IS_TOP_LEVEL AND DEFINED ${variable})
+  # will still override these values, nevertheless.
+  if(PROJECT_IS_TOP_LEVEL
+     AND DEFINED ${variable}
+     AND NOT DEFINED CACHE{${variable}})
     message(
       AUTHOR_WARNING
         "The variable ${variable} was set for project ${PROJECT_NAME} prior to "
@@ -110,7 +116,7 @@ function(jgd_setup_project)
   # configure a project configuration header
   if(ARGS_CONFIGURE_CONFIG_HEADER)
     jgd_config_header_file_name(OUT_VAR header_name)
-    jgd_config_header_in_file_name(OUT_VAR in_header_file)
+    set(in_header_file "${header_name}${JGD_IN_FILE_EXTENSION}")
     string(PREPEND in_header_file "${JGD_PROJECT_CMAKE_DIR}/")
     if(NOT EXISTS "${in_header_file}")
       message(
@@ -119,7 +125,7 @@ function(jgd_setup_project)
     endif()
 
     configure_file("${in_header_file}"
-                   "${JGD_CONFIG_HEADER_DESTINATION}/${header_name}" @ONLY)
+                   "${JGD_HEADER_DESTINATION}/${header_name}" @ONLY)
   endif()
 
   # == Variables Setting Default Target Properties ==
@@ -182,10 +188,25 @@ function(jgd_setup_project)
     _jgd_warn_set(CMAKE_INSTALL_RPATH ${rpath_base} ${rpath_base}/${rel_path})
   endif()
 
+  macro(enable_ipo)
+    if(CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL
+                                              "RelWithDebInfo")
+      include(CheckIPOSupported)
+      check_ipo_supported(RESULT result OUTPUT output)
+      if(result)
+        set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
+      else()
+        message(SEND_ERROR "IPO is not supported: ${output}")
+      endif()
+    endif()
+  endmacro()
+
   # interprocedural/link-time optimization
+
   check_ipo_supported(RESULT ipo_supported OUTPUT err_msg)
   if(ipo_supported)
-    _jgd_warn_set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
+    _jgd_warn_set(CMAKE_INTERPROCEDURAL_OPTIMIZATION
+                  $<IF:$<CONFIG:DEBUG>,OFF,ON>)
   else()
     _jgd_warn_set(CMAKE_INTERPROCEDURAL_OPTIMIZATION OFF)
     message(NOTICE
@@ -214,5 +235,4 @@ function(jgd_setup_project)
 
   # enable testing even if there are no tests, so ctest won't fail
   enable_testing()
-
 endfunction()

@@ -126,8 +126,6 @@ function(jgd_add_library)
   # == Create Library Target ==
 
   add_library("${library}" ${lib_type} "${ARGS_SOURCES}")
-
-  # alias with exported name for same name within source tree (tests)
   add_library(${PROJECT_NAME}::${export_name} ALIAS ${target_name})
 
   # == Set Target Properties ==

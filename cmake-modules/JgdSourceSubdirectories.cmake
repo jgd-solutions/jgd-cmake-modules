@@ -30,7 +30,7 @@ macro(_JGD_CHECK_ADD_SUBDIR)
 
   if(IS_DIRECTORY "${ARGS_SUBDIR}")
     list(APPEND subdirs_added "${ARGS_SUBDIR}")
-    if(DEFINED ARGS_ADD_SUBDIRS)
+    if(ARGS_ADD_SUBDIRS)
       message(DEBUG "${CMAKE_CURRENT_FUNCTION}: Adding directory "
               "${ARGS_SUBDIR} to project ${PROJECT_NAME}")
       add_subdirectory("${ARGS_SUBDIR}")
@@ -79,6 +79,11 @@ function(jgd_source_subdirectories)
   set(subdirs_added)
   list(REMOVE_ITEM ARGS_LIB_COMPONENTS "${PROJECT_NAME}")
 
+  if(ADD_SUBDIRS)
+    set(add_subdirs_arg ADD_SUBDIRS)
+  endif()
+
+  # Add Subdirs
   if(DEFINED ARGS_LIB_COMPONENTS)
     # add all components' subdirectories
     foreach(component ${ARGS_LIB_COMPONENTS})
@@ -86,7 +91,7 @@ function(jgd_source_subdirectories)
       jgd_canonical_lib_component_subdir(COMPONENT "${component}" OUT_VAR
                                          subdir_path)
       set(JGD_CURRENT_COMPONENT "${component}")
-      _jgd_check_add_subdir(${ARGS_ADD_SUBDIRS} SUBDIR "${subdir_path}")
+      _jgd_check_add_subdir(${add_subdirs_arg} SUBDIR "${subdir_path}")
       unset(JGD_CURRENT_COMPONENT)
 
       list(LENGTH subdirs_added new_len)
@@ -101,12 +106,12 @@ function(jgd_source_subdirectories)
   else()
     # add single library subdirectory, if it exists
     jgd_canonical_lib_subdir(OUT_VAR lib_subdir)
-    _jgd_check_add_subdir(${ARGS_ADD_SUBDIRS} SUBDIR "${lib_subdir}")
+    _jgd_check_add_subdir(${add_subdirs_arg} SUBDIR "${lib_subdir}")
   endif()
 
   # add executable source subdirectory, if it exists
   jgd_canonical_exec_subdir(OUT_VAR exec_subdir)
-  _jgd_check_add_subdir(${ARGS_ADD_SUBDIRS} SUBDIR "${exec_subdir}")
+  _jgd_check_add_subdir(${add_subdirs_arg} SUBDIR "${exec_subdir}")
 
   # Ensure at least one sub directory was added
   if(NOT subdirs_added)
