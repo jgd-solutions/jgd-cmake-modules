@@ -6,12 +6,12 @@ macro(_TEST_PROJECT project_name build_opts)
   add_test(
     NAME ${project_name}
     COMMAND
-      "${CMAKE_CTEST_COMMAND}" --build-and-test
-      "${CMAKE_CURRENT_SOURCE_DIR}/${project_name}"
-      "${CMAKE_CURRENT_BINARY_DIR}/${project_name}" --build-generator
-      "${CMAKE_GENERATOR}" --build-options
-      "-DCMAKE_MODULE_PATH=${CMAKE_MODULE_PATH}" ${build_opts} --test-command
-      "${CMAKE_CTEST_COMMAND}")
+    "${CMAKE_CTEST_COMMAND}" --build-and-test
+    "${CMAKE_CURRENT_SOURCE_DIR}/${project_name}"
+    "${CMAKE_CURRENT_BINARY_DIR}/${project_name}" --build-generator
+    "${CMAKE_GENERATOR}" --build-options
+    "-DCMAKE_MODULE_PATH=${CMAKE_MODULE_PATH}" ${build_opts} --test-command
+    "${CMAKE_CTEST_COMMAND}")
 endmacro()
 
 _test_project("single-exec" "")

@@ -101,7 +101,7 @@ function(jgd_setup_project)
 
   # == Function Arguments Project Configuration  ==
 
-  jgd_parse_arguments(OPTIONS "CONFIGURE_CONFIG_HEADER" ONE_VALUE_KEYWORDS
+  jgd_parse_arguments(ONE_VALUE_KEYWORDS
                       "PREFIX_NAME" ARGUMENTS "${ARGN}")
 
   # project prefix name
@@ -112,21 +112,6 @@ function(jgd_setup_project)
     string(REPLACE "-" "_" ${prefix_temp} project_prefix_name)
   endif()
   set(JGD_PROJECT_PREFIX_NAME "${project_prefix_name}")
-
-  # configure a project configuration header
-  if(ARGS_CONFIGURE_CONFIG_HEADER)
-    jgd_config_header_file_name(OUT_VAR header_name)
-    set(in_header_file "${header_name}${JGD_IN_FILE_EXTENSION}")
-    string(PREPEND in_header_file "${JGD_PROJECT_CMAKE_DIR}/")
-    if(NOT EXISTS "${in_header_file}")
-      message(
-        FATAL_ERROR "Cannot configure a configuration header for project "
-                    "${PROJECT_NAME}. Could not find file ${in_header_file}.")
-    endif()
-
-    configure_file("${in_header_file}"
-                   "${JGD_HEADER_DESTINATION}/${header_name}" @ONLY)
-  endif()
 
   # == Variables Setting Default Target Properties ==
 
