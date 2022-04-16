@@ -176,7 +176,7 @@ function(jgd_setup_project)
   endforeach()
 
   # default transitive runtime search path (RPATH) for shared libraries
-  if(NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
+  if((languages STREQUAL "NONE") AND (NOT CMAKE_SYSTEM_NAME STREQUAL "Windows"))
     if(CMAKE_SYSTEM_NAME STREQUAL "Apple")
       set(rpath_base @loader_path)
     else()
