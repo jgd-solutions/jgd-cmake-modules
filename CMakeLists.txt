@@ -11,4 +11,4 @@ include(JgdInstallConfigFilePkg)
 
 jgd_setup_project(PREFIX_NAME "CMM")
 jgd_source_subdirectories(ADD_SUBDIRS)
-jgd_install_config_file_pkg(CMAKE_MODULES "cmake-modules")
+# jgd_install_config_file_pkg(CMAKE_MODULES "cmake-modules")
