@@ -21,25 +21,25 @@ function(jgd_add_library)
     "${ARGN}")
 
   # Set library component
-  if(DEFINED ARGS_COMPONENT AND NOT ARGS_COMPONENT STREQUAL PROJECT_NAME)
+  if (DEFINED ARGS_COMPONENT AND NOT ARGS_COMPONENT STREQUAL PROJECT_NAME)
     set(comp_arg COMPONENT ${ARGS_COMPONENT})
     set(comp_err_msg "component (${ARGS_COMPONENT}) ")
-  endif()
+  endif ()
 
   # == Usage Guards ==
 
   # ensure library is created in the appropriate canonical directory
-  if(DEFINED comp_arg)
+  if (DEFINED comp_arg)
     jgd_canonical_lib_component_subdir(${comp_arg} OUT_VAR canonical_dir)
-  else()
+  else ()
     jgd_canonical_lib_subdir(OUT_VAR canonical_dir)
-  endif()
-  if(NOT CMAKE_CURRENT_SOURCE_DIR STREQUAL canonical_dir)
+  endif ()
+  if (NOT CMAKE_CURRENT_SOURCE_DIR STREQUAL canonical_dir)
     message(
       FATAL_ERROR
-        "Creating a ${comp_err_msg}library for project ${PROJECT_NAME} must be "
-        "done in the canonical directory ${canonical_dir}.")
-  endif()
+      "Creating a ${comp_err_msg}library for project ${PROJECT_NAME} must be "
+      "done in the canonical directory ${canonical_dir}.")
+  endif ()
 
   # verify source naming
   set(regex "${JGD_HEADER_REGEX}|${JGD_SOURCE_REGEX}")
@@ -52,20 +52,20 @@ function(jgd_add_library)
     "FILENAME"
     OUT_UNMATCHED
     incorrectly_named)
-  if(incorrectly_named)
+  if (incorrectly_named)
     message(
       FATAL_ERROR
-        "Provided source files do not match the regex for library sources, "
-        "${regex}: ${incorrectly_named}.")
-  endif()
+      "Provided source files do not match the regex for library sources, "
+      "${regex}: ${incorrectly_named}.")
+  endif ()
 
   # == Build options related to libraries and this library =================
   # note: locally setting BUILD_SHARED_LIBS has scope constrained to func
 
-  if(NOT DEFINED ARGS_TYPE)
+  if (NOT DEFINED ARGS_TYPE)
     # commonly used (so it's build-wide) build shared option
     option(BUILD_SHARED_LIBS "Dictates if libraries with unspecified types "
-           "should be built shared." OFF)
+      "should be built shared." OFF)
 
     # project specific build shared option
     option(
@@ -76,9 +76,9 @@ function(jgd_add_library)
     set(BUILD_SHARED_LIBS ${JGD_PROJECT_PREFIX_NAME}_BUILD_SHARED_LIBS})
 
     # component specific build shared option
-    if(DEFINED comp_arg)
+    if (DEFINED comp_arg)
       string(TOUPPER ${ARGS_COMPONENT} comp_temp)
-      string(REPLACE "-" "_" ${comp_temp} comp_upper)
+      string(REPLACE "-" "_" comp_upper ${comp_temp})
       option(
         ${JGD_PROJECT_PREFIX_NAME}_${comp_upper}_BUILD_SHARED_LIBS
         "Dictates if libraries with unspecified types should be built shared. "
@@ -86,33 +86,33 @@ function(jgd_add_library)
         ${JGD_PROJECT_PREFIX_NAME}_BUILD_SHARED_LIBS)
 
       set(BUILD_SHARED_LIBS
-          ${JGD_PROJECT_PREFIX_NAME}_${comp_upper}_BUILD_SHARED_LIBS)
-    endif()
-  endif()
+        ${JGD_PROJECT_PREFIX_NAME}_${comp_upper}_BUILD_SHARED_LIBS)
+    endif ()
+  endif ()
 
   # == Library Configuration ==
 
   # set library type, if provided and supported
   set(lib_type "")
-  if(DEFINED ARGS_TYPE)
+  if (DEFINED ARGS_TYPE)
     set(supported_types STATIC SHARED MODULE)
     list(FIND supported_types "${ARGS_TYPE}" supported)
-    if(supported EQUAL -1)
+    if (supported EQUAL -1)
       message(
         FATAL_ERROR
-          "Unsupported type ${ARGS_TYPE}. ${CMAKE_CURRENT_FUNCTION} must be "
-          "called with no type or one of: ${supported_types}")
-    endif()
+        "Unsupported type ${ARGS_TYPE}. ${CMAKE_CURRENT_FUNCTION} must be "
+        "called with no type or one of: ${supported_types}")
+    endif ()
 
     set(lib_type ${ARGS_TYPE})
-  endif()
+  endif ()
 
   # resolve library names
-  if(DEFINED ARGS_LIBRARY)
+  if (DEFINED ARGS_LIBRARY)
     set(target_name ${ARGS_LIBRARY})
     set(export_name ${ARGS_LIBRARY})
     set(output_name ${ARGS_LIBRARY})
-  else()
+  else ()
     jgd_library_naming(
       ${comp_arg}
       OUT_TARGET_NAME
@@ -121,7 +121,7 @@ function(jgd_add_library)
       export_name
       OUT_OUTPUT_NAME
       output_name)
-  endif()
+  endif ()
 
   # == Create Library Target ==
 
@@ -136,24 +136,24 @@ function(jgd_add_library)
   set_target_properties(
     ${target_name}
     PROPERTIES OUTPUT_NAME ${output_name}
-               PREFIX ${JGD_LIB_PREFIX}
-               EXPORT_NAME ${export_name}
-               COMPILE_OPTIONS ${JGD_DEFAULT_COMPILE_OPTIONS}
-               INCLUDE_DIRECTORIES "${include_dirs}"
-               INTERFACE_INCLUDE_DIRECTORIES
-               "$<BUILD_INTERFACE:${include_dirs}>")
+    PREFIX ${JGD_LIB_PREFIX}
+    EXPORT_NAME ${export_name}
+    COMPILE_OPTIONS ${JGD_DEFAULT_COMPILE_OPTIONS}
+    INCLUDE_DIRECTORIES "${include_dirs}"
+    INTERFACE_INCLUDE_DIRECTORIES
+    "$<BUILD_INTERFACE:${include_dirs}>")
 
   # shared library versioning
-  if(PROJECT_VERSION AND (BUILD_SHARED_LIBS OR lib_type STREQUAL "SHARED"))
+  if (PROJECT_VERSION AND (BUILD_SHARED_LIBS OR lib_type STREQUAL "SHARED"))
     set_target_properties(
       ${target_name} PROPERTIES VERSION ${PROJECT_VERSION}
-                                SOVERSION ${PROJECT_VERSION_MAJOR})
-  endif()
+      SOVERSION ${PROJECT_VERSION_MAJOR})
+  endif ()
 
   # custom component property
-  if(DEFINED comp_arg)
+  if (DEFINED comp_arg)
     set_target_properties(${target_name} PROPERTIES ${comp_arg})
-  endif()
+  endif ()
 
   # == Generate an export header ==
   generate_export_header(

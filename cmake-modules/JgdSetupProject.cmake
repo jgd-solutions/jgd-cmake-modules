@@ -98,15 +98,14 @@ macro(JGD_SETUP_PROJECT)
 
   # == Function Arguments Project Configuration  ==
 
-  jgd_parse_arguments(ONE_VALUE_KEYWORDS
-    "PREFIX_NAME" ARGUMENTS "${ARGN}")
+  jgd_parse_arguments(ONE_VALUE_KEYWORDS "PREFIX_NAME" ARGUMENTS "${ARGN}")
 
   # project prefix name
   if (DEFINED ARGS_PREFIX_NAME)
     set(project_prefix_name ${ARGS_PREFIX_NAME})
   else ()
     string(TOUPPER ${PROJECT_NAME} prefix_temp)
-    string(REPLACE "-" "_" ${prefix_temp} project_prefix_name)
+    string(REPLACE "-" "_" project_prefix_name ${prefix_temp})
   endif ()
   set(JGD_PROJECT_PREFIX_NAME "${project_prefix_name}")
 
