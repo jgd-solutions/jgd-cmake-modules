@@ -81,12 +81,10 @@ function(jgd_add_executable)
   jgd_canonical_include_dirs(TARGET ${target_name} OUT_VAR include_dirs)
 
   # basic properties
-
   set_target_properties(${target_name}
     PROPERTIES OUTPUT_NAME ${output_name}
     EXPORT_NAME ${export_name}
-    COMPILE_OPTIONS "${JGD_DEFAULT_COMPILE_OPTIONS}"
-    LINK_LIBRARIES ${target_name}-object-lib)
+    COMPILE_OPTIONS "${JGD_DEFAULT_COMPILE_OPTIONS}")
 
   # include directories, if no object library to provide them
   if (NOT DEFINED ARGS_SOURCES)
@@ -102,11 +100,14 @@ function(jgd_add_executable)
   # == Object Library ==
 
   # create library of exec's objects, allowing unit testing of exec's sources
+  message(STATUS "debug ${ARGS_SOURCES}")
   if (DEFINED ARGS_SOURCES)
-    add_library(${target_name}-object-lib OBJECT "${ARGS_SOURCES}")
+    message(STATUS "debug INSIDE ${ARGS_SOURCES}")
+    add_library(${target_name}-objects OBJECT "${ARGS_SOURCES}")
+    add_library(${target_name}-object-lib INTERFACE ${target_name}-objects)
 
-    # properties on object library
-    set_target_properties(${target_name}-object-lib PROPERTIES
+    # properties on executable objects
+    set_target_properties(${target_name}-objects PROPERTIES
       COMPILE_OPTIONS "${JGD_DEFAULT_COMPILE_OPTIONS}"
       INCLUDE_DIRECTORIES "${include_dirs}"
       INTERFACE_INCLUDE_DIRECTORIES "$<BUILD_INTERFACE:${include_dirs}>")
