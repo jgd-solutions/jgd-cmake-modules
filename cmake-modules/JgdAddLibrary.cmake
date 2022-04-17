@@ -12,7 +12,7 @@ include(GenerateExportHeader)
 function(jgd_add_library)
   jgd_parse_arguments(
     ONE_VALUE_KEYWORDS
-    "COMPONENT;LIBRARY;TYPE"
+    "COMPONENT;NAME;TYPE"
     MULTI_VALUE_KEYWORDS
     "SOURCES"
     REQUIRES_ALL
@@ -108,10 +108,10 @@ function(jgd_add_library)
   endif ()
 
   # resolve library names
-  if (DEFINED ARGS_LIBRARY)
-    set(target_name ${ARGS_LIBRARY})
-    set(export_name ${ARGS_LIBRARY})
-    set(output_name ${ARGS_LIBRARY})
+  if (DEFINED ARGS_NAME)
+    set(target_name ${ARGS_NAME})
+    set(export_name ${ARGS_NAME})
+    set(output_name ${ARGS_NAME})
   else ()
     jgd_library_naming(
       ${comp_arg}
