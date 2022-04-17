@@ -33,16 +33,12 @@ macro(_jgd_warn_set variable value)
       "override the default value, set ${variable} after calling "
       "jgd_setup_project.")
   endif ()
-  set(${variable}
-    ${value}
-    PARENT_SCOPE)
+  set(${variable} "${value}")
 endmacro()
 
 macro(_jgd_check_set variable value)
   if (NOT DEFINED ${variable})
-    set(${variable}
-      "${value}"
-      PARENT_SCOPE)
+    set(${variable} "${value}")
   endif ()
 endmacro()
 
@@ -50,7 +46,7 @@ endmacro()
 # CMAKE_ variables to set default target properties & configure cmake operation
 # enables testing so it's never forgotten, even if there's no tests, it can
 # still be run
-function(jgd_setup_project)
+macro(JGD_SETUP_PROJECT)
   # == Usage Guards ==
 
   # guard against running as script or forgetting project() command
@@ -66,7 +62,7 @@ function(jgd_setup_project)
     "${PROJECT_SOURCE_DIR}/CMakeLists.txt")
     message(
       FATAL_ERROR
-      "${CMAKE_CURRENT_FUNCTION} must be called in the same CMakeLists.txt file that "
+      "jgd_setup_project must be called in the same CMakeLists.txt file that "
       "the project was defined in, with CMake's project() command.")
   endif ()
 
@@ -88,6 +84,7 @@ function(jgd_setup_project)
       "root directory, and is required because it influences things like "
       "target names and artifact output names.")
   endif ()
+  unset(project_name_regex)
 
   # no project version specified
   if (NOT DEFINED PROJECT_VERSION)
@@ -126,18 +123,15 @@ function(jgd_setup_project)
   endif ()
 
   # build artifact destinations
-  set(archive_out_dir "${CMAKE_BINARY_DIR}/lib")
-  set(lib_out_dir "${CMAKE_BINARY_DIR}/lib")
-  set(runtime_out_dir "${CMAKE_BINARY_DIR}/bin")
   if (PROJECT_IS_TOP_LEVEL)
-    _jgd_warn_set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${archive_out_dir}")
-    _jgd_warn_set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${lib_out_dir}")
-    _jgd_warn_set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${runtime_out_dir}")
+    _jgd_warn_set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
+    _jgd_warn_set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
+    _jgd_warn_set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
   else ()
     # welcome parent project's values, if defined
-    _jgd_check_set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${archive_out_dir}")
-    _jgd_check_set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${lib_out_dir}")
-    _jgd_check_set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${runtime_out_dir}")
+    _jgd_check_set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
+    _jgd_check_set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
+    _jgd_check_set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
   endif ()
 
   # language standard requirements
@@ -177,6 +171,8 @@ function(jgd_setup_project)
       ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}
       ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR})
     _jgd_warn_set(CMAKE_INSTALL_RPATH ${rpath_base} ${rpath_base}/${rel_path})
+    unset(rel_path)
+    unset(rpath_base)
   endif ()
 
   # interprocedural/link-time optimization
@@ -194,7 +190,11 @@ function(jgd_setup_project)
         "Interprocedural linker optimization is not supported: ${err_msg}\n"
         "Continuing without it.")
     endif ()
+    unset(ipo_supported)
+    unset(err_msg)
   endif ()
+
+  unset(languages)
 
   # == Variables Controlling CMake ==
 
@@ -215,6 +215,6 @@ function(jgd_setup_project)
       "Base installation location." FORCE)
   endif ()
 
-  # enable testing even if there are no tests, so ctest won't fail
+  # enable testing by default so invoking ctest always succeeds
   enable_testing()
-endfunction()
+endmacro()

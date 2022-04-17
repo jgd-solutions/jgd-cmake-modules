@@ -1,7 +1,6 @@
 # TODO: Try to find a way to install cmake-modules so test projects can consume
 # cmake-modules with the find_package() pattern that real consumers would. Then,
 # can remove CMAKE_MODULE_PATH in below tests.
-
 macro(_TEST_PROJECT project_name build_opts)
   add_test(
     NAME ${project_name}
@@ -14,5 +13,5 @@ macro(_TEST_PROJECT project_name build_opts)
     "${CMAKE_CTEST_COMMAND}")
 endmacro()
 
-_test_project("single-exec" "")
+_test_project(single-exec "")
 # _test_project("libcomponents" "") _test_project("libsingle" "-DBUILD_DOCS=ON")
