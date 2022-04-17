@@ -64,16 +64,13 @@ function(jgd_add_library)
 
   if (NOT DEFINED ARGS_TYPE)
     # commonly used (so it's build-wide) build shared option
-    option(BUILD_SHARED_LIBS "Dictates if libraries with unspecified types "
-      "should be built shared." OFF)
+    option(BUILD_SHARED_LIBS "Dictates if libraries with unspecified types should be built shared." OFF)
 
     # project specific build shared option
     option(
       ${JGD_PROJECT_PREFIX_NAME}_BUILD_SHARED_LIBS
-      "Dictates if libraries with unspecified types should be built shared. "
-      "Prefixed to only take affect for ${PROJECT_NAME}." ${BUILD_SHARED_LIBS})
-
-    set(BUILD_SHARED_LIBS ${JGD_PROJECT_PREFIX_NAME}_BUILD_SHARED_LIBS})
+      "Dictates if libraries with unspecified types should be built shared. Prefixed to only take affect for ${PROJECT_NAME}."
+      ${BUILD_SHARED_LIBS})
 
     # component specific build shared option
     if (DEFINED comp_arg)
@@ -84,9 +81,6 @@ function(jgd_add_library)
         "Dictates if libraries with unspecified types should be built shared. "
         "Prefixed to only take affect for ${PROJECT_NAME}."
         ${JGD_PROJECT_PREFIX_NAME}_BUILD_SHARED_LIBS)
-
-      set(BUILD_SHARED_LIBS
-        ${JGD_PROJECT_PREFIX_NAME}_${comp_upper}_BUILD_SHARED_LIBS)
     endif ()
   endif ()
 
@@ -129,7 +123,7 @@ function(jgd_add_library)
 
   # == Create Library Target ==
 
-  add_library("${library}" ${lib_type} "${ARGS_SOURCES}")
+  add_library("${target_name}" ${lib_type} "${ARGS_SOURCES}")
   add_library(${PROJECT_NAME}::${export_name} ALIAS ${target_name})
 
   # == Set Target Properties ==
@@ -142,7 +136,7 @@ function(jgd_add_library)
     PROPERTIES OUTPUT_NAME ${output_name}
     PREFIX ${JGD_LIB_PREFIX}
     EXPORT_NAME ${export_name}
-    COMPILE_OPTIONS ${JGD_DEFAULT_COMPILE_OPTIONS}
+    COMPILE_OPTIONS "${JGD_DEFAULT_COMPILE_OPTIONS}"
     INCLUDE_DIRECTORIES "${include_dirs}"
     INTERFACE_INCLUDE_DIRECTORIES
     "$<BUILD_INTERFACE:${include_dirs}>")

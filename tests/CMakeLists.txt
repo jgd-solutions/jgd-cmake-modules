@@ -14,4 +14,5 @@ macro(_TEST_PROJECT project_name build_opts)
 endmacro()
 
 _test_project(single-exec "-DSINGLE_EXEC_BUILD_TESTS=ON")
-# _test_project("libcomponents" "") _test_project("libsingle" "-DBUILD_DOCS=ON")
+_test_project("libsingle" "-DLIBSINGLE_BUILD_TESTS=ON")
+#_test_project("libcomponents" "-DCOMPONENTS_BUILD_TESTS=ON")
