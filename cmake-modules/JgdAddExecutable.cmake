@@ -81,10 +81,11 @@ function(jgd_add_executable)
   jgd_canonical_include_dirs(TARGET ${target_name} OUT_VAR include_dirs)
 
   # basic properties
+
   set_target_properties(${target_name}
     PROPERTIES OUTPUT_NAME ${output_name}
     EXPORT_NAME ${export_name}
-    COMPILE_OPTIONS ${JGD_DEFAULT_COMPILE_OPTIONS}
+    COMPILE_OPTIONS "${JGD_DEFAULT_COMPILE_OPTIONS}"
     LINK_LIBRARIES ${target_name}-object-lib)
 
   # include directories, if no object library to provide them
@@ -106,7 +107,7 @@ function(jgd_add_executable)
 
     # properties on object library
     set_target_properties(${target_name}-object-lib PROPERTIES
-      COMPILE_OPTIONS ${JGD_DEFAULT_COMPILE_OPTIONS}
+      COMPILE_OPTIONS "${JGD_DEFAULT_COMPILE_OPTIONS}"
       INCLUDE_DIRECTORIES "${include_dirs}"
       INTERFACE_INCLUDE_DIRECTORIES "$<BUILD_INTERFACE:${include_dirs}>")
 
