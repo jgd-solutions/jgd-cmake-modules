@@ -71,6 +71,6 @@ function(jgd_add_test_executable)
   set_target_properties(
     ${ARGS_EXECUTABLE}
     PROPERTIES OUTPUT_NAME ${ARGS_EXECUTABLE}
-    COMPILE_OPTIONS ${JGD_DEFAULT_COMPILE_OPTIONS}
+    COMPILE_OPTIONS "${JGD_DEFAULT_COMPILE_OPTIONS}"
     LINK_LIBRARIES "${ARGS_LIBS}")
 endfunction()

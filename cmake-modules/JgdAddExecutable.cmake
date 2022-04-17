@@ -88,8 +88,7 @@ function(jgd_add_executable)
 
   # include directories, if no object library to provide them
   if (NOT DEFINED ARGS_SOURCES)
-    set_target_properties(${target_name} PROPERTIES
-      INCLUDE_DIRECTORIES "${include_dirs}")
+    target_include_directories(${target_name} PRIVATE "${include_dirs}")
   endif ()
 
   # custom component property
@@ -101,15 +100,13 @@ function(jgd_add_executable)
 
   # create library of exec's objects, allowing unit testing of exec's sources
   if (DEFINED ARGS_SOURCES)
-    add_library(${target_name}-objects OBJECT "${ARGS_SOURCES}")
-    add_library(${target_name}-object-lib INTERFACE ${target_name}-objects)
+    add_library(${target_name}-object-lib OBJECT "${ARGS_SOURCES}")
 
     # properties on executable objects
-    set_target_properties(${target_name}-objects PROPERTIES
-      COMPILE_OPTIONS "${JGD_DEFAULT_COMPILE_OPTIONS}"
-      INCLUDE_DIRECTORIES "${include_dirs}"
-      INTERFACE_INCLUDE_DIRECTORIES "$<BUILD_INTERFACE:${include_dirs}>")
+    target_compile_options(${target_name}-object-lib PRIVATE "${JGD_DEFAULT_COMPILE_OPTIONS}")
+    target_include_directories(${target_name}-object-lib INTERFACE "$<BUILD_INTERFACE:${include_dirs}>" PRIVATE "${include_dirs}")
 
+    # link target to associated object files & usage requirements
     target_link_libraries(${target_name} PRIVATE ${target_name}-object-lib)
   endif ()
 endfunction()
