@@ -9,13 +9,13 @@ set(JGD_CMAKE_MODULE_REGEX "^([A-Z][a-z]*)+\.cmake$")
 # Create regexs of file names based on file extensions from
 # JgdCanonicalStructure. Variables of the same name, but with _EXTENSION
 # replaced with _REGEX
-foreach(ext_var
-        JGD_HEADER_EXTENSION;JGD_SOURCE_EXTENSION;JGD_TEST_SOURCE_EXTENSION
-        JGD_MODULE_EXTENSION;JGD_IN_FILE_EXTENSION)
+foreach (ext_var
+  JGD_HEADER_EXTENSION;JGD_SOURCE_EXTENSION;JGD_TEST_SOURCE_EXTENSION
+  JGD_MODULE_EXTENSION;JGD_IN_FILE_EXTENSION)
   string(REPLACE "_EXTENSION" "_REGEX" regex_var "${ext_var}")
   string(REPLACE "." "\\." ${regex_var} "${${ext_var}}")
   set(${regex_var} "^[a-z][a-z_0-9]*${${regex_var}}$")
-endforeach()
+endforeach ()
 
 #
 # Private macro to the module. Constructs a consistent file name based on the
@@ -44,43 +44,43 @@ macro(_JGD_JOINED_FILE_NAME)
     ONE_VALUE_KEYWORDS "COMPONENT;DELIMITER;SUFFIX;PROJECT;OUT_VAR"
     REQUIRES_ALL "SUFFIX;OUT_VAR" ARGUMENTS "${ARGN}")
   # project name
-  if(DEFINED ARGS_PROJECT)
+  if (DEFINED ARGS_PROJECT)
     set(project ${ARGS_PROJECT})
-  else()
-    set(projecft ${PROJECT_NAME})
-  endif()
+  else ()
+    set(project ${PROJECT_NAME})
+  endif ()
 
-  if(DEFINED ARGS_DELIMITER)
+  if (DEFINED ARGS_DELIMITER)
     set(delim ${ARGS_DELIMITER})
-  else()
+  else ()
     set(delim "-")
-  endif()
+  endif ()
 
-  # remove leading delimiters from suffix, if it was provided
+  # remove leading delimiters from suffix
   string(REGEX REPLACE "^${delim}" "" suffix "${ARGS_SUFFIX}")
 
   # compose file name
-  if(NOT ARGS_COMPONENT OR ("${ARGS_COMPONENT}" STREQUAL "${project}"))
+  if (NOT ARGS_COMPONENT OR ("${ARGS_COMPONENT}" STREQUAL "${project}"))
     set(${ARGS_OUT_VAR}
-        "${project}${delim}${suffix}"
-        PARENT_SCOPE)
-  else()
+      "${project}${delim}${suffix}"
+      PARENT_SCOPE)
+  else ()
     set(${ARGS_OUT_VAR}
-        "${project}${delim}${ARGS_COMPONENT}${delim}${suffix}"
-        PARENT_SCOPE)
-  endif()
+      "${project}${delim}${ARGS_COMPONENT}${delim}${suffix}"
+      PARENT_SCOPE)
+  endif ()
 endmacro()
 
-macro(_JGD_FILE_NAMING_ARGUMENTS)
+macro(_JGD_FILE_NAMING_ARGUMENTS args)
   jgd_parse_arguments(ONE_VALUE_KEYWORDS "COMPONENT;PROJECT;OUT_VAR"
-                      REQUIRES_ALL "OUT_VAR" ARGUMENTS "${ARGN}")
-  if(DEFINED ARGS_PROJECT)
+    REQUIRES_ALL "OUT_VAR" ARGUMENTS "${args}")
+  if (DEFINED ARGS_PROJECT)
     set(proj_arg PROJECT ${ARGS_PROJECT})
-  endif()
+  endif ()
 
-  if(DEFINED ARGS_COMPONENT)
+  if (DEFINED ARGS_COMPONENT)
     set(comp_arg COMPONENT ${ARGS_COMPONENT})
-  endif()
+  endif ()
 endmacro()
 
 #
@@ -102,9 +102,9 @@ endmacro()
 # resulting file name.
 #
 function(jgd_pkg_configuration_file_name)
-  _jgd_file_naming_arguments()
+  _jgd_file_naming_arguments("${ARGN}")
   _jgd_joined_file_name(${comp_arg} SUFFIX "config.cmake" ${proj_arg} OUT_VAR
-                        "${ARGS_OUT_VAR}")
+    "${ARGS_OUT_VAR}")
 endfunction()
 
 #
@@ -124,9 +124,9 @@ endfunction()
 # resulting file name.
 #
 function(jgd_pkg_version_file_name)
-  _jgd_file_naming_arguments()
+  _jgd_file_naming_arguments("${ARGN}")
   _jgd_joined_file_name(SUFFIX "config-version.cmake" ${proj_arg} OUT_VAR
-                        ${ARGS_OUT_VAR})
+    ${ARGS_OUT_VAR})
 endfunction()
 
 #
@@ -149,9 +149,9 @@ endfunction()
 # resulting file name.
 #
 function(jgd_pkg_targets_file_name)
-  _jgd_file_naming_arguments()
+  _jgd_file_naming_arguments("${ARGN}")
   _jgd_joined_file_name(${comp_arg} SUFFIX "targets.cmake" ${proj_arg} OUT_VAR
-                        ${ARGS_OUT_VAR})
+    ${ARGS_OUT_VAR})
 endfunction()
 
 #
@@ -169,7 +169,7 @@ endfunction()
 # resulting file name.
 #
 function(jgd_config_header_file_name)
-  _jgd_file_naming_arguments()
+  _jgd_file_naming_arguments("${ARGN}")
   _jgd_joined_file_name(
     ${comp_arg}
     DELIMITER

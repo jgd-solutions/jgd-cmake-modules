@@ -39,79 +39,79 @@ macro(JGD_PARSE_ARGUMENTS)
   set(options WITHOUT_MISSING_VALUES_CHECK WITHOUT_UNPARSED_CHECK)
   set(one_value_keywords)
   set(multi_value_keywords ARGUMENTS OPTIONS ONE_VALUE_KEYWORDS
-                           MULTI_VALUE_KEYWORDS REQUIRES_ALL REQUIRES_ANY)
+    MULTI_VALUE_KEYWORDS REQUIRES_ALL REQUIRES_ANY)
   cmake_parse_arguments(INS "${options}" "${one_value_keywords}"
-                        "${multi_value_keywords}" "${ARGN}")
+    "${multi_value_keywords}" "${ARGN}")
 
   # == Argument Validation of jgd_parse_arguments ==
 
   # no missing values or unnecessary keywords when arguments were provided
-  if(INS_KEYWORDS_MISSING_VALUES AND DEFINED INS_ARGUMENTS)
+  if (INS_KEYWORDS_MISSING_VALUES AND DEFINED INS_ARGUMENTS)
     message(FATAL_ERROR "Keywords provided to jgd_parse_arguments without any "
-                        "values: ${INS_KEYWORDS_MISSING_VALUES}")
-  endif()
-  if(INS_UNPARSED_ARGUMENTS)
+      "values: ${INS_KEYWORDS_MISSING_VALUES}")
+  endif ()
+  if (INS_UNPARSED_ARGUMENTS)
     message(WARNING "Unparsed arguments provided to jgd_parse_arguments: "
-                    "${INS_UNPARSED_ARGUMENTS}")
-  endif()
+      "${INS_UNPARSED_ARGUMENTS}")
+  endif ()
 
   # required keywords are a subset of the function's parsed keywords
   list(APPEND parsed_keywords ${INS_OPTIONS} "${INS_ONE_VALUE_KEYWORDS}"
-       "${INS_MULTI_VALUE_KEYWORDS}")
+    "${INS_MULTI_VALUE_KEYWORDS}")
   list(APPEND required_keywords "${INS_REQUIRES_ALL}" "${INS_REQUIRES_ANY}")
-  foreach(req_keyword ${required_keywords})
+  foreach (req_keyword ${required_keywords})
     list(FIND parsed_keywords "${req_keyword}" idx)
-    if(idx EQUAL -1)
+    if (idx EQUAL -1)
       message(
         FATAL_ERROR
-          "The required keyword ${req_keyword} is not in the list of function "
-          "keywords ${parsed_keywords}. This keyword cannot be required if it "
-          "is not parsed by the function.")
-    endif()
-  endforeach()
+        "The required keyword ${req_keyword} is not in the list of function "
+        "keywords ${parsed_keywords}. This keyword cannot be required if it "
+        "is not parsed by the function.")
+    endif ()
+  endforeach ()
 
   # == Parse and Validate Caller's Arguments ==
 
   # parse the caller's arguments
   cmake_parse_arguments(ARGS "${INS_OPTIONS}" "${INS_ONE_VALUE_KEYWORDS}"
-                        "${INS_MULTI_VALUE_KEYWORDS}" "${INS_ARGUMENTS}")
+    "${INS_MULTI_VALUE_KEYWORDS}" "${INS_ARGUMENTS}")
 
   # validate keywords that must all be present
-  foreach(keyword ${INS_REQUIRES_ALL})
+  foreach (keyword ${INS_REQUIRES_ALL})
     set(parsed_var ARGS_${keyword})
-    if(NOT DEFINED ${parsed_var})
-      message(FATAL_ERROR "${keyword} was not provided or may be missing "
-                          "its value(s).")
-    endif()
-  endforeach()
+    if (NOT DEFINED ${parsed_var})
+      message(FATAL_ERROR " ${keyword} was not provided or may be missing "
+        " its value (s) .")
+    endif ()
+  endforeach ()
 
   # validate keywords that must have one present
-  if(INS_REQUIRES_ANY)
+  if (INS_REQUIRES_ANY)
     set(at_least_one_defined FALSE)
-    foreach(keyword ${INS_REQUIRES_ANY})
+    foreach (keyword ${INS_REQUIRES_ANY})
       set(parsed_var ARGS_${keyword})
-      if(DEFINED parsed_var)
+      if (DEFINED parsed_var)
         set(at_least_one_defined TRUE)
         break()
-      endif()
-    endforeach()
+      endif ()
+    endforeach ()
 
-    if(NOT at_least_one_defined)
+    if (NOT at_least_one_defined)
       message(
         FATAL_ERROR
-          "None of the following keywords were provided or may be missing their "
-          "values: ${INS_REQUIRES_ANY}")
-    endif()
-  endif()
+        "None of the following keywords were provided or may be missing their "
+        " values: ${INS_REQUIRES_ANY}")
+    endif ()
+  endif ()
 
   # validate caller's argument format
-  if(NOT WITHOUT_MISSING_VALUES_CHECK AND ARGS_KEYWORDS_MISSING_VALUES)
+  if (NOT WITHOUT_MISSING_VALUES_CHECK AND ARGS_KEYWORDS_MISSING_VALUES)
     message(FATAL_ERROR "Keywords provided without any values: "
-                        "${ARGS_KEYWORDS_MISSING_VALUES}")
-  endif()
+      " ${ARGS_KEYWORDS_MISSING_VALUES}")
+  endif ()
 
-  if(NOT WITHOUT_UNPARSED_CHECK AND ARGS_UNPARSED_ARGUMENTS)
+  if (NOT WITHOUT_UNPARSED_CHECK AND ARGS_UNPARSED_ARGUMENTS)
     message(WARNING "Unparsed arguments provided: "
-                    "${ARGS_UNPARSED_ARGUMENTS}")
-  endif()
+      " ${ARGS_UNPARSED_ARGUMENTS} ")
+  endif ()
 endmacro()
