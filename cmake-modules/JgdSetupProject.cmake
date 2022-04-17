@@ -110,6 +110,12 @@ macro(JGD_SETUP_PROJECT)
   endif ()
   set(JGD_PROJECT_PREFIX_NAME "${project_prefix_name}")
 
+  # == Invariable Project Options ==
+
+  option(${JGD_PROJECT_PREFIX_NAME}_BUILD_TESTS "Build all automated tests for ${PROJECT_NAME}" OFF)
+  option(${JGD_PROJECT_PREFIX_NAME}_BUILD_DOCS "Build all documentation for ${PROJECT_NAME}" OFF)
+  # note: build shared options provided by jgd_add_library, if called
+
   # == Variables Setting Default Target Properties ==
 
   # basic
@@ -117,7 +123,7 @@ macro(JGD_SETUP_PROJECT)
   _jgd_warn_set(CMAKE_OPTIMIZE_DEPENDENCIES ON)
 
   # add project's cmake modules to path
-  list(FIND CMAKE_MODULE_PATH "${JGD_PROJECT_CMAKE_DIR}" cmake_dir_idx)
+  list(FIND CMAKE_MODULE_PATH " ${JGD_PROJECT_CMAKE_DIR}" cmake_dir_idx)
   if (cmake_dir_idx EQUAL -1 AND EXISTS "${JGD_PROJECT_CMAKE_DIR}")
     list(APPEND CMAKE_MODULE_PATH "${JGD_PROJECT_CMAKE_DIR}")
   endif ()
@@ -212,7 +218,7 @@ macro(JGD_SETUP_PROJECT)
     AND PROJECT_IS_TOP_LEVEL)
     # todo: follow opt/ with provider, once registered with LANANA
     _jgd_warn_set(CMAKE_INSTALL_PREFIX "/opt/${PROJECT_NAME}" CACHE PATH
-      "Base installation location." FORCE)
+      "Base installation location. " FORCE)
   endif ()
 
   # enable testing by default so invoking ctest always succeeds
