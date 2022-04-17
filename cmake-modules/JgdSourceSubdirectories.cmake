@@ -2,6 +2,7 @@ include_guard()
 
 include(JgdParseArguments)
 include(JgdCanonicalStructure)
+include(JgdStandardDirs)
 
 #
 # Private macro to the module. After checking that it's a directory, appends the
@@ -44,7 +45,8 @@ endmacro()
 # provided by functions in  JgdCanonicalStructure. That is, the executable,
 # library or library component subdirectories will be added, if they exist. The
 # variable JGD_CURRENT_COMPONENT will be set to the component before adding each
-# component's subdirectory.
+# component's subdirectory. Options also exist to consider the standard tests
+# and docs project directories as source subdirectories.
 #
 # Arguments:
 #
@@ -53,19 +55,29 @@ endmacro()
 # any library components. Components that match the PROJECT_NAME will be
 # ignored.
 #
-# ADD_SUBDIRS: one-value arg; when defined, will cause the function to add the
+# OUT_VAR: one-value arg; the name of the list that will contain the added
+# subdirectories. This list will be populated regardless of if the ADD_SUBDIRS
+# was provided, or not.
+#
+# ADD_SUBDIRS: option; when defined, will cause the function to add the
 # source subdirectories as project subdirectories with CMake's
 # add_subdirectory() command, in addition to adding them to the variable
 # specified by OUT_VAR.
 #
-# OUT_VAR: one-value arg; the name of the list that will contain the added
-# subdirectories. This list will be populated regardless of if the ADD_SUBDIRS
-# was provided, or not.
+# WITH_TESTS_DIR: option; when defined, will cause JGD_PROJECT_TESTS_DIR to be
+# considered as a source subdirectory when the
+# <JGD_PROJECT_PREFIX_NAME>_BUILD_TESTS option is set.
+#
+# WITH_DOCS_DIR: option; when defined, will cause JGD_PROJECT_DOCS_DIR to be
+# considered as a source subdirectory when the
+# <JGD_PROJECT_PREFIX_NAME>_BUILD_DOCS option is set.
 #
 function(jgd_source_subdirectories)
   jgd_parse_arguments(
     OPTIONS
     "ADD_SUBDIRS"
+    "WITH_TESTS_DIR"
+    "WITH_DOCS_DIR"
     ONE_VALUE_KEYWORDS
     "OUT_VAR"
     MULTI_VALUE_KEYWORDS
@@ -121,6 +133,15 @@ function(jgd_source_subdirectories)
       "project ${PROJECT_NAME}. No LIB_COMPONENTS were provided, and neither the "
       "library subdirectory, ${lib_subdir}, nor the executable subdirectory, "
       "${exec_subdir}, exist.")
+  endif ()
+
+  # Add supplementary source subdirectories
+  if (ARGS_WITH_TESTS_DIR AND ${JGD_PROJECT_PREFIX_NAME}_BUILD_TESTS)
+    _jgd_check_add_subdir(${add_subdirs_arg} SUBDIR "${JGD_PROJECT_TESTS_DIR}")
+  endif ()
+
+  if (ARGS_WITH_DOCS_DIR AND ${JGD_PROJECT_PREFIX_NAME}_BUILD_DOCS)
+    _jgd_check_add_subdir(${add_subdirs_arg} SUBDIR "${JGD_PROJECT_DOCS_DIR}")
   endif ()
 
   # Set result variable

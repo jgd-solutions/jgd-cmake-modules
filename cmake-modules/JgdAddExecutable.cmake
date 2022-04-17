@@ -100,9 +100,7 @@ function(jgd_add_executable)
   # == Object Library ==
 
   # create library of exec's objects, allowing unit testing of exec's sources
-  message(STATUS "debug ${ARGS_SOURCES}")
   if (DEFINED ARGS_SOURCES)
-    message(STATUS "debug INSIDE ${ARGS_SOURCES}")
     add_library(${target_name}-objects OBJECT "${ARGS_SOURCES}")
     add_library(${target_name}-object-lib INTERFACE ${target_name}-objects)
 
