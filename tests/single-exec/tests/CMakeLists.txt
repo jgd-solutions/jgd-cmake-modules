@@ -1,7 +1,12 @@
+include(JgdTargetNaming)
+include(JgdAddTestExecutable)
+
 # Run the main executable to test its operation
-add_test(NAME ${PROJECT_NAME} COMMAND ${PROJECT_NAME})
+jgd_executable_naming(OUT_TARGET_NAME exec-target)
+add_test(NAME ${exec-target} COMMAND ${exec-target})
 
 # Run separate "integration" test, testing object library from main exec
-include(JgdAddTestExecutable)
-jgd_add_test_executable(EXECUTABLE ${PROJECT_NAME}-integration SOURCES integration.cpp LIBS ${PROJECT_NAME}-object-lib)
-
+jgd_add_test_executable(
+  EXECUTABLE ${PROJECT_NAME}-integration
+  SOURCES integration.cpp
+  LIBS ${exec-target}-objects)

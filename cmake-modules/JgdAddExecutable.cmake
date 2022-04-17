@@ -11,7 +11,7 @@ include(JgdDefaultCompileOptions)
 function(jgd_add_executable)
   jgd_parse_arguments(
     ONE_VALUE_KEYWORDS
-    "COMPONENT;EXECUTABLE"
+    "COMPONENT;EXECUTABLE;OUT_TARGET_NAME"
     MULTI_VALUE_KEYWORDS
     "SOURCES;MAIN_SOURCES"
     REQUIRES_ALL
@@ -72,6 +72,12 @@ function(jgd_add_executable)
       output_name)
   endif ()
 
+  if (DEFINED ARGS_OUT_TARGET_NAME)
+    set(${ARGS_OUT_TARGET_NAME} ${target_name} PARENT_SCOPE)
+  endif ()
+
+  message(STATUS "debug target name: ${target_name}")
+
   # create executable target
   add_executable(${target_name} "${ARGS_MAIN_SOURCES}")
   add_executable(${PROJECT_NAME}::${export_name} ALIAS ${target_name})
@@ -100,13 +106,13 @@ function(jgd_add_executable)
 
   # create library of exec's objects, allowing unit testing of exec's sources
   if (DEFINED ARGS_SOURCES)
-    add_library(${target_name}-object-lib OBJECT "${ARGS_SOURCES}")
+    add_library(${target_name}-objects OBJECT "${ARGS_SOURCES}")
 
     # properties on executable objects
-    target_compile_options(${target_name}-object-lib PRIVATE "${JGD_DEFAULT_COMPILE_OPTIONS}")
-    target_include_directories(${target_name}-object-lib INTERFACE "$<BUILD_INTERFACE:${include_dirs}>" PRIVATE "${include_dirs}")
+    target_compile_options(${target_name}-objects PRIVATE "${JGD_DEFAULT_COMPILE_OPTIONS}")
+    target_include_directories(${target_name}-objects INTERFACE "$<BUILD_INTERFACE:${include_dirs}>" PRIVATE "${include_dirs}")
 
     # link target to associated object files & usage requirements
-    target_link_libraries(${target_name} PRIVATE ${target_name}-object-lib)
+    target_link_libraries(${target_name} PRIVATE ${target_name}-objects)
   endif ()
 endfunction()

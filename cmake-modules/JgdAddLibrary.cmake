@@ -12,7 +12,7 @@ include(GenerateExportHeader)
 function(jgd_add_library)
   jgd_parse_arguments(
     ONE_VALUE_KEYWORDS
-    "COMPONENT;NAME;TYPE"
+    "COMPONENT;NAME;TYPE;OUT_TARGET_NAME"
     MULTI_VALUE_KEYWORDS
     "SOURCES"
     REQUIRES_ALL
@@ -121,6 +121,10 @@ function(jgd_add_library)
       export_name
       OUT_OUTPUT_NAME
       output_name)
+  endif ()
+
+  if (DEFINED ARGS_OUT_TARGET_NAME)
+    set(${ARGS_OUT_TARGET_NAME} ${target_name} PARENT_SCOPE)
   endif ()
 
   # == Create Library Target ==
