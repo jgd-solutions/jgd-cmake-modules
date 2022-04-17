@@ -11,6 +11,5 @@ include(JgdInstallConfigFilePkg)
 include(JgdStandardDirs)
 
 jgd_setup_project(PREFIX_NAME "CMM")
-jgd_source_subdirectories(ADD_SUBDIRS)
-add_subdirectory(${JGD_PROJECT_TESTS_DIR})
+add_subdirectory("${JGD_PROJECT_TESTS_DIR}")
 # jgd_install_config_file_pkg(CMAKE_MODULES "cmake-modules")
