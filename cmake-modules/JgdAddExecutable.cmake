@@ -20,21 +20,21 @@ function(jgd_add_executable)
     "${ARGN}")
 
   # Set executable component
-  if(DEFINED ARGS_COMPONENT AND NOT ARGS_COMPONENT STREQUAL PROJECT_NAME)
+  if (DEFINED ARGS_COMPONENT AND NOT ARGS_COMPONENT STREQUAL PROJECT_NAME)
     set(comp_arg COMPONENT ${ARGS_COMPONENT})
     set(comp_err_msg "n component (${ARGS_COMPONENT})")
-  endif()
+  endif ()
 
   # == Usage Guards ==
 
   # ensure executable is created in the appropriate canonical directory
   jgd_canonical_exec_subdir(OUT_VAR canonical_dir)
-  if(NOT CMAKE_CURRENT_SOURCE_DIR STREQUAL canonical_dir)
+  if (NOT CMAKE_CURRENT_SOURCE_DIR STREQUAL canonical_dir)
     message(
       FATAL_ERROR
-        "Creating a${comp_err_msg} executable for project ${PROJECT_NAME} must "
-        "be done in the canonical directory ${canonical_dir}.")
-  endif()
+      "Creating a${comp_err_msg} executable for project ${PROJECT_NAME} must "
+      "be done in the canonical directory ${canonical_dir}.")
+  endif ()
 
   # verify source naming
   set(regex "${JGD_HEADER_REGEX}|${JGD_SOURCE_REGEX}")
@@ -47,21 +47,21 @@ function(jgd_add_executable)
     "FILENAME"
     OUT_UNMATCHED
     incorrectly_named)
-  if(incorrectly_named)
+  if (incorrectly_named)
     message(
       FATAL_ERROR
-        "Provided source files do not match the regex for executable sources, "
-        "${regex}: ${incorrectly_named}.")
-  endif()
+      "Provided source files do not match the regex for executable sources, "
+      "${regex}: ${incorrectly_named}.")
+  endif ()
 
   # == Create Executable ==
 
   # resolve executable names
-  if(DEFINED ARGS_EXECUTABLE)
+  if (DEFINED ARGS_EXECUTABLE)
     set(target_name ${ARGS_EXECUTABLE})
     set(export_name ${ARGS_EXECUTABLE})
     set(output_name ${ARGS_EXECUTABLE})
-  else()
+  else ()
     jgd_executable_naming(
       ${comp_arg}
       OUT_TARGET_NAME
@@ -70,36 +70,46 @@ function(jgd_add_executable)
       export_name
       OUT_OUTPUT_NAME
       output_name)
-  endif()
+  endif ()
 
-  # resolve include directories
-  jgd_canonical_include_dirs(TARGET ${target_name} OUT_VAR include_dirs)
-
-  # create library of executable's objects, allowing unit testing
-  add_library(${target_name}-object-lib OBJECT "${ARGS_SOURCES}")
-  set_target_properties(
-    ${target_name}-object-lib
-    PROPERTIES COMPILE_OPTIONS ${JGD_DEFAULT_COMPILE_OPTIONS}
-               INCLUDE_DIRECTORIES "${include_dirs}"
-               INTERFACE_INCLUDE_DIRECTORIES
-               "$<BUILD_INTERFACE:${include_dirs}>")
-
-  # create target
+  # create executable target
   add_executable(${target_name} "${ARGS_MAIN_SOURCES}")
-  add_library(${PROJECT_NAME}::${export_name} ALIAS ${target_name})
+  add_executable(${PROJECT_NAME}::${export_name} ALIAS ${target_name})
 
   # == Set Target Properties ==
 
+  jgd_canonical_include_dirs(TARGET ${target_name} OUT_VAR include_dirs)
+
   # basic properties
-  set_target_properties(
-    ${target_name}
+  set_target_properties(${target_name}
     PROPERTIES OUTPUT_NAME ${output_name}
-               EXPORT_NAME ${export_name}
-               COMPILE_OPTIONS ${JGD_DEFAULT_COMPILE_OPTIONS}
-               LINK_LIBRARIES ${target_name}-object-lib)
+    EXPORT_NAME ${export_name}
+    COMPILE_OPTIONS ${JGD_DEFAULT_COMPILE_OPTIONS}
+    LINK_LIBRARIES ${target_name}-object-lib)
+
+  # include directories, if no object library to provide them
+  if (NOT DEFINED ARGS_SOURCES)
+    set_target_properties(${target_name} PROPERTIES
+      INCLUDE_DIRECTORIES "${include_dirs}")
+  endif ()
 
   # custom component property
-  if(DEFINED comp_arg)
+  if (DEFINED comp_arg)
     set_target_properties(${target_name} PROPERTIES ${comp_arg})
-  endif()
+  endif ()
+
+  # == Object Library ==
+
+  # create library of exec's objects, allowing unit testing of exec's sources
+  if (DEFINED ARGS_SOURCES)
+    add_library(${target_name}-object-lib OBJECT "${ARGS_SOURCES}")
+
+    # properties on object library
+    set_target_properties(${target_name}-object-lib PROPERTIES
+      COMPILE_OPTIONS ${JGD_DEFAULT_COMPILE_OPTIONS}
+      INCLUDE_DIRECTORIES "${include_dirs}"
+      INTERFACE_INCLUDE_DIRECTORIES "$<BUILD_INTERFACE:${include_dirs}>")
+
+    target_link_libraries(${target_name} PRIVATE ${target_name}-object-lib)
+  endif ()
 endfunction()
