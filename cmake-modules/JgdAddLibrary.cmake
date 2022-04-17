@@ -154,12 +154,16 @@ function(jgd_add_library)
   endif ()
 
   # == Generate an export header ==
+  set(base_name ${JGD_PROJECT_PREFIX_NAME})
+  if (DEFINED comp_arg)
+    string(TOUPPER ${ARGS_COMPONENT} comp_temp)
+    string(REPLACE "-" "_" comp_upper ${comp_temp})
+    string(APPEND base_name "_${comp_upper}")
+  endif ()
+
   generate_export_header(
     ${target_name}
-    PREFIX_NAME
-    ${JGD_PROJECT_PREFIX_NAME}
-    BASE_NAME
-    ${export_name}
+    BASE_NAME ${base_name}
     EXPORT_FILE_NAME
     "library_export_macros.hpp")
 endfunction()
