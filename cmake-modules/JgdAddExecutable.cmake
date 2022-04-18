@@ -76,8 +76,6 @@ function(jgd_add_executable)
     set(${ARGS_OUT_TARGET_NAME} ${target_name} PARENT_SCOPE)
   endif ()
 
-  message(STATUS "debug target name: ${target_name}")
-
   # create executable target
   add_executable(${target_name} "${ARGS_MAIN_SOURCES}")
   add_executable(${PROJECT_NAME}::${export_name} ALIAS ${target_name})

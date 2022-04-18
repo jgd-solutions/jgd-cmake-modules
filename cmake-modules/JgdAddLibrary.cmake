@@ -87,8 +87,9 @@ function(jgd_add_library)
   # == Library Configuration ==
 
   # set library type, if provided and supported
-  set(lib_type "")
+  set(lib_type STATIC)
   if (DEFINED ARGS_TYPE)
+    set(lib_type ${ARGS_TYPE})
     set(supported_types STATIC SHARED MODULE)
     list(FIND supported_types "${ARGS_TYPE}" supported)
     if (supported EQUAL -1)
@@ -97,8 +98,8 @@ function(jgd_add_library)
         "Unsupported type ${ARGS_TYPE}. ${CMAKE_CURRENT_FUNCTION} must be "
         "called with no type or one of: ${supported_types}")
     endif ()
-
-    set(lib_type ${ARGS_TYPE})
+  elseif (${JGD_PROJECT_PREFIX_NAME}_BUILD_SHARED_LIBS OR ${JGD_PROJECT_PREFIX_NAME}_${comp_upper}_BUILD_SHARED_LIBS)
+    set(lib_type SHARED)
   endif ()
 
   # resolve library names
@@ -156,8 +157,6 @@ function(jgd_add_library)
   # == Generate an export header ==
   set(base_name ${JGD_PROJECT_PREFIX_NAME})
   if (DEFINED comp_arg)
-    string(TOUPPER ${ARGS_COMPONENT} comp_temp)
-    string(REPLACE "-" "_" comp_upper ${comp_temp})
     string(APPEND base_name "_${comp_upper}")
   endif ()
 
