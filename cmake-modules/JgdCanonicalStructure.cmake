@@ -180,6 +180,10 @@ function(jgd_canonical_include_dirs)
     cmake_path(GET include_dir PARENT_PATH include_dir)
   endforeach ()
 
-  # Set result with PROJECT_BINARY_DIR - the root for generated headers
-  set(${ARGS_OUT_VAR} "${include_dir};${PROJECT_BINARY_DIR}" PARENT_SCOPE)
+  # Add appropriate binary dir for generated headers
+  set(binary_dirs "${PROJECT_BINARY_DIR}")
+  if (component)
+    set(binary_dirs "${PROJECT_BINARY_DIR};${PROJECT_BINARY_DIR}/${PROJECT_NAME}-${component}")
+  endif ()
+  set(${ARGS_OUT_VAR} "${include_dir};${binary_dirs}" PARENT_SCOPE)
 endfunction()
