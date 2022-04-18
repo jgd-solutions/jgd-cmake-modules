@@ -32,11 +32,11 @@ set(JGD_IN_FILE_EXTENSION ".in")
 #
 function(jgd_canonical_lib_subdir)
   jgd_parse_arguments(ONE_VALUE_KEYWORDS "OUT_VAR" REQUIRES_ALL "OUT_VAR"
-                      ARGUMENTS "${ARGN}")
+    ARGUMENTS "${ARGN}")
   string(REGEX REPLACE "^${JGD_LIB_PREFIX}" "" no_lib "${PROJECT_NAME}")
   set(${ARGS_OUT_VAR}
-      "${PROJECT_SOURCE_DIR}/${JGD_LIB_PREFIX}${no_lib}"
-      PARENT_SCOPE)
+    "${PROJECT_SOURCE_DIR}/${JGD_LIB_PREFIX}${no_lib}"
+    PARENT_SCOPE)
 endfunction()
 
 #
@@ -56,11 +56,11 @@ endfunction()
 #
 function(jgd_canonical_lib_component_subdir)
   jgd_parse_arguments(ONE_VALUE_KEYWORDS "OUT_VAR;COMPONENT" REQUIRES_ALL
-                      "OUT_VAR;COMPONENT" ARGUMENTS "${ARGN}")
+    "OUT_VAR;COMPONENT" ARGUMENTS "${ARGN}")
   string(JOIN "-" comp_dir ${PROJECT_NAME} ${ARGS_COMPONENT})
   set(${ARGS_OUT_VAR}
-      "${PROJECT_SOURCE_DIR}/${comp_dir}/${PROJECT_NAME}/${component}"
-      PARENT_SCOPE)
+    "${PROJECT_SOURCE_DIR}/${comp_dir}/${PROJECT_NAME}/${component}"
+    PARENT_SCOPE)
 endfunction()
 
 #
@@ -77,11 +77,11 @@ endfunction()
 #
 function(jgd_canonical_exec_subdir)
   jgd_parse_arguments(ONE_VALUE_KEYWORDS "OUT_VAR" REQUIRES_ALL "OUT_VAR"
-                      ARGUMENTS "${ARGN}")
+    ARGUMENTS "${ARGN}")
   string(REGEX REPLACE "^${JGD_LIB_PREFIX}" "" no_lib "${PROJECT_NAME}")
   set(${ARGS_OUT_VAR}
-      "${PROJECT_SOURCE_DIR}/${no_lib}"
-      PARENT_SCOPE)
+    "${PROJECT_SOURCE_DIR}/${no_lib}"
+    PARENT_SCOPE)
 endfunction()
 
 #
@@ -102,13 +102,13 @@ endfunction()
 #
 function(jgd_canonical_exec_component_subdir)
   jgd_parse_arguments(ONE_VALUE_KEYWORDS "OUT_VAR;COMPONENT" REQUIRES_ALL
-                      "OUT_VAR;COMPONENT" ARGUMENTS "${ARGN}")
+    "OUT_VAR;COMPONENT" ARGUMENTS "${ARGN}")
 
   jgd_canonical_exec_subdir(OUT_VAR exec_subdir)
   set(exec_comp_subdir "${exec_subdir}/${ARGS_COMPONENT}")
   set(${ARGS_OUT_VAR}
-      "${exec_comp_subdir}"
-      PARENT_SCOPE)
+    "${exec_comp_subdir}"
+    PARENT_SCOPE)
 endfunction()
 
 #
@@ -132,7 +132,7 @@ endfunction()
 #
 function(jgd_canonical_include_dirs)
   jgd_parse_arguments(ONE_VALUE_KEYWORDS "TARGET;OUT_VAR" REQUIRES_ALL
-                      "TARGET;OUT_VAR" ARGUMENTS "${ARGN}")
+    "TARGET;OUT_VAR" ARGUMENTS "${ARGN}")
 
   # Get the target's properties
   get_target_property(source_dir ${ARGS_TARGET} SOURCE_DIR)
@@ -141,47 +141,45 @@ function(jgd_canonical_include_dirs)
 
   # Helpful macro to check & emit error
   macro(_CHECK_ERR subdir target_type_name)
-    if(NOT "${source_dir}" MATCHES "^${subdir}")
+    if (NOT "${source_dir}" MATCHES "^${subdir}")
       message(
         FATAL_ERROR
-          "Unable to resolve default include directory for target "
-          "${ARGS_TARGET}. The source directory, "
-          "${source_dir}, is not within the ${target_type_name}'s canonical "
-          "include directory of ${subdir}.")
-    endif()
+        "Unable to resolve default include directory for target "
+        "${ARGS_TARGET}. The source directory, "
+        "${source_dir}, is not within the ${target_type_name}'s canonical "
+        "include directory of ${subdir}.")
+    endif ()
   endmacro()
 
   # Set include directory from canonical directories for respective target type
-  if("${target_type}" STREQUAL "EXECUTABLE")
+  if ("${target_type}" STREQUAL "EXECUTABLE")
     # executable
     jgd_canonical_exec_subdir(OUT_VAR exec_subdir)
     _check_err("${exec_subdir}" "executable")
     set(prefix_parents 1)
     set(include_dir "${exec_subdir}")
-  else()
-    if(component)
+  else ()
+    if (component)
       # library component
       jgd_canonical_lib_component_subdir(COMPONENT ${component} OUT_VAR
-                                         comp_subdir)
+        comp_subdir)
       _check_err("${comp_subdir}" "library component")
       set(prefix_parents 2)
       set(include_dir "${comp_subdir}")
-    else()
+    else ()
       # main library
       jgd_canonical_lib_subdir(OUT_VAR lib_subdir)
       _check_err("${comp_subdir}" "library")
       set(prefix_parents 1)
       set(include_dir "${lib_subdir}")
-    endif()
-  endif()
+    endif ()
+  endif ()
 
   # Set include dir up the canonical source path to create include prefix
-  foreach(i RANGE 1 ${prefix_parents})
+  foreach (i RANGE 1 ${prefix_parents})
     cmake_path(GET include_dir PARENT_PATH include_dir)
-  endforeach()
+  endforeach ()
 
   # Set result with PROJECT_BINARY_DIR - the root for generated headers
-  set(${ARGS_OUT_VAR}
-      "${include_dir};${PROJECT_BINARY_DIR}"
-      PARENT_SCOPE)
+  set(${ARGS_OUT_VAR} "${include_dir};${PROJECT_BINARY_DIR}" PARENT_SCOPE)
 endfunction()
