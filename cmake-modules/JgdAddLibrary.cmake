@@ -164,5 +164,5 @@ function(jgd_add_library)
     ${target_name}
     BASE_NAME ${base_name}
     EXPORT_FILE_NAME
-    "library_export_macros.hpp")
+    "export_macros.hpp")
 endfunction()
