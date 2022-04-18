@@ -1,5 +1,5 @@
-include(JgdAddDefaultLibrary)
-jgd_add_default_library(
+include(JgdAddLibrary)
+jgd_add_library(
   COMPONENT
   "${JGD_CURRENT_COMPONENT}"
   SOURCES

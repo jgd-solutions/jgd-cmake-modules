@@ -16,5 +16,6 @@ endmacro()
 
 _test_project(single-exec "-DSINGLE_EXEC_BUILD_TESTS=ON")
 _test_project("libsingle" "-DLIBSINGLE_BUILD_TESTS=ON")
-_test_project("libsingle" "-D LIBSINGLE_BUILD_TESTS=ON;-D LIBSINGLE_BUILD_SHARED_LIBS=ON" -shared)
-#_test_project("libcomponents" "-DCOMPONENTS_BUILD_TESTS=ON")
+_test_project("libsingle" "-DLIBSINGLE_BUILD_TESTS=ON;-DLIBSINGLE_BUILD_SHARED_LIBS=ON" -shared)
+_test_project("libcomponents" "-DLIBCOMPONENTS_BUILD_TESTS=ON")
+_test_project("libcomponents" "-DLIBCOMPONENTS_BUILD_TESTS=ON;-DLIBCOMPONENTS_CORE_BUILD_SHARED_LIBS=ON" -shared)

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <libcomponents/core/library_export_macros.hpp>
+
 namespace components {
-int reader();
+LIBCOMPONENTS_CORE_EXPORT int reader();
 }

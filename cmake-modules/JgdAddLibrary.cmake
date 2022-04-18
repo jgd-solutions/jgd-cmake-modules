@@ -78,9 +78,8 @@ function(jgd_add_library)
       string(REPLACE "-" "_" comp_upper ${comp_temp})
       option(
         ${JGD_PROJECT_PREFIX_NAME}_${comp_upper}_BUILD_SHARED_LIBS
-        "Dictates if libraries with unspecified types should be built shared. "
-        "Prefixed to only take affect for ${PROJECT_NAME}."
-        ${JGD_PROJECT_PREFIX_NAME}_BUILD_SHARED_LIBS)
+        "Dictates if libraries with unspecified types should be built shared. Prefixed to only take affect for ${ARGS_COMPONENT} of ${PROJECT_NAME}."
+        ${${JGD_PROJECT_PREFIX_NAME}_BUILD_SHARED_LIBS})
     endif ()
   endif ()
 
@@ -129,6 +128,11 @@ function(jgd_add_library)
 
   # == Set Target Properties ==
 
+  # custom component property
+  if (DEFINED comp_arg)
+    set_target_properties(${target_name} PROPERTIES ${comp_arg})
+  endif ()
+
   jgd_canonical_include_dirs(TARGET ${target_name} OUT_VAR include_dirs)
 
   # common properties. Some may be ignored by certain targets
@@ -149,12 +153,8 @@ function(jgd_add_library)
       SOVERSION ${PROJECT_VERSION_MAJOR})
   endif ()
 
-  # custom component property
-  if (DEFINED comp_arg)
-    set_target_properties(${target_name} PROPERTIES ${comp_arg})
-  endif ()
-
   # == Generate an export header ==
+
   set(base_name ${JGD_PROJECT_PREFIX_NAME})
   if (DEFINED comp_arg)
     string(APPEND base_name "_${comp_upper}")
