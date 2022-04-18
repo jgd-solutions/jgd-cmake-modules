@@ -21,7 +21,7 @@ function(jgd_configure_pkg_configuration_file)
   jgd_pkg_config_file_name(${comp_arg} OUT_VAR config_file)
   set(in_config_file "${config_file}${JGD_IN_FILE_EXTENSION}")
   string(PREPEND in_config_file "${JGD_PROJECT_CMAKE_DIR}/")
-  string(PREPEND config_file "${JGD_PROJECT_CMAKE_DIR}/")
+  string(PREPEND config_file "${JGD_CMAKE_DESTINATION}/")
   if (NOT EXISTS "${in_config_file}")
     message(
       FATAL_ERROR
