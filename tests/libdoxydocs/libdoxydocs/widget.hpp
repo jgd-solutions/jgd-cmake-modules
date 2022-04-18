@@ -7,14 +7,14 @@
  * This is a more detailed explanation of this file, but it's truly simple
  */
 
-#include <libsingle/export_macros.hpp>
+#include <libdoxydocs/export_macros.hpp>
 
-namespace single {
+namespace doxydocs {
 
 /*!
  * \brief Forward declaration for friendship relationship
  */
-class LIBSINGLE_EXPORT Factory;
+class LIBDOXYDOCS_EXPORT Factory;
 
 /*!
  * \brief Represents the Widgets being manufactured.
@@ -42,4 +42,4 @@ class Widget {
   constexpr int get_value() const noexcept { return this->value; }
 };
 
-}  // namespace single
+}  // namespace doxydocs

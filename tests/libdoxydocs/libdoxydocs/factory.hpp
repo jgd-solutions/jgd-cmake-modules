@@ -6,10 +6,10 @@
  * This is a more detailed explanation of this file, but it's truly simple
  */
 
-#include <libsingle/export_macros.hpp>
-#include <libsingle/widget.hpp>
+#include <libdoxydocs/export_macros.hpp>
+#include <libdoxydocs/widget.hpp>
 
-namespace single {
+namespace doxydocs {
 
 /*!
  * \brief Uniformly produces Widgets based on a bunch of factors that couldn't
@@ -18,7 +18,7 @@ namespace single {
  * In reality, there is also a physical factory. This abstraction helps to
  * properly represent reality.
  */
-class LIBSINGLE_EXPORT Factory {
+class LIBDOXYDOCS_EXPORT Factory {
  private:
   int factory_num{0};  //!< Internal factory number
 
@@ -47,4 +47,4 @@ class LIBSINGLE_EXPORT Factory {
   Widget manufacture(const int scale = 1) const noexcept;
 };
 
-}  // namespace single
+}  // namespace doxydocs

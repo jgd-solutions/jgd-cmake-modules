@@ -100,8 +100,7 @@ function(jgd_source_subdirectories)
     # add all components' subdirectories
     foreach (component ${ARGS_LIB_COMPONENTS})
       list(LENGTH subdirs_added old_len)
-      jgd_canonical_lib_component_subdir(COMPONENT "${component}" OUT_VAR
-        subdir_path)
+      jgd_canonical_lib_component_subdir(COMPONENT "${component}" OUT_VAR subdir_path)
       set(JGD_CURRENT_COMPONENT "${component}")
       _jgd_check_add_subdir(${add_subdirs_arg} SUBDIR "${subdir_path}")
       unset(JGD_CURRENT_COMPONENT)
@@ -140,6 +139,7 @@ function(jgd_source_subdirectories)
     _jgd_check_add_subdir(${add_subdirs_arg} SUBDIR "${JGD_PROJECT_TESTS_DIR}")
   endif ()
 
+  message(STATUS "debug  ${JGD_PROJECT_PREFIX_NAME}_BUILD_DOCS = ${${JGD_PROJECT_PREFIX_NAME}_BUILD_DOCS}")
   if (ARGS_WITH_DOCS_DIR AND ${JGD_PROJECT_PREFIX_NAME}_BUILD_DOCS)
     _jgd_check_add_subdir(${add_subdirs_arg} SUBDIR "${JGD_PROJECT_DOCS_DIR}")
   endif ()

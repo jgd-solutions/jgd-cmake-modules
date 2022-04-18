@@ -2,6 +2,6 @@
 
 #include <filesystem>
 
-namespace compproject {
+namespace single {
 inline const std::filesystem::path data_dir = "@JGD_PROJECT_DATA_DIR@";
 }

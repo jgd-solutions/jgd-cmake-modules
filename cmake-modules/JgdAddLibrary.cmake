@@ -139,7 +139,7 @@ function(jgd_add_library)
   set_target_properties(
     ${target_name}
     PROPERTIES OUTPUT_NAME ${output_name}
-    PREFIX ${JGD_LIB_PREFIX}
+    PREFIX ""
     EXPORT_NAME ${export_name}
     COMPILE_OPTIONS "${JGD_DEFAULT_COMPILE_OPTIONS}"
     INCLUDE_DIRECTORIES "${include_dirs}"
