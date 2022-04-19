@@ -39,7 +39,7 @@ macro(JGD_PARSE_ARGUMENTS)
   set(options WITHOUT_MISSING_VALUES_CHECK WITHOUT_UNPARSED_CHECK)
   set(one_value_keywords)
   set(multi_value_keywords ARGUMENTS OPTIONS ONE_VALUE_KEYWORDS
-    MULTI_VALUE_KEYWORDS REQUIRES_ALL REQUIRES_ANY)
+    MULTI_VALUE_KEYWORDS REQUIRES_ALL REQUIRES_ANY MUTUALLY_EXCLUSIVE)
   cmake_parse_arguments(INS "${options}" "${one_value_keywords}"
     "${multi_value_keywords}" "${ARGN}")
 
@@ -80,8 +80,8 @@ macro(JGD_PARSE_ARGUMENTS)
   foreach (keyword ${INS_REQUIRES_ALL})
     set(parsed_var ARGS_${keyword})
     if (NOT DEFINED ${parsed_var})
-      message(FATAL_ERROR " ${keyword} was not provided or may be missing "
-        " its value (s) .")
+      message(FATAL_ERROR "${keyword} was not provided or may be missing "
+        "its value (s) .")
     endif ()
   endforeach ()
 
@@ -100,18 +100,38 @@ macro(JGD_PARSE_ARGUMENTS)
       message(
         FATAL_ERROR
         "None of the following keywords were provided or may be missing their "
-        " values: ${INS_REQUIRES_ANY}")
+        "values: ${INS_REQUIRES_ANY}")
+    endif ()
+  endif ()
+
+  # validate keywords that are mutually exclusive
+  if (INS_MUTUALLY_EXCLUSIVE)
+    foreach (keyword ${INS_ARGUMENTS})
+      list(FIND INS_MUTUALLY_EXCLUSIVE ${keyword} idx)
+      if (NOT idx EQUAL -1)
+        if (DEFINED first_keyword)
+          set(second_keyword ${keyword})
+          break()
+        else ()
+          set(first_keyword ${keyword})
+        endif ()
+      endif ()
+    endforeach ()
+
+    if (DEFINED second_keyword)
+      message(FATAL_ERROR "The keywords ${first_keyword} and ${second_keyword} were both defined but are part of the "
+        "mutually exclusive list of function arguments: ${INS_MUTUALLY_EXCLUSIVE}")
     endif ()
   endif ()
 
   # validate caller's argument format
   if (NOT WITHOUT_MISSING_VALUES_CHECK AND ARGS_KEYWORDS_MISSING_VALUES)
     message(FATAL_ERROR "Keywords provided without any values: "
-      " ${ARGS_KEYWORDS_MISSING_VALUES}")
+      "${ARGS_KEYWORDS_MISSING_VALUES}")
   endif ()
 
   if (NOT WITHOUT_UNPARSED_CHECK AND ARGS_UNPARSED_ARGUMENTS)
     message(WARNING "Unparsed arguments provided: "
-      " ${ARGS_UNPARSED_ARGUMENTS} ")
+      "${ARGS_UNPARSED_ARGUMENTS} ")
   endif ()
 endmacro()

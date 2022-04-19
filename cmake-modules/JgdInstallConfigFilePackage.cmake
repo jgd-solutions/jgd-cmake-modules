@@ -4,71 +4,12 @@ include(JgdParseArguments)
 include(JgdFileNaming)
 include(JgdStandardDirs)
 include(JgdCanonicalStructure)
+include(JgdConfigureFiles)
 include(JgdExpandDirectories)
 include(JgdSeparateList)
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
-# Used to only install each project's main package config and version files once
-set(_LAST_INSTALLED_PROJECT)
-
-# TODO: - each target can have a pkg-config file - the project definitely needs
-# to install the root package config file - the includes above are possibly all
-# not necessary
-
-# For each target, searches appropriate paths for pkg config files and sets
-# variable specified by out_var to a list of config-files to install
-function(_jgd_package_config_files targets out_var configure_first)
-  set(install_cmake_files)
-
-  # searches for file_name in standard cmake source locations
-  macro(_search target configure_first)
-
-    jgd_package_config_file_name(${comp_arg} OUT_VAR config_file_name)
-
-    if (configure_first)
-      set(in_config_file "${config_file_name}${JGD_IN_FILE_EXTENSION}")
-      string(PREPEND in_config_file "${JGD_PROJECT_CMAKE_DIR}/")
-      if (NOT EXISTS "${in_config_file}")
-        message(
-          FATAL_ERROR "Cannot configure a package config file for project "
-          "${PROJECT_NAME}. Could not find file ${in_config_file}.")
-      endif ()
-
-    endif ()
-
-    # search for main package config-file
-    set(config_pkg_file)
-    set(search_paths "${JGD_CMAKE_DESTINATION}/${config_file_name}"
-      "${JGD_PROJECT_CMAKE_DIR}/${config_file_name}")
-    foreach (search_path ${search_paths})
-      if (EXISTS "${search_path}")
-        set(${out_var} "${search_path}")
-        return()
-      endif ()
-    endforeach ()
-
-    message(
-      FATAL_ERROR
-      "Unable to install a config-file package without a config file. "
-      "Could not find the file ${config_file_name} in any of ${search_paths}."
-    )
-  endmacro()
-
-  # Add the mandatory project's package config file
-  _search(${config_file_name} config_pkg_file)
-  list(APPEND install_cmake_files "${config_pkg_file}")
-
-  # Add any additional component-specific config files
-  foreach (target ${targets})
-
-  endforeach ()
-
-  # Set Result
-  set(${out_var}
-    "${install_cmake_files}"
-    PARENT_SCOPE)
-endfunction()
 
 #
 # Installs a config-file package and its associated artifacts.  The provided
@@ -115,10 +56,12 @@ endfunction()
 # Targets' headers will be installed -> all in runtime except private
 #
 
-function(jgd_install_config_file_pkg)
+function(jgd_install_config_file_package)
   jgd_parse_arguments(
     OPTIONS
-    "CONFIGURE_PKG_CONFIGURATION_FILES"
+    "CONFIGURE_PACKAGE_CONFIG_FILES"
+    ONE_VALUE_KEYWORDS
+    "HEADER_EXCLUDE_REGEX"
     MULTI_VALUE_KEYWORDS
     "TARGETS;CMAKE_MODULES"
     REQUIRES_ANY
@@ -136,34 +79,78 @@ function(jgd_install_config_file_pkg)
     )
   endif ()
 
-  # == Optionally configure the pkg-config file
-
-  # == Install CMake Files==
-
-  # list of cmake files to install at end
-  set(install_cmake_files)
-
   # Package version file
   if (DEFINED ${PROJECT_NAME}_VERSION)
     jgd_package_version_file_name(OUT_VAR config_version_file)
-    string(PREPEND config_version_file "${CMAKE_CURRENT_BINARY_DIR}/")
 
     write_basic_package_version_file(
-      "${config_version_file}"
+      "${JGD_CMAKE_DESTINATION}/${config_version_file}"
       VERSION ${PROJECT_VERSION}
       COMPATIBILITY SameMajorVersion)
-
     list(APPEND install_cmake_files "${config_version_file}")
   endif ()
 
-  # Package config file(s)
-  _jgd_package_config_files("${ARGS_TARGETS}" config_pkg_files)
-  list(APPEND install_cmake_files "${config_pkg_files}")
+  # == Install CMake Files==
 
-  # Additional cmake modules
-  if (ARGS_CMAKE_MODULES)
-    jgd_expand_directories(PATHS "${ARGS_CMAKE_MODULES}" OUT_VAR module_files
-      GLOB "*.cmake")
+  set(install_cmake_files) # list of cmake files to install at end
+
+  # Function to configure and find package config file for components or project
+  function(_jgd_get_package_config_file component out_var)
+    if (component)
+      set(comp_arg COMPONENT ${component})
+    endif ()
+    jgd_package_config_file_name(${comp_arg} OUT_VAR config_file_name)
+
+    if (DEFINED ARGS_CONFIGURE_PACKAGE_CONFIG_FILES)
+      set(in_config_file "${config_file_name}${JGD_IN_FILE_EXTENSION}")
+      string(PREPEND in_config_file "${JGD_PROJECT_CMAKE_DIR}/")
+      if (EXISTS "${in_config_file}")
+        jgd_configure_package_config_file(${comp_arg})
+      else ()
+        message(
+          FATAL_ERROR "Cannot configure a package config file for ${component} of project "
+          "${PROJECT_NAME}. Could not find file ${in_config_file}.")
+      endif ()
+    endif ()
+
+    # search for package config-file
+    set(config_pkg_file)
+    set(search_paths "${JGD_CMAKE_DESTINATION}/${config_file_name}"
+      "${JGD_PROJECT_CMAKE_DIR}/${config_file_name}")
+    foreach (search_path ${search_paths})
+      if (EXISTS "${search_path}")
+        set(${out_var} "${search_path}" PARENT_SCOPE)
+        return()
+      endif ()
+    endforeach ()
+
+    message(
+      FATAL_ERROR
+      "Unable to install a config-file package without a config file. "
+      "Could not find the file ${config_file_name} in any of ${search_paths}."
+    )
+  endfunction()
+
+  # Resolve components' package config files, append to cmake files to be installed
+  foreach (target ${ARGS_TARGETS})
+    get_target_property(component ${target} COMPONENT)
+    if (NOT DEFINED component)
+      continue()
+    endif ()
+
+    _jgd_get_package_config_file(${component} component_config_file)
+    list(APPEND install_cmake_files "${component_config_file}")
+  endforeach ()
+
+  # Append project's main package config file to cmake files to be installed
+  _jgd_get_package_config_file("" component_config_file)
+  list(APPEND install_cmake_files "${component_config_file}")
+
+  # Additional cmake modules for project
+  if (DEFINED ARGS_CMAKE_MODULES)
+    jgd_expand_directories(PATHS "${ARGS_CMAKE_MODULES}" OUT_VAR module_files GLOB "*.cmake")
+    list(REMOVE_ITEM module_files ${install_cmake_modules}) # ignore config package files
+
     if (module_files)
       jgd_separate_list(
         IN_LIST
@@ -189,6 +176,7 @@ function(jgd_install_config_file_pkg)
     endif ()
   endif ()
 
+
   # Install all CMake files
   install(
     FILES ${install_cmake_files}
@@ -197,28 +185,31 @@ function(jgd_install_config_file_pkg)
 
   # ==  Install Target's Interface Headers ==
 
-  foreach (target ARGS_TARGETS)
-    # current target's component
+  foreach (target ${ARGS_TARGETS})
     get_target_property(target_component ${target} COMPONENT)
     if (target_component)
       set(comp_arg COMPONENT ${target_component})
     endif ()
 
     # current target's include directories
-    get_target_property(inc_prop ${target} ${target}
-      INTERFACE_INCLUDE_DIRECTORIES)
+    get_target_property(inc_prop ${target} ${target} INTERFACE_INCLUDE_DIRECTORIES)
     string(REGEX REPLACE "\$<BUILD_INTERFACE:|>" "" include_dirs "${inc_prop}")
 
     # suffix all include dirs with / so only their contents is installed
     list(TRANSFORM include_dirs APPEND "/")
 
-    if (suffixed_include_dirs)
+    if (DEFINED ARGS_HEADER_EXCLUDE_REGEX)
+      set(exclude_arg REGEX "${ARGS_HEADER_EXCLUDE_REGEX}" EXCLUDE)
+    endif ()
+
+    if (include_dirs)
       install(
         DIRECTORY ${include_dirs}
         DESTINATION ${JGD_INSTALL_INCLUDE_DIR}
         FILES_MATCHING
         PATTERN "*${JGD_HEADER_EXTENSION}"
-        PATTERN "private" EXCLUDE
+        PATTERN "*private*" EXCLUDE
+        ${exclude_arg}
         COMPONENT ${PROJECT_NAME}_devel)
     endif ()
   endforeach ()
@@ -226,14 +217,10 @@ function(jgd_install_config_file_pkg)
   # == Install targets via an export set ==
 
   if (DEFINED ARGS_TARGETS)
-    if (DEFINED ARGS_HEADERS)
-      set(includes_dest INCLUDES DESTINATION "${JGD_INSTALL_INCLUDE_DIR}")
-    endif ()
-
     install(
       TARGETS ${ARGS_TARGETS}
       EXPORT export_set
-      ${includes_dest}
+      INCLUDES DESTINATION "${JGD_INSTALL_INCLUDE_DIR}"
       RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
       COMPONENT ${PROJECT_NAME}_runtime
       LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
@@ -242,10 +229,21 @@ function(jgd_install_config_file_pkg)
       ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
       COMPONENT ${PROJECT_NAME}_devel)
 
-    jgd_package_targets_file_name(COMPONENT "${component}" OUT_VAR targets_file)
+
+    jgd_package_targets_file_name(OUT_VAR targets_files)
+    foreach (target ${ARGS_TARGETS})
+      get_target_property(component ${target} COMPONENT)
+      if (NOT DEFINED component)
+        continue()
+      endif ()
+
+      jgd_package_targets_file_name(COMPONENT ${component} OUT_VAR targets_file)
+      list(APPEND targets_files "${targets_file}")
+    endforeach ()
+
     install(
       EXPORT export_set
-      FILE ${targets_file}
+      FILES ${targets_files}
       NAMESPACE ${PROJECT_NAME}::
       DESTINATION "${JGD_INSTALL_CMAKE_DESTINATION}"
       COMPONENT ${PROJECT_NAME}_devel)

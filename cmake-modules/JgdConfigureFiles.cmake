@@ -6,12 +6,17 @@ include(CMakePackageConfigHelpers)
 
 # without target -> for the project with target -> specifically for the target
 function(jgd_configure_package_config_file)
-  jgd_parse_arguments(ONE_VALUE_KEYWORDS "TARGET" ARGUMENTS "${ARGN}")
+  jgd_parse_arguments(ONE_VALUE_KEYWORDS "TARGET;COMPONENT"
+    MUTUALLY_EXCLUSIVE "TARGET;COMPONENT" ARGUMENTS "${ARGN}")
 
-  # extract target's component property into an argument
-  if (DEFINED ARGS_TARGET)
-    get_target_property(component ${target} COMPONENT)
-    if (component AND NOT component STREQUAL PROJECT_NAME)
+  # use provided component or extract target's component property into an argument
+  if (DEFINED ARGS_TARGET OR DEFINED ARGS_COMPONENT)
+    if (DEFINED ARGS_COMPONENT)
+      set(component ${ARGS_COMPONENT})
+    else ()
+      get_target_property(component ${target} COMPONENT)
+    endif ()
+    if (NOT component STREQUAL PROJECT_NAME)
       set(comp_arg COMPONENT ${component})
       set(comp_err_msg " for component ${component}")
     endif ()
