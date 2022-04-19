@@ -57,10 +57,7 @@ _test_project("libdoxydocs"
   BUILD_OPTIONS -DLIBDOXYDOCS_BUILD_TESTS=ON -DLIBDOXYDOCS_BUILD_DOCS=ON
   BUILD_TARGET doxygen-docs)
 
-_test_project("libclangformat"
-  BUILD_OPTIONS -DLIBCLANGFORMAT_BUILD_TESTS=ON
-  NAME_SUFFIX -proj-works)
-
-_test_project("libclangformat"
-  BUILD_OPTIONS -DLIBCLANGFORMAT_BUILD_TESTS=ON
+_test_project("libcomponents"
+  BUILD_OPTIONS -DLIBCOMPONENTS_BUILD_TESTS=ON
+  NAME_SUFFIX -format
   BUILD_TARGET clang-format-check)

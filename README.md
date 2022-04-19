@@ -35,10 +35,6 @@ Shouldn't be done but will try to support it.
 
 - check if certain calls, like setup_project() and install_package() have already been called for the given project and
   emit a warnign
-- library components may have individual cmake modules. These should only be installed if the respective component is
-  installed. A structure for separating these modules also needs to be defined. Do they go in the source dir or in the
-  cmake/ dir?
-
 - set(CMAKE_INSTALL_DOCDIR \${CMAKE_INSTALL_DATAROOTDIR}/doc/\${PROJECT_NAME}) on each include of gnu install dirs
 
 - for things like prefix and include paths, etc. (those that are calculated or

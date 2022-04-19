@@ -1,0 +1,3 @@
+include(JgdFileNaming)
+jgd_package_targets_file_name(PROJECT @PROJECT_NAME@ COMPONENT core OUT_VAR target_file)
+include("${target_file}")
