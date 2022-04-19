@@ -1,0 +1,41 @@
+include(JgdFileNaming)
+
+# Include main targets file
+jgd_package_targets_file_name(PROJECT @PROJECT_NAME@ OUT_VAR target_file_name)
+set_and_check(target_file_name ${target_file_name})
+list(APPEND config_package_files ${target_file_name})
+include(${target_file_name})
+unset(target_file_name)
+
+# Include package components' config file
+foreach(component ${@PROJECT_NAME@_FIND_COMPONENTS})
+  jgd_package_config_file_name(PROJECT @PROJECT_NAME@ COMPONENT ${component}
+                           OUT_VAR comp_config_name)
+  set_and_check(comp_config_name ${comp_config_name})
+  list(APPEND config_package_files ${comp_config_name})
+  include(${comp_config_name})
+endforeach()
+unset(comp_config_name)
+
+# Add config package's version file to collection of package modules
+jgd_package_version_file_name(PROJECT @PROJECT_NAME@ OUT_VAR version_file_name)
+if(EXISTS ${version_file_name})
+  list(APPEND config_package_files ${version_file_name})
+endif()
+unset(version_file_name)
+
+# Append module path for any additional (non-package) CMake modules
+file(GLOB_RECURSE additional_modules
+  LIST_DIRECTORIES false
+  RELATIVE "${CMAKE_CURRENT_LIST_DIR}" "*.cmake")
+list(REMOVE_ITEM additional_modules ${config_package_files})
+unset(config_package_files)
+
+if(additional_modules)
+  list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")
+endif()
+unset(additional_modules)
+
+# As recommended in CMake's configure_package_config_file command, ensure
+# required components have been found
+check_required_components(@PROJECT_NAME@)

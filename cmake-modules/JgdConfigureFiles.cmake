@@ -5,7 +5,7 @@ include(JgdFileNaming)
 include(CMakePackageConfigHelpers)
 
 # without target -> for the project with target -> specifically for the target
-function(jgd_configure_pkg_configuration_file)
+function(jgd_configure_package_config_file)
   jgd_parse_arguments(ONE_VALUE_KEYWORDS "TARGET" ARGUMENTS "${ARGN}")
 
   # extract target's component property into an argument
@@ -18,7 +18,7 @@ function(jgd_configure_pkg_configuration_file)
   endif ()
 
   # resolve input and output pkg-config file names
-  jgd_pkg_config_file_name(${comp_arg} OUT_VAR config_file)
+  jgd_package_config_file_name(${comp_arg} OUT_VAR config_file)
   set(in_config_file "${config_file}${JGD_IN_FILE_EXTENSION}")
   string(PREPEND in_config_file "${JGD_PROJECT_CMAKE_DIR}/")
   string(PREPEND config_file "${JGD_CMAKE_DESTINATION}/")

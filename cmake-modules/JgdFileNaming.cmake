@@ -101,7 +101,7 @@ endmacro()
 # OUT_VAR: one-value arg; the name of the output variable which will store the
 # resulting file name.
 #
-function(jgd_pkg_configuration_file_name)
+function(jgd_package_config_file_name)
   _jgd_file_naming_arguments("${ARGN}")
   _jgd_joined_file_name(${comp_arg} SUFFIX "config.cmake" ${proj_arg} OUT_VAR
     "${ARGS_OUT_VAR}")
@@ -123,7 +123,7 @@ endfunction()
 # OUT_VAR: one-value arg; the name of the output variable which will store the
 # resulting file name.
 #
-function(jgd_pkg_version_file_name)
+function(jgd_package_version_file_name)
   _jgd_file_naming_arguments("${ARGN}")
   _jgd_joined_file_name(SUFFIX "config-version.cmake" ${proj_arg} OUT_VAR
     ${ARGS_OUT_VAR})
@@ -148,7 +148,7 @@ endfunction()
 # OUT_VAR: one-value arg; the name of the output variable which will store the
 # resulting file name.
 #
-function(jgd_pkg_targets_file_name)
+function(jgd_package_targets_file_name)
   _jgd_file_naming_arguments("${ARGN}")
   _jgd_joined_file_name(${comp_arg} SUFFIX "targets.cmake" ${proj_arg} OUT_VAR
     ${ARGS_OUT_VAR})
