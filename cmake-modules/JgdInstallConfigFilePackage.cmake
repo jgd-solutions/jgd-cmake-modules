@@ -10,52 +10,6 @@ include(JgdSeparateList)
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
-
-#
-# Installs a config-file package and its associated artifacts.  The provided
-# TARGETS, HEADERS, and CMAKE_MODULES will be installed under the COMPONENT
-# provided, or the default global component of PROJECT_NAME. Prior to
-# installing, any TARGETS provided are exported under the namespace
-# 'PROJECT_NAME::'. If HEADERS is provided, these exported targets will have
-# their INTERFACE_INCLUDE_DIRECTORIES property set to JGD_INSTALL_INCLUDE_DIR,
-# such that consumers can use the interface headers.
-#
-# Multiple calls to this function can be made to install various components, but
-# each call expects an appropriately named config-file to be present. All file
-# names follow those in JgdFileNaming and installation locations follow those in
-# JgdStandardDirs.
-#
-# Arguments:
-#
-# COMPONENT: one-value arg; the package component currently being installed.
-# Artifacts will be installed under this component. Optional - PROJECT_NAME will
-# be used, if not provided.
-#
-# TARGETS: multi-value arg; the targets to install. The target's headers will
-# not automatically be installed, they must be provided through HEADERS.
-# Optional.
-#
-# HEADERS: multi-value arg; list of the interface header files of the TARGETS,
-# which will be installed. Relative paths are evaluated with respect to
-# CMAKE_CURRENT_SOURCE_DIR, as defined by CMake's install() command. If any of
-# the provided paths are directories, the entire recursive directory contents
-# will be installed, limited to files that meet JGD_HEADER_REGEX. Nested
-# directories will be retained in the installed path, but the given directory
-# will not.
-#
-# CMAKE_MODULES: multi-value arg; list of CMake modules to install in addition
-# to the project's config package files. Relative paths are evaluated with
-# respect to CMAKE_CURRENT_SOURCE_DIR, as defined by CMake's install() command.
-# If any of the provided paths are directories, the entire recursive directory
-# contents will be installed, limited to files that meed JGD_CMAKE_MODULE_REGEX.
-# Nested directories will be retained in the installed path, but the given
-# directory will not.
-#
-
-#
-# Targets' headers will be installed -> all in runtime except private
-#
-
 function(jgd_install_config_file_package)
   jgd_parse_arguments(
     OPTIONS
@@ -192,7 +146,7 @@ function(jgd_install_config_file_package)
     endif ()
 
     # current target's include directories
-    get_target_property(inc_prop ${target} ${target} INTERFACE_INCLUDE_DIRECTORIES)
+    get_target_property(inc_prop ${target} INTERFACE_INCLUDE_DIRECTORIES)
     string(REGEX REPLACE "\$<BUILD_INTERFACE:|>" "" include_dirs "${inc_prop}")
 
     # suffix all include dirs with / so only their contents is installed
@@ -207,18 +161,28 @@ function(jgd_install_config_file_package)
         DIRECTORY ${include_dirs}
         DESTINATION ${JGD_INSTALL_INCLUDE_DIR}
         FILES_MATCHING
+        COMPONENT ${PROJECT_NAME}_devel
         PATTERN "*${JGD_HEADER_EXTENSION}"
         PATTERN "*private*" EXCLUDE
-        ${exclude_arg}
-        COMPONENT ${PROJECT_NAME}_devel)
+        ${exclude_arg})
     endif ()
   endforeach ()
 
   # == Install targets via an export set ==
 
+  set(install_targets)
+  foreach (target ${ARGS_TARGETS})
+    get_target_property(aliased ${target} ALIASED_TARGET)
+    if (aliased)
+      list(APPEND install_targets ${aliased})
+    else ()
+      list(APPEND install_targets ${target})
+    endif ()
+  endforeach ()
+
   if (DEFINED ARGS_TARGETS)
     install(
-      TARGETS ${ARGS_TARGETS}
+      TARGETS ${install_targets}
       EXPORT export_set
       INCLUDES DESTINATION "${JGD_INSTALL_INCLUDE_DIR}"
       RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -230,20 +194,10 @@ function(jgd_install_config_file_package)
       COMPONENT ${PROJECT_NAME}_devel)
 
 
-    jgd_package_targets_file_name(OUT_VAR targets_files)
-    foreach (target ${ARGS_TARGETS})
-      get_target_property(component ${target} COMPONENT)
-      if (NOT DEFINED component)
-        continue()
-      endif ()
-
-      jgd_package_targets_file_name(COMPONENT ${component} OUT_VAR targets_file)
-      list(APPEND targets_files "${targets_file}")
-    endforeach ()
-
+    jgd_package_targets_file_name(OUT_VAR targets_file)
     install(
       EXPORT export_set
-      FILES ${targets_files}
+      FILE ${targets_file}
       NAMESPACE ${PROJECT_NAME}::
       DESTINATION "${JGD_INSTALL_CMAKE_DESTINATION}"
       COMPONENT ${PROJECT_NAME}_devel)
