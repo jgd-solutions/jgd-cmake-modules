@@ -1,3 +1,3 @@
-#include <libsingle/widget.hpp>
+#include <libdoxydocs/widget.hpp>
 
-single::Widget::Widget(const int value) : value{value} {}
+doxydocs::Widget::Widget(const int value) : value{value} {}
