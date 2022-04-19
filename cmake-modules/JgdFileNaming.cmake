@@ -71,8 +71,12 @@ macro(_JGD_JOINED_FILE_NAME)
   endif ()
 endmacro()
 
-macro(_JGD_FILE_NAMING_ARGUMENTS args)
-  jgd_parse_arguments(ONE_VALUE_KEYWORDS "COMPONENT;PROJECT;OUT_VAR"
+macro(_JGD_FILE_NAMING_ARGUMENTS with_component args)
+  if (with_component)
+    set(comp_keyword COMPONENT)
+  endif ()
+
+  jgd_parse_arguments(ONE_VALUE_KEYWORDS "${comp_keyword};PROJECT;OUT_VAR"
     REQUIRES_ALL "OUT_VAR" ARGUMENTS "${args}")
   if (DEFINED ARGS_PROJECT)
     set(proj_arg PROJECT ${ARGS_PROJECT})
@@ -102,7 +106,7 @@ endmacro()
 # resulting file name.
 #
 function(jgd_package_config_file_name)
-  _jgd_file_naming_arguments("${ARGN}")
+  _jgd_file_naming_arguments(true "${ARGN}")
   _jgd_joined_file_name(${comp_arg} SUFFIX "config.cmake" ${proj_arg} OUT_VAR
     "${ARGS_OUT_VAR}")
 endfunction()
@@ -124,23 +128,19 @@ endfunction()
 # resulting file name.
 #
 function(jgd_package_version_file_name)
-  _jgd_file_naming_arguments("${ARGN}")
+  _jgd_file_naming_arguments(false "${ARGN}")
   _jgd_joined_file_name(SUFFIX "config-version.cmake" ${proj_arg} OUT_VAR
     ${ARGS_OUT_VAR})
 endfunction()
 
 #
 # Constructs a consistent kebab-case targets file name based on the PROJECT
-# argument or the PROJECT_NAME variable, and the provided COMPONENT. Targets
+# argument or the PROJECT_NAME variable. Targets
 # files are part of 'config-file' packages. The resulting file name will be
 # placed in the variable specified by OUT_VAR. The result will be
-# <PROJECT_NAME>-[COMPONENT-]targets.cmake. Ex. proj-comp-targets.cmake.
+# <PROJECT_NAME>-targets.cmake. Ex. proj-targets.cmake.
 #
 # Arguments:
-#
-# COMPONENT: one-value arg; specifies the component that the file will describe.
-# A COMPONENT that matches PROJECT_NAME, or PROJECT, if provided, will be
-# ignored. Optional.
 #
 # PROJECT: on-value arg; override of PROJECT_NAME. Optional - if not provided,
 # PROJECT_NAME will be used, which is more common.
@@ -149,7 +149,7 @@ endfunction()
 # resulting file name.
 #
 function(jgd_package_targets_file_name)
-  _jgd_file_naming_arguments("${ARGN}")
+  _jgd_file_naming_arguments(false "${ARGN}")
   _jgd_joined_file_name(${comp_arg} SUFFIX "targets.cmake" ${proj_arg} OUT_VAR
     ${ARGS_OUT_VAR})
 endfunction()
@@ -169,7 +169,7 @@ endfunction()
 # resulting file name.
 #
 function(jgd_config_header_file_name)
-  _jgd_file_naming_arguments("${ARGN}")
+  _jgd_file_naming_arguments(true "${ARGN}")
   _jgd_joined_file_name(
     ${comp_arg}
     DELIMITER
