@@ -1,0 +1,9 @@
+include(JgdAddLibrary)
+jgd_add_library(
+  COMPONENT
+  "${JGD_CURRENT_COMPONENT}"
+  SOURCES
+  extra.hpp
+  extra.cpp
+  more.hpp
+  more.cpp)

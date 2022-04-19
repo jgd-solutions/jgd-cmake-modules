@@ -1,0 +1,9 @@
+include(JgdAddTestExecutable)
+jgd_add_test_executable(
+  EXECUTABLE
+  clangformat-test
+  LIBS
+  libclangformat::core
+  libclangformat::extra
+  SOURCES
+  test.cpp)

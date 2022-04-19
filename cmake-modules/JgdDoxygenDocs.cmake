@@ -37,11 +37,15 @@ function(jgd_create_doxygen_target)
     MULTI_VALUE_KEYWORDS "TARGETS;ADDITIONAL_PATHS;EXCLUDE_REGEX"
     REQUIRES_ALL "TARGETS" ARGUMENTS "${ARGN}")
 
+  if (NOT DOXYGEN_FOUND)
+    message(FATAL_ERROR "Doxygen must be previously found to use ${CMAKE_CURRENT_FUNCTION}")
+  endif ()
+
   # Extract all include directories from targets
   set(include_dirs)
   foreach (target ${ARGS_TARGETS})
     get_target_property(target_dirs ${target} INTERFACE_INCLUDE_DIRECTORIES)
-    string(REGEX REPLACE "\\$<BUILD_INTERFACE:|>" "" target_dirs
+    string(REGEX REPLACE " \\$<BUILD_INTERFACE:|>" "" target_dirs
       "${target_dirs}")
     foreach (dir ${target_dirs})
       file(REAL_PATH "${dir}" full_dir)
@@ -86,7 +90,7 @@ function(jgd_create_doxygen_target)
     set(readme "${PROJECT_SOURCE_DIR}/README.md")
     if (NOT EXISTS "${readme}")
       message(WARNING "The README_MAIN_PAGE option was specified but the "
-        "README file doesn't exist: ${readme}")
+        " README file doesn't exist: ${readme}")
     endif ()
 
     set(DOXYGEN_USE_MDFILE_AS_MAINPAGE "${readme}")
@@ -96,6 +100,6 @@ function(jgd_create_doxygen_target)
   # Target to generate Doxygen documentation
   set(DOXYGEN_STRIP_FROM_INC_PATH "${include_dirs}")
   set(DOXYGEN_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/doxygen")
-  doxygen_add_docs(doxygen-docs "${doxygen_input}" ALL
-    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
+  doxygen_add_docs(doxygen-docs "${doxygen_input}" ALL WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
+  set_target_properties(doxygen-docs PROPERTIES EXCLUDE_FROM_ALL TRUE)
 endfunction()

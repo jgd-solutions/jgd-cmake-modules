@@ -122,7 +122,7 @@ macro(JGD_SETUP_PROJECT)
   _jgd_warn_set(CMAKE_OPTIMIZE_DEPENDENCIES ON)
 
   # add project's cmake modules to path
-  list(FIND CMAKE_MODULE_PATH " ${JGD_PROJECT_CMAKE_DIR}" cmake_dir_idx)
+  list(FIND CMAKE_MODULE_PATH "${JGD_PROJECT_CMAKE_DIR}" cmake_dir_idx)
   if (cmake_dir_idx EQUAL -1 AND EXISTS "${JGD_PROJECT_CMAKE_DIR}")
     list(APPEND CMAKE_MODULE_PATH "${JGD_PROJECT_CMAKE_DIR}")
   endif ()

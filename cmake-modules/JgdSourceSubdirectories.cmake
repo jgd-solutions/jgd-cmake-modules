@@ -139,7 +139,6 @@ function(jgd_source_subdirectories)
     _jgd_check_add_subdir(${add_subdirs_arg} SUBDIR "${JGD_PROJECT_TESTS_DIR}")
   endif ()
 
-  message(STATUS "debug  ${JGD_PROJECT_PREFIX_NAME}_BUILD_DOCS = ${${JGD_PROJECT_PREFIX_NAME}_BUILD_DOCS}")
   if (ARGS_WITH_DOCS_DIR AND ${JGD_PROJECT_PREFIX_NAME}_BUILD_DOCS)
     _jgd_check_add_subdir(${add_subdirs_arg} SUBDIR "${JGD_PROJECT_DOCS_DIR}")
   endif ()
