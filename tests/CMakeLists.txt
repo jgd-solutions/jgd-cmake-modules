@@ -35,6 +35,11 @@ endmacro()
 _test_project(single-exec
   BUILD_OPTIONS -DSINGLE_EXEC_BUILD_TESTS=ON)
 
+_test_project(single-exec
+  BUILD_OPTIONS -DSINGLE_EXEC_BUILD_TESTS=ON
+  NAME_SUFFIX -format
+  BUILD_TARGET clang-format-check)
+
 _test_project("libsingle"
   BUILD_OPTIONS -DLIBSINGLE_BUILD_TESTS=ON)
 
