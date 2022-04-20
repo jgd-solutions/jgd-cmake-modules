@@ -62,7 +62,7 @@ function(jgd_install_config_file_package)
         jgd_configure_package_config_file(${comp_arg})
       else ()
         message(
-          FATAL_ERROR "Cannot configure a package config file for ${component} of project "
+          FATAL_ERROR "Cannot configure a package config file for ${comp_arg} of project "
           "${PROJECT_NAME}. Could not find file ${in_config_file}.")
       endif ()
     endif ()
