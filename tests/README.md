@@ -14,5 +14,3 @@ provided CMake modules and structure the project.
 - **single-exec:** Produces a single executable.
 - **libsingle:** Produces a single library, either static or shared.
 - **libcomponents:** Produces multiple libraries through a single project, offered as library components.
-- **libdocs:** Tests the ability to generate doxygen documentation. Provides a single library with inline doxygen
-  comments and generates the accompanying documentation.
