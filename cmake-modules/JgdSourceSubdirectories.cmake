@@ -138,7 +138,7 @@ function(jgd_source_subdirectories)
         message(
           FATAL_ERROR
           "${CMAKE_CURRENT_FUNCTION} could not add subdirectory "
-          "${subdir_path} for component ${component} or project "
+          "${subdir_path} for component ${component} of project "
           "${PROJECT_NAME}. Directory does not exist.")
       endif ()
     endforeach ()
