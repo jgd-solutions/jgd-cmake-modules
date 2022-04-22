@@ -82,6 +82,7 @@ function(jgd_source_subdirectories)
     "OUT_VAR"
     MULTI_VALUE_KEYWORDS
     "LIB_COMPONENTS"
+    "EXEC_COMPONENTS"
     REQUIRES_ANY
     "ADD_SUBDIRS;OUT_VAR"
     ARGUMENTS
@@ -100,8 +101,8 @@ function(jgd_source_subdirectories)
     # add all components' subdirectories
     foreach (component ${ARGS_LIB_COMPONENTS})
       list(LENGTH subdirs_added old_len)
-      jgd_canonical_lib_component_subdir(COMPONENT "${component}" OUT_VAR subdir_path)
-      set(JGD_CURRENT_COMPONENT "${component}")
+      jgd_canonical_lib_subdir(COMPONENT ${component} OUT_VAR subdir_path)
+      set(JGD_CURRENT_COMPONENT ${component})
       _jgd_check_add_subdir(${add_subdirs_arg} SUBDIR "${subdir_path}")
       unset(JGD_CURRENT_COMPONENT)
 
@@ -119,6 +120,30 @@ function(jgd_source_subdirectories)
     jgd_canonical_lib_subdir(OUT_VAR lib_subdir)
     _jgd_check_add_subdir(${add_subdirs_arg} SUBDIR "${lib_subdir}")
   endif ()
+
+  #  if (DEFINED ARGS_EXEC_COMPONENTS)
+  #    # add all components' subdirectories
+  #    foreach (component ${ARGS_EXEC_COMPONENTS})
+  #      list(LENGTH subdirs_added old_len)
+  #      jgd_canonical_lib_subdir(COMPONENT "${component}" OUT_VAR subdir_path)
+  #      set(JGD_CURRENT_COMPONENT "${component}")
+  #      _jgd_check_add_subdir(${add_subdirs_arg} SUBDIR "${subdir_path}")
+  #      unset(JGD_CURRENT_COMPONENT)
+  #
+  #      list(LENGTH subdirs_added new_len)
+  #      if (${new_len} EQUAL ${old_len})
+  #        message(
+  #          FATAL_ERROR
+  #          "${CMAKE_CURRENT_FUNCTION} could not add subdirectory "
+  #          "${subdir_path} for component ${component} or project "
+  #          "${PROJECT_NAME}. Directory does not exist.")
+  #      endif ()
+  #    endforeach ()
+  #  else ()
+  #    # add single library subdirectory, if it exists
+  #    jgd_canonical_lib_subdir(OUT_VAR lib_subdir)
+  #    _jgd_check_add_subdir(${add_subdirs_arg} SUBDIR "${lib_subdir}")
+  #  endif ()
 
   # add executable source subdirectory, if it exists
   jgd_canonical_exec_subdir(OUT_VAR exec_subdir)

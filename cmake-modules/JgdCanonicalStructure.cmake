@@ -19,31 +19,16 @@ set(JGD_MODULE_EXTENSION ".mpp") # cmake doesn't support modules, but for future
 set(JGD_IN_FILE_EXTENSION ".in")
 
 #
-# Sets the variable specified by OUT_VAR to the canonical project path for a
+# Sets the variable specified by OUT_VAR to the canonical project path for library.
+# When COMPONENT is omitted, the output will be the canonical project path for a
 # single library of PROJECT_NAME, regardless of if PROJECT_NAME names a library
 # or executable. The resulting path is absolute, and will be
 # /<JGD_LIB_PREFIX><name>, with respect to PROJECT_SOURCE_DIR, where 'name' is
 # the PROJECT_NAME without any lib prefix. Ex.  .../libproj
 #
-# Arguments:
-#
-# OUT_VAR: one-value arg; the name of the variable that will store the resulting
-# path.
-#
-function(jgd_canonical_lib_subdir)
-  jgd_parse_arguments(ONE_VALUE_KEYWORDS "OUT_VAR" REQUIRES_ALL "OUT_VAR"
-    ARGUMENTS "${ARGN}")
-  string(REGEX REPLACE "^${JGD_LIB_PREFIX}" "" no_lib "${PROJECT_NAME}")
-  set(${ARGS_OUT_VAR}
-    "${PROJECT_SOURCE_DIR}/${JGD_LIB_PREFIX}${no_lib}"
-    PARENT_SCOPE)
-endfunction()
-
-#
-# Sets the variable specified by OUT_VAR to the canonical project path for a
-# library component, considering the PROJECT_NAME and the COMPONENT argument.
-# The resulting path is absolute, and will be
-# /<PROJECT_NAME>-<COMPONENT>/<PROJECT_NAME>/<COMPONENT>, with respect to the
+# When COMPONENT is provided, the output will name a ibrary component, considering
+# the PROJECT_NAME and the COMPONENT argument. The resulting path is absolute, and
+# will be /<PROJECT_NAME>-<COMPONENT>/<PROJECT_NAME>/<COMPONENT>, with respect to the
 # PROJECT_SOURCE_DIR. Ex. .../proj-comp/proj/comp
 #
 # Arguments:
@@ -54,13 +39,19 @@ endfunction()
 # COMPONENT: one-value arg; the name of the component for which the path will be
 # computed.
 #
-function(jgd_canonical_lib_component_subdir)
-  jgd_parse_arguments(ONE_VALUE_KEYWORDS "OUT_VAR;COMPONENT" REQUIRES_ALL
-    "OUT_VAR;COMPONENT" ARGUMENTS "${ARGN}")
-  string(JOIN "-" comp_dir ${PROJECT_NAME} ${ARGS_COMPONENT})
-  set(${ARGS_OUT_VAR}
-    "${PROJECT_SOURCE_DIR}/${comp_dir}/${PROJECT_NAME}/${component}"
-    PARENT_SCOPE)
+function(jgd_canonical_lib_subdir)
+  jgd_parse_arguments(ONE_VALUE_KEYWORDS "OUT_VAR;COMPONENT" REQUIRES_ALL "OUT_VAR" ARGUMENTS "${ARGN}")
+  if (DEFINED ARGS_COMPONENT)
+    string(JOIN "-" comp_dir ${PROJECT_NAME} ${ARGS_COMPONENT})
+    set(${ARGS_OUT_VAR}
+      "${PROJECT_SOURCE_DIR}/${comp_dir}/${PROJECT_NAME}/${component}"
+      PARENT_SCOPE)
+  else ()
+    string(REGEX REPLACE "^${JGD_LIB_PREFIX}" "" no_lib "${PROJECT_NAME}")
+    set(${ARGS_OUT_VAR}
+      "${PROJECT_SOURCE_DIR}/${JGD_LIB_PREFIX}${no_lib}"
+      PARENT_SCOPE)
+  endif ()
 endfunction()
 
 #
@@ -161,7 +152,7 @@ function(jgd_canonical_include_dirs)
   else ()
     if (component)
       # library component
-      jgd_canonical_lib_component_subdir(COMPONENT ${component} OUT_VAR
+      jgd_canonical_lib_subdir(COMPONENT ${component} OUT_VAR
         comp_subdir)
       _check_err("${comp_subdir}" "library component")
       set(prefix_parents 2)

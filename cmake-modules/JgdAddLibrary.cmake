@@ -29,11 +29,7 @@ function(jgd_add_library)
   # == Usage Guards ==
 
   # ensure library is created in the appropriate canonical directory
-  if (DEFINED comp_arg)
-    jgd_canonical_lib_component_subdir(${comp_arg} OUT_VAR canonical_dir)
-  else ()
-    jgd_canonical_lib_subdir(OUT_VAR canonical_dir)
-  endif ()
+  jgd_canonical_lib_subdir(${comp_arg} OUT_VAR canonical_dir)
   if (NOT CMAKE_CURRENT_SOURCE_DIR STREQUAL canonical_dir)
     message(
       FATAL_ERROR
