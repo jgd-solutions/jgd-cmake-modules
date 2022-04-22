@@ -33,12 +33,12 @@ macro(_jgd_warn_set variable value)
       "override the default value, set ${variable} after calling "
       "jgd_setup_project.")
   endif ()
-  set(${variable} "${value}")
+  set(${variable} "${value}" ${ARGN})
 endmacro()
 
 macro(_jgd_check_set variable value)
   if (NOT DEFINED ${variable})
-    set(${variable} "${value}")
+    set(${variable} "${value}" ${ARGN})
   endif ()
 endmacro()
 
@@ -216,8 +216,7 @@ macro(JGD_SETUP_PROJECT)
     AND NOT CMAKE_SYSTEM_NAME STREQUAL "Windows"
     AND PROJECT_IS_TOP_LEVEL)
     # todo: follow opt/ with provider, once registered with LANANA
-    _jgd_warn_set(CMAKE_INSTALL_PREFIX "/opt/${PROJECT_NAME}" CACHE PATH
-      "Base installation location. " FORCE)
+    _jgd_warn_set(CMAKE_INSTALL_PREFIX "/opt/${PROJECT_NAME}" CACHE PATH "Base installation location. " FORCE)
   endif ()
 
   # enable testing by default so invoking ctest always succeeds
