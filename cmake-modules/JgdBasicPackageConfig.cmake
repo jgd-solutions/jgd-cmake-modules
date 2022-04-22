@@ -1,7 +1,7 @@
 include(JgdFileNaming)
 include(JgdParseArguments)
 
-macro(JGD_USE_BASIC_PACKAGE_CONFIG)
+macro(JGD_BASIC_PACKAGE_CONFIG)
   jgd_parse_arguments(
     ONE_VALUE_KEYWORDS "PROJECT"
     REQUIRES_ALL "PROJECT"
