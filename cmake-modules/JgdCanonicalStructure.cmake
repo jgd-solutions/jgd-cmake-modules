@@ -26,7 +26,7 @@ set(JGD_IN_FILE_EXTENSION ".in")
 # /<JGD_LIB_PREFIX><name>, with respect to PROJECT_SOURCE_DIR, where 'name' is
 # the PROJECT_NAME without any lib prefix. Ex.  .../libproj
 #
-# When COMPONENT is provided, the output will name a ibrary component, considering
+# When COMPONENT is provided, the output will name a library component, considering
 # the PROJECT_NAME and the COMPONENT argument. The resulting path is absolute, and
 # will be /<PROJECT_NAME>-<COMPONENT>/<PROJECT_NAME>/<COMPONENT>, with respect to the
 # PROJECT_SOURCE_DIR. Ex. .../proj-comp/proj/comp
@@ -40,17 +40,17 @@ set(JGD_IN_FILE_EXTENSION ".in")
 # computed.
 #
 function(jgd_canonical_lib_subdir)
-  jgd_parse_arguments(ONE_VALUE_KEYWORDS "OUT_VAR;COMPONENT" REQUIRES_ALL "OUT_VAR" ARGUMENTS "${ARGN}")
+  jgd_parse_arguments(
+    ONE_VALUE_KEYWORDS "OUT_VAR;COMPONENT"
+    REQUIRES_ALL "OUT_VAR"
+    ARGUMENTS "${ARGN}")
   if (DEFINED ARGS_COMPONENT)
     string(JOIN "-" comp_dir ${PROJECT_NAME} ${ARGS_COMPONENT})
-    set(${ARGS_OUT_VAR}
-      "${PROJECT_SOURCE_DIR}/${comp_dir}/${PROJECT_NAME}/${component}"
+    set(${ARGS_OUT_VAR} "${PROJECT_SOURCE_DIR}/${comp_dir}/${PROJECT_NAME}/${component}"
       PARENT_SCOPE)
   else ()
     string(REGEX REPLACE "^${JGD_LIB_PREFIX}" "" no_lib "${PROJECT_NAME}")
-    set(${ARGS_OUT_VAR}
-      "${PROJECT_SOURCE_DIR}/${JGD_LIB_PREFIX}${no_lib}"
-      PARENT_SCOPE)
+    set(${ARGS_OUT_VAR} "${PROJECT_SOURCE_DIR}/${JGD_LIB_PREFIX}${no_lib}" PARENT_SCOPE)
   endif ()
 endfunction()
 
@@ -79,19 +79,17 @@ endfunction()
 # path will be computed.
 #
 function(jgd_canonical_exec_subdir)
-  jgd_parse_arguments(ONE_VALUE_KEYWORDS "OUT_VAR;COMPONENT" REQUIRES_ALL
-    "OUT_VAR" ARGUMENTS "${ARGN}")
+  jgd_parse_arguments(
+    ONE_VALUE_KEYWORDS "OUT_VAR;COMPONENT"
+    REQUIRES_ALL "OUT_VAR"
+    ARGUMENTS "${ARGN}")
   if (DEFINED ARGS_COMPONENT)
     jgd_canonical_exec_subdir(OUT_VAR exec_subdir)
     set(exec_comp_subdir "${exec_subdir}/${ARGS_COMPONENT}")
-    set(${ARGS_OUT_VAR}
-      "${exec_comp_subdir}"
-      PARENT_SCOPE)
+    set(${ARGS_OUT_VAR} "${exec_comp_subdir}" PARENT_SCOPE)
   else ()
     string(REGEX REPLACE "^${JGD_LIB_PREFIX}" "" no_lib "${PROJECT_NAME}")
-    set(${ARGS_OUT_VAR}
-      "${PROJECT_SOURCE_DIR}/${no_lib}"
-      PARENT_SCOPE)
+    set(${ARGS_OUT_VAR} "${PROJECT_SOURCE_DIR}/${no_lib}" PARENT_SCOPE)
   endif ()
 endfunction()
 

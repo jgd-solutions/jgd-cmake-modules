@@ -43,10 +43,10 @@ endmacro()
 # Provides subdirectories following JGD's project layout conventions, which are
 # the canonical project layout conventions. These canonical subdirectories are
 # provided by functions in  JgdCanonicalStructure. That is, the executable,
-# library or library component subdirectories will be added, if they exist. The
-# variable JGD_CURRENT_COMPONENT will be set to the component before adding each
-# component's subdirectory. Options also exist to consider the standard tests
-# and docs project directories as source subdirectories.
+# executable components, library, or library component subdirectories will be
+# added, if they exist. The variable JGD_CURRENT_COMPONENT will be set to the
+# component before adding each component's subdirectory. Options also exist to
+# consider the standard tests and docs project directories as source subdirectories.
 #
 # Arguments:
 #
@@ -97,8 +97,10 @@ function(jgd_source_subdirectories)
   endif ()
 
   # Add Subdirs
+
+  # library subdirectories
   if (DEFINED ARGS_LIB_COMPONENTS)
-    # add all components' subdirectories
+    # add all library components' subdirectories
     foreach (component ${ARGS_LIB_COMPONENTS})
       list(LENGTH subdirs_added old_len)
       jgd_canonical_lib_subdir(COMPONENT ${component} OUT_VAR subdir_path)
@@ -121,42 +123,37 @@ function(jgd_source_subdirectories)
     _jgd_check_add_subdir(${add_subdirs_arg} SUBDIR "${lib_subdir}")
   endif ()
 
-  #  if (DEFINED ARGS_EXEC_COMPONENTS)
-  #    # add all components' subdirectories
-  #    foreach (component ${ARGS_EXEC_COMPONENTS})
-  #      list(LENGTH subdirs_added old_len)
-  #      jgd_canonical_lib_subdir(COMPONENT "${component}" OUT_VAR subdir_path)
-  #      set(JGD_CURRENT_COMPONENT "${component}")
-  #      _jgd_check_add_subdir(${add_subdirs_arg} SUBDIR "${subdir_path}")
-  #      unset(JGD_CURRENT_COMPONENT)
-  #
-  #      list(LENGTH subdirs_added new_len)
-  #      if (${new_len} EQUAL ${old_len})
-  #        message(
-  #          FATAL_ERROR
-  #          "${CMAKE_CURRENT_FUNCTION} could not add subdirectory "
-  #          "${subdir_path} for component ${component} or project "
-  #          "${PROJECT_NAME}. Directory does not exist.")
-  #      endif ()
-  #    endforeach ()
-  #  else ()
-  #    # add single library subdirectory, if it exists
-  #    jgd_canonical_lib_subdir(OUT_VAR lib_subdir)
-  #    _jgd_check_add_subdir(${add_subdirs_arg} SUBDIR "${lib_subdir}")
-  #  endif ()
+  # executable subdirectories
+  if (DEFINED ARGS_EXEC_COMPONENTS)
+    # add all executable components' subdirectories
+    foreach (component ${ARGS_EXEC_COMPONENTS})
+      list(LENGTH subdirs_added old_len)
+      jgd_canonical_EXEC_subdir(COMPONENT ${component} OUT_VAR subdir_path)
+      set(JGD_CURRENT_COMPONENT ${component})
+      _jgd_check_add_subdir(${add_subdirs_arg} SUBDIR "${subdir_path}")
+      unset(JGD_CURRENT_COMPONENT)
 
-  # add executable source subdirectory, if it exists
-  jgd_canonical_exec_subdir(OUT_VAR exec_subdir)
-  _jgd_check_add_subdir(${add_subdirs_arg} SUBDIR "${exec_subdir}")
+      list(LENGTH subdirs_added new_len)
+      if (${new_len} EQUAL ${old_len})
+        message(
+          FATAL_ERROR
+          "${CMAKE_CURRENT_FUNCTION} could not add subdirectory "
+          "${subdir_path} for component ${component} or project "
+          "${PROJECT_NAME}. Directory does not exist.")
+      endif ()
+    endforeach ()
+  else ()
+    # add single executable subdirectory, if it exists
+    jgd_canonical_exec_subdir(OUT_VAR exec_subdir)
+    _jgd_check_add_subdir(${add_subdirs_arg} SUBDIR "${exec_subdir}")
+  endif ()
 
   # Ensure at least one sub directory was added
   if (NOT subdirs_added)
     message(
       FATAL_ERROR
       "${CMAKE_CURRENT_FUNCTION} could not add any subdirectories for "
-      "project ${PROJECT_NAME}. No LIB_COMPONENTS were provided, and neither the "
-      "library subdirectory, ${lib_subdir}, nor the executable subdirectory, "
-      "${exec_subdir}, exist.")
+      "project ${PROJECT_NAME}. The canonical subdirectories do not exist")
   endif ()
 
   # Add supplementary source subdirectories
@@ -170,8 +167,6 @@ function(jgd_source_subdirectories)
 
   # Set result variable
   if (DEFINED ARGS_OUT_VAR)
-    set(${ARGS_OUT_VAR}
-      "${subdirs_added}"
-      PARENT_SCOPE)
+    set(${ARGS_OUT_VAR} "${subdirs_added}" PARENT_SCOPE)
   endif ()
 endfunction()
