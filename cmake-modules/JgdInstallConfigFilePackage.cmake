@@ -33,20 +33,21 @@ function(jgd_install_config_file_package)
     )
   endif ()
 
+  set(install_cmake_files) # list of cmake files to install at end
+
   # Package version file
   if (DEFINED ${PROJECT_NAME}_VERSION)
     jgd_package_version_file_name(OUT_VAR config_version_file)
+    set(config_version_file "${JGD_CMAKE_DESTINATION}/${config_version_file}")
 
     write_basic_package_version_file(
-      "${JGD_CMAKE_DESTINATION}/${config_version_file}"
+      "${config_version_file}"
       VERSION ${PROJECT_VERSION}
       COMPATIBILITY SameMajorVersion)
     list(APPEND install_cmake_files "${config_version_file}")
   endif ()
 
   # == Install CMake Files==
-
-  set(install_cmake_files) # list of cmake files to install at end
 
   # Function to configure and find package config file for components or project
   function(_jgd_get_package_config_file component out_var)
@@ -192,7 +193,6 @@ function(jgd_install_config_file_package)
       NAMELINK_COMPONENT ${PROJECT_NAME}_devel
       ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
       COMPONENT ${PROJECT_NAME}_devel)
-
 
     jgd_package_targets_file_name(OUT_VAR targets_file)
     install(
