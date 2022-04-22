@@ -55,28 +55,15 @@ function(jgd_canonical_lib_subdir)
 endfunction()
 
 #
-# Sets the variable specified by OUT_VAR to the canonical project path for a
+# Sets the variable specified by OUT_VAR to the canonical project path for an
+# executable.
+# When COMPONENT is omitted, the output is the canonical project path for a
 # single executable of PROJECT_NAME, regardless of if PROJECT_NAME names a
 # library or executable. The resulting path is absolute, and will be /<name>,
 # with respect to PROJECT_SOURCE_DIR, where 'name' is the PROJECT_NAME without
 # any lib prefix. Ex. .../proj
 #
-# Arguments:
-#
-# OUT_VAR: one-value arg; the name of the variable that will store the resulting
-# path.
-#
-function(jgd_canonical_exec_subdir)
-  jgd_parse_arguments(ONE_VALUE_KEYWORDS "OUT_VAR" REQUIRES_ALL "OUT_VAR"
-    ARGUMENTS "${ARGN}")
-  string(REGEX REPLACE "^${JGD_LIB_PREFIX}" "" no_lib "${PROJECT_NAME}")
-  set(${ARGS_OUT_VAR}
-    "${PROJECT_SOURCE_DIR}/${no_lib}"
-    PARENT_SCOPE)
-endfunction()
-
-#
-# Sets the variable specified by OUT_VAR to the canonical project path for an
+# When COMPONENT is provided, the output is the canonical project path for an
 # executable component, considering the PROJECT_NAME and the COMPONENT argument,
 # regardless of if PROJECT_NAME names a library or executable.  The resulting
 # path is absolute, and will be /<name>/<COMPONENT>, with respect to
@@ -91,15 +78,21 @@ endfunction()
 # COMPONENT: one-value arg; the name of the executable component for which the
 # path will be computed.
 #
-function(jgd_canonical_exec_component_subdir)
+function(jgd_canonical_exec_subdir)
   jgd_parse_arguments(ONE_VALUE_KEYWORDS "OUT_VAR;COMPONENT" REQUIRES_ALL
-    "OUT_VAR;COMPONENT" ARGUMENTS "${ARGN}")
-
-  jgd_canonical_exec_subdir(OUT_VAR exec_subdir)
-  set(exec_comp_subdir "${exec_subdir}/${ARGS_COMPONENT}")
-  set(${ARGS_OUT_VAR}
-    "${exec_comp_subdir}"
-    PARENT_SCOPE)
+    "OUT_VAR" ARGUMENTS "${ARGN}")
+  if (DEFINED ARGS_COMPONENT)
+    jgd_canonical_exec_subdir(OUT_VAR exec_subdir)
+    set(exec_comp_subdir "${exec_subdir}/${ARGS_COMPONENT}")
+    set(${ARGS_OUT_VAR}
+      "${exec_comp_subdir}"
+      PARENT_SCOPE)
+  else ()
+    string(REGEX REPLACE "^${JGD_LIB_PREFIX}" "" no_lib "${PROJECT_NAME}")
+    set(${ARGS_OUT_VAR}
+      "${PROJECT_SOURCE_DIR}/${no_lib}"
+      PARENT_SCOPE)
+  endif ()
 endfunction()
 
 #
