@@ -28,7 +28,7 @@ function(jgd_add_executable)
   # == Usage Guards ==
 
   # ensure executable is created in the appropriate canonical directory
-  jgd_canonical_exec_subdir(OUT_VAR canonical_dir)
+  jgd_canonical_exec_subdir(${comp_arg} OUT_VAR canonical_dir)
   if (NOT CMAKE_CURRENT_SOURCE_DIR STREQUAL canonical_dir)
     message(
       FATAL_ERROR
