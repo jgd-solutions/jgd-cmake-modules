@@ -3,6 +3,7 @@ include_guard()
 include(JgdSourceSubdirectories)
 include(JgdExpandDirectories)
 include(JgdSeparateList)
+include(JgdExpandDirectories)
 
 # Locate the clang-format executable on system
 find_program(
@@ -64,14 +65,7 @@ function(jgd_create_clang_format_targets)
       set(sources "${sources};${interface_sources}")
     endif ()
 
-    foreach (source_file ${sources})
-      if (IS_ABSOLUTE)
-        set(abs_source_path "${source_file}")
-      else ()
-        set(abs_source_path "${source_dir}/${source_file}")
-      endif ()
-      list(APPEND files_to_format "${abs_source_path}")
-    endforeach ()
+    jgd_expand_directories(PATHS "${sources}" GLOB "*" OUT_VAR files_to_format)
   endforeach ()
 
   list(REMOVE_DUPLICATES files_to_format)
