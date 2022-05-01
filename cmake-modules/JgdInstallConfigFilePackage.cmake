@@ -89,7 +89,7 @@ function(jgd_install_config_file_package)
   # Resolve components' package config files, append to cmake files to be installed
   foreach (target ${ARGS_TARGETS})
     get_target_property(component ${target} COMPONENT)
-    if (NOT DEFINED component)
+    if (NOT component)
       continue()
     endif ()
 
@@ -104,7 +104,7 @@ function(jgd_install_config_file_package)
   # Additional cmake modules for project
   if (DEFINED ARGS_CMAKE_MODULES)
     jgd_expand_directories(PATHS "${ARGS_CMAKE_MODULES}" OUT_VAR module_files GLOB "*.cmake")
-    list(REMOVE_ITEM module_files ${install_cmake_modules}) # ignore config package files
+    list(REMOVE_ITEM module_files ${install_cmake_files}) # ignore config package files
 
     if (module_files)
       jgd_separate_list(
@@ -141,6 +141,9 @@ function(jgd_install_config_file_package)
   # ==  Install Target's Interface Headers ==
 
   foreach (target ${ARGS_TARGETS})
+    unset(target_component)
+    unset(comp_arg)
+    unset(exclude_arg)
     get_target_property(target_component ${target} COMPONENT)
     if (target_component)
       set(comp_arg COMPONENT ${target_component})
@@ -148,24 +151,29 @@ function(jgd_install_config_file_package)
 
     # current target's include directories
     get_target_property(inc_prop ${target} INTERFACE_INCLUDE_DIRECTORIES)
-    string(REGEX REPLACE "\$<BUILD_INTERFACE:|>" "" include_dirs "${inc_prop}")
+    string(REGEX REPLACE "\\$<BUILD_INTERFACE:|>" "" include_dirs "${inc_prop}")
 
-    # suffix all include dirs with / so only their contents is installed
-    list(TRANSFORM include_dirs APPEND "/")
+    get_target_property(source_dir ${target} SOURCE_DIR)
+    set(abs_include_dirs)
+    foreach (include_dir ${include_dirs})
+      if (IS_ABSOLUTE "${include_dir}")
+        list(APPEND abs_include_dirs "${include_dir}")
+      else ()
+        list(APPEND abs_include_dirs "${source_dir}/${include_dir}")
+      endif ()
+    endforeach ()
 
     if (DEFINED ARGS_HEADER_EXCLUDE_REGEX)
-      set(exclude_arg REGEX "${ARGS_HEADER_EXCLUDE_REGEX}" EXCLUDE)
+      jgd_separate_list(IN_LIST "${abs_include_dirs}"
+        REGEX "${ARGS_HEADER_EXCLUDE_REGEX}"
+        OUT_UNMATCHED abs_include_dirs)
     endif ()
 
-    if (include_dirs)
-      install(
-        DIRECTORY ${include_dirs}
-        DESTINATION ${JGD_INSTALL_INCLUDE_DIR}
-        FILES_MATCHING
-        COMPONENT ${PROJECT_NAME}_devel
-        PATTERN "*${JGD_HEADER_EXTENSION}"
-        PATTERN "*private*" EXCLUDE
-        ${exclude_arg})
+    jgd_expand_directories(PATHS "${abs_include_dirs}" GLOB "*${JGD_HEADER_EXTENSION}" OUT_VAR include_files)
+    if (include_files)
+      install(FILES ${include_files}
+        DESTINATION "${JGD_INSTALL_INCLUDE_DIR}"
+        COMPONENT ${PROJECT_NAME}_devel)
     endif ()
   endforeach ()
 
