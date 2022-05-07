@@ -211,7 +211,15 @@ function(jgd_install_config_file_package)
       COMPONENT ${PROJECT_NAME}_devel)
   endif ()
 
-  if (EXISTS "${PROJECT_SOURCE_DIR}/LICENSE.md")
-    install(FILES "${PROJECT_SOURCE_DIR}/LICENSE.md" TYPE DOC)
+  # == Install project licenses ==
+
+  file(GLOB license_file LIST_DIRECTORIES false "${PROJECT_SOURCE_DIR}/LICENSE*")
+  if (EXISTS "${license_file}")
+    install(FILES ${license_file} TYPE DOC)
+  endif ()
+
+  set(licenses_dir "${PROJECT_SOURCE_DIR}/licenses")
+  if (IS_DIRECTORY "${licenses_dir}")
+    install(DIRECTORY ${licenses_dir} TYPE DOC)
   endif ()
 endfunction()
