@@ -210,4 +210,8 @@ function(jgd_install_config_file_package)
       DESTINATION "${JGD_INSTALL_CMAKE_DESTINATION}"
       COMPONENT ${PROJECT_NAME}_devel)
   endif ()
+
+  if (EXISTS "${PROJECT_SOURCE_DIR}/LICENSE.md")
+    install(FILES "${PROJECT_SOURCE_DIR}/LICENSE.md" TYPE DOC)
+  endif ()
 endfunction()
