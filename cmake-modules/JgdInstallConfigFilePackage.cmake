@@ -153,13 +153,14 @@ function(jgd_install_config_file_package)
     get_target_property(inc_prop ${target} INTERFACE_INCLUDE_DIRECTORIES)
     string(REGEX REPLACE "\\$<BUILD_INTERFACE:|>" "" include_dirs "${inc_prop}")
 
+    # convert each to absolute paths with project name appended, to ignore project dirs
     get_target_property(source_dir ${target} SOURCE_DIR)
     set(abs_include_dirs)
     foreach (include_dir ${include_dirs})
       if (IS_ABSOLUTE "${include_dir}")
-        list(APPEND abs_include_dirs "${include_dir}")
+        list(APPEND abs_include_dirs "${include_dir}/${PROJECT_NAME}/")
       else ()
-        list(APPEND abs_include_dirs "${source_dir}/${include_dir}")
+        list(APPEND abs_include_dirs "${source_dir}/${include_dir}/${PROJECT_NAME}/")
       endif ()
     endforeach ()
 
@@ -169,12 +170,11 @@ function(jgd_install_config_file_package)
         OUT_UNMATCHED abs_include_dirs)
     endif ()
 
-    jgd_expand_directories(PATHS "${abs_include_dirs}" GLOB "*${JGD_HEADER_EXTENSION}" OUT_VAR include_files)
-    if (include_files)
-      install(FILES ${include_files}
-        DESTINATION "${JGD_INSTALL_INCLUDE_DIR}"
-        COMPONENT ${PROJECT_NAME}_devel)
-    endif ()
+    install(DIRECTORY ${abs_include_dirs}
+      DESTINATION "${JGD_INSTALL_INCLUDE_DIR}/${PROJECT_NAME}"
+      COMPONENT ${PROJECT_NAME}_devel
+      FILES_MATCHING PATTERN "*${JGD_HEADER_EXTENSION}"
+      PATTERN "CMakeFiles" EXCLUDE)
   endforeach ()
 
   # == Install targets via an export set ==
