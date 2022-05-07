@@ -1,2 +1,0 @@
-include(JgdAddDefaultExecutable)
-jgd_add_default_executable(SOURCES test_package.cpp)

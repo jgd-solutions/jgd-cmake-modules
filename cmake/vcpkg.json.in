@@ -1,0 +1,6 @@
+{
+  "name": "@PROJECT_NAME@",
+  "version": "@PROJECT_VERSION@",
+  "description": "@PROJECT_DESCRIPTION@",
+  "homepage": "@PROJECT_HOMEPAGE_URL@"
+}
