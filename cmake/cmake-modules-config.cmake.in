@@ -1,5 +1,4 @@
 @PACKAGE_INIT@
-
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")
-
-check_required_components(@PROJECT_NAME@)
+include(JgdBasicPackageConfig)
+jgd_basic_package_config(PROJECT @PROJECT_NAME@)

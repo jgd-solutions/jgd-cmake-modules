@@ -7,12 +7,14 @@
  * This is a more detailed explanation of this file, but it's truly simple
  */
 
+#include <libsingle/export_macros.hpp>
+
 namespace single {
 
 /*!
  * \brief Forward declaration for friendship relationship
  */
-class Factory;
+class LIBSINGLE_EXPORT Factory;
 
 /*!
  * \brief Represents the Widgets being manufactured.

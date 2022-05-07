@@ -6,6 +6,7 @@
  * This is a more detailed explanation of this file, but it's truly simple
  */
 
+#include <libsingle/export_macros.hpp>
 #include <libsingle/widget.hpp>
 
 namespace single {
@@ -17,7 +18,7 @@ namespace single {
  * In reality, there is also a physical factory. This abstraction helps to
  * properly represent reality.
  */
-class Factory {
+class LIBSINGLE_EXPORT Factory {
  private:
   int factory_num{0};  //!< Internal factory number
 

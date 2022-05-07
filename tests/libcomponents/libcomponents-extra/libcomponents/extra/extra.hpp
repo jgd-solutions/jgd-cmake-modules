@@ -1,5 +1,7 @@
 #pragma once
 
+#include <libcomponents/extra/export_macros.hpp>
+
 namespace components {
-int extra();
+LIBCOMPONENTS_EXTRA_EXPORT int extra();
 }

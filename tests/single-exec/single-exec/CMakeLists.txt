@@ -1,4 +1,8 @@
-include(JgdAddDefaultExecutable)
+include(JgdAddExecutable)
+include(JgdAddTestExecutable)
 
-jgd_add_default_executable(EXECUTABLE ${PROJECT_NAME} SOURCES main.cpp test.hpp
-                           test.cpp)
+jgd_add_executable(MAIN_SOURCES main.cpp SOURCES exec.hpp exec.cpp OUT_TARGET_NAME exec-target)
+jgd_add_test_executable(
+  EXECUTABLE ${PROJECT_NAME}-unit-test
+  SOURCES exec.test.cpp
+  LIBS ${exec-target}-objects)

@@ -1,10 +1,14 @@
 cmake_minimum_required(VERSION 3.20)
-project(libsingle LANGUAGES CXX)
+project(libsingle VERSION 0.0.0 LANGUAGES CXX)
 
-if(BUILD_DOCS)
+if (LIBSINGLE_BUILD_DOCS)
   find_package(Doxygen REQUIRED COMPONENTS doxygen)
-endif()
+endif ()
 
-include(JgdSetupDefaultProject)
-jgd_setup_default_project(WITH_TESTS WITH_DOCS CONFIGURE_CONFIG_HEADER
-                          ADD_SUBDIRECTORIES)
+include(JgdAllModules)
+
+jgd_setup_project()
+jgd_source_subdirectories(ADD_SUBDIRS WITH_TESTS_DIR WITH_DOCS_DIR)
+jgd_configure_config_header_file()
+jgd_install_config_file_package(CONFIGURE_PACKAGE_CONFIG_FILES TARGETS libsingle::libsingle)
+jgd_create_clang_format_targets(TARGETS libsingle::libsingle)

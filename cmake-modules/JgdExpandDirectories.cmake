@@ -1,7 +1,6 @@
 include_guard()
 
 include(JgdParseArguments)
-include(JgdValidateArguments)
 
 #
 # For each path in PATHS, if the path is a directory, the enclosed files
@@ -21,33 +20,37 @@ include(JgdValidateArguments)
 # directory_path/GLOB
 #
 function(jgd_expand_directories)
-  jgd_parse_arguments(ONE_VALUE_KEYWORDS "OUT_VAR;GLOB" MULTI_VALUE_KEYWORDS
-                      "PATHS" ARGUMENTS "${ARGN}")
-  jgd_validate_arguments(KEYWORDS "PATHS;OUT_VAR;GLOB")
+  jgd_parse_arguments(
+    ONE_VALUE_KEYWORDS
+    "OUT_VAR;GLOB"
+    MULTI_VALUE_KEYWORDS
+    "PATHS"
+    REQUIRES_ALL
+    "PATHS;OUT_VAR;GLOB"
+    ARGUMENTS
+    "${ARGN}")
 
   # Fill list with all file paths
   set(file_paths)
-  foreach(in_path ${ARGS_PATHS})
+  foreach (in_path ${ARGS_PATHS})
     # convert to abs path; if(IS_DIRECTORY) isn't well defined for rel. paths
     file(REAL_PATH "${in_path}" full_path)
 
-    if(IS_DIRECTORY "${full_path}")
+    if (IS_DIRECTORY "${full_path}")
       # extract files within directory
       file(
         GLOB_RECURSE expand_files
         LIST_DIRECTORIES false
         "${full_path}/${ARGS_GLOB}")
-      if(expand_files)
-        list(APPEND file_paths ${expand_files})
-      endif()
-    else()
+      if (expand_files)
+        list(APPEND file_paths "${expand_files}")
+      endif ()
+    else ()
       # directly add file
       list(APPEND file_paths "${full_path}")
-    endif()
-  endforeach()
+    endif ()
+  endforeach ()
 
   # Set out var
-  set(${ARGS_OUT_VAR}
-      ${file_paths}
-      PARENT_SCOPE)
+  set(${ARGS_OUT_VAR} "${file_paths}" PARENT_SCOPE)
 endfunction()
