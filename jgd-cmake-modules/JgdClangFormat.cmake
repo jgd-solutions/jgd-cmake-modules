@@ -42,15 +42,31 @@ function(jgd_create_clang_format_targets)
   jgd_parse_arguments(MULTI_VALUE_KEYWORDS "ADDITIONAL_PATHS;TARGETS"
     ONE_VALUE_KEYWORD "EXCLUDE_REGEX" OPTIONS "VERBOSE" REQUIRES_ALL "TARGETS" ARGUMENTS "${ARGN}")
 
-  # Usage Guards
-
+  # Create targets to instead emit clang-format usage errors
+  set(clang_format_err)
   if (NOT CLANG_FORMAT_EXE)
-    message(FATAL_ERROR "The clang-format executable must be available to use ${CMAKE_CURRENT_FUNCTION}")
+    set(clang_format_err "The clang-format executable must be available to use ${CMAKE_CURRENT_FUNCTION}")
   endif ()
 
   if (NOT EXISTS "${PROJECT_SOURCE_DIR}/.clang-format")
-    message(FATAL_ERROR "The expected clang-format configuration file is not present  in ${PROJECT_NAME}: ${PROJECT_SOURCE_DIR}/.clang-format")
+    set(clang_format_err "The expected clang-format configuration file is not present  in ${PROJECT_NAME}: ${PROJECT_SOURCE_DIR}/.clang-format")
   endif ()
+
+  if (clang_format_err)
+    set(exit_failure "${CMAKE_COMMAND}" -E false)
+    set(print_err
+      "${CMAKE_COMMAND}" -E echo "${clang_format_err}")
+    add_custom_target(
+      clang-format
+      COMMAND "${print_err}"
+      COMMAND "${exit_failure}")
+    add_custom_target(
+      clang-format-check
+      COMMAND "${print_err}"
+      COMMAND "${exit_failure}")
+    return()
+  endif ()
+
 
   # Collect all sources from input targets
 
