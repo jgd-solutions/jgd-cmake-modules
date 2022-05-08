@@ -25,3 +25,5 @@ set(JGD_INSTALL_CMAKE_DESTINATION
 
 # interface include directory for exported targets.
 set(JGD_INSTALL_INCLUDE_DIR "${CMAKE_INSTALL_INCLUDEDIR}/${_name_version}")
+
+set(JGD_INSTALL_DOC_DIR "${CMAKE_INSTALL_DATAROOTDIR}/doc/${_name_version}")

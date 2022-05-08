@@ -213,13 +213,23 @@ function(jgd_install_config_file_package)
 
   # == Install project licenses ==
 
-  file(GLOB license_file LIST_DIRECTORIES false "${PROJECT_SOURCE_DIR}/LICENSE*")
-  if (EXISTS "${license_file}")
-    install(FILES ${license_file} TYPE DOC)
-  endif ()
+  # licenses in project root
+  file(GLOB license_files LIST_DIRECTORIES false "${PROJECT_SOURCE_DIR}/LICENSE*")
+  foreach (license_file ${license_files})
+    cmake_path(GET license_file FILENAME file_name)
+    while (IS_SYMLINK "${license_file}")
+      file(READ_SYMLINK "${license_file}" license_file)
+    endwhile ()
+    install(FILES "${license_file}" DESTINATION "${JGD_INSTALL_DOC_DIR}" RENAME "${file_name}")
+  endforeach ()
 
-  set(licenses_dir "${PROJECT_SOURCE_DIR}/licenses")
-  if (IS_DIRECTORY "${licenses_dir}")
-    install(DIRECTORY ${licenses_dir} TYPE DOC)
-  endif ()
+  # licenses in dedicated folder
+  file(GLOB license_files LIST_DIRECTORIES false "${PROJECT_SOURCE_DIR}/licenses/*")
+  foreach (license_file ${license_files})
+    cmake_path(GET license_file FILENAME file_name)
+    while (IS_SYMLINK "${license_file}")
+      file(READ_SYMLINK "${license_file}" license_file)
+    endwhile ()
+    install(FILES "${license_file}" DESTINATION "${JGD_INSTALL_DOC_DIR}/licenses/" RENAME "${file_name}")
+  endforeach ()
 endfunction()
