@@ -64,12 +64,9 @@ function(jgd_add_executable)
   else ()
     jgd_executable_naming(
       ${comp_arg}
-      OUT_TARGET_NAME
-      target_name
-      OUT_EXPORT_NAME
-      export_name
-      OUT_OUTPUT_NAME
-      output_name)
+      OUT_TARGET_NAME target_name
+      OUT_EXPORT_NAME export_name
+      OUT_OUTPUT_NAME output_name)
   endif ()
 
   if (DEFINED ARGS_OUT_TARGET_NAME)
@@ -90,9 +87,9 @@ function(jgd_add_executable)
     EXPORT_NAME ${export_name}
     COMPILE_OPTIONS "${JGD_DEFAULT_COMPILE_OPTIONS}")
 
-  # include directories, if no object library to provide them
+  # include directories, if no object library will be created to provide them
   if (NOT DEFINED ARGS_SOURCES)
-    target_include_directories(${target_name} PRIVATE "${include_dirs}")
+    target_include_directories(${target_name} PRIVATE "$<BUILD_INTERFACE:${include_dirs}>")
   endif ()
 
   # custom component property
@@ -108,7 +105,7 @@ function(jgd_add_executable)
 
     # properties on executable objects
     target_compile_options(${target_name}-objects PRIVATE "${JGD_DEFAULT_COMPILE_OPTIONS}")
-    target_include_directories(${target_name}-objects INTERFACE "$<BUILD_INTERFACE:${include_dirs}>" PRIVATE "${include_dirs}")
+    target_include_directories(${target_name}-objects PUBLIC "$<BUILD_INTERFACE:${include_dirs}>")
 
     # link target to associated object files & usage requirements
     target_link_libraries(${target_name} PRIVATE ${target_name}-objects)

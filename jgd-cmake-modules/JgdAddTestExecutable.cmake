@@ -26,6 +26,10 @@ include(JgdStandardDirs)
 # executable. Commonly the library under test. Optional.
 #
 function(jgd_add_test_executable)
+  if (NOT ${JGD_PROJECT_PREFIX_NAME}_BUILD_TESTS)
+    return()
+  endif ()
+
   jgd_parse_arguments(
     ONE_VALUE_KEYWORDS
     "EXECUTABLE;NAME"
@@ -35,10 +39,6 @@ function(jgd_add_test_executable)
     "EXECUTABLE;SOURCES"
     ARGUMENTS
     "${ARGN}")
-
-  if (NOT ${JGD_PROJECT_PREFIX_NAME}_BUILD_TESTS)
-    return()
-  endif ()
 
   # Verify source naming
 
