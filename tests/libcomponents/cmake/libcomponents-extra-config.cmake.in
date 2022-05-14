@@ -1,3 +1,1 @@
-include(JgdFileNaming)
-jgd_package_targets_file_name(PROJECT @PROJECT_NAME@ COMPONENT extra OUT_VAR target_file)
-include("${target_file}")
+jgd_basic_component_config(@PROJECT_NAME@ extra REQUIRED_COMPONENTS core)

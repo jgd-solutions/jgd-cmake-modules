@@ -72,7 +72,7 @@ macro(_JGD_JOINED_FILE_NAME)
 endmacro()
 
 macro(_JGD_FILE_NAMING_ARGUMENTS with_component args)
-  if (with_component)
+  if (${with_component})
     set(comp_keyword COMPONENT)
   endif ()
 
@@ -149,9 +149,8 @@ endfunction()
 # resulting file name.
 #
 function(jgd_package_targets_file_name)
-  _jgd_file_naming_arguments(false "${ARGN}")
-  _jgd_joined_file_name(${comp_arg} SUFFIX "targets.cmake" ${proj_arg} OUT_VAR
-    ${ARGS_OUT_VAR})
+  _jgd_file_naming_arguments(true "${ARGN}")
+  _jgd_joined_file_name(${comp_arg} SUFFIX "targets.cmake" ${proj_arg} OUT_VAR ${ARGS_OUT_VAR})
 endfunction()
 
 #

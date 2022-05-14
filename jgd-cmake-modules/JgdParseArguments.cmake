@@ -37,7 +37,7 @@ include(CMakeParseArguments)
 macro(JGD_PARSE_ARGUMENTS)
   # Arguments to jgd_parse_arguments
   set(options WITHOUT_MISSING_VALUES_CHECK WITHOUT_UNPARSED_CHECK)
-  set(one_value_keywords)
+  set(one_value_keywords PREFIX)
   set(multi_value_keywords ARGUMENTS OPTIONS ONE_VALUE_KEYWORDS
     MULTI_VALUE_KEYWORDS REQUIRES_ALL REQUIRES_ANY MUTUALLY_EXCLUSIVE)
   cmake_parse_arguments(INS "${options}" "${one_value_keywords}"
@@ -70,15 +70,19 @@ macro(JGD_PARSE_ARGUMENTS)
     endif ()
   endforeach ()
 
+  if (NOT DEFINED INS_PREFIX)
+    set(INS_PREFIX "ARGS")
+  endif ()
+
   # == Parse and Validate Caller's Arguments ==
 
   # parse the caller's arguments
-  cmake_parse_arguments(ARGS "${INS_OPTIONS}" "${INS_ONE_VALUE_KEYWORDS}"
+  cmake_parse_arguments(${INS_PREFIX} "${INS_OPTIONS}" "${INS_ONE_VALUE_KEYWORDS}"
     "${INS_MULTI_VALUE_KEYWORDS}" "${INS_ARGUMENTS}")
 
   # validate keywords that must all be present
   foreach (keyword ${INS_REQUIRES_ALL})
-    set(parsed_var ARGS_${keyword})
+    set(parsed_var ${INS_PREFIX}_${keyword})
     if (NOT DEFINED ${parsed_var})
       message(FATAL_ERROR "${keyword} was not provided or may be missing "
         "its value (s) .")
@@ -89,7 +93,7 @@ macro(JGD_PARSE_ARGUMENTS)
   if (INS_REQUIRES_ANY)
     set(at_least_one_defined FALSE)
     foreach (keyword ${INS_REQUIRES_ANY})
-      set(parsed_var ARGS_${keyword})
+      set(parsed_var ${INS_PREFIX}_${keyword})
       if (DEFINED parsed_var)
         set(at_least_one_defined TRUE)
         break()
@@ -125,13 +129,13 @@ macro(JGD_PARSE_ARGUMENTS)
   endif ()
 
   # validate caller's argument format
-  if (NOT WITHOUT_MISSING_VALUES_CHECK AND ARGS_KEYWORDS_MISSING_VALUES)
+  if (NOT WITHOUT_MISSING_VALUES_CHECK AND ${INS_PREFIX}_KEYWORDS_MISSING_VALUES)
     message(FATAL_ERROR "Keywords provided without any values: "
-      "${ARGS_KEYWORDS_MISSING_VALUES}")
+      "${${INS_PREFIX}_KEYWORDS_MISSING_VALUES}")
   endif ()
 
-  if (NOT WITHOUT_UNPARSED_CHECK AND ARGS_UNPARSED_ARGUMENTS)
+  if (NOT WITHOUT_UNPARSED_CHECK AND ${INS_PREFIX}_UNPARSED_ARGUMENTS)
     message(WARNING "Unparsed arguments provided: "
-      "${ARGS_UNPARSED_ARGUMENTS} ")
+      "${${INS_PREFIX}_UNPARSED_ARGUMENTS} ")
   endif ()
 endmacro()

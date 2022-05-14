@@ -50,9 +50,9 @@ function(jgd_install_config_file_package)
   # == Install CMake Files==
 
   # Function to configure and find package config file for components or project
-  function(_jgd_get_package_config_file component out_var)
-    if (component)
-      set(comp_arg COMPONENT ${component})
+  function(_jgd_get_package_config_file provided_component out_var)
+    if (provided_component)
+      set(comp_arg COMPONENT ${provided_component})
     endif ()
     jgd_package_config_file_name(${comp_arg} OUT_VAR config_file_name)
 
@@ -177,22 +177,27 @@ function(jgd_install_config_file_package)
       PATTERN "CMakeFiles" EXCLUDE)
   endforeach ()
 
-  # == Install targets via an export set ==
+  # == Install targets via export sets ==
 
-  set(install_targets)
   foreach (target ${ARGS_TARGETS})
+    unset(target_component)
+    unset(comp_arg)
+    get_target_property(target_component ${target} COMPONENT)
+    if (target_component)
+      set(comp_arg COMPONENT ${target_component})
+    endif ()
+
     get_target_property(aliased ${target} ALIASED_TARGET)
     if (aliased)
-      list(APPEND install_targets ${aliased})
-    else ()
-      list(APPEND install_targets ${target})
+      set(target ${aliased})
     endif ()
-  endforeach ()
 
-  if (DEFINED ARGS_TARGETS)
+    jgd_package_targets_file_name(${comp_arg} OUT_VAR targets_file)
+    cmake_path(GET targets_file STEM export_set_name)
+
     install(
-      TARGETS ${install_targets}
-      EXPORT export_set
+      TARGETS ${target}
+      EXPORT ${export_set_name}
       INCLUDES DESTINATION "${JGD_INSTALL_INCLUDE_DIR}"
       RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
       COMPONENT ${PROJECT_NAME}_runtime
@@ -202,14 +207,12 @@ function(jgd_install_config_file_package)
       ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
       COMPONENT ${PROJECT_NAME}_devel)
 
-    jgd_package_targets_file_name(OUT_VAR targets_file)
     install(
-      EXPORT export_set
-      FILE ${targets_file}
+      EXPORT ${export_set_name}
       NAMESPACE ${PROJECT_NAME}::
       DESTINATION "${JGD_INSTALL_CMAKE_DESTINATION}"
       COMPONENT ${PROJECT_NAME}_devel)
-  endif ()
+  endforeach ()
 
   # == Install project licenses ==
 
