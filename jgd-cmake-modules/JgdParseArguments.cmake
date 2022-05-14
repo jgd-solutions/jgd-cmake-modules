@@ -84,8 +84,7 @@ macro(JGD_PARSE_ARGUMENTS)
   foreach (keyword ${INS_REQUIRES_ALL})
     set(parsed_var ${INS_PREFIX}_${keyword})
     if (NOT DEFINED ${parsed_var})
-      message(FATAL_ERROR "${keyword} was not provided or may be missing "
-        "its value (s) .")
+      message(FATAL_ERROR "${keyword} was not provided or may be missing its value(s).")
     endif ()
   endforeach ()
 
@@ -103,8 +102,7 @@ macro(JGD_PARSE_ARGUMENTS)
     if (NOT at_least_one_defined)
       message(
         FATAL_ERROR
-        "None of the following keywords were provided or may be missing their "
-        "values: ${INS_REQUIRES_ANY}")
+        "None of the following keywords were provided or may be missing their values: ${INS_REQUIRES_ANY}")
     endif ()
   endif ()
 

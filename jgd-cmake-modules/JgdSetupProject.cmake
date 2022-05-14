@@ -102,12 +102,12 @@ macro(JGD_SETUP_PROJECT)
 
   # project prefix name
   if (DEFINED ARGS_PREFIX_NAME)
-    set(project_prefix_name ${ARGS_PREFIX_NAME})
+    set(JGD_PROJECT_PREFIX_NAME ${ARGS_PREFIX_NAME})
   else ()
     string(TOUPPER ${PROJECT_NAME} prefix_temp)
-    string(REPLACE "-" "_" project_prefix_name ${prefix_temp})
+    string(REPLACE "-" "_" JGD_PROJECT_PREFIX_NAME ${prefix_temp})
+    unset(prefix_temp)
   endif ()
-  set(JGD_PROJECT_PREFIX_NAME "${project_prefix_name}")
 
   # == Invariable Project Options ==
 
