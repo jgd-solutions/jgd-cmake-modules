@@ -52,8 +52,8 @@ function(jgd_header_file_set scope)
       message(FATAL_ERROR "Could not resolve the canonical include directory for ${header_path}")
     endif ()
 
-    string(MD5 include_dir_hash "${include_dir}")
-    string(REPLACE "-" "_" file_set_name "${ARGS_TARGET}_${scope}_${include_dir_hash}")
+    string(MD5 base_dir_hash "${base_dir}")
+    string(REPLACE "-" "_" file_set_name "${ARGS_TARGET}_${scope}_${base_dir_hash}")
 
     target_sources(${ARGS_TARGET} ${scope} FILE_SET "${file_set_name}"
       TYPE HEADERS BASE_DIRS "${base_dir}" FILES "${header_path}")
