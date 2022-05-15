@@ -116,6 +116,12 @@ function(jgd_canonical_include_dirs)
   jgd_parse_arguments(ONE_VALUE_KEYWORDS "TARGET;OUT_VAR" REQUIRES_ALL
     "TARGET;OUT_VAR" ARGUMENTS "${ARGN}")
 
+  # Usage guard
+  if (NOT TARGET ${ARGS_TARGET})
+    message(FATAL_ERROR "${ARGS_TARGET} is not a target and must first be created before calling "
+      "${CMAKE_CURRENT_FUNCTION}.")
+  endif ()
+
   # Get the target's properties
   get_target_property(source_dir ${ARGS_TARGET} SOURCE_DIR)
   get_target_property(target_type ${ARGS_TARGET} TYPE)

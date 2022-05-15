@@ -138,45 +138,6 @@ function(jgd_install_config_file_package)
     DESTINATION "${JGD_INSTALL_CMAKE_DESTINATION}"
     COMPONENT ${PROJECT_NAME}_devel)
 
-  # ==  Install Target's Interface Headers ==
-
-  foreach (target ${ARGS_TARGETS})
-    unset(target_component)
-    unset(comp_arg)
-    unset(exclude_arg)
-    get_target_property(target_component ${target} COMPONENT)
-    if (target_component)
-      set(comp_arg COMPONENT ${target_component})
-    endif ()
-
-    # current target's include directories
-    get_target_property(inc_prop ${target} INTERFACE_INCLUDE_DIRECTORIES)
-    string(REGEX REPLACE "\\$<BUILD_INTERFACE:|>" "" include_dirs "${inc_prop}")
-
-    # convert each to absolute paths with project name appended, to ignore project dirs
-    get_target_property(source_dir ${target} SOURCE_DIR)
-    set(abs_include_dirs)
-    foreach (include_dir ${include_dirs})
-      if (IS_ABSOLUTE "${include_dir}")
-        list(APPEND abs_include_dirs "${include_dir}/${PROJECT_NAME}/")
-      else ()
-        list(APPEND abs_include_dirs "${source_dir}/${include_dir}/${PROJECT_NAME}/")
-      endif ()
-    endforeach ()
-
-    if (DEFINED ARGS_HEADER_EXCLUDE_REGEX)
-      jgd_separate_list(IN_LIST "${abs_include_dirs}"
-        REGEX "${ARGS_HEADER_EXCLUDE_REGEX}"
-        OUT_UNMATCHED abs_include_dirs)
-    endif ()
-
-    install(DIRECTORY ${abs_include_dirs}
-      DESTINATION "${JGD_INSTALL_INCLUDE_DIR}/${PROJECT_NAME}"
-      COMPONENT ${PROJECT_NAME}_devel
-      FILES_MATCHING PATTERN "*${JGD_HEADER_EXTENSION}"
-      PATTERN "CMakeFiles" EXCLUDE)
-  endforeach ()
-
   # == Install targets via export sets ==
 
   foreach (target ${ARGS_TARGETS})
@@ -195,17 +156,25 @@ function(jgd_install_config_file_package)
     jgd_package_targets_file_name(${comp_arg} OUT_VAR targets_file)
     cmake_path(GET targets_file STEM export_set_name)
 
+    get_target_property(interface_header_sets ${target} INTERFACE_HEADER_SETS)
+    set(file_set_args)
+    foreach (interface_header_set ${interface_header_sets})
+      set(file_set_args ${file_set_args} FILE_SET ${interface_header_set} DESTINATION "${JGD_INSTALL_INCLUDE_DIR}")
+    endforeach ()
+
     install(
       TARGETS ${target}
       EXPORT ${export_set_name}
-      INCLUDES DESTINATION "${JGD_INSTALL_INCLUDE_DIR}"
-      RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+      RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
       COMPONENT ${PROJECT_NAME}_runtime
-      LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+      LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
       COMPONENT ${PROJECT_NAME}_runtime
       NAMELINK_COMPONENT ${PROJECT_NAME}_devel
-      ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-      COMPONENT ${PROJECT_NAME}_devel)
+      ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+      COMPONENT ${PROJECT_NAME}_devel
+      ${file_set_args}
+      INCLUDES DESTINATION "${JGD_INSTALL_INCLUDE_DIR}"
+    )
 
     install(
       EXPORT ${export_set_name}

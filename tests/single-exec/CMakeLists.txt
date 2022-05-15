@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 project(single-exec VERSION 0.0.0 LANGUAGES CXX)
 
+find_package(jgd-cmake-modules CONFIG REQUIRED)
 include(JgdAllModules)
 
 jgd_setup_project()

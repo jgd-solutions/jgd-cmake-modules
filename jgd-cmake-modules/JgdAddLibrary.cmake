@@ -6,19 +6,18 @@ include(JgdTargetNaming)
 include(JgdSeparateList)
 include(JgdCanonicalStructure)
 include(JgdDefaultCompileOptions)
+include(JgdHeaderFileSet)
 include(GenerateExportHeader)
 
-# artifact
 function(jgd_add_library)
   jgd_parse_arguments(
     ONE_VALUE_KEYWORDS
     "COMPONENT;NAME;TYPE;OUT_TARGET_NAME"
     MULTI_VALUE_KEYWORDS
-    "SOURCES"
-    REQUIRES_ALL
-    "SOURCES"
-    ARGUMENTS
-    "${ARGN}")
+    "INTERFACE_HEADERS;PUBLIC_HEADERS;PRIVATE_HEADERS;SOURCES"
+    REQUIRES_ANY
+    "INTERFACE_HEADERS;PUBLIC_HEADERS;PRIVATE_HEADERS;SOURCES"
+    ARGUMENTS "${ARGN}")
 
   # Set library component
   if (DEFINED ARGS_COMPONENT AND NOT ARGS_COMPONENT STREQUAL PROJECT_NAME)
@@ -27,6 +26,15 @@ function(jgd_add_library)
   endif ()
 
   # == Usage Guards ==
+
+  # ensure sources are provided appropriately
+  if (ARGS_TYPE STREQUAL INTERFACE)
+    if (DEFINED ARGS_SOURCES OR DEFINED ARGS_PUBLIC_HEADERS OR DEFINED ARGS_PRIVATE_HEADERS)
+      message(FATAL_ERROR "Interface libraries can only be added with INTERFACE_HEADERS")
+    endif ()
+  elseif (NOT DEFINED ARGS_SOURCES)
+    message(FATAL_ERROR "SOURCES must be provided for non-interface libraries")
+  endif ()
 
   # ensure library is created in the appropriate canonical directory
   jgd_canonical_lib_subdir(${comp_arg} OUT_VAR canonical_dir)
@@ -85,7 +93,7 @@ function(jgd_add_library)
   set(lib_type STATIC)
   if (DEFINED ARGS_TYPE)
     set(lib_type ${ARGS_TYPE})
-    set(supported_types STATIC SHARED MODULE)
+    set(supported_types STATIC SHARED MODULE INTERFACE)
     list(FIND supported_types "${ARGS_TYPE}" supported)
     if (supported EQUAL -1)
       message(
@@ -119,35 +127,8 @@ function(jgd_add_library)
 
   # == Create Library Target ==
 
-  add_library("${target_name}" ${lib_type} "${ARGS_SOURCES}")
+  add_library("${target_name}" ${lib_type} ${ARGS_SOURCES})
   add_library(${PROJECT_NAME}::${export_name} ALIAS ${target_name})
-
-  # == Set Target Properties ==
-
-  # custom component property
-  if (DEFINED comp_arg)
-    set_target_properties(${target_name} PROPERTIES ${comp_arg})
-  endif ()
-
-  jgd_canonical_include_dirs(TARGET ${target_name} OUT_VAR include_dirs)
-
-  # common properties. Some may be ignored by certain targets
-  set_target_properties(
-    ${target_name}
-    PROPERTIES OUTPUT_NAME ${output_name}
-    PREFIX ""
-    EXPORT_NAME ${export_name}
-    COMPILE_OPTIONS "${JGD_DEFAULT_COMPILE_OPTIONS}"
-    INCLUDE_DIRECTORIES "${include_dirs}"
-    INTERFACE_INCLUDE_DIRECTORIES
-    "$<BUILD_INTERFACE:${include_dirs}>")
-
-  # shared library versioning
-  if (PROJECT_VERSION AND (BUILD_SHARED_LIBS OR lib_type STREQUAL "SHARED"))
-    set_target_properties(
-      ${target_name} PROPERTIES VERSION ${PROJECT_VERSION}
-      SOVERSION ${PROJECT_VERSION_MAJOR})
-  endif ()
 
   # == Generate an export header ==
 
@@ -161,4 +142,35 @@ function(jgd_add_library)
     BASE_NAME ${base_name}
     EXPORT_FILE_NAME
     "export_macros.hpp")
+
+  # == Set Target Properties ==
+
+  # custom component property
+  if (DEFINED comp_arg)
+    set_target_properties(${target_name} PROPERTIES ${comp_arg})
+  endif ()
+
+  # header properties
+  if (DEFINED ARGS_INTERFACE_HEADERS)
+    jgd_header_file_set(INTERFACE TARGET ${target_name} HEADERS "${ARGS_INTERFACE_HEADERS}")
+  elseif (DEFINED ARGS_PRIVATE_HEADERS)
+    jgd_header_file_set(PRIVATE TARGET ${target_name} HEADERS "${ARGS_PRIVATE_HEADERS}")
+  endif ()
+  jgd_header_file_set(PUBLIC TARGET ${target_name}
+    HEADERS "${ARGS_PUBLIC_HEADERS}" "${CMAKE_CURRENT_BINARY_DIR}/export_macros.hpp")
+
+  # common properties
+  set_target_properties(
+    ${target_name}
+    PROPERTIES OUTPUT_NAME ${output_name}
+    PREFIX ""
+    EXPORT_NAME ${export_name}
+    COMPILE_OPTIONS "${JGD_DEFAULT_COMPILE_OPTIONS}")
+
+  # shared library versioning
+  if (PROJECT_VERSION AND lib_type STREQUAL SHARED)
+    set_target_properties(
+      ${target_name} PROPERTIES VERSION ${PROJECT_VERSION}
+      SOVERSION ${PROJECT_VERSION_MAJOR})
+  endif ()
 endfunction()

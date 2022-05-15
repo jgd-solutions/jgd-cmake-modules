@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 project(libsingle VERSION 0.0.0 LANGUAGES CXX)
 
+find_package(jgd-cmake-modules CONFIG REQUIRED)
 if (LIBSINGLE_BUILD_DOCS)
   find_package(Doxygen REQUIRED COMPONENTS doxygen)
 endif ()
