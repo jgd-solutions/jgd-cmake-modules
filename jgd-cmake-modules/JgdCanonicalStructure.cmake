@@ -129,7 +129,7 @@ function(jgd_canonical_include_dirs)
 
   # Helpful macro to check & emit error
   macro(_CHECK_ERR subdir target_type_name)
-    if (NOT "${source_dir}" MATCHES "^${subdir}")
+    if (NOT source_dir MATCHES "^${subdir}")
       message(
         FATAL_ERROR
         "Unable to resolve default include directory for target "
@@ -140,7 +140,7 @@ function(jgd_canonical_include_dirs)
   endmacro()
 
   # Set include directory from canonical directories for respective target type
-  if ("${target_type}" STREQUAL "EXECUTABLE")
+  if (target_type STREQUAL "EXECUTABLE")
     # executable
     jgd_canonical_exec_subdir(OUT_VAR exec_subdir)
     _check_err("${exec_subdir}" "executable")
@@ -149,8 +149,7 @@ function(jgd_canonical_include_dirs)
   else ()
     if (component)
       # library component
-      jgd_canonical_lib_subdir(COMPONENT ${component} OUT_VAR
-        comp_subdir)
+      jgd_canonical_lib_subdir(COMPONENT ${component} OUT_VAR comp_subdir)
       _check_err("${comp_subdir}" "library component")
       set(prefix_parents 2)
       set(include_dir "${comp_subdir}")
@@ -173,5 +172,6 @@ function(jgd_canonical_include_dirs)
   if (component)
     set(binary_dirs "${PROJECT_BINARY_DIR};${PROJECT_BINARY_DIR}/${PROJECT_NAME}-${component}")
   endif ()
-  set(${ARGS_OUT_VAR} "${include_dir};${binary_dirs}" PARENT_SCOPE)
+
+  set(${ARGS_OUT_VAR} "${include_dir}" "${binary_dirs}" PARENT_SCOPE)
 endfunction()

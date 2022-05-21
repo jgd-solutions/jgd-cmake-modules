@@ -54,6 +54,8 @@ function(jgd_library_naming)
   # Resolve component
   if (DEFINED ARGS_COMPONENT AND NOT ARGS_COMPONENT STREQUAL PROJECT_NAME)
     set(component ${ARGS_COMPONENT})
+  else()
+    unset(component)
   endif ()
 
   # Base name upon which library names will be derived
@@ -66,22 +68,16 @@ function(jgd_library_naming)
   # Export name
   if (DEFINED ARGS_OUT_EXPORT_NAME)
     # there's a component and the project starts with JGD_LIB_PREFIX
-    if (DEFINED component AND NOT ${no_prefix} STREQUAL ${PROJECT_NAME})
-      set(${ARGS_OUT_EXPORT_NAME}
-        ${component}
-        PARENT_SCOPE)
+    if (DEFINED component AND NOT no_prefix STREQUAL PROJECT_NAME)
+      set(${ARGS_OUT_EXPORT_NAME} ${component} PARENT_SCOPE)
     else ()
-      set(${ARGS_OUT_EXPORT_NAME}
-        ${base_name}
-        PARENT_SCOPE)
+      set(${ARGS_OUT_EXPORT_NAME} ${base_name} PARENT_SCOPE)
     endif ()
   endif ()
 
   # Output name
   if (DEFINED ARGS_OUT_OUTPUT_NAME)
-    set(${ARGS_OUT_OUTPUT_NAME}
-      ${base_name}
-      PARENT_SCOPE)
+    set(${ARGS_OUT_OUTPUT_NAME} ${base_name} PARENT_SCOPE)
   endif ()
 
   # Target name
@@ -143,6 +139,8 @@ function(jgd_executable_naming)
   # Resolve component
   if (DEFINED ARGS_COMPONENT AND NOT ARGS_COMPONENT STREQUAL PROJECT_NAME)
     set(component ${ARGS_COMPONENT})
+  else()
+    unset(component)
   endif ()
 
   # Base name upon which executable names will be derived
@@ -155,7 +153,7 @@ function(jgd_executable_naming)
   # Export name
   if (DEFINED ARGS_OUT_EXPORT_NAME)
     # there's a component and the project doesn't start with JGD_LIB_PREFIX
-    if (DEFINED component AND ${no_prefix} STREQUAL ${PROJECT_NAME})
+    if (DEFINED component AND no_prefix STREQUAL PROJECT_NAME)
       set(${ARGS_OUT_EXPORT_NAME} ${component} PARENT_SCOPE)
     else ()
       set(${ARGS_OUT_EXPORT_NAME} ${base_name} PARENT_SCOPE)

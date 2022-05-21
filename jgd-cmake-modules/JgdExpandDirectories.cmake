@@ -21,14 +21,10 @@ include(JgdParseArguments)
 #
 function(jgd_expand_directories)
   jgd_parse_arguments(
-    ONE_VALUE_KEYWORDS
-    "OUT_VAR;GLOB"
-    MULTI_VALUE_KEYWORDS
-    "PATHS"
-    REQUIRES_ALL
-    "PATHS;OUT_VAR;GLOB"
-    ARGUMENTS
-    "${ARGN}")
+    ONE_VALUE_KEYWORDS "OUT_VAR;GLOB"
+    MULTI_VALUE_KEYWORDS "PATHS"
+    REQUIRES_ALL "PATHS;OUT_VAR;GLOB"
+    ARGUMENTS "${ARGN}")
 
   # Fill list with all file paths
   set(file_paths)

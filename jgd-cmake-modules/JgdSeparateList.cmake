@@ -29,17 +29,13 @@ function(jgd_separate_list)
   jgd_parse_arguments(
     ONE_VALUE_KEYWORDS
     "REGEX;OUT_MATCHED;OUT_UNMATCHED;TRANSFORM"
-    MULTI_VALUE_KEYWORDS
-    "IN_LIST"
-    REQUIRES_ALL
-    "REGEX;IN_LIST"
-    REQUIRES_ANY
-    "OUT_MATCHED;OUT_UNMATCHED"
-    ARGUMENTS
-    "${ARGN}")
+    MULTI_VALUE_KEYWORDS "IN_LIST"
+    REQUIRES_ALL "REGEX;IN_LIST"
+    REQUIRES_ANY "OUT_MATCHED;OUT_UNMATCHED"
+    ARGUMENTS "${ARGN}")
 
   set(supported_transforms "FILENAME")
-  if(DEFINED ARGS_TRANSFORM AND NOT "${ARGS_TRANSFORM}" MATCHES
+  if(DEFINED ARGS_TRANSFORM AND NOT ARGS_TRANSFORM MATCHES
                                 "${supported_transforms}")
     message(FATAL_ERROR "The TRANSFORM of ${ARGS_TRANSFORM} is not supported. "
                         "It must be one of ${supported_transforms}.")
@@ -51,7 +47,7 @@ function(jgd_separate_list)
   foreach(element ${ARGS_IN_LIST})
     # transform element to be matched
     set(transformed_element "${element}")
-    if("${ARGS_TRANSFORM}" STREQUAL "FILENAME")
+    if(ARGS_TRANSFORM STREQUAL "FILENAME")
       cmake_path(GET element FILENAME transformed_element)
     endif()
 
@@ -65,10 +61,6 @@ function(jgd_separate_list)
   endforeach()
 
   # Set out variables
-  set(${ARGS_OUT_MATCHED}
-      "${matched_elements}"
-      PARENT_SCOPE)
-  set(${ARGS_OUT_UNMATCHED}
-      "${unmatched_elements}"
-      PARENT_SCOPE)
+  set(${ARGS_OUT_MATCHED} "${matched_elements}" PARENT_SCOPE)
+  set(${ARGS_OUT_UNMATCHED} "${unmatched_elements}" PARENT_SCOPE)
 endfunction()

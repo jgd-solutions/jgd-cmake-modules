@@ -60,30 +60,38 @@ macro(_JGD_JOINED_FILE_NAME)
   string(REGEX REPLACE "^${delim}" "" suffix "${ARGS_SUFFIX}")
 
   # compose file name
-  if (NOT ARGS_COMPONENT OR ("${ARGS_COMPONENT}" STREQUAL "${project}"))
-    set(${ARGS_OUT_VAR}
-      "${project}${delim}${suffix}"
-      PARENT_SCOPE)
+  if (NOT ARGS_COMPONENT OR (ARGS_COMPONENT STREQUAL project))
+    set(${ARGS_OUT_VAR} "${project}${delim}${suffix}" PARENT_SCOPE)
   else ()
     set(${ARGS_OUT_VAR}
       "${project}${delim}${ARGS_COMPONENT}${delim}${suffix}"
       PARENT_SCOPE)
   endif ()
+
+  unset(suffix)
+  unset(delim)
+  unset(project)
 endmacro()
 
 macro(_JGD_FILE_NAMING_ARGUMENTS with_component args)
   if (${with_component})
     set(comp_keyword COMPONENT)
+  else()
+    unset(comp_keyword)
   endif ()
 
   jgd_parse_arguments(ONE_VALUE_KEYWORDS "${comp_keyword};PROJECT;OUT_VAR"
     REQUIRES_ALL "OUT_VAR" ARGUMENTS "${args}")
   if (DEFINED ARGS_PROJECT)
     set(proj_arg PROJECT ${ARGS_PROJECT})
+  else()
+    unset(proj_arg)
   endif ()
 
   if (DEFINED ARGS_COMPONENT)
     set(comp_arg COMPONENT ${ARGS_COMPONENT})
+  else()
+    unset(comp_arg)
   endif ()
 endmacro()
 
@@ -171,10 +179,7 @@ function(jgd_config_header_file_name)
   _jgd_file_naming_arguments(true "${ARGN}")
   _jgd_joined_file_name(
     ${comp_arg}
-    DELIMITER
-    "_"
-    SUFFIX
-    "config${JGD_HEADER_EXTENSION}"
-    OUT_VAR
-    ${ARGS_OUT_VAR})
+    DELIMITER "_"
+    SUFFIX "config${JGD_HEADER_EXTENSION}"
+    OUT_VAR ${ARGS_OUT_VAR})
 endfunction()

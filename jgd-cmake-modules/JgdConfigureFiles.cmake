@@ -46,6 +46,8 @@ function(jgd_configure_config_header_file)
   jgd_parse_arguments(ONE_VALUE_KEYWORDS "TARGET" ARGUMENTS "${ARGN}")
 
   # extract target's component property into an argument
+  set(comp_arg)
+  set(comp_err_msg)
   if (DEFINED ARGS_TARGET)
     get_target_property(component ${target} COMPONENT)
     if (component AND NOT component STREQUAL PROJECT_NAME)

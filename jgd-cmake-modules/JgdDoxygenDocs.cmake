@@ -45,8 +45,7 @@ function(jgd_create_doxygen_target)
   set(include_dirs)
   foreach (target ${ARGS_TARGETS})
     get_target_property(target_dirs ${target} INTERFACE_INCLUDE_DIRECTORIES)
-    string(REGEX REPLACE " \\$<BUILD_INTERFACE:|>" "" target_dirs
-      "${target_dirs}")
+    string(REGEX REPLACE " \\$<BUILD_INTERFACE:|>" "" target_dirs "${target_dirs}")
     foreach (dir ${target_dirs})
       file(REAL_PATH "${dir}" full_dir)
       list(APPEND include_dirs "${full_dir}")
@@ -55,6 +54,7 @@ function(jgd_create_doxygen_target)
 
   list(REMOVE_DUPLICATES include_dirs)
 
+  set(header_files)
   if (include_dirs)
     # Expand each include directory into files
     jgd_expand_directories(PATHS "${include_dirs}" GLOB
@@ -68,9 +68,8 @@ function(jgd_create_doxygen_target)
     # Exclude header files based on provided regex
     if (ARGS_EXCLUDE_REGEX AND header_files)
       jgd_separate_list(REGEX "${ARGS_EXCLUDE_REGEX}" IN_LIST "${header_files}"
-        OUT_UNMATCHED to_keep)
-      set(header_files "${to_keep}")
-      if (NOT to_keep)
+        OUT_UNMATCHED header_files)
+      if (NOT header_files)
         message(
           WARNING "All of the headers in the following include directories for "
           "targets ${ARGS_TARGETS} were excluded by the EXCLUDE_REGEX "

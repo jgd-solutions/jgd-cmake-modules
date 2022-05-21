@@ -14,7 +14,7 @@ define_property(
   FULL_DOCS
   "The name of a library or executable component that the target represents.")
 
-macro(_jgd_warn_set variable value)
+macro(_JGD_WARN_SET variable value)
   # Values that will be overridden by the project setup and should therefore not
   # be set prior to calling setup, unless it was explicity in the cache, which
   # occurs when variables are specified on the command line. This guard can only
@@ -36,7 +36,7 @@ macro(_jgd_warn_set variable value)
   set(${variable} "${value}" ${ARGN})
 endmacro()
 
-macro(_jgd_check_set variable value)
+macro(_JGD_CHECK_SET variable value)
   if (NOT DEFINED ${variable})
     set(${variable} "${value}" ${ARGN})
   endif ()
@@ -84,6 +84,7 @@ macro(JGD_SETUP_PROJECT)
       "root directory, and is required because it influences things like "
       "target names and artifact output names.")
   endif ()
+  unset(name_correct)
   unset(project_name_regex)
 
   # no project version specified
@@ -126,6 +127,7 @@ macro(JGD_SETUP_PROJECT)
   if (cmake_dir_idx EQUAL -1 AND EXISTS "${JGD_PROJECT_CMAKE_DIR}")
     list(APPEND CMAKE_MODULE_PATH "${JGD_PROJECT_CMAKE_DIR}")
   endif ()
+  unset(cmake_dir_idx)
 
   # build artifact destinations
   if (PROJECT_IS_TOP_LEVEL)
@@ -166,16 +168,18 @@ macro(JGD_SETUP_PROJECT)
   endforeach ()
 
   # default transitive runtime search path (RPATH) for shared libraries
-  if ((languages STREQUAL "NONE") AND (NOT CMAKE_SYSTEM_NAME STREQUAL "Windows"))
+  if ((NOT languages STREQUAL "NONE") AND (NOT CMAKE_SYSTEM_NAME STREQUAL "Windows"))
     if (CMAKE_SYSTEM_NAME STREQUAL "Apple")
       set(rpath_base @loader_path)
     else ()
       set(rpath_base $ORIGIN)
     endif ()
     file(RELATIVE_PATH rel_path
-      ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}
-      ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR})
+      "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}"
+      "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}")
+
     _jgd_warn_set(CMAKE_INSTALL_RPATH ${rpath_base} ${rpath_base}/${rel_path})
+
     unset(rel_path)
     unset(rpath_base)
   endif ()
@@ -186,8 +190,7 @@ macro(JGD_SETUP_PROJECT)
     "Release|RelWithDepInfo"))
     check_ipo_supported(RESULT ipo_supported OUTPUT err_msg)
     if (ipo_supported)
-      _jgd_warn_set(CMAKE_INTERPROCEDURAL_OPTIMIZATION
-        $<IF:$<CONFIG:DEBUG>,OFF,ON>)
+      _jgd_warn_set(CMAKE_INTERPROCEDURAL_OPTIMIZATION $<IF:$<CONFIG:DEBUG>,OFF,ON>)
     else ()
       _jgd_warn_set(CMAKE_INTERPROCEDURAL_OPTIMIZATION OFF)
       message(
@@ -206,9 +209,7 @@ macro(JGD_SETUP_PROJECT)
   # keep object file paths within Windows' path length limit
   if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     _jgd_warn_set(CMAKE_OBJECT_PATH_MAX 260)
-    message(
-      STATUS
-      "Windows: setting CMAKE_OBJECT_PATH_MAX to ${CMAKE_OBJECT_PATH_MAX}")
+    message(STATUS "Windows: setting CMAKE_OBJECT_PATH_MAX to ${CMAKE_OBJECT_PATH_MAX}")
   endif ()
 
   # default install prefix to Filesystem Hierarchy Standard's "add-on" path

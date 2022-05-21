@@ -7,7 +7,7 @@ function(jgd_header_file_set scope)
   jgd_parse_arguments(
     ONE_VALUE_KEYWORDS "TARGET"
     MULTI_VALUE_KEYWORDS "HEADERS"
-    REQUIRES_ALL "SOURCES"
+    REQUIRES_ALL "HEADERS"
     ARGUMENTS "${ARGN}")
 
   # Usage Guards
@@ -32,7 +32,7 @@ function(jgd_header_file_set scope)
     set(shortest_relative_length 65000)
     set(base_dir)
     foreach (include_dir ${include_dirs})
-      if (NOT "${header_path}" MATCHES "^${include_dir}")
+      if (NOT header_path MATCHES "^${include_dir}")
         continue()
       endif ()
 
@@ -40,7 +40,7 @@ function(jgd_header_file_set scope)
       string(LENGTH "${relative_path}" relative_length)
 
       if (relative_length LESS shortest_relative_length)
-        set(shortest_relative_length "${relative_length}")
+        set(shortest_relative_length ${relative_length})
         set(base_dir "${include_dir}")
       elseif (relative_length EQUAL shortest_relative_length)
         message(AUTHOR_WARNING "Multiple canonical include directories refer to the same path: "

@@ -31,18 +31,14 @@ function(jgd_add_test_executable)
   endif ()
 
   jgd_parse_arguments(
-    ONE_VALUE_KEYWORDS
-    "EXECUTABLE;NAME"
-    MULTI_VALUE_KEYWORDS
-    "SOURCES;LIBS"
-    REQUIRES_ALL
-    "EXECUTABLE;SOURCES"
-    ARGUMENTS
-    "${ARGN}")
+    ONE_VALUE_KEYWORDS "EXECUTABLE;NAME"
+    MULTI_VALUE_KEYWORDS "SOURCES;LIBS"
+    REQUIRES_ALL "EXECUTABLE;SOURCES"
+    ARGUMENTS "${ARGN}")
 
   # Verify source naming
 
-  if ("${CMAKE_CURRENT_SOURCE_DIR}" MATCHES "^${JGD_PROJECT_TESTS_DIR}")
+  if (CMAKE_CURRENT_SOURCE_DIR MATCHES "^${JGD_PROJECT_TESTS_DIR}")
     set(test_source_regex "${JGD_SOURCE_REGEX}") # other tests & drivers, only
   else ()
     set(test_source_regex "${JGD_TEST_SOURCE_REGEX}") # unit test files, only

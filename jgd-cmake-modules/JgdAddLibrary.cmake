@@ -23,12 +23,15 @@ function(jgd_add_library)
   if (DEFINED ARGS_COMPONENT AND NOT ARGS_COMPONENT STREQUAL PROJECT_NAME)
     set(comp_arg COMPONENT ${ARGS_COMPONENT})
     set(comp_err_msg "component (${ARGS_COMPONENT}) ")
+  else()
+    unset(comp_arg)
+    unset(comp_err_msg)
   endif ()
 
   # == Usage Guards ==
 
   # ensure sources are provided appropriately
-  if (ARGS_TYPE STREQUAL INTERFACE)
+  if (ARGS_TYPE STREQUAL "INTERFACE")
     if (DEFINED ARGS_SOURCES OR DEFINED ARGS_PUBLIC_HEADERS OR DEFINED ARGS_PRIVATE_HEADERS)
       message(FATAL_ERROR "Interface libraries can only be added with INTERFACE_HEADERS")
     endif ()
@@ -45,21 +48,28 @@ function(jgd_add_library)
       "done in the canonical directory ${canonical_dir}.")
   endif ()
 
-  # verify source naming
-  set(regex "${JGD_HEADER_REGEX}|${JGD_SOURCE_REGEX}")
+  # verify file naming
   jgd_separate_list(
-    IN_LIST
-    "${ARGS_SOURCES}"
-    REGEX
-    "${regex}"
-    TRANSFORM
-    "FILENAME"
-    OUT_UNMATCHED
-    incorrectly_named)
+    IN_LIST "${ARGS_SOURCES}"
+    REGEX "${JGD_SOURCE_REGEX}"
+    TRANSFORM "FILENAME"
+    OUT_UNMATCHED incorrectly_named)
   if (incorrectly_named)
     message(
       FATAL_ERROR
       "Provided source files do not match the regex for library sources, "
+      "${regex}: ${incorrectly_named}.")
+  endif ()
+
+  jgd_separate_list(
+    IN_LIST "${ARGS_INTERFACE_HEADERS}" "${ARGS_PUBLIC_HEADERS}" "${ARGS_PRIVATE_HEADERS}"
+    REGEX "${JGD_HEADER_REGEX}"
+    TRANSFORM "FILENAME"
+    OUT_UNMATCHED incorrectly_named)
+  if (incorrectly_named)
+    message(
+      FATAL_ERROR
+      "Provided header files do not match the regex for library headers, "
       "${regex}: ${incorrectly_named}.")
   endif ()
 
@@ -168,7 +178,7 @@ function(jgd_add_library)
     COMPILE_OPTIONS "${JGD_DEFAULT_COMPILE_OPTIONS}")
 
   # shared library versioning
-  if (PROJECT_VERSION AND lib_type STREQUAL SHARED)
+  if (PROJECT_VERSION AND lib_type STREQUAL "SHARED")
     set_target_properties(
       ${target_name} PROPERTIES VERSION ${PROJECT_VERSION}
       SOVERSION ${PROJECT_VERSION_MAJOR})

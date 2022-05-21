@@ -27,3 +27,5 @@ set(JGD_INSTALL_CMAKE_DESTINATION
 set(JGD_INSTALL_INCLUDE_DIR "${CMAKE_INSTALL_INCLUDEDIR}/${_name_version}")
 
 set(JGD_INSTALL_DOC_DIR "${CMAKE_INSTALL_DATAROOTDIR}/doc/${_name_version}")
+
+unset(_name_version)

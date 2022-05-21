@@ -40,8 +40,13 @@ macro(JGD_PARSE_ARGUMENTS)
   set(one_value_keywords PREFIX)
   set(multi_value_keywords ARGUMENTS OPTIONS ONE_VALUE_KEYWORDS
     MULTI_VALUE_KEYWORDS REQUIRES_ALL REQUIRES_ANY MUTUALLY_EXCLUSIVE)
+
   cmake_parse_arguments(INS "${options}" "${one_value_keywords}"
     "${multi_value_keywords}" "${ARGN}")
+
+  unset(options)
+  unset(one_value_keywords)
+  unset(mulit_one_value_keywords)
 
   # == Argument Validation of jgd_parse_arguments ==
 
@@ -55,10 +60,14 @@ macro(JGD_PARSE_ARGUMENTS)
       "${INS_UNPARSED_ARGUMENTS}")
   endif ()
 
-  # required keywords are a subset of the function's parsed keywords
+  # ensure required keywords are a subset of the function's parsed keywords
+  set(parsed_keywords)
   list(APPEND parsed_keywords ${INS_OPTIONS} "${INS_ONE_VALUE_KEYWORDS}"
     "${INS_MULTI_VALUE_KEYWORDS}")
+
+  set(required_keywords)
   list(APPEND required_keywords "${INS_REQUIRES_ALL}" "${INS_REQUIRES_ANY}")
+
   foreach (req_keyword ${required_keywords})
     list(FIND parsed_keywords "${req_keyword}" idx)
     if (idx EQUAL -1)
@@ -69,6 +78,9 @@ macro(JGD_PARSE_ARGUMENTS)
         "is not parsed by the function.")
     endif ()
   endforeach ()
+
+  unset(parsed_keywords)
+  unset(required_keywords)
 
   if (NOT DEFINED INS_PREFIX)
     set(INS_PREFIX "ARGS")
@@ -106,34 +118,41 @@ macro(JGD_PARSE_ARGUMENTS)
     endif ()
   endif ()
 
-  # validate keywords that are mutually exclusive
-  if (INS_MUTUALLY_EXCLUSIVE)
-    foreach (keyword ${INS_ARGUMENTS})
-      list(FIND INS_MUTUALLY_EXCLUSIVE ${keyword} idx)
-      if (NOT idx EQUAL -1)
-        if (DEFINED first_keyword)
-          set(second_keyword ${keyword})
-          break()
-        else ()
-          set(first_keyword ${keyword})
-        endif ()
-      endif ()
-    endforeach ()
+  unset(at_least_one_defined)
+  unset(parsed_var)
 
-    if (DEFINED second_keyword)
-      message(FATAL_ERROR "The keywords ${first_keyword} and ${second_keyword} were both defined but are part of the "
-        "mutually exclusive list of function arguments: ${INS_MUTUALLY_EXCLUSIVE}")
+  # validate keywords that are mutually exclusive
+  unset(first_keyword)
+  unset(second_keyword)
+
+  foreach(keyword ${INS_MUTUALLY_EXCLUSIVE})
+    list(FIND INS_ARGUMENTS ${keyword} idx)
+    if (NOT idx EQUAL -1)
+      if (DEFINED first_keyword)
+        set(second_keyword ${keyword})
+        break()
+      else ()
+        set(first_keyword ${keyword})
+      endif ()
     endif ()
+  endforeach()
+
+  if (DEFINED second_keyword)
+    message(FATAL_ERROR "The keywords ${first_keyword} and ${second_keyword} were both defined but are part of the "
+      "mutually exclusive list of function arguments: ${INS_MUTUALLY_EXCLUSIVE}")
   endif ()
+
+  unset(idx)
+  unset(second_keyword)
+  unset(first_keyword)
 
   # validate caller's argument format
-  if (NOT WITHOUT_MISSING_VALUES_CHECK AND ${INS_PREFIX}_KEYWORDS_MISSING_VALUES)
+  if (NOT ${INS_PREFIX}_WITHOUT_MISSING_VALUES_CHECK AND ${ARGS}_KEYWORDS_MISSING_VALUES)
     message(FATAL_ERROR "Keywords provided without any values: "
-      "${${INS_PREFIX}_KEYWORDS_MISSING_VALUES}")
+      "${${ARGS}_KEYWORDS_MISSING_VALUES}")
   endif ()
 
-  if (NOT WITHOUT_UNPARSED_CHECK AND ${INS_PREFIX}_UNPARSED_ARGUMENTS)
-    message(WARNING "Unparsed arguments provided: "
-      "${${INS_PREFIX}_UNPARSED_ARGUMENTS} ")
+  if (NOT ${INS_PREFIX}_WITHOUT_UNPARSED_CHECK AND ${ARGS}_UNPARSED_ARGUMENTS)
+    message(WARNING "Unparsed arguments provided: ${${ARGS}_UNPARSED_ARGUMENTS} ")
   endif ()
 endmacro()

@@ -12,16 +12,11 @@ include(CMakePackageConfigHelpers)
 
 function(jgd_install_config_file_package)
   jgd_parse_arguments(
-    OPTIONS
-    "CONFIGURE_PACKAGE_CONFIG_FILES"
-    ONE_VALUE_KEYWORDS
-    "HEADER_EXCLUDE_REGEX"
-    MULTI_VALUE_KEYWORDS
-    "TARGETS;CMAKE_MODULES"
-    REQUIRES_ANY
-    "TARGETS;CMAKE_MODULES"
-    ARGUMENTS
-    "${ARGN}")
+    OPTIONS "CONFIGURE_PACKAGE_CONFIG_FILES"
+    ONE_VALUE_KEYWORDS "HEADER_EXCLUDE_REGEX"
+    MULTI_VALUE_KEYWORDS "TARGETS;CMAKE_MODULES"
+    REQUIRES_ANY "TARGETS;CMAKE_MODULES"
+    ARGUMENTS "${ARGN}")
 
   # Usage guard
   if (NOT DEFINED ${PROJECT_NAME}_VERSION)
@@ -53,6 +48,8 @@ function(jgd_install_config_file_package)
   function(_jgd_get_package_config_file provided_component out_var)
     if (provided_component)
       set(comp_arg COMPONENT ${provided_component})
+    else()
+      unset(comp_arg)
     endif ()
     jgd_package_config_file_name(${comp_arg} OUT_VAR config_file_name)
 
@@ -108,16 +105,11 @@ function(jgd_install_config_file_package)
 
     if (module_files)
       jgd_separate_list(
-        IN_LIST
-        "${module_files}"
-        REGEX
-        "${JGD_CMAKE_MODULE_REGEX}"
-        TRANSFORM
-        "FILENAME"
-        OUT_MATCHED
-        correct_files
-        OUT_UNMATCHED
-        incorrect_files)
+        IN_LIST "${module_files}"
+        REGEX "${JGD_CMAKE_MODULE_REGEX}"
+        TRANSFORM "FILENAME"
+        OUT_MATCHED correct_files
+        OUT_UNMATCHED incorrect_files)
       if (incorrect_files)
         message(
           AUTHOR_WARNING

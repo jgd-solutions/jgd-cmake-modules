@@ -5,16 +5,36 @@ include(JgdExpandDirectories)
 include(JgdSeparateList)
 
 # Locate the clang-format executable on system
-find_program(
-  CLANG_FORMAT_EXE
-  NAMES "clang-format"
-  DOC "Path to clang-format executable")
+if(NOT EXISTS "${CLANG_FORMAT_EXE}")
+  if(DEFINED CLANG_FORMAT_EXE)
+    message(AUTHOR_WARNING "The path to clang-format does not exist: ${CLANG_FORMAT_EXE}. Searching for clang-format...")
+  endif()
 
-if (CLANG_FORMAT_EXE)
-  message(STATUS "clang-format found: ${CLANG_FORMAT_EXE}")
-else ()
-  message(AUTHOR_WARNING "clang-format could NOT be found.")
-endif ()
+  find_program(
+    CLANG_FORMAT_EXE
+    NAMES "clang-format"
+    DOC "Path to clang-format executable")
+
+  if (CLANG_FORMAT_EXE)
+    message(STATUS "clang-format found: ${CLANG_FORMAT_EXE}")
+  else ()
+    message(AUTHOR_WARNING "clang-format could NOT be found.")
+  endif ()
+endif()
+
+function(_jgd_build_error_clang_format_targets err_msg)
+    set(exit_failure "${CMAKE_COMMAND}" -E false)
+    set(print_err
+      "${CMAKE_COMMAND}" -E echo "${err_msg}")
+    add_custom_target(
+      clang-format
+      COMMAND "${print_err}"
+      COMMAND "${exit_failure}")
+    add_custom_target(
+      clang-format-check
+      COMMAND "${print_err}"
+      COMMAND "${exit_failure}")
+endfunction()
 
 #
 # Creates targets "clang-format" and "clang-format-check", that invoke
@@ -49,21 +69,11 @@ function(jgd_create_clang_format_targets)
   endif ()
 
   if (NOT EXISTS "${PROJECT_SOURCE_DIR}/.clang-format")
-    set(clang_format_err "The expected clang-format configuration file is not present  in ${PROJECT_NAME}: ${PROJECT_SOURCE_DIR}/.clang-format")
+    set(clang_format_err "The expected clang-format configuration file is not present for project ${PROJECT_NAME}: ${PROJECT_SOURCE_DIR}/.clang-format")
   endif ()
 
   if (clang_format_err)
-    set(exit_failure "${CMAKE_COMMAND}" -E false)
-    set(print_err
-      "${CMAKE_COMMAND}" -E echo "${clang_format_err}")
-    add_custom_target(
-      clang-format
-      COMMAND "${print_err}"
-      COMMAND "${exit_failure}")
-    add_custom_target(
-      clang-format-check
-      COMMAND "${print_err}"
-      COMMAND "${exit_failure}")
+    _jgd_build_error_clang_format_targets("${clang_format_err}")
     return()
   endif ()
 
@@ -72,15 +82,15 @@ function(jgd_create_clang_format_targets)
 
   set(files_to_format)
   foreach (target ${ARGS_TARGETS})
+    get_target_property(interface_sources ${target} INTERFACE_SOURCES)
+    if(NOT interface_sources)
+      continue()
+    endif()
+
     get_target_property(source_dir ${target} SOURCE_DIR)
     get_target_property(sources ${target} SOURCES)
-    get_target_property(interface_sources ${target} INTERFACE_SOURCES)
 
-    if (interface_sources)
-      set(sources "${sources};${interface_sources}")
-    endif ()
-
-    foreach (source_file ${sources})
+    foreach (source_file ${sources} ${interface_sources})
       if (IS_ABSOLUTE)
         set(abs_source_path "${source_file}")
       else ()
@@ -93,30 +103,31 @@ function(jgd_create_clang_format_targets)
   list(REMOVE_DUPLICATES files_to_format)
 
   # Filter out unwanted source files
-
-  if (ARGS_EXCLUDE_REGEX AND files_to_format)
-    jgd_separate_list(REGEX "${ARGS_EXCLUDE_REGEX}" IN_LIST "${files_to_format}" OUT_UNMATCHED to_keep)
-    set(files_to_format "${to_keep}")
-    if (NOT to_keep)
+  if (DEFINED ARGS_EXCLUDE_REGEX AND files_to_format)
+    jgd_separate_list(REGEX "${ARGS_EXCLUDE_REGEX}" IN_LIST "${files_to_format}" OUT_UNMATCHED file_to_format)
+    if (NOT file_to_format)
       message(
-        WARNING "All of the sources for targets ${ARGS_TARGETS} were excluded by the EXCLUDE_REGEX ${ARGS_EXCLUDE_REGEX}")
+        AUTHOR_WARNING "All of the sources for targets ${ARGS_TARGETS} were excluded by the EXCLUDE_REGEX ${ARGS_EXCLUDE_REGEX}")
     endif ()
   endif ()
 
   # Add additional files
-
-  if (ARGS_ADDITIONAL_PATHS)
+  if (DEFINED ARGS_ADDITIONAL_PATHS)
     jgd_expand_directories(PATHS "${ARGS_ADDITIONAL_PATHS}" GLOB "*" OUT_VAR globbed_files)
     list(APPEND files_to_format "${globbed_files}")
   endif ()
 
   # Create targets to run clang-format
 
+  if (NOT file_to_format)
+    message(
+      AUTHOR_WARNING "No source files in project ${PROJEC_NAME} will be provided to clang-format.")
+  endif ()
+
   set(verbose_flag)
   if (ARGS_VERBOSE)
     set(verbose_flag ";--verbose")
   endif ()
-
 
   set(base_cmd "${CLANG_FORMAT_EXE}" -style=file ${verbose_flag})
   add_custom_target(

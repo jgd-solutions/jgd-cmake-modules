@@ -23,6 +23,9 @@ function(jgd_add_executable)
   if (DEFINED ARGS_COMPONENT AND NOT ARGS_COMPONENT STREQUAL PROJECT_NAME)
     set(comp_arg COMPONENT ${ARGS_COMPONENT})
     set(comp_err_msg "n component (${ARGS_COMPONENT})")
+  else()
+    unset(comp_arg)
+    unset(comp_err_msg)
   endif ()
 
   # == Usage Guards ==
