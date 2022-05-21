@@ -5,18 +5,14 @@ include(JgdExpandDirectories)
 include(JgdSeparateList)
 
 # Locate the clang-format executable on system
-if(NOT EXISTS "${CLANG_FORMAT_EXE}")
-  if(DEFINED CLANG_FORMAT_EXE)
-    message(AUTHOR_WARNING "The path to clang-format does not exist: ${CLANG_FORMAT_EXE}. Searching for clang-format...")
-  endif()
-
+if(NOT CLANG_FORMAT_COMMAND)
   find_program(
-    CLANG_FORMAT_EXE
+    CLANG_FORMAT_COMMAND
     NAMES "clang-format"
     DOC "Path to clang-format executable")
 
-  if (CLANG_FORMAT_EXE)
-    message(STATUS "clang-format found: ${CLANG_FORMAT_EXE}")
+  if (CLANG_FORMAT_COMMAND)
+    message(STATUS "clang-format found: ${CLANG_FORMAT_COMMAND}")
   else ()
     message(AUTHOR_WARNING "clang-format could NOT be found.")
   endif ()
