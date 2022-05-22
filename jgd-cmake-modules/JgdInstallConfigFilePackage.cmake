@@ -13,7 +13,6 @@ include(CMakePackageConfigHelpers)
 function(jgd_install_config_file_package)
   jgd_parse_arguments(
     OPTIONS "CONFIGURE_PACKAGE_CONFIG_FILES"
-    ONE_VALUE_KEYWORDS "HEADER_EXCLUDE_REGEX"
     MULTI_VALUE_KEYWORDS "TARGETS;CMAKE_MODULES"
     REQUIRES_ANY "TARGETS;CMAKE_MODULES"
     ARGUMENTS "${ARGN}")
@@ -150,9 +149,11 @@ function(jgd_install_config_file_package)
 
     get_target_property(interface_header_sets ${target} INTERFACE_HEADER_SETS)
     set(file_set_args)
-    foreach (interface_header_set ${interface_header_sets})
-      set(file_set_args ${file_set_args} FILE_SET ${interface_header_set} DESTINATION "${JGD_INSTALL_INCLUDE_DIR}")
-    endforeach ()
+    if(interface_header_sets)
+      foreach (interface_header_set ${interface_header_sets})
+        set(file_set_args ${file_set_args} FILE_SET ${interface_header_set} DESTINATION "${JGD_INSTALL_INCLUDE_DIR}")
+      endforeach ()
+    endif()
 
     install(
       TARGETS ${target}

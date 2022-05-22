@@ -60,7 +60,7 @@ function(jgd_create_clang_format_targets)
 
   # Create targets to instead emit clang-format usage errors
   set(clang_format_err)
-  if (NOT CLANG_FORMAT_EXE)
+  if (NOT CLANG_FORMAT_COMMAND)
     set(clang_format_err "The clang-format executable must be available to use ${CMAKE_CURRENT_FUNCTION}")
   endif ()
 
@@ -79,12 +79,12 @@ function(jgd_create_clang_format_targets)
   set(files_to_format)
   foreach (target ${ARGS_TARGETS})
     get_target_property(interface_sources ${target} INTERFACE_SOURCES)
-    if(NOT interface_sources)
-      continue()
-    endif()
-
     get_target_property(source_dir ${target} SOURCE_DIR)
     get_target_property(sources ${target} SOURCES)
+
+    if(NOT interface_sources)
+      set(interface_sources)
+    endif()
 
     foreach (source_file ${sources} ${interface_sources})
       if (IS_ABSOLUTE)
@@ -100,8 +100,8 @@ function(jgd_create_clang_format_targets)
 
   # Filter out unwanted source files
   if (DEFINED ARGS_EXCLUDE_REGEX AND files_to_format)
-    jgd_separate_list(REGEX "${ARGS_EXCLUDE_REGEX}" IN_LIST "${files_to_format}" OUT_UNMATCHED file_to_format)
-    if (NOT file_to_format)
+    jgd_separate_list(REGEX "${ARGS_EXCLUDE_REGEX}" IN_LIST "${files_to_format}" OUT_UNMATCHED files_to_format)
+    if (NOT files_to_format)
       message(
         AUTHOR_WARNING "All of the sources for targets ${ARGS_TARGETS} were excluded by the EXCLUDE_REGEX ${ARGS_EXCLUDE_REGEX}")
     endif ()
@@ -115,9 +115,9 @@ function(jgd_create_clang_format_targets)
 
   # Create targets to run clang-format
 
-  if (NOT file_to_format)
+  if (NOT files_to_format)
     message(
-      AUTHOR_WARNING "No source files in project ${PROJEC_NAME} will be provided to clang-format.")
+      AUTHOR_WARNING "No source files in project ${PROJECT_NAME} will be provided to clang-format.")
   endif ()
 
   set(verbose_flag)
@@ -125,7 +125,7 @@ function(jgd_create_clang_format_targets)
     set(verbose_flag ";--verbose")
   endif ()
 
-  set(base_cmd "${CLANG_FORMAT_EXE}" -style=file ${verbose_flag})
+  set(base_cmd "${CLANG_FORMAT_COMMAND}" -style=file ${verbose_flag})
   add_custom_target(
     clang-format COMMAND ${base_cmd} -i ${files_to_format})
   add_custom_target(
