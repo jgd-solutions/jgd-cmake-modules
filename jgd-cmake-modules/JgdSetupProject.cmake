@@ -112,7 +112,7 @@ macro(JGD_SETUP_PROJECT)
 
   # == Invariable Project Options ==
 
-  option(${JGD_PROJECT_PREFIX_NAME}_BUILD_TESTS "Build all automated tests for ${PROJECT_NAME}" OFF)
+  option(${JGD_PROJECT_PREFIX_NAME}_BUILD_TESTS "Build all automated tests for ${PROJECT_NAME}" ${BUILD_TESTING})
   option(${JGD_PROJECT_PREFIX_NAME}_BUILD_DOCS "Build all documentation for ${PROJECT_NAME}" OFF)
   # note: build shared options provided by jgd_add_library, if called
 
