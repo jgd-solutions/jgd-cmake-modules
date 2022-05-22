@@ -222,4 +222,7 @@ macro(JGD_SETUP_PROJECT)
 
   # enable testing by default so invoking ctest always succeeds
   enable_testing()
+  if(PROJECT_IS_TOP_LEVEL AND ${JGD_PROJECT_PREFIX_NAME}_BUILD_TESTS)
+    include(CTest)
+  endif()
 endmacro()
