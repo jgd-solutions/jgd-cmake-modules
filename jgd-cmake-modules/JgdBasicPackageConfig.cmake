@@ -12,6 +12,10 @@ macro(JGD_BASIC_PACKAGE_CONFIG project)
 
   # Include package components' config file
   foreach (component ${${project}_FIND_COMPONENTS})
+    if(component STREQUAL project)
+      continue()
+    endif()
+
     jgd_package_config_file_name(PROJECT ${project} COMPONENT ${component} OUT_VAR component_file)
     list(APPEND config_package_files "${component_file}")
     include("${CMAKE_CURRENT_LIST_DIR}/${component_file}")

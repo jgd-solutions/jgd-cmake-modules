@@ -48,8 +48,8 @@ function(jgd_add_test_executable)
   foreach (source ${ARGS_SOURCES})
     string(REGEX MATCH "${regex}" matched "${source}")
     if (NOT matched)
-      message(FATAL_ERROR "Provided source file, ${source}, does not match the"
-        "regex for test executable sources, ${regex}.")
+      message(FATAL_ERROR "Provided source file, ${source}, does not match the "
+        "regex for test executable sources: ${regex}.")
     endif ()
   endforeach ()
 

@@ -4,7 +4,7 @@ include(JgdParseArguments)
 include(JgdCanonicalStructure)
 
 # non-package-config cmake modules
-set(JGD_CMAKE_MODULE_REGEX "^([A-Z][a-z]*)+\.cmake$")
+set(JGD_CMAKE_MODULE_REGEX "^([A-Z][a-z]*)+\\.cmake$")
 
 # Create regexs of file names based on file extensions from
 # JgdCanonicalStructure. Variables of the same name, but with _EXTENSION
@@ -114,7 +114,7 @@ endmacro()
 # resulting file name.
 #
 function(jgd_package_config_file_name)
-  _jgd_file_naming_arguments(true "${ARGN}")
+  _jgd_file_naming_arguments(1 "${ARGN}")
   _jgd_joined_file_name(${comp_arg} SUFFIX "config.cmake" ${proj_arg} OUT_VAR
     "${ARGS_OUT_VAR}")
 endfunction()
@@ -157,7 +157,7 @@ endfunction()
 # resulting file name.
 #
 function(jgd_package_targets_file_name)
-  _jgd_file_naming_arguments(true "${ARGN}")
+  _jgd_file_naming_arguments(1 "${ARGN}")
   _jgd_joined_file_name(${comp_arg} SUFFIX "targets.cmake" ${proj_arg} OUT_VAR ${ARGS_OUT_VAR})
 endfunction()
 
@@ -176,7 +176,7 @@ endfunction()
 # resulting file name.
 #
 function(jgd_config_header_file_name)
-  _jgd_file_naming_arguments(true "${ARGN}")
+  _jgd_file_naming_arguments(1 "${ARGN}")
   _jgd_joined_file_name(
     ${comp_arg}
     DELIMITER "_"

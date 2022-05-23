@@ -61,15 +61,10 @@ macro(JGD_PARSE_ARGUMENTS)
   endif ()
 
   # ensure required keywords are a subset of the function's parsed keywords
-  set(parsed_keywords)
-  list(APPEND parsed_keywords ${INS_OPTIONS} "${INS_ONE_VALUE_KEYWORDS}"
-    "${INS_MULTI_VALUE_KEYWORDS}")
+  set(parsed_keywords ${INS_OPTIONS} ${INS_ONE_VALUE_KEYWORDS} ${INS_MULTI_VALUE_KEYWORDS})
 
-  set(required_keywords)
-  list(APPEND required_keywords "${INS_REQUIRES_ALL}" "${INS_REQUIRES_ANY}")
-
-  foreach (req_keyword ${required_keywords})
-    list(FIND parsed_keywords "${req_keyword}" idx)
+  foreach (req_keyword ${INS_REQUIRES_ALL} ${INS_REQUIRES_ANY})
+    list(FIND parsed_keywords ${req_keyword} idx)
     if (idx EQUAL -1)
       message(
         FATAL_ERROR
@@ -80,7 +75,6 @@ macro(JGD_PARSE_ARGUMENTS)
   endforeach ()
 
   unset(parsed_keywords)
-  unset(required_keywords)
 
   if (NOT DEFINED INS_PREFIX)
     set(INS_PREFIX "ARGS")
@@ -94,8 +88,7 @@ macro(JGD_PARSE_ARGUMENTS)
 
   # validate keywords that must all be present
   foreach (keyword ${INS_REQUIRES_ALL})
-    set(parsed_var ${INS_PREFIX}_${keyword})
-    if (NOT DEFINED ${parsed_var})
+    if (NOT DEFINED ${INS_PREFIX}_${keyword})
       message(FATAL_ERROR "${keyword} was not provided or may be missing its value(s).")
     endif ()
   endforeach ()
@@ -104,8 +97,7 @@ macro(JGD_PARSE_ARGUMENTS)
   if (INS_REQUIRES_ANY)
     set(at_least_one_defined FALSE)
     foreach (keyword ${INS_REQUIRES_ANY})
-      set(parsed_var ${INS_PREFIX}_${keyword})
-      if (DEFINED parsed_var)
+      if (DEFINED ${INS_PREFIX}_${keyword})
         set(at_least_one_defined TRUE)
         break()
       endif ()
@@ -116,10 +108,9 @@ macro(JGD_PARSE_ARGUMENTS)
         FATAL_ERROR
         "None of the following keywords were provided or may be missing their values: ${INS_REQUIRES_ANY}")
     endif ()
+    unset(at_least_one_defined)
   endif ()
 
-  unset(at_least_one_defined)
-  unset(parsed_var)
 
   # validate keywords that are mutually exclusive
   unset(first_keyword)
@@ -147,12 +138,12 @@ macro(JGD_PARSE_ARGUMENTS)
   unset(first_keyword)
 
   # validate caller's argument format
-  if (NOT ${INS_PREFIX}_WITHOUT_MISSING_VALUES_CHECK AND ${ARGS}_KEYWORDS_MISSING_VALUES)
+  if (NOT INS_WITHOUT_MISSING_VALUES_CHECK AND ${INS_PREFIX}_KEYWORDS_MISSING_VALUES)
     message(FATAL_ERROR "Keywords provided without any values: "
       "${${ARGS}_KEYWORDS_MISSING_VALUES}")
   endif ()
 
-  if (NOT ${INS_PREFIX}_WITHOUT_UNPARSED_CHECK AND ${ARGS}_UNPARSED_ARGUMENTS)
+  if (NOT INS_WITHOUT_UNPARSED_CHECK AND ${INS_PREFIX}_UNPARSED_ARGUMENTS)
     message(WARNING "Unparsed arguments provided: ${${ARGS}_UNPARSED_ARGUMENTS} ")
   endif ()
 endmacro()

@@ -1,6 +1,8 @@
 include(JgdParseArguments)
 include(JgdStandardDirs)
 
+set(jgd-cmake-modules_ROOT "${CMAKE_CURRENT_BINARY_DIR}/install")
+
 function(_build_and_ctest project_name)
   jgd_parse_arguments(
     ONE_VALUE_KEYWORDS "NAME_SUFFIX" "BUILD_TARGET"
@@ -24,12 +26,12 @@ function(_build_and_ctest project_name)
     --build-generator "${CMAKE_GENERATOR}"
     --build-target ${ARGS_BUILD_TARGET}
     --build-and-test "${CMAKE_CURRENT_SOURCE_DIR}/${project_name}" "${CMAKE_CURRENT_BINARY_DIR}/${project_name}"
-    --build-options -Djgd-cmake-modules_ROOT="${PROJECT_BINARY_DIR}/install" ${ARGS_BUILD_OPTIONS}
+    --build-options "-Djgd-cmake-modules_ROOT:PATH=${jgd-cmake-modules_ROOT}" ${ARGS_BUILD_OPTIONS}
     ${test_arg})
 endfunction()
 
 
-function(_install_find_project project_name)
+function(_install_use_project project_name)
   set(${project_name}_ROOT "${CMAKE_CURRENT_BINARY_DIR}/${project_name}/install")
 
   add_test(
@@ -40,17 +42,28 @@ function(_install_find_project project_name)
     --verbose
     --prefix "${${project_name}_ROOT}")
 
-  if(ARGN)
-    set(comp_arg COMPONENTS ${ARGN})
-  else()
-    unset(comp_arg)
-  endif()
-
-  find_package(${project_name} CONFIG REQUIRED ${comp_arg})
+  add_test(
+    NAME ${project_name}-use-install
+    COMMAND
+    "${CMAKE_CTEST_COMMAND}"
+    --verbose
+    --output-on-failure
+    --build-noclean
+    --build-generator "${CMAKE_GENERATOR}"
+    --build-and-test
+      "${CMAKE_CURRENT_SOURCE_DIR}/test-project-consumption"
+      "${CMAKE_CURRENT_BINARY_DIR}/test-project-consumption"
+    --build-options
+      "-D TEST_PROJECT_CONSUMPTION_BUILD_TESTS:BOOL=ON"
+      "-D jgd-cmake-modules_ROOT:PATH=${jgd-cmake-modules_ROOT}"
+      "-D ${project_name}_ROOT:PATH=${${project_name}_ROOT}"
+      "-D test_name=use-${project_name}"
+      "-D components=${ARGN}"
+    --test-command "${CMAKE_CTEST_COMMAND}")
 endfunction()
 
+
 # Install jgd-cmake-modules as a test and for following test projects to find
-set(jgd-cmake-modules_ROOT "${PROJECT_BINARY_DIR}/tests/install")
 add_test(
   NAME ${PROJECT_NAME}-install
   COMMAND
@@ -58,7 +71,6 @@ add_test(
   --install "${PROJECT_BINARY_DIR}"
   --verbose
   --prefix "${jgd-cmake-modules_ROOT}")
-
 
 
 # == single-exec ==
@@ -71,7 +83,7 @@ _build_and_ctest("single-exec"
 _build_and_ctest("single-exec"
   BUILD_OPTIONS -DSINGLE_EXEC_BUILD_TESTS=ON)
 
-_install_find_project("single-exec")
+_install_use_project("single-exec")
 
 
 # == libsingle ==
@@ -93,7 +105,7 @@ _build_and_ctest("libsingle"
   NAME_SUFFIX -docs
   BUILD_TARGET doxygen-docs)
 
-_install_find_project("libsingle")
+_install_use_project("libsingle")
 
 
 # == libcomponents ==
@@ -110,4 +122,4 @@ _build_and_ctest("libcomponents"
   BUILD_OPTIONS -DLIBCOMPONENTS_BUILD_TESTS=ON -DLIBCOMPONENTS_CORE_BUILD_SHARED_LIBS=ON
   NAME_SUFFIX -shared)
 
-_install_find_project("libcomponents" core extra)
+_install_use_project("libcomponents" core extra)
