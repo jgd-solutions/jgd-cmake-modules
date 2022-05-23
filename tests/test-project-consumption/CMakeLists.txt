@@ -24,7 +24,8 @@ find_package(${package_name} CONFIG REQUIRED ${comp_arg})
 # == Create Tests to Use Package ==
 
 if(test_name STREQUAL use-single-exec)
-  # TODO: execute single-exec
+  add_test(NAME ${test_name} COMMAND single-exec::single-exec)
+  return()
 elseif(test_name STREQUAL use-libsingle)
   add_executable(${test_name} use_libsingle.cpp)
   target_link_libraries(${test_name} PRIVATE libsingle::libsingle)

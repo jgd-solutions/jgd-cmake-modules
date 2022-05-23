@@ -15,7 +15,7 @@ and structure the project.
 
 ## Test Layout
 
-- **test-project-consumption:** A phony project that finds and consumes each of the following test projects.
+- **test-project-consumption:** A project that finds and consumes each of the following test projects.
 - **single-exec:** Produces a single executable.
 - **libsingle:** Produces a single library, either static or shared.
 - **libcomponents:** Produces multiple libraries through a single project, offered as library components.
