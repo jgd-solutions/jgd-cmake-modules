@@ -49,17 +49,19 @@ function(jgd_add_library)
   endif ()
 
   # verify file naming
-  jgd_separate_list(
-    IN_LIST "${ARGS_SOURCES}"
-    REGEX "${JGD_SOURCE_REGEX}"
-    TRANSFORM "FILENAME"
-    OUT_UNMATCHED incorrectly_named)
-  if (incorrectly_named)
-    message(
-      FATAL_ERROR
-      "Provided source files do not match the regex for library sources, "
-      "${regex}: ${incorrectly_named}.")
-  endif ()
+  if(DEFINED ARGS_SOURCES)
+    jgd_separate_list(
+      IN_LIST "${ARGS_SOURCES}"
+      REGEX "${JGD_SOURCE_REGEX}"
+      TRANSFORM "FILENAME"
+      OUT_UNMATCHED incorrectly_named)
+    if (incorrectly_named)
+      message(
+        FATAL_ERROR
+        "Provided source files do not match the regex for library sources, "
+        "${regex}: ${incorrectly_named}.")
+    endif ()
+  endif()
 
   jgd_separate_list(
     IN_LIST "${ARGS_INTERFACE_HEADERS}" "${ARGS_PUBLIC_HEADERS}" "${ARGS_PRIVATE_HEADERS}"
@@ -123,12 +125,9 @@ function(jgd_add_library)
   else ()
     jgd_library_naming(
       ${comp_arg}
-      OUT_TARGET_NAME
-      target_name
-      OUT_EXPORT_NAME
-      export_name
-      OUT_OUTPUT_NAME
-      output_name)
+      OUT_TARGET_NAME target_name
+      OUT_EXPORT_NAME export_name
+      OUT_OUTPUT_NAME output_name)
   endif ()
 
   if (DEFINED ARGS_OUT_TARGET_NAME)
@@ -137,21 +136,27 @@ function(jgd_add_library)
 
   # == Create Library Target ==
 
-  add_library("${target_name}" ${lib_type} ${ARGS_SOURCES})
+  add_library("${target_name}" ${lib_type}
+    ${ARGS_INTERFACE_HEADERS}
+    ${ARGS_PUBLIC_HEADERS}
+    ${ARGS_PRIVATE_HEADERS}
+    ${ARGS_SOURCES})
+
   add_library(${PROJECT_NAME}::${export_name} ALIAS ${target_name})
 
   # == Generate an export header ==
 
-  set(base_name ${JGD_PROJECT_PREFIX_NAME})
-  if (DEFINED comp_arg)
-    string(APPEND base_name "_${comp_upper}")
-  endif ()
+  if(NOT ARGS_TYPE STREQUAL "INTERFACE")
+    set(base_name ${JGD_PROJECT_PREFIX_NAME})
+    if (DEFINED comp_arg)
+      string(APPEND base_name "_${comp_upper}")
+    endif ()
 
-  generate_export_header(
-    ${target_name}
-    BASE_NAME ${base_name}
-    EXPORT_FILE_NAME
-    "export_macros.hpp")
+    generate_export_header(
+      ${target_name}
+      BASE_NAME ${base_name}
+      EXPORT_FILE_NAME "export_macros.hpp")
+  endif()
 
   # == Set Target Properties ==
 
@@ -166,8 +171,11 @@ function(jgd_add_library)
   elseif (DEFINED ARGS_PRIVATE_HEADERS)
     jgd_header_file_set(PRIVATE TARGET ${target_name} HEADERS "${ARGS_PRIVATE_HEADERS}")
   endif ()
-  jgd_header_file_set(PUBLIC TARGET ${target_name}
-    HEADERS "${ARGS_PUBLIC_HEADERS}" "${CMAKE_CURRENT_BINARY_DIR}/export_macros.hpp")
+
+  if(NOT ARGS_TYPE STREQUAL "INTERFACE")
+    jgd_header_file_set(PUBLIC TARGET ${target_name}
+      HEADERS "${ARGS_PUBLIC_HEADERS}" "${CMAKE_CURRENT_BINARY_DIR}/export_macros.hpp")
+  endif()
 
   # common properties
   set_target_properties(

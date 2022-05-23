@@ -87,7 +87,7 @@ function(jgd_create_clang_format_targets)
     endif()
 
     foreach (source_file ${sources} ${interface_sources})
-      if (IS_ABSOLUTE)
+      if (IS_ABSOLUTE "${source_file}")
         set(abs_source_path "${source_file}")
       else ()
         set(abs_source_path "${source_dir}/${source_file}")

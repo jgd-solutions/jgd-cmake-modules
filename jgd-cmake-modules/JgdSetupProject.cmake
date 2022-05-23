@@ -144,7 +144,7 @@ macro(JGD_SETUP_PROJECT)
   # language standard requirements
   get_property(languages GLOBAL PROPERTY ENABLED_LANGUAGES)
   foreach (lang ${languages})
-    if (lang MATCHES "CXX")
+    if (lang STREQUAL "CXX")
       _jgd_warn_set(CMAKE_CXX_STANDARD 20)
     elseif (lang STREQUAL "C")
       _jgd_warn_set(CMAKE_C_STANDARD 17)

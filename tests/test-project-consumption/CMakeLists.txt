@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.23)
-project(test-project-consumption VERSION 0.0.0)
+project(test-project-consumption VERSION 0.0.0 LANGUAGES CXX)
 
 # == Usage Guards ==
 if(NOT DEFINED test_name)
@@ -31,6 +31,9 @@ elseif(test_name STREQUAL use-libsingle)
 elseif(test_name STREQUAL use-libcomponents)
   add_executable(${test_name} use_libcomponents.cpp)
   target_link_libraries(${test_name} PRIVATE libcomponents::extra)
+elseif(test_name STREQUAL use-libheaders)
+  add_executable(${test_name} use_libheaders.cpp)
+  target_link_libraries(${test_name} PRIVATE libheaders::libheaders)
 else()
   message(FATAL_ERROR "${test_name} is not a recognized test name in ${PROJECT_NAME}")
 endif()

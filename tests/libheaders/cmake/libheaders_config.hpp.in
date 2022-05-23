@@ -2,6 +2,5 @@
 
 #include <filesystem>
 
-namespace components {
+namespace headers {
 inline const std::filesystem::path data_dir{"@JGD_PROJECT_DATA_DIR@"};
-}

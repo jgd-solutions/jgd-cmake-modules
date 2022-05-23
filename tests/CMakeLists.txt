@@ -123,3 +123,16 @@ _build_and_ctest("libcomponents"
   NAME_SUFFIX -shared)
 
 _install_use_project("libcomponents" core extra)
+
+
+# == libheaders ==
+
+_build_and_ctest("libheaders"
+  BUILD_OPTIONS -DLIBHEADERS_BUILD_TESTS=ON
+  NAME_SUFFIX -format
+  BUILD_TARGET clang-format-check)
+
+_build_and_ctest("libheaders"
+  BUILD_OPTIONS -DLIBHEADERS_BUILD_TESTS=ON)
+
+_install_use_project("libheaders")
