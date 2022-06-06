@@ -75,17 +75,16 @@ function(jgd_add_library)
       "${regex}: ${incorrectly_named}.")
   endif ()
 
-  # == Build options related to libraries and this library =================
-  # note: locally setting BUILD_SHARED_LIBS has scope constrained to func
+  # == Build options related to libraries and this library ==
 
   if (NOT DEFINED ARGS_TYPE)
-    # commonly used (so it's build-wide) build shared option
+    # commonly used (build-wide) build-shared option
     option(BUILD_SHARED_LIBS "Dictates if libraries with unspecified types should be built shared." OFF)
 
     # project specific build shared option
     option(
       ${JGD_PROJECT_PREFIX_NAME}_BUILD_SHARED_LIBS
-      "Dictates if libraries with unspecified types should be built shared. Prefixed to only take affect for ${PROJECT_NAME}."
+      "Dictates if libraries of project ${PROJECT_NAME} with unspecified types should be built shared."
       ${BUILD_SHARED_LIBS})
 
     # component specific build shared option
@@ -93,8 +92,8 @@ function(jgd_add_library)
       string(TOUPPER ${ARGS_COMPONENT} comp_temp)
       string(REPLACE "-" "_" comp_upper ${comp_temp})
       option(
-        ${JGD_PROJECT_PREFIX_NAME}_${comp_upper}_BUILD_SHARED_LIBS
-        "Dictates if libraries with unspecified types should be built shared. Prefixed to only take affect for ${ARGS_COMPONENT} of ${PROJECT_NAME}."
+        ${JGD_PROJECT_PREFIX_NAME}_${comp_upper}_BUILD_SHARED
+        "Dictates if the library component ${ARGS_COMPONENT} of project ${PROJECT_NAME} should be built shared."
         ${${JGD_PROJECT_PREFIX_NAME}_BUILD_SHARED_LIBS})
     endif ()
   endif ()
