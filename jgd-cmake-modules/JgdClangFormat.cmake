@@ -58,6 +58,24 @@ function(jgd_create_clang_format_targets)
   jgd_parse_arguments(MULTI_VALUE_KEYWORDS "ADDITIONAL_PATHS;TARGETS"
     ONE_VALUE_KEYWORD "EXCLUDE_REGEX" OPTIONS "VERBOSE" REQUIRES_ALL "TARGETS" ARGUMENTS "${ARGN}")
 
+  if(NOT PROJECT_IS_TOP_LEVEL)
+    return()
+  endif()
+
+  # Warn about targets already being created to prevent less expressive warning later
+  set(target_existed FALSE)
+  foreach(target clang-format clang-format-check)
+    if(TARGET ${target})
+      message(WARNING "The target '${target}' already exists. ${CMAKE_CURRENT_FUNCTION} will not"
+                      "create this target")
+      set(target_existed TRUE)
+    endif()
+  endforeach()
+
+  if(target_exited)
+    return()
+  endif()
+
   # Create targets to instead emit clang-format usage errors
   set(clang_format_err)
   if (NOT CLANG_FORMAT_COMMAND)
@@ -65,7 +83,8 @@ function(jgd_create_clang_format_targets)
   endif ()
 
   if (NOT EXISTS "${PROJECT_SOURCE_DIR}/.clang-format")
-    set(clang_format_err "The expected clang-format configuration file is not present for project ${PROJECT_NAME}: ${PROJECT_SOURCE_DIR}/.clang-format")
+    set(clang_format_err "The expected clang-format configuration file is not present for project "
+      "${PROJECT_NAME}: ${PROJECT_SOURCE_DIR}/.clang-format")
   endif ()
 
   if (clang_format_err)
