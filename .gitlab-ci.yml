@@ -1,17 +1,21 @@
 stages:
+  - docker-build
   - build
-  - test
 
 variables:
   DOCKER_DRIVER: overlay2
   IMG_TAG: $CI_COMMIT_BRANCH
+  GIT_SUBMODULE_STRATEGY: recursive
 
-cache:
-
-build-gcc:
-  image:
-    name: registry.gitlab.com/jgd-solutions/continuous-dockerfiles/pipenv:latest
-    entrypoint: [""]
+workflow:
+  rules:
+    - if: $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME
+      variables:
+        IMG_TAG: $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME
+    - if: $CI_COMMIT_BRANCH == "main"
+      variables:
+        IMG_TAG: latest
+    - when: always
 
 .image_builder:
   image:
@@ -21,52 +25,32 @@ build-gcc:
     refs:
       - branches
       - merge_requests
-  stage: build
+  stage: docker-build
   when: on_success
   before_script:
     - mkdir -p /kaniko/.docker
     - echo "{\"auths\":{\"${CI_REGISTRY}\":{\"auth\":\"$(printf "%s:%s" "${CI_REGISTRY_USER}" "${CI_REGISTRY_PASSWORD}" | base64 | tr -d '\n')\"}}}" > /kaniko/.docker/config.json
 
-pipenv:
+docker-build-alpine-amd64:
   extends: .image_builder
   only:
     changes:
-      - dockerfiles/pipenv/*
+      - .gitlab/ci-dockerfiles/alpine-amd64
   script:
-    - IMG_NAME="$CI_REGISTRY_IMAGE/pipenv:$IMG_TAG" && echo "Building image $IMG_NAME"
+    - IMG_NAME="$CI_REGISTRY_IMAGE/alpine-amd64:$IMG_TAG" && echo "Building image $IMG_NAME"
     - >-
       /kaniko/executor
-      --context "$CI_PROJECT_DIR/dockerfiles/pipenv"
+      --context "$CI_PROJECT_DIR/.gitlab/ci-dockerfiles/alpine-amd64"
       --destination "$IMG_NAME"
 
-gpp:
-  extends: .image_builder
+build-alpine-amd64:
+  stage: build
   needs:
-    - job: pipenv
+    - job: docker-build-alpine-amd64
       optional: true
-  only:
-    changes:
-      - dockerfiles/pipenv/*
-      - dockerfiles/gpp/*
+  image:
+    name: $CI_REGISTRY_IMAGE/alpine-amd64:$IMG_TAG
+    entrypoint: [""]
   script:
-    - IMG_NAME="$CI_REGISTRY_IMAGE/gpp:$IMG_TAG" && echo "Building image $IMG_NAME"
-    - >-
-      /kaniko/executor
-      --context "$CI_PROJECT_DIR/dockerfiles/gpp"
-      --destination "$IMG_NAME"
-
-aws-cli-zip:
-  extends: .image_builder
-  needs:
-    - job: pipenv
-      optional: true
-  only:
-    changes:
-      - dockerfiles/pipenv/*
-      - dockerfiles/aws-cli-zip/*
-  script:
-    - IMG_NAME="$CI_REGISTRY_IMAGE/aws-cli-zip:$IMG_TAG" && echo "Building image $IMG_NAME"
-    - >-
-      /kaniko/executor
-      --context "$CI_PROJECT_DIR/dockerfiles/aws-cli-zip"
-      --destination "$IMG_NAME"
+    - cmake -DJCM_BUILD_TESTS=ON -S . -B build -G Ninja
+    - ctest --output-on-failure --test-dir build

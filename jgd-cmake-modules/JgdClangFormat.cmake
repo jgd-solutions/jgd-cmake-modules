@@ -77,14 +77,12 @@ function(jgd_create_clang_format_targets)
   endif()
 
   # Create targets to instead emit clang-format usage errors
-  set(clang_format_err)
   if (NOT CLANG_FORMAT_COMMAND)
     set(clang_format_err "The clang-format executable must be available to use ${CMAKE_CURRENT_FUNCTION}")
-  endif ()
-
-  if (NOT EXISTS "${PROJECT_SOURCE_DIR}/.clang-format")
-    set(clang_format_err "The expected clang-format configuration file is not present for project "
-      "${PROJECT_NAME}: ${PROJECT_SOURCE_DIR}/.clang-format")
+  elseif (NOT EXISTS "${PROJECT_SOURCE_DIR}/.clang-format")
+    set(clang_format_err "The expected clang-format configuration file is not present for project ${PROJECT_NAME}: ${PROJECT_SOURCE_DIR}/.clang-format")
+  else()
+    unset(clang_format_err)
   endif ()
 
   if (clang_format_err)
