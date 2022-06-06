@@ -80,7 +80,7 @@ macro(JGD_SETUP_PROJECT)
     message(
       FATAL_ERROR
       "The project ${PROJECT_NAME} does not meet the required regex "
-      "${project_name_regex}. This should be the same name as the project's "
+      "'${project_name_regex}'. This should be the same name as the project's "
       "root directory, and is required because it influences things like "
       "target names and artifact output names.")
   endif ()
@@ -223,6 +223,8 @@ macro(JGD_SETUP_PROJECT)
   # enable testing by default so invoking ctest always succeeds
   enable_testing()
   if(PROJECT_IS_TOP_LEVEL AND ${JGD_PROJECT_PREFIX_NAME}_BUILD_TESTS)
+    set(BUILD_TESTING ON)
     include(CTest)
+    set(BUILD_TESTING OFF)
   endif()
 endmacro()
