@@ -1,0 +1,72 @@
+stages:
+  - build
+  - test
+
+variables:
+  DOCKER_DRIVER: overlay2
+  IMG_TAG: $CI_COMMIT_BRANCH
+
+cache:
+
+build-gcc:
+  image:
+    name: registry.gitlab.com/jgd-solutions/continuous-dockerfiles/pipenv:latest
+    entrypoint: [""]
+
+.image_builder:
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [""]
+  only:
+    refs:
+      - branches
+      - merge_requests
+  stage: build
+  when: on_success
+  before_script:
+    - mkdir -p /kaniko/.docker
+    - echo "{\"auths\":{\"${CI_REGISTRY}\":{\"auth\":\"$(printf "%s:%s" "${CI_REGISTRY_USER}" "${CI_REGISTRY_PASSWORD}" | base64 | tr -d '\n')\"}}}" > /kaniko/.docker/config.json
+
+pipenv:
+  extends: .image_builder
+  only:
+    changes:
+      - dockerfiles/pipenv/*
+  script:
+    - IMG_NAME="$CI_REGISTRY_IMAGE/pipenv:$IMG_TAG" && echo "Building image $IMG_NAME"
+    - >-
+      /kaniko/executor
+      --context "$CI_PROJECT_DIR/dockerfiles/pipenv"
+      --destination "$IMG_NAME"
+
+gpp:
+  extends: .image_builder
+  needs:
+    - job: pipenv
+      optional: true
+  only:
+    changes:
+      - dockerfiles/pipenv/*
+      - dockerfiles/gpp/*
+  script:
+    - IMG_NAME="$CI_REGISTRY_IMAGE/gpp:$IMG_TAG" && echo "Building image $IMG_NAME"
+    - >-
+      /kaniko/executor
+      --context "$CI_PROJECT_DIR/dockerfiles/gpp"
+      --destination "$IMG_NAME"
+
+aws-cli-zip:
+  extends: .image_builder
+  needs:
+    - job: pipenv
+      optional: true
+  only:
+    changes:
+      - dockerfiles/pipenv/*
+      - dockerfiles/aws-cli-zip/*
+  script:
+    - IMG_NAME="$CI_REGISTRY_IMAGE/aws-cli-zip:$IMG_TAG" && echo "Building image $IMG_NAME"
+    - >-
+      /kaniko/executor
+      --context "$CI_PROJECT_DIR/dockerfiles/aws-cli-zip"
+      --destination "$IMG_NAME"
