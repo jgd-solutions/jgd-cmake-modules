@@ -46,6 +46,8 @@ ci-env:
 docker-build-alpine-amd64:
   extends: .image_builder
   rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: always
     - changes: 
       - .gitlab/ci-dockerfiles/alpine-amd64
       when: on_success
