@@ -21,10 +21,11 @@ workflow:
   image:
     name: gcr.io/kaniko-project/executor:debug
     entrypoint: [""]
-  only:
-    refs:
-      - branches
-      - merge_requests
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: on_success
+    - if: $CI_PIPELINE_SOURCE == "push"
+      when: manual
   stage: docker-build
   when: on_success
   before_script:
@@ -33,9 +34,10 @@ workflow:
 
 docker-build-alpine-amd64:
   extends: .image_builder
-  only:
-    changes:
+  rules:
+    - changes: 
       - .gitlab/ci-dockerfiles/alpine-amd64
+      when: on_success
   script:
     - IMG_NAME="$CI_REGISTRY_IMAGE/alpine-amd64:$IMG_TAG" && echo "Building image $IMG_NAME"
     - >-
