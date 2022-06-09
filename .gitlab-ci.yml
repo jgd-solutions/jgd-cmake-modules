@@ -1,4 +1,5 @@
 stages:
+  - environment
   - docker-build
   - build
 
@@ -17,13 +18,23 @@ workflow:
         IMG_TAG: latest
     - when: always
 
+ci-env:
+  stage: environment
+  script:
+    - echo "=== GitLab CI/CD | All Environment Variables ==="
+    - env | tee env_vars.sh
+  artifacts: 
+    paths:
+      - env_vars.sh
+
 .image_builder:
+  needs: []
   image:
     name: gcr.io/kaniko-project/executor:debug
     entrypoint: [""]
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-      when: on_success
+      when: always
     - if: $CI_PIPELINE_SOURCE == "push"
       when: manual
   stage: docker-build
@@ -35,6 +46,8 @@ workflow:
 docker-build-alpine-amd64:
   extends: .image_builder
   rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: always
     - changes: 
       - .gitlab/ci-dockerfiles/alpine-amd64
       when: on_success
