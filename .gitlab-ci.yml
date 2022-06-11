@@ -10,12 +10,12 @@ variables:
 
 workflow:
   rules:
-    - if: $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME
-      variables:
-        IMG_TAG: $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME
-    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"
       variables:
         IMG_TAG: latest
+    - if: $CI_COMMIT_BRANCH
+      variables:
+        IMG_TAG: $CI_COMMIT_BRANCH
     - when: always
 
 ci-env:
