@@ -33,8 +33,6 @@ ci-env:
     name: gcr.io/kaniko-project/executor:debug
     entrypoint: [""]
   rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-      when: always
   stage: docker-build
   when: on_success
   before_script:
@@ -44,7 +42,10 @@ ci-env:
 docker-build-alpine-amd64:
   extends: .image_builder
   rules:
-    - !reference [.image_builder, rules]
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        - .gitlab/ci-dockerfiles/alpine-amd64
+      when: always
     - changes:
         - .gitlab/ci-dockerfiles/alpine-amd64
       when: always
@@ -57,6 +58,8 @@ docker-build-alpine-amd64:
 
 build-alpine-amd64:
   stage: build
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
   needs:
     - job: docker-build-alpine-amd64
       optional: true
