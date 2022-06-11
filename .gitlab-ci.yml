@@ -23,7 +23,7 @@ ci-env:
   script:
     - echo "=== GitLab CI/CD | All Environment Variables ==="
     - env | tee env_vars.sh
-  artifacts: 
+  artifacts:
     paths:
       - env_vars.sh
 
@@ -46,11 +46,10 @@ ci-env:
 docker-build-alpine-amd64:
   extends: .image_builder
   rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - !reference [.image_builder, rules]
+    - changes:
+        - .gitlab/ci-dockerfiles/alpine-amd64
       when: always
-    - changes: 
-      - .gitlab/ci-dockerfiles/alpine-amd64
-      when: on_success
   script:
     - IMG_NAME="$CI_REGISTRY_IMAGE/alpine-amd64:$IMG_TAG" && echo "Building image $IMG_NAME"
     - >-
