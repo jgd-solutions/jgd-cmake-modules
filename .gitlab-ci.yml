@@ -10,7 +10,7 @@ variables:
 
 workflow:
   rules:
-    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main" || $CI_COMMIT_BRANCH == "main"
       variables:
         IMG_TAG: latest
     - if: $CI_COMMIT_BRANCH
