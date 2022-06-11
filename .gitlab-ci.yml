@@ -59,7 +59,8 @@ docker-build-alpine-amd64:
 build-alpine-amd64:
   stage: build
   rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" || $CI_PIPELINE_SOURCE == "push"
+      when: always
   needs:
     - job: docker-build-alpine-amd64
       optional: true
