@@ -1,8 +1,8 @@
 include_guard()
 
-include(JgdParseArguments)
-include(JgdFileNaming)
-include(JgdStandardDirs)
+include(JcmParseArguments)
+include(JcmFileNaming)
+include(JcmStandardDirs)
 include(CheckIPOSupported)
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
@@ -14,7 +14,7 @@ define_property(
   FULL_DOCS
   "The name of a library or executable component that the target represents.")
 
-macro(_JGD_WARN_SET variable value)
+macro(_JCM_WARN_SET variable value)
   # Values that will be overridden by the project setup and should therefore not
   # be set prior to calling setup, unless it was explicity in the cache, which
   # occurs when variables are specified on the command line. This guard can only
@@ -28,25 +28,25 @@ macro(_JGD_WARN_SET variable value)
     message(
       AUTHOR_WARNING
       "The variable ${variable} was set for project ${PROJECT_NAME} prior to "
-      "calling jgd_setup_project. This variable will by overridden to the "
+      "calling jcm_setup_project. This variable will by overridden to the "
       "default value of ${value} in the project setup. If you wish to "
       "override the default value, set ${variable} after calling "
-      "jgd_setup_project.")
+      "jcm_setup_project.")
   endif ()
   set(${variable} "${value}" ${ARGN})
 endmacro()
 
-macro(_JGD_CHECK_SET variable value)
+macro(_JCM_CHECK_SET variable value)
   if (NOT DEFINED ${variable})
     set(${variable} "${value}" ${ARGN})
   endif ()
 endmacro()
 
-# JGD_PROJECT_PREFIX_NAME, guards against basic project issues sets a bunch of
+# JCM_PROJECT_PREFIX_NAME, guards against basic project issues sets a bunch of
 # CMAKE_ variables to set default target properties & configure cmake operation
 # enables testing so it's never forgotten, even if there's no tests, it can
 # still be run
-macro(JGD_SETUP_PROJECT)
+macro(JCM_SETUP_PROJECT)
   # == Usage Guards ==
 
   # guard against running as script or forgetting project() command
@@ -62,7 +62,7 @@ macro(JGD_SETUP_PROJECT)
     "${PROJECT_SOURCE_DIR}/CMakeLists.txt")
     message(
       FATAL_ERROR
-      "jgd_setup_project must be called in the same CMakeLists.txt file that "
+      "jcm_setup_project must be called in the same CMakeLists.txt file that "
       "the project was defined in, with CMake's project() command.")
   endif ()
 
@@ -99,72 +99,72 @@ macro(JGD_SETUP_PROJECT)
 
   # == Function Arguments Project Configuration  ==
 
-  jgd_parse_arguments(ONE_VALUE_KEYWORDS "PREFIX_NAME" ARGUMENTS "${ARGN}")
+  jcm_parse_arguments(ONE_VALUE_KEYWORDS "PREFIX_NAME" ARGUMENTS "${ARGN}")
 
   # project prefix name
   if (DEFINED ARGS_PREFIX_NAME)
-    set(JGD_PROJECT_PREFIX_NAME ${ARGS_PREFIX_NAME})
+    set(JCM_PROJECT_PREFIX_NAME ${ARGS_PREFIX_NAME})
   else ()
     string(TOUPPER ${PROJECT_NAME} prefix_temp)
-    string(REPLACE "-" "_" JGD_PROJECT_PREFIX_NAME ${prefix_temp})
+    string(REPLACE "-" "_" JCM_PROJECT_PREFIX_NAME ${prefix_temp})
     unset(prefix_temp)
   endif ()
 
   # == Invariable Project Options ==
 
-  option(${JGD_PROJECT_PREFIX_NAME}_BUILD_TESTS "Build all automated tests for ${PROJECT_NAME}" ${BUILD_TESTING})
-  option(${JGD_PROJECT_PREFIX_NAME}_BUILD_DOCS "Build all documentation for ${PROJECT_NAME}" OFF)
-  # note: build shared options provided by jgd_add_library, if called
+  option(${JCM_PROJECT_PREFIX_NAME}_BUILD_TESTS "Build all automated tests for ${PROJECT_NAME}" ${BUILD_TESTING})
+  option(${JCM_PROJECT_PREFIX_NAME}_BUILD_DOCS "Build all documentation for ${PROJECT_NAME}" OFF)
+  # note: build shared options provided by jcm_add_library, if called
 
   # == Variables Setting Default Target Properties ==
 
   # basic
-  _jgd_warn_set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-  _jgd_warn_set(CMAKE_OPTIMIZE_DEPENDENCIES ON)
+  _jcm_warn_set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+  _jcm_warn_set(CMAKE_OPTIMIZE_DEPENDENCIES ON)
 
   # add project's cmake modules to path
-  list(FIND CMAKE_MODULE_PATH "${JGD_PROJECT_CMAKE_DIR}" cmake_dir_idx)
-  if (cmake_dir_idx EQUAL -1 AND EXISTS "${JGD_PROJECT_CMAKE_DIR}")
-    list(APPEND CMAKE_MODULE_PATH "${JGD_PROJECT_CMAKE_DIR}")
+  list(FIND CMAKE_MODULE_PATH "${JCM_PROJECT_CMAKE_DIR}" cmake_dir_idx)
+  if (cmake_dir_idx EQUAL -1 AND EXISTS "${JCM_PROJECT_CMAKE_DIR}")
+    list(APPEND CMAKE_MODULE_PATH "${JCM_PROJECT_CMAKE_DIR}")
   endif ()
   unset(cmake_dir_idx)
 
   # build artifact destinations
   if (PROJECT_IS_TOP_LEVEL)
-    _jgd_warn_set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
-    _jgd_warn_set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
-    _jgd_warn_set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+    _jcm_warn_set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
+    _jcm_warn_set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
+    _jcm_warn_set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
   else ()
     # welcome parent project's values, if defined
-    _jgd_check_set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
-    _jgd_check_set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
-    _jgd_check_set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+    _jcm_check_set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
+    _jcm_check_set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
+    _jcm_check_set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
   endif ()
 
   # language standard requirements
   get_property(languages GLOBAL PROPERTY ENABLED_LANGUAGES)
   foreach (lang ${languages})
     if (lang STREQUAL "CXX")
-      _jgd_warn_set(CMAKE_CXX_STANDARD 20)
+      _jcm_warn_set(CMAKE_CXX_STANDARD 20)
     elseif (lang STREQUAL "C")
-      _jgd_warn_set(CMAKE_C_STANDARD 17)
+      _jcm_warn_set(CMAKE_C_STANDARD 17)
     elseif (lang STREQUAL "CUDA")
-      _jgd_warn_set(CMAKE_CUDA_STANDARD 20)
+      _jcm_warn_set(CMAKE_CUDA_STANDARD 20)
     elseif (lang STREQUAL "OBJC")
-      _jgd_warn_set(CMAKE_OBJC_STANDARD 11)
+      _jcm_warn_set(CMAKE_OBJC_STANDARD 11)
     elseif (lang STREQUAL "OBJCXX")
-      _jgd_warn_set(CMAKE_OBJCXX_STANDARD 20)
+      _jcm_warn_set(CMAKE_OBJCXX_STANDARD 20)
     elseif (lang STREQUAL "HIP")
-      _jgd_warn_set(CMAKE_HIP_STANDARD 20)
+      _jcm_warn_set(CMAKE_HIP_STANDARD 20)
     endif ()
-    _jgd_warn_set(CMAKE_${lang}_STANDARD_REQUIRED ON)
-    _jgd_warn_set(CMAKE_${lang}_EXTENSIONS OFF)
+    _jcm_warn_set(CMAKE_${lang}_STANDARD_REQUIRED ON)
+    _jcm_warn_set(CMAKE_${lang}_EXTENSIONS OFF)
   endforeach ()
 
   # export visibility for shared & module libraries
-  _jgd_warn_set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
+  _jcm_warn_set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
   foreach (lang ${languages})
-    _jgd_warn_set(CMAKE_${lang}_VISIBILITY_PRESET hidden)
+    _jcm_warn_set(CMAKE_${lang}_VISIBILITY_PRESET hidden)
   endforeach ()
 
   # default transitive runtime search path (RPATH) for shared libraries
@@ -178,7 +178,7 @@ macro(JGD_SETUP_PROJECT)
       "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}"
       "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}")
 
-    _jgd_warn_set(CMAKE_INSTALL_RPATH ${rpath_base} ${rpath_base}/${rel_path})
+    _jcm_warn_set(CMAKE_INSTALL_RPATH ${rpath_base} ${rpath_base}/${rel_path})
 
     unset(rel_path)
     unset(rpath_base)
@@ -190,9 +190,9 @@ macro(JGD_SETUP_PROJECT)
     "Release|RelWithDepInfo"))
     check_ipo_supported(RESULT ipo_supported OUTPUT err_msg)
     if (ipo_supported)
-      _jgd_warn_set(CMAKE_INTERPROCEDURAL_OPTIMIZATION $<IF:$<CONFIG:DEBUG>,OFF,ON>)
+      _jcm_warn_set(CMAKE_INTERPROCEDURAL_OPTIMIZATION $<IF:$<CONFIG:DEBUG>,OFF,ON>)
     else ()
-      _jgd_warn_set(CMAKE_INTERPROCEDURAL_OPTIMIZATION OFF)
+      _jcm_warn_set(CMAKE_INTERPROCEDURAL_OPTIMIZATION OFF)
       message(
         NOTICE
         "Interprocedural linker optimization is not supported: ${err_msg}\n"
@@ -208,7 +208,7 @@ macro(JGD_SETUP_PROJECT)
 
   # keep object file paths within Windows' path length limit
   if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    _jgd_warn_set(CMAKE_OBJECT_PATH_MAX 260)
+    _jcm_warn_set(CMAKE_OBJECT_PATH_MAX 260)
     message(STATUS "Windows: setting CMAKE_OBJECT_PATH_MAX to ${CMAKE_OBJECT_PATH_MAX}")
   endif ()
 
@@ -217,12 +217,12 @@ macro(JGD_SETUP_PROJECT)
     AND NOT CMAKE_SYSTEM_NAME STREQUAL "Windows"
     AND PROJECT_IS_TOP_LEVEL)
     # todo: follow opt/ with provider, once registered with LANANA
-    _jgd_warn_set(CMAKE_INSTALL_PREFIX "/opt/${PROJECT_NAME}" CACHE PATH "Base installation location. " FORCE)
+    _jcm_warn_set(CMAKE_INSTALL_PREFIX "/opt/${PROJECT_NAME}" CACHE PATH "Base installation location. " FORCE)
   endif ()
 
   # enable testing by default so invoking ctest always succeeds
   enable_testing()
-  if(PROJECT_IS_TOP_LEVEL AND ${JGD_PROJECT_PREFIX_NAME}_BUILD_TESTS)
+  if(PROJECT_IS_TOP_LEVEL AND ${JCM_PROJECT_PREFIX_NAME}_BUILD_TESTS)
     set(BUILD_TESTING ON)
     include(CTest)
     set(BUILD_TESTING OFF)

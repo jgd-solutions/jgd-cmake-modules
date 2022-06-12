@@ -1,10 +1,10 @@
 include_guard()
 
-include(JgdParseArguments)
-include(JgdCanonicalStructure)
+include(JcmParseArguments)
+include(JcmCanonicalStructure)
 
-function(jgd_header_file_set scope)
-  jgd_parse_arguments(
+function(jcm_header_file_set scope)
+  jcm_parse_arguments(
     ONE_VALUE_KEYWORDS "TARGET"
     MULTI_VALUE_KEYWORDS "HEADERS"
     REQUIRES_ALL "HEADERS"
@@ -22,7 +22,7 @@ function(jgd_header_file_set scope)
   endif ()
 
   get_target_property(target_source_dir ${ARGS_TARGET} SOURCE_DIR)
-  jgd_canonical_include_dirs(TARGET ${ARGS_TARGET} OUT_VAR include_dirs)
+  jcm_canonical_include_dirs(TARGET ${ARGS_TARGET} OUT_VAR include_dirs)
 
   foreach (header_path ${ARGS_HEADERS})
     if (NOT IS_ABSOLUTE "${header_path}")

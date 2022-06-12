@@ -3,5 +3,5 @@
 include(CMakeFindDependencyMacro)
 find_dependency(jgd-cmake-modules CONFIG REQUIRED)
 
-include(JgdBasicPackageConfig)
-jgd_basic_package_config(@PROJECT_NAME@)
+include(JcmBasicPackageConfig)
+jcm_basic_package_config(@PROJECT_NAME@)

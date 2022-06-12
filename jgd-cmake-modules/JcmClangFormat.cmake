@@ -1,8 +1,8 @@
 include_guard()
 
-include(JgdSourceSubdirectories)
-include(JgdExpandDirectories)
-include(JgdSeparateList)
+include(JcmSourceSubdirectories)
+include(JcmExpandDirectories)
+include(JcmSeparateList)
 
 # Locate the clang-format executable on system
 if(NOT CLANG_FORMAT_COMMAND)
@@ -18,7 +18,7 @@ if(NOT CLANG_FORMAT_COMMAND)
   endif ()
 endif()
 
-function(_jgd_build_error_clang_format_targets err_msg)
+function(_jcm_build_error_clang_format_targets err_msg)
     set(exit_failure "${CMAKE_COMMAND}" -E false)
     set(print_err
       "${CMAKE_COMMAND}" -E echo "${err_msg}")
@@ -54,8 +54,8 @@ endfunction()
 # VERBOSE; option: provide the --verbose option to the underlying clang-format
 # executable.
 #
-function(jgd_create_clang_format_targets)
-  jgd_parse_arguments(MULTI_VALUE_KEYWORDS "ADDITIONAL_PATHS;TARGETS"
+function(jcm_create_clang_format_targets)
+  jcm_parse_arguments(MULTI_VALUE_KEYWORDS "ADDITIONAL_PATHS;TARGETS"
     ONE_VALUE_KEYWORD "EXCLUDE_REGEX" OPTIONS "VERBOSE" REQUIRES_ALL "TARGETS" ARGUMENTS "${ARGN}")
 
   if(NOT PROJECT_IS_TOP_LEVEL)
@@ -86,7 +86,7 @@ function(jgd_create_clang_format_targets)
   endif ()
 
   if (clang_format_err)
-    _jgd_build_error_clang_format_targets("${clang_format_err}")
+    _jcm_build_error_clang_format_targets("${clang_format_err}")
     return()
   endif ()
 
@@ -117,7 +117,7 @@ function(jgd_create_clang_format_targets)
 
   # Filter out unwanted source files
   if (DEFINED ARGS_EXCLUDE_REGEX AND files_to_format)
-    jgd_separate_list(REGEX "${ARGS_EXCLUDE_REGEX}" IN_LIST "${files_to_format}" OUT_UNMATCHED files_to_format)
+    jcm_separate_list(REGEX "${ARGS_EXCLUDE_REGEX}" IN_LIST "${files_to_format}" OUT_UNMATCHED files_to_format)
     if (NOT files_to_format)
       message(
         AUTHOR_WARNING "All of the sources for targets ${ARGS_TARGETS} were excluded by the EXCLUDE_REGEX ${ARGS_EXCLUDE_REGEX}")
@@ -126,7 +126,7 @@ function(jgd_create_clang_format_targets)
 
   # Add additional files
   if (DEFINED ARGS_ADDITIONAL_PATHS)
-    jgd_expand_directories(PATHS "${ARGS_ADDITIONAL_PATHS}" GLOB "*" OUT_VAR globbed_files)
+    jcm_expand_directories(PATHS "${ARGS_ADDITIONAL_PATHS}" GLOB "*" OUT_VAR globbed_files)
     list(APPEND files_to_format "${globbed_files}")
   endif ()
 

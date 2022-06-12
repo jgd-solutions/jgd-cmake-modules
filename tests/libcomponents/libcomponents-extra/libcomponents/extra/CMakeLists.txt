@@ -1,8 +1,8 @@
-include(JgdAddLibrary)
+include(JcmAddLibrary)
 
-jgd_add_library(
+jcm_add_library(
   OUT_TARGET_NAME target
-  COMPONENT "${JGD_CURRENT_COMPONENT}"
+  COMPONENT "${JCM_CURRENT_COMPONENT}"
   PUBLIC_HEADERS extra.hpp more.hpp
   SOURCES extra.cpp more.cpp)
 

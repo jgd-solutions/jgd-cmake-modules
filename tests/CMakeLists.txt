@@ -1,10 +1,10 @@
-include(JgdParseArguments)
-include(JgdStandardDirs)
+include(JcmParseArguments)
+include(JcmStandardDirs)
 
 set(jgd-cmake-modules_ROOT "${CMAKE_CURRENT_BINARY_DIR}/install")
 
 function(_build_and_ctest project_name)
-  jgd_parse_arguments(
+  jcm_parse_arguments(
     ONE_VALUE_KEYWORDS "NAME_SUFFIX" "BUILD_TARGET"
     MULTI_VALUE_KEYWORDS "BUILD_OPTIONS"
     ARGUMENTS "${ARGN}")

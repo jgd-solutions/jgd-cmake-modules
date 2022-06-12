@@ -1,12 +1,12 @@
 include_guard()
 
-include(JgdParseArguments)
-include(JgdFileNaming)
+include(JcmParseArguments)
+include(JcmFileNaming)
 include(CMakePackageConfigHelpers)
 
 # without target -> for the project with target -> specifically for the target
-function(jgd_configure_package_config_file)
-  jgd_parse_arguments(ONE_VALUE_KEYWORDS "TARGET;COMPONENT"
+function(jcm_configure_package_config_file)
+  jcm_parse_arguments(ONE_VALUE_KEYWORDS "TARGET;COMPONENT"
     MUTUALLY_EXCLUSIVE "TARGET;COMPONENT" ARGUMENTS "${ARGN}")
 
   # use provided component or extract target's component property into an argument
@@ -23,10 +23,10 @@ function(jgd_configure_package_config_file)
   endif ()
 
   # resolve input and output pkg-config file names
-  jgd_package_config_file_name(${comp_arg} OUT_VAR config_file)
-  set(in_config_file "${config_file}${JGD_IN_FILE_EXTENSION}")
-  string(PREPEND in_config_file "${JGD_PROJECT_CMAKE_DIR}/")
-  string(PREPEND config_file "${JGD_CMAKE_DESTINATION}/")
+  jcm_package_config_file_name(${comp_arg} OUT_VAR config_file)
+  set(in_config_file "${config_file}${JCM_IN_FILE_EXTENSION}")
+  string(PREPEND in_config_file "${JCM_PROJECT_CMAKE_DIR}/")
+  string(PREPEND config_file "${JCM_CMAKE_DESTINATION}/")
   if (NOT EXISTS "${in_config_file}")
     message(
       FATAL_ERROR
@@ -37,13 +37,13 @@ function(jgd_configure_package_config_file)
 
   configure_package_config_file(
     "${in_config_file}" "${config_file}"
-    INSTALL_DESTINATION "${JGD_INSTALL_CMAKE_DESTINATION}")
+    INSTALL_DESTINATION "${JCM_INSTALL_CMAKE_DESTINATION}")
 endfunction()
 
 # without target -> for the project (common) with target -> specifically for the
 # target
-function(jgd_configure_config_header_file)
-  jgd_parse_arguments(ONE_VALUE_KEYWORDS "TARGET" ARGUMENTS "${ARGN}")
+function(jcm_configure_config_header_file)
+  jcm_parse_arguments(ONE_VALUE_KEYWORDS "TARGET" ARGUMENTS "${ARGN}")
 
   # extract target's component property into an argument
   set(comp_arg)
@@ -56,10 +56,10 @@ function(jgd_configure_config_header_file)
     endif ()
   endif ()
 
-  jgd_config_header_file_name(${comp_arg} OUT_VAR header_file)
-  set(in_header_file "${header_file}${JGD_IN_FILE_EXTENSION}")
-  string(PREPEND in_header_file "${JGD_PROJECT_CMAKE_DIR}/")
-  string(PREPEND header_file "${JGD_HEADER_DESTINATION}/")
+  jcm_config_header_file_name(${comp_arg} OUT_VAR header_file)
+  set(in_header_file "${header_file}${JCM_IN_FILE_EXTENSION}")
+  string(PREPEND in_header_file "${JCM_PROJECT_CMAKE_DIR}/")
+  string(PREPEND header_file "${JCM_HEADER_DESTINATION}/")
   if (NOT EXISTS "${in_header_file}")
     message(
       FATAL_ERROR
@@ -70,4 +70,3 @@ function(jgd_configure_config_header_file)
 
   configure_file("${in_header_file}" "${header_file}" @ONLY)
 endfunction()
-

@@ -1,14 +1,14 @@
 include_guard()
 
-include(JgdParseArguments)
-include(JgdExpandDirectories)
-include(JgdCanonicalStructure)
-include(JgdSeparateList)
+include(JcmParseArguments)
+include(JcmExpandDirectories)
+include(JcmCanonicalStructure)
+include(JcmSeparateList)
 
 #
 # Creates a target, "doxygen-docs", that generates documentation of the provided
 # TARGETS using Doxygen. Doxygen will generate documentation from the header
-# files (those matching JGD_HEADER_EXTENSION) within the TARGETS'
+# files (those matching JCM_HEADER_EXTENSION) within the TARGETS'
 # INTERFACE_INCLUDE_DIRECTORIES. EXCLUDE_REGEX can be provided to exclude any of
 # these files or paths from Doxygen's input. The EXCLUDE_REGEX will be applied
 # to absolute paths.
@@ -31,8 +31,8 @@ include(JgdSeparateList)
 # Doxygen's list of input files and sets DOXYGEN_USE_MDFILE_AS_MAINPAGE to it,
 # such that Doxygen will use the project's readme as the main page.
 #
-function(jgd_create_doxygen_target)
-  jgd_parse_arguments(
+function(jcm_create_doxygen_target)
+  jcm_parse_arguments(
     OPTIONS "README_MAIN_PAGE"
     MULTI_VALUE_KEYWORDS "TARGETS;ADDITIONAL_PATHS;EXCLUDE_REGEX"
     REQUIRES_ALL "TARGETS" ARGUMENTS "${ARGN}")
@@ -61,17 +61,17 @@ function(jgd_create_doxygen_target)
   set(header_files)
   if (include_dirs)
     # Expand each include directory into files
-    jgd_expand_directories(PATHS "${include_dirs}" GLOB
-      "*${JGD_HEADER_EXTENSION}" OUT_VAR header_files)
+    jcm_expand_directories(PATHS "${include_dirs}" GLOB
+      "*${JCM_HEADER_EXTENSION}" OUT_VAR header_files)
     if (NOT header_files)
       message(WARNING "The following include directories for targets "
         "${ARGS_TARGETS} don't contain any header files meeting"
-        "JGD_HEADER_EXTENSION: ${include_dirs}")
+        "JCM_HEADER_EXTENSION: ${include_dirs}")
     endif ()
 
     # Exclude header files based on provided regex
     if (ARGS_EXCLUDE_REGEX AND header_files)
-      jgd_separate_list(REGEX "${ARGS_EXCLUDE_REGEX}" IN_LIST "${header_files}"
+      jcm_separate_list(REGEX "${ARGS_EXCLUDE_REGEX}" IN_LIST "${header_files}"
         OUT_UNMATCHED header_files)
       if (NOT header_files)
         message(

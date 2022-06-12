@@ -1,7 +1,7 @@
 include_guard()
 
-include(JgdParseArguments)
-include(JgdCanonicalStructure)
+include(JcmParseArguments)
+include(JcmCanonicalStructure)
 
 #
 # Sets the output variable specified by the OUT_* arguments to default,
@@ -9,13 +9,13 @@ include(JgdCanonicalStructure)
 # properties.
 #
 # OUT_TARGET_NAME's variable specifies the library target name to use within
-# CMake commands; it will be <PROJECT_NAME>_<JGD_LIB_PREFIX><name>[-COMPONENT].
+# CMake commands; it will be <PROJECT_NAME>_<JCM_LIB_PREFIX><name>[-COMPONENT].
 # OUT_EXPORT_NAME's variable specifies the exported target name that consumers
-# will use; it will be <JGD_LIB_PREFIX><name>, or <COMPONENT> if COMPONENT is
-# provided and PROJECT_NAME already starts with JGD_LIB_PREFIX.
+# will use; it will be <JCM_LIB_PREFIX><name>, or <COMPONENT> if COMPONENT is
+# provided and PROJECT_NAME already starts with JCM_LIB_PREFIX.
 # OUT_OUTPUT_NAME's variable specifies the name of the built library on disk,
-# which will be <JGD_LIB_PREFIX><name>[-COMPONENT]. For each library name,
-# 'name' is the PROJECT_NAME with any leading JGD_LIB_PREFIX stripped.
+# which will be <JCM_LIB_PREFIX><name>[-COMPONENT]. For each library name,
+# 'name' is the PROJECT_NAME with any leading JCM_LIB_PREFIX stripped.
 #
 # The target name is prefixed with the project name to avoid conflicts with
 # other projects when dependencies are added as subdirectories, for all target
@@ -37,8 +37,8 @@ include(JgdCanonicalStructure)
 # OUT_OUTPUT_NAME: one-value arg; the name of the variable that will store the
 # library's output name. Associated to the library's OUTPUT_NAME property.
 #
-function(jgd_library_naming)
-  jgd_parse_arguments(
+function(jcm_library_naming)
+  jcm_parse_arguments(
     ONE_VALUE_KEYWORDS
     "COMPONENT"
     "OUT_TARGET_NAME"
@@ -59,15 +59,15 @@ function(jgd_library_naming)
   endif ()
 
   # Base name upon which library names will be derived
-  string(REGEX REPLACE "^${JGD_LIB_PREFIX}" "" no_prefix ${PROJECT_NAME})
-  set(base_name "${JGD_LIB_PREFIX}${no_prefix}")
+  string(REGEX REPLACE "^${JCM_LIB_PREFIX}" "" no_prefix ${PROJECT_NAME})
+  set(base_name "${JCM_LIB_PREFIX}${no_prefix}")
   if (DEFINED component)
     string(APPEND base_name "-${component}")
   endif ()
 
   # Export name
   if (DEFINED ARGS_OUT_EXPORT_NAME)
-    # there's a component and the project starts with JGD_LIB_PREFIX
+    # there's a component and the project starts with JCM_LIB_PREFIX
     if (DEFINED component AND NOT no_prefix STREQUAL PROJECT_NAME)
       set(${ARGS_OUT_EXPORT_NAME} ${component} PARENT_SCOPE)
     else ()
@@ -97,10 +97,10 @@ endfunction()
 # CMake commands; it will be <PROJECT_NAME>_<name>[-COMPONENT].
 # OUT_EXPORT_NAME's variable specifies the exported target name that consumers
 # will use; it will be <name>[-COMPONENT], or <COMPONENT> if COMPONENT is
-# provided and PROJECT_NAME doesn't start with JGD_LIB_PREFIX. OUT_OUTPUT_NAME's
+# provided and PROJECT_NAME doesn't start with JCM_LIB_PREFIX. OUT_OUTPUT_NAME's
 # variable specifies the name of the built executable on disk, which will be
 # <name>[-COMPONENT]. For each executable name, 'name' is the PROJECT_NAME with
-# any leading JGD_LIB_PREFIX stripped.
+# any leading JCM_LIB_PREFIX stripped.
 #
 # The target name is prefixed with the project name to avoid conflicts with
 # other projects when dependencies are added as subdirectories, for all target
@@ -122,8 +122,8 @@ endfunction()
 # OUT_OUTPUT_NAME: one-value arg; the name of the variable that will store the
 # executable's output name. Associated to the executable's OUTPUT_NAME property.
 #
-function(jgd_executable_naming)
-  jgd_parse_arguments(
+function(jcm_executable_naming)
+  jcm_parse_arguments(
     ONE_VALUE_KEYWORDS
     "COMPONENT"
     "OUT_TARGET_NAME"
@@ -144,7 +144,7 @@ function(jgd_executable_naming)
   endif ()
 
   # Base name upon which executable names will be derived
-  string(REGEX REPLACE "^${JGD_LIB_PREFIX}" "" no_prefix ${PROJECT_NAME})
+  string(REGEX REPLACE "^${JCM_LIB_PREFIX}" "" no_prefix ${PROJECT_NAME})
   set(base_name ${no_prefix})
   if (DEFINED component)
     string(APPEND base_name "-${component}")
@@ -152,7 +152,7 @@ function(jgd_executable_naming)
 
   # Export name
   if (DEFINED ARGS_OUT_EXPORT_NAME)
-    # there's a component and the project doesn't start with JGD_LIB_PREFIX
+    # there's a component and the project doesn't start with JCM_LIB_PREFIX
     if (DEFINED component AND no_prefix STREQUAL PROJECT_NAME)
       set(${ARGS_OUT_EXPORT_NAME} ${component} PARENT_SCOPE)
     else ()
