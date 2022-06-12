@@ -6,24 +6,24 @@ include_guard()
 # Refinements:
 #
 # * from the list of appropriate file names file names, lower snake case is
-#   chosen, enforced in JgdFileNaming
+#   chosen, enforced in JcmFileNaming
 
-include(JgdParseArguments)
+include(JcmParseArguments)
 
-set(JGD_LIB_PREFIX "lib")
+set(JCM_LIB_PREFIX "lib")
 
-set(JGD_HEADER_EXTENSION ".hpp")
-set(JGD_SOURCE_EXTENSION ".cpp")
-set(JGD_TEST_SOURCE_EXTENSION ".test.cpp")
-set(JGD_MODULE_EXTENSION ".mpp") # cmake doesn't support modules, but for future
-set(JGD_IN_FILE_EXTENSION ".in")
+set(JCM_HEADER_EXTENSION ".hpp")
+set(JCM_SOURCE_EXTENSION ".cpp")
+set(JCM_TEST_SOURCE_EXTENSION ".test.cpp")
+set(JCM_MODULE_EXTENSION ".mpp") # cmake doesn't support modules, but for future
+set(JCM_IN_FILE_EXTENSION ".in")
 
 #
 # Sets the variable specified by OUT_VAR to the canonical project path for library.
 # When COMPONENT is omitted, the output will be the canonical project path for a
 # single library of PROJECT_NAME, regardless of if PROJECT_NAME names a library
 # or executable. The resulting path is absolute, and will be
-# /<JGD_LIB_PREFIX><name>, with respect to PROJECT_SOURCE_DIR, where 'name' is
+# /<JCM_LIB_PREFIX><name>, with respect to PROJECT_SOURCE_DIR, where 'name' is
 # the PROJECT_NAME without any lib prefix. Ex.  .../libproj
 #
 # When COMPONENT is provided, the output will name a library component, considering
@@ -39,8 +39,8 @@ set(JGD_IN_FILE_EXTENSION ".in")
 # COMPONENT: one-value arg; the name of the component for which the path will be
 # computed.
 #
-function(jgd_canonical_lib_subdir)
-  jgd_parse_arguments(
+function(jcm_canonical_lib_subdir)
+  jcm_parse_arguments(
     ONE_VALUE_KEYWORDS "OUT_VAR;COMPONENT"
     REQUIRES_ALL "OUT_VAR"
     ARGUMENTS "${ARGN}")
@@ -49,8 +49,8 @@ function(jgd_canonical_lib_subdir)
     set(${ARGS_OUT_VAR} "${PROJECT_SOURCE_DIR}/${comp_dir}/${PROJECT_NAME}/${component}"
       PARENT_SCOPE)
   else ()
-    string(REGEX REPLACE "^${JGD_LIB_PREFIX}" "" no_lib "${PROJECT_NAME}")
-    set(${ARGS_OUT_VAR} "${PROJECT_SOURCE_DIR}/${JGD_LIB_PREFIX}${no_lib}" PARENT_SCOPE)
+    string(REGEX REPLACE "^${JCM_LIB_PREFIX}" "" no_lib "${PROJECT_NAME}")
+    set(${ARGS_OUT_VAR} "${PROJECT_SOURCE_DIR}/${JCM_LIB_PREFIX}${no_lib}" PARENT_SCOPE)
   endif ()
 endfunction()
 
@@ -78,17 +78,17 @@ endfunction()
 # COMPONENT: one-value arg; the name of the executable component for which the
 # path will be computed.
 #
-function(jgd_canonical_exec_subdir)
-  jgd_parse_arguments(
+function(jcm_canonical_exec_subdir)
+  jcm_parse_arguments(
     ONE_VALUE_KEYWORDS "OUT_VAR;COMPONENT"
     REQUIRES_ALL "OUT_VAR"
     ARGUMENTS "${ARGN}")
   if (DEFINED ARGS_COMPONENT)
-    jgd_canonical_exec_subdir(OUT_VAR exec_subdir)
+    jcm_canonical_exec_subdir(OUT_VAR exec_subdir)
     set(exec_comp_subdir "${exec_subdir}/${ARGS_COMPONENT}")
     set(${ARGS_OUT_VAR} "${exec_comp_subdir}" PARENT_SCOPE)
   else ()
-    string(REGEX REPLACE "^${JGD_LIB_PREFIX}" "" no_lib "${PROJECT_NAME}")
+    string(REGEX REPLACE "^${JCM_LIB_PREFIX}" "" no_lib "${PROJECT_NAME}")
     set(${ARGS_OUT_VAR} "${PROJECT_SOURCE_DIR}/${no_lib}" PARENT_SCOPE)
   endif ()
 endfunction()
@@ -112,8 +112,8 @@ endfunction()
 # OUT_VAR: one-value arg; the name of the variable that will store the resulting
 # list.
 #
-function(jgd_canonical_include_dirs)
-  jgd_parse_arguments(ONE_VALUE_KEYWORDS "TARGET;OUT_VAR" REQUIRES_ALL
+function(jcm_canonical_include_dirs)
+  jcm_parse_arguments(ONE_VALUE_KEYWORDS "TARGET;OUT_VAR" REQUIRES_ALL
     "TARGET;OUT_VAR" ARGUMENTS "${ARGN}")
 
   # Usage guard
@@ -142,20 +142,20 @@ function(jgd_canonical_include_dirs)
   # Set include directory from canonical directories for respective target type
   if (target_type STREQUAL "EXECUTABLE")
     # executable
-    jgd_canonical_exec_subdir(OUT_VAR exec_subdir)
+    jcm_canonical_exec_subdir(OUT_VAR exec_subdir)
     _check_err("${exec_subdir}" "executable")
     set(prefix_parents 1)
     set(include_dir "${exec_subdir}")
   else ()
     if (component)
       # library component
-      jgd_canonical_lib_subdir(COMPONENT ${component} OUT_VAR comp_subdir)
+      jcm_canonical_lib_subdir(COMPONENT ${component} OUT_VAR comp_subdir)
       _check_err("${comp_subdir}" "library component")
       set(prefix_parents 2)
       set(include_dir "${comp_subdir}")
     else ()
       # main library
-      jgd_canonical_lib_subdir(OUT_VAR lib_subdir)
+      jcm_canonical_lib_subdir(OUT_VAR lib_subdir)
       _check_err("${comp_subdir}" "library")
       set(prefix_parents 1)
       set(include_dir "${lib_subdir}")

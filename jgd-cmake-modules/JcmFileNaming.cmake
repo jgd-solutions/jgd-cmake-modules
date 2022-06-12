@@ -1,17 +1,17 @@
 include_guard()
 
-include(JgdParseArguments)
-include(JgdCanonicalStructure)
+include(JcmParseArguments)
+include(JcmCanonicalStructure)
 
 # non-package-config cmake modules
-set(JGD_CMAKE_MODULE_REGEX "^([A-Z][a-z]*)+\\.cmake$")
+set(JCM_CMAKE_MODULE_REGEX "^([A-Z][a-z]*)+\\.cmake$")
 
 # Create regexs of file names based on file extensions from
-# JgdCanonicalStructure. Variables of the same name, but with _EXTENSION
+# JcmCanonicalStructure. Variables of the same name, but with _EXTENSION
 # replaced with _REGEX
 foreach (ext_var
-  JGD_HEADER_EXTENSION;JGD_SOURCE_EXTENSION;JGD_TEST_SOURCE_EXTENSION
-  JGD_MODULE_EXTENSION;JGD_IN_FILE_EXTENSION)
+  JCM_HEADER_EXTENSION;JCM_SOURCE_EXTENSION;JCM_TEST_SOURCE_EXTENSION
+  JCM_MODULE_EXTENSION;JCM_IN_FILE_EXTENSION)
   string(REPLACE "_EXTENSION" "_REGEX" regex_var "${ext_var}")
   string(REPLACE "." "\\." ${regex_var} "${${ext_var}}")
   set(${regex_var} "^[a-z][a-z_0-9]*${${regex_var}}$")
@@ -39,8 +39,8 @@ endforeach ()
 # OUT_VAR: one-value arg; the name of the output variable which will store the
 # resulting file name.
 #
-macro(_JGD_JOINED_FILE_NAME)
-  jgd_parse_arguments(
+macro(_JCM_JOINED_FILE_NAME)
+  jcm_parse_arguments(
     ONE_VALUE_KEYWORDS "COMPONENT;DELIMITER;SUFFIX;PROJECT;OUT_VAR"
     REQUIRES_ALL "SUFFIX;OUT_VAR" ARGUMENTS "${ARGN}")
   # project name
@@ -73,14 +73,14 @@ macro(_JGD_JOINED_FILE_NAME)
   unset(project)
 endmacro()
 
-macro(_JGD_FILE_NAMING_ARGUMENTS with_component args)
+macro(_JCM_FILE_NAMING_ARGUMENTS with_component args)
   if (${with_component})
     set(comp_keyword COMPONENT)
   else()
     unset(comp_keyword)
   endif ()
 
-  jgd_parse_arguments(ONE_VALUE_KEYWORDS "${comp_keyword};PROJECT;OUT_VAR"
+  jcm_parse_arguments(ONE_VALUE_KEYWORDS "${comp_keyword};PROJECT;OUT_VAR"
     REQUIRES_ALL "OUT_VAR" ARGUMENTS "${args}")
   if (DEFINED ARGS_PROJECT)
     set(proj_arg PROJECT ${ARGS_PROJECT})
@@ -113,9 +113,9 @@ endmacro()
 # OUT_VAR: one-value arg; the name of the output variable which will store the
 # resulting file name.
 #
-function(jgd_package_config_file_name)
-  _jgd_file_naming_arguments(1 "${ARGN}")
-  _jgd_joined_file_name(${comp_arg} SUFFIX "config.cmake" ${proj_arg} OUT_VAR
+function(jcm_package_config_file_name)
+  _jcm_file_naming_arguments(1 "${ARGN}")
+  _jcm_joined_file_name(${comp_arg} SUFFIX "config.cmake" ${proj_arg} OUT_VAR
     "${ARGS_OUT_VAR}")
 endfunction()
 
@@ -135,9 +135,9 @@ endfunction()
 # OUT_VAR: one-value arg; the name of the output variable which will store the
 # resulting file name.
 #
-function(jgd_package_version_file_name)
-  _jgd_file_naming_arguments(false "${ARGN}")
-  _jgd_joined_file_name(SUFFIX "config-version.cmake" ${proj_arg} OUT_VAR
+function(jcm_package_version_file_name)
+  _jcm_file_naming_arguments(false "${ARGN}")
+  _jcm_joined_file_name(SUFFIX "config-version.cmake" ${proj_arg} OUT_VAR
     ${ARGS_OUT_VAR})
 endfunction()
 
@@ -156,16 +156,16 @@ endfunction()
 # OUT_VAR: one-value arg; the name of the output variable which will store the
 # resulting file name.
 #
-function(jgd_package_targets_file_name)
-  _jgd_file_naming_arguments(1 "${ARGN}")
-  _jgd_joined_file_name(${comp_arg} SUFFIX "targets.cmake" ${proj_arg} OUT_VAR ${ARGS_OUT_VAR})
+function(jcm_package_targets_file_name)
+  _jcm_file_naming_arguments(1 "${ARGN}")
+  _jcm_joined_file_name(${comp_arg} SUFFIX "targets.cmake" ${proj_arg} OUT_VAR ${ARGS_OUT_VAR})
 endfunction()
 
 #
 # Constructs a consistent snake-case config header file name based on the
 # PROJECT argument or the PROJECT_NAME variable. The resulting file name will be
 # placed in the variable specified by OUT_VAR. Result will be
-# <PROJECT_NAME>_config.<JGD_HEADER_EXTENSION>, ex. proj_config.hpp
+# <PROJECT_NAME>_config.<JCM_HEADER_EXTENSION>, ex. proj_config.hpp
 #
 # Arguments:
 #
@@ -175,11 +175,11 @@ endfunction()
 # OUT_VAR: one-value arg; the name of the output variable which will store the
 # resulting file name.
 #
-function(jgd_config_header_file_name)
-  _jgd_file_naming_arguments(1 "${ARGN}")
-  _jgd_joined_file_name(
+function(jcm_config_header_file_name)
+  _jcm_file_naming_arguments(1 "${ARGN}")
+  _jcm_joined_file_name(
     ${comp_arg}
     DELIMITER "_"
-    SUFFIX "config${JGD_HEADER_EXTENSION}"
+    SUFFIX "config${JCM_HEADER_EXTENSION}"
     OUT_VAR ${ARGS_OUT_VAR})
 endfunction()

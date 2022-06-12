@@ -1,15 +1,15 @@
 include_guard()
 
-include(JgdParseArguments)
-include(JgdFileNaming)
-include(JgdTargetNaming)
-include(JgdSeparateList)
-include(JgdCanonicalStructure)
-include(JgdDefaultCompileOptions)
+include(JcmParseArguments)
+include(JcmFileNaming)
+include(JcmTargetNaming)
+include(JcmSeparateList)
+include(JcmCanonicalStructure)
+include(JcmDefaultCompileOptions)
 
 # again, artifacts
-function(jgd_add_executable)
-  jgd_parse_arguments(
+function(jcm_add_executable)
+  jcm_parse_arguments(
     ONE_VALUE_KEYWORDS
     "COMPONENT;EXECUTABLE;OUT_TARGET_NAME"
     MULTI_VALUE_KEYWORDS
@@ -31,7 +31,7 @@ function(jgd_add_executable)
   # == Usage Guards ==
 
   # ensure executable is created in the appropriate canonical directory
-  jgd_canonical_exec_subdir(${comp_arg} OUT_VAR canonical_dir)
+  jcm_canonical_exec_subdir(${comp_arg} OUT_VAR canonical_dir)
   if (NOT CMAKE_CURRENT_SOURCE_DIR STREQUAL canonical_dir)
     message(
       FATAL_ERROR
@@ -40,8 +40,8 @@ function(jgd_add_executable)
   endif ()
 
   # verify source naming
-  set(regex "${JGD_HEADER_REGEX}|${JGD_SOURCE_REGEX}")
-  jgd_separate_list(
+  set(regex "${JCM_HEADER_REGEX}|${JCM_SOURCE_REGEX}")
+  jcm_separate_list(
     IN_LIST
     "${ARGS_SOURCES};${ARGS_MAIN_SOURCES}"
     REGEX
@@ -65,7 +65,7 @@ function(jgd_add_executable)
     set(export_name ${ARGS_EXECUTABLE})
     set(output_name ${ARGS_EXECUTABLE})
   else ()
-    jgd_executable_naming(
+    jcm_executable_naming(
       ${comp_arg}
       OUT_TARGET_NAME target_name
       OUT_EXPORT_NAME export_name
@@ -82,13 +82,13 @@ function(jgd_add_executable)
 
   # == Set Target Properties ==
 
-  jgd_canonical_include_dirs(TARGET ${target_name} OUT_VAR include_dirs)
+  jcm_canonical_include_dirs(TARGET ${target_name} OUT_VAR include_dirs)
 
   # basic properties
   set_target_properties(${target_name}
     PROPERTIES OUTPUT_NAME ${output_name}
     EXPORT_NAME ${export_name}
-    COMPILE_OPTIONS "${JGD_DEFAULT_COMPILE_OPTIONS}")
+    COMPILE_OPTIONS "${JCM_DEFAULT_COMPILE_OPTIONS}")
 
   # include directories, if no object library will be created to provide them
   if (NOT DEFINED ARGS_SOURCES)
@@ -107,7 +107,7 @@ function(jgd_add_executable)
     add_library(${target_name}-objects OBJECT "${ARGS_SOURCES}")
 
     # properties on executable objects
-    target_compile_options(${target_name}-objects PRIVATE "${JGD_DEFAULT_COMPILE_OPTIONS}")
+    target_compile_options(${target_name}-objects PRIVATE "${JCM_DEFAULT_COMPILE_OPTIONS}")
     target_include_directories(${target_name}-objects PUBLIC "$<BUILD_INTERFACE:${include_dirs}>")
 
     # link target to associated object files & usage requirements

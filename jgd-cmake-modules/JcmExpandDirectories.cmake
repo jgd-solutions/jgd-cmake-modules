@@ -1,6 +1,6 @@
 include_guard()
 
-include(JgdParseArguments)
+include(JcmParseArguments)
 
 #
 # For each path in PATHS, if the path is a directory, the enclosed files
@@ -19,8 +19,8 @@ include(JgdParseArguments)
 # The final globbing expression, used to get files within the directory path, is
 # directory_path/GLOB
 #
-function(jgd_expand_directories)
-  jgd_parse_arguments(
+function(jcm_expand_directories)
+  jcm_parse_arguments(
     ONE_VALUE_KEYWORDS "OUT_VAR;GLOB"
     MULTI_VALUE_KEYWORDS "PATHS"
     REQUIRES_ALL "PATHS;OUT_VAR;GLOB"

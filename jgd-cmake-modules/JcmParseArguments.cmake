@@ -34,8 +34,8 @@ include(CMakeParseArguments)
 # WITHOUT_UNPARSED_CHECK: option; when defined, unparsed arguments (those that
 # were provided but were not expected by the function) will be ignored
 #
-macro(JGD_PARSE_ARGUMENTS)
-  # Arguments to jgd_parse_arguments
+macro(JCM_PARSE_ARGUMENTS)
+  # Arguments to jcm_parse_arguments
   set(options WITHOUT_MISSING_VALUES_CHECK WITHOUT_UNPARSED_CHECK)
   set(one_value_keywords PREFIX)
   set(multi_value_keywords ARGUMENTS OPTIONS ONE_VALUE_KEYWORDS
@@ -48,15 +48,15 @@ macro(JGD_PARSE_ARGUMENTS)
   unset(one_value_keywords)
   unset(mulit_one_value_keywords)
 
-  # == Argument Validation of jgd_parse_arguments ==
+  # == Argument Validation of jcm_parse_arguments ==
 
   # no missing values or unnecessary keywords when arguments were provided
   if (INS_KEYWORDS_MISSING_VALUES AND DEFINED INS_ARGUMENTS)
-    message(FATAL_ERROR "Keywords provided to jgd_parse_arguments without any "
+    message(FATAL_ERROR "Keywords provided to jcm_parse_arguments without any "
       "values: ${INS_KEYWORDS_MISSING_VALUES}")
   endif ()
   if (INS_UNPARSED_ARGUMENTS)
-    message(WARNING "Unparsed arguments provided to jgd_parse_arguments: "
+    message(WARNING "Unparsed arguments provided to jcm_parse_arguments: "
       "${INS_UNPARSED_ARGUMENTS}")
   endif ()
 

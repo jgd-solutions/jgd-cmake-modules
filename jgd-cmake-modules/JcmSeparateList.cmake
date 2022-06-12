@@ -1,6 +1,6 @@
 include_guard()
 
-include(JgdParseArguments)
+include(JcmParseArguments)
 
 #
 # Separates the IN_LIST into two groups: OUT_MATCHED, if the element matches the
@@ -25,8 +25,8 @@ include(JgdParseArguments)
 # OUT_UNMATCHED: out-value arg; the name of the variable that will store the
 # list of unmatched elements. Optional if OUT_MATCHED is provided.
 #
-function(jgd_separate_list)
-  jgd_parse_arguments(
+function(jcm_separate_list)
+  jcm_parse_arguments(
     ONE_VALUE_KEYWORDS
     "REGEX;OUT_MATCHED;OUT_UNMATCHED;TRANSFORM"
     MULTI_VALUE_KEYWORDS "IN_LIST"

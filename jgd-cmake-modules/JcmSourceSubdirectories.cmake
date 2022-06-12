@@ -1,8 +1,8 @@
 include_guard()
 
-include(JgdParseArguments)
-include(JgdCanonicalStructure)
-include(JgdStandardDirs)
+include(JcmParseArguments)
+include(JcmCanonicalStructure)
+include(JcmStandardDirs)
 
 #
 # Private macro to the module. After checking that it's a directory, appends the
@@ -18,8 +18,8 @@ include(JgdStandardDirs)
 # Can be absolute or relative to the current directory, as defined by
 # add_subdirectory().
 #
-macro(_JGD_CHECK_ADD_SUBDIR out_added_subdirs)
-  jgd_parse_arguments(
+macro(_JCM_CHECK_ADD_SUBDIR out_added_subdirs)
+  jcm_parse_arguments(
     OPTIONS "ADD_SUBDIRS"
     ONE_VALUE_KEYWORDS "SUBDIR"
     REQUIRES_ALL "SUBDIR"
@@ -38,9 +38,9 @@ endmacro()
 #
 # Provides subdirectories following JGD's project layout conventions, which are
 # the canonical project layout conventions. These canonical subdirectories are
-# provided by functions in  JgdCanonicalStructure. That is, the executable,
+# provided by functions in  JcmCanonicalStructure. That is, the executable,
 # executable components, library, or library component subdirectories will be
-# added, if they exist. The variable JGD_CURRENT_COMPONENT will be set to the
+# added, if they exist. The variable JCM_CURRENT_COMPONENT will be set to the
 # component before adding each component's subdirectory. Options also exist to
 # consider the standard tests and docs project directories as source subdirectories.
 #
@@ -60,16 +60,16 @@ endmacro()
 # add_subdirectory() command, in addition to adding them to the variable
 # specified by OUT_VAR.
 #
-# WITH_TESTS_DIR: option; when defined, will cause JGD_PROJECT_TESTS_DIR to be
+# WITH_TESTS_DIR: option; when defined, will cause JCM_PROJECT_TESTS_DIR to be
 # considered as a source subdirectory when the
-# <JGD_PROJECT_PREFIX_NAME>_BUILD_TESTS option is set.
+# <JCM_PROJECT_PREFIX_NAME>_BUILD_TESTS option is set.
 #
-# WITH_DOCS_DIR: option; when defined, will cause JGD_PROJECT_DOCS_DIR to be
+# WITH_DOCS_DIR: option; when defined, will cause JCM_PROJECT_DOCS_DIR to be
 # considered as a source subdirectory when the
-# <JGD_PROJECT_PREFIX_NAME>_BUILD_DOCS option is set.
+# <JCM_PROJECT_PREFIX_NAME>_BUILD_DOCS option is set.
 #
-function(jgd_source_subdirectories)
-  jgd_parse_arguments(
+function(jcm_source_subdirectories)
+  jcm_parse_arguments(
     OPTIONS
     "ADD_SUBDIRS"
     "WITH_TESTS_DIR"
@@ -98,11 +98,11 @@ function(jgd_source_subdirectories)
     # add all library components' subdirectories
     foreach (component ${ARGS_LIB_COMPONENTS})
       list(LENGTH subdirs_added old_len)
-      jgd_canonical_lib_subdir(COMPONENT ${component} OUT_VAR subdir_path)
+      jcm_canonical_lib_subdir(COMPONENT ${component} OUT_VAR subdir_path)
 
-      set(JGD_CURRENT_COMPONENT ${component})
-      _jgd_check_add_subdir(subdirs_added ${add_subdirs_arg} SUBDIR "${subdir_path}")
-      unset(JGD_CURRENT_COMPONENT)
+      set(JCM_CURRENT_COMPONENT ${component})
+      _jcm_check_add_subdir(subdirs_added ${add_subdirs_arg} SUBDIR "${subdir_path}")
+      unset(JCM_CURRENT_COMPONENT)
 
       list(LENGTH subdirs_added new_len)
       if (new_len EQUAL old_len)
@@ -115,8 +115,8 @@ function(jgd_source_subdirectories)
     endforeach ()
   else ()
     # add single library subdirectory, if it exists
-    jgd_canonical_lib_subdir(OUT_VAR lib_subdir)
-    _jgd_check_add_subdir(subdirs_added ${add_subdirs_arg} SUBDIR "${lib_subdir}")
+    jcm_canonical_lib_subdir(OUT_VAR lib_subdir)
+    _jcm_check_add_subdir(subdirs_added ${add_subdirs_arg} SUBDIR "${lib_subdir}")
   endif ()
 
   # executable subdirectories
@@ -124,11 +124,11 @@ function(jgd_source_subdirectories)
     # add all executable components' subdirectories
     foreach (component ${ARGS_EXEC_COMPONENTS})
       list(LENGTH subdirs_added old_len)
-      jgd_canonical_exec_subdir(COMPONENT ${component} OUT_VAR subdir_path)
+      jcm_canonical_exec_subdir(COMPONENT ${component} OUT_VAR subdir_path)
 
-      set(JGD_CURRENT_COMPONENT ${component})
-      _jgd_check_add_subdir(subdirs_added ${add_subdirs_arg} SUBDIR "${subdir_path}")
-      unset(JGD_CURRENT_COMPONENT)
+      set(JCM_CURRENT_COMPONENT ${component})
+      _jcm_check_add_subdir(subdirs_added ${add_subdirs_arg} SUBDIR "${subdir_path}")
+      unset(JCM_CURRENT_COMPONENT)
 
       list(LENGTH subdirs_added new_len)
       if (new_len EQUAL old_len)
@@ -141,8 +141,8 @@ function(jgd_source_subdirectories)
     endforeach ()
   else ()
     # add single executable subdirectory, if it exists
-    jgd_canonical_exec_subdir(OUT_VAR exec_subdir)
-    _jgd_check_add_subdir(subdirs_added ${add_subdirs_arg} SUBDIR "${exec_subdir}")
+    jcm_canonical_exec_subdir(OUT_VAR exec_subdir)
+    _jcm_check_add_subdir(subdirs_added ${add_subdirs_arg} SUBDIR "${exec_subdir}")
   endif ()
 
   # Ensure at least one sub directory was added
@@ -154,12 +154,12 @@ function(jgd_source_subdirectories)
   endif ()
 
   # Add supplementary source subdirectories
-  if (ARGS_WITH_TESTS_DIR AND ${JGD_PROJECT_PREFIX_NAME}_BUILD_TESTS)
-    _jgd_check_add_subdir(subdirs_added ${add_subdirs_arg} SUBDIR "${JGD_PROJECT_TESTS_DIR}")
+  if (ARGS_WITH_TESTS_DIR AND ${JCM_PROJECT_PREFIX_NAME}_BUILD_TESTS)
+    _jcm_check_add_subdir(subdirs_added ${add_subdirs_arg} SUBDIR "${JCM_PROJECT_TESTS_DIR}")
   endif ()
 
-  if (ARGS_WITH_DOCS_DIR AND ${JGD_PROJECT_PREFIX_NAME}_BUILD_DOCS)
-    _jgd_check_add_subdir(subdirs_added ${add_subdirs_arg} SUBDIR "${JGD_PROJECT_DOCS_DIR}")
+  if (ARGS_WITH_DOCS_DIR AND ${JCM_PROJECT_PREFIX_NAME}_BUILD_DOCS)
+    _jcm_check_add_subdir(subdirs_added ${add_subdirs_arg} SUBDIR "${JCM_PROJECT_DOCS_DIR}")
   endif ()
 
   # Set result variable

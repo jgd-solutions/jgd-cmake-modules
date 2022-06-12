@@ -1,17 +1,17 @@
 include_guard()
 
-include(JgdParseArguments)
-include(JgdDefaultCompileOptions)
-include(JgdFileNaming)
-include(JgdStandardDirs)
+include(JcmParseArguments)
+include(JcmDefaultCompileOptions)
+include(JcmFileNaming)
+include(JcmStandardDirs)
 
 #
 # A convenience function to create an executable and add it as a test in one
 # command, while also setting default target compile options from
-# JgdDefaultCompileOptions. An executable with name EXECUTABLE will be created
+# JcmDefaultCompileOptions. An executable with name EXECUTABLE will be created
 # from the sources provided to SOURCES. This executable will then be registered
 # as a test with name NAME, or EXECUTABLE, if NAME is not provided. This
-# function has no affect if <JGD_PROJECT_PREFIX_NAME>_BUILD_TESTS is not set.
+# function has no affect if <JCM_PROJECT_PREFIX_NAME>_BUILD_TESTS is not set.
 #
 # Arguments:
 #
@@ -25,12 +25,12 @@ include(JgdStandardDirs)
 # LIBS: multi value arg; list of libraries to privately link against the test
 # executable. Commonly the library under test. Optional.
 #
-function(jgd_add_test_executable)
-  if (NOT ${JGD_PROJECT_PREFIX_NAME}_BUILD_TESTS)
+function(jcm_add_test_executable)
+  if (NOT ${JCM_PROJECT_PREFIX_NAME}_BUILD_TESTS)
     return()
   endif ()
 
-  jgd_parse_arguments(
+  jcm_parse_arguments(
     ONE_VALUE_KEYWORDS "EXECUTABLE;NAME"
     MULTI_VALUE_KEYWORDS "SOURCES;LIBS"
     REQUIRES_ALL "EXECUTABLE;SOURCES"
@@ -38,13 +38,13 @@ function(jgd_add_test_executable)
 
   # Verify source naming
 
-  if (CMAKE_CURRENT_SOURCE_DIR MATCHES "^${JGD_PROJECT_TESTS_DIR}")
-    set(test_source_regex "${JGD_SOURCE_REGEX}") # other tests & drivers, only
+  if (CMAKE_CURRENT_SOURCE_DIR MATCHES "^${JCM_PROJECT_TESTS_DIR}")
+    set(test_source_regex "${JCM_SOURCE_REGEX}") # other tests & drivers, only
   else ()
-    set(test_source_regex "${JGD_TEST_SOURCE_REGEX}") # unit test files, only
+    set(test_source_regex "${JCM_TEST_SOURCE_REGEX}") # unit test files, only
   endif ()
 
-  set(regex "${JGD_HEADER_REGEX}|${test_source_regex}")
+  set(regex "${JCM_HEADER_REGEX}|${test_source_regex}")
   foreach (source ${ARGS_SOURCES})
     string(REGEX MATCH "${regex}" matched "${source}")
     if (NOT matched)
@@ -67,6 +67,6 @@ function(jgd_add_test_executable)
   set_target_properties(
     ${ARGS_EXECUTABLE}
     PROPERTIES OUTPUT_NAME ${ARGS_EXECUTABLE}
-    COMPILE_OPTIONS "${JGD_DEFAULT_COMPILE_OPTIONS}"
+    COMPILE_OPTIONS "${JCM_DEFAULT_COMPILE_OPTIONS}"
     LINK_LIBRARIES "${ARGS_LIBS}")
 endfunction()

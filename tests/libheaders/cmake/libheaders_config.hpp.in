@@ -3,4 +3,4 @@
 #include <filesystem>
 
 namespace headers {
-inline const std::filesystem::path data_dir{"@JGD_PROJECT_DATA_DIR@"};
+inline const std::filesystem::path data_dir{"@JCM_PROJECT_DATA_DIR@"};

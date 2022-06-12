@@ -1,5 +1,5 @@
-include(JgdAddTestExecutable)
-jgd_add_test_executable(
+include(JcmAddTestExecutable)
+jcm_add_test_executable(
   EXECUTABLE
   components-test
   LIBS

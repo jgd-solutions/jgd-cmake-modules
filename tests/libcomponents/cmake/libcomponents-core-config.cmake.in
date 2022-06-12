@@ -1,1 +1,1 @@
-jgd_basic_component_config(@PROJECT_NAME@ core)
+jcm_basic_component_config(@PROJECT_NAME@ core)

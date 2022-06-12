@@ -1,4 +1,4 @@
 @PACKAGE_INIT@
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")
-include(JgdBasicPackageConfig)
-jgd_basic_package_config(@PROJECT_NAME@)
+include(JcmBasicPackageConfig)
+jcm_basic_package_config(@PROJECT_NAME@)

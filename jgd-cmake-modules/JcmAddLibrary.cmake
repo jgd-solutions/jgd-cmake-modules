@@ -1,16 +1,16 @@
 include_guard()
 
-include(JgdParseArguments)
-include(JgdFileNaming)
-include(JgdTargetNaming)
-include(JgdSeparateList)
-include(JgdCanonicalStructure)
-include(JgdDefaultCompileOptions)
-include(JgdHeaderFileSet)
+include(JcmParseArguments)
+include(JcmFileNaming)
+include(JcmTargetNaming)
+include(JcmSeparateList)
+include(JcmCanonicalStructure)
+include(JcmDefaultCompileOptions)
+include(JcmHeaderFileSet)
 include(GenerateExportHeader)
 
-function(jgd_add_library)
-  jgd_parse_arguments(
+function(jcm_add_library)
+  jcm_parse_arguments(
     ONE_VALUE_KEYWORDS
     "COMPONENT;NAME;TYPE;OUT_TARGET_NAME"
     MULTI_VALUE_KEYWORDS
@@ -40,7 +40,7 @@ function(jgd_add_library)
   endif ()
 
   # ensure library is created in the appropriate canonical directory
-  jgd_canonical_lib_subdir(${comp_arg} OUT_VAR canonical_dir)
+  jcm_canonical_lib_subdir(${comp_arg} OUT_VAR canonical_dir)
   if (NOT CMAKE_CURRENT_SOURCE_DIR STREQUAL canonical_dir)
     message(
       FATAL_ERROR
@@ -50,9 +50,9 @@ function(jgd_add_library)
 
   # verify file naming
   if(DEFINED ARGS_SOURCES)
-    jgd_separate_list(
+    jcm_separate_list(
       IN_LIST "${ARGS_SOURCES}"
-      REGEX "${JGD_SOURCE_REGEX}"
+      REGEX "${JCM_SOURCE_REGEX}"
       TRANSFORM "FILENAME"
       OUT_UNMATCHED incorrectly_named)
     if (incorrectly_named)
@@ -63,9 +63,9 @@ function(jgd_add_library)
     endif ()
   endif()
 
-  jgd_separate_list(
+  jcm_separate_list(
     IN_LIST "${ARGS_INTERFACE_HEADERS}" "${ARGS_PUBLIC_HEADERS}" "${ARGS_PRIVATE_HEADERS}"
-    REGEX "${JGD_HEADER_REGEX}"
+    REGEX "${JCM_HEADER_REGEX}"
     TRANSFORM "FILENAME"
     OUT_UNMATCHED incorrectly_named)
   if (incorrectly_named)
@@ -83,7 +83,7 @@ function(jgd_add_library)
 
     # project specific build shared option
     option(
-      ${JGD_PROJECT_PREFIX_NAME}_BUILD_SHARED_LIBS
+      ${JCM_PROJECT_PREFIX_NAME}_BUILD_SHARED_LIBS
       "Dictates if libraries of project ${PROJECT_NAME} with unspecified types should be built shared."
       ${BUILD_SHARED_LIBS})
 
@@ -92,9 +92,9 @@ function(jgd_add_library)
       string(TOUPPER ${ARGS_COMPONENT} comp_temp)
       string(REPLACE "-" "_" comp_upper ${comp_temp})
       option(
-        ${JGD_PROJECT_PREFIX_NAME}_${comp_upper}_BUILD_SHARED
+        ${JCM_PROJECT_PREFIX_NAME}_${comp_upper}_BUILD_SHARED
         "Dictates if the library component ${ARGS_COMPONENT} of project ${PROJECT_NAME} should be built shared."
-        ${${JGD_PROJECT_PREFIX_NAME}_BUILD_SHARED_LIBS})
+        ${${JCM_PROJECT_PREFIX_NAME}_BUILD_SHARED_LIBS})
     endif ()
   endif ()
 
@@ -112,7 +112,7 @@ function(jgd_add_library)
         "Unsupported type ${ARGS_TYPE}. ${CMAKE_CURRENT_FUNCTION} must be "
         "called with no type or one of: ${supported_types}")
     endif ()
-  elseif (${JGD_PROJECT_PREFIX_NAME}_BUILD_SHARED_LIBS OR ${JGD_PROJECT_PREFIX_NAME}_${comp_upper}_BUILD_SHARED_LIBS)
+  elseif (${JCM_PROJECT_PREFIX_NAME}_BUILD_SHARED_LIBS OR ${JCM_PROJECT_PREFIX_NAME}_${comp_upper}_BUILD_SHARED_LIBS)
     set(lib_type SHARED)
   endif ()
 
@@ -122,7 +122,7 @@ function(jgd_add_library)
     set(export_name ${ARGS_NAME})
     set(output_name ${ARGS_NAME})
   else ()
-    jgd_library_naming(
+    jcm_library_naming(
       ${comp_arg}
       OUT_TARGET_NAME target_name
       OUT_EXPORT_NAME export_name
@@ -146,7 +146,7 @@ function(jgd_add_library)
   # == Generate an export header ==
 
   if(NOT ARGS_TYPE STREQUAL "INTERFACE")
-    set(base_name ${JGD_PROJECT_PREFIX_NAME})
+    set(base_name ${JCM_PROJECT_PREFIX_NAME})
     if (DEFINED comp_arg)
       string(APPEND base_name "_${comp_upper}")
     endif ()
@@ -166,13 +166,13 @@ function(jgd_add_library)
 
   # header properties
   if (DEFINED ARGS_INTERFACE_HEADERS)
-    jgd_header_file_set(INTERFACE TARGET ${target_name} HEADERS "${ARGS_INTERFACE_HEADERS}")
+    jcm_header_file_set(INTERFACE TARGET ${target_name} HEADERS "${ARGS_INTERFACE_HEADERS}")
   elseif (DEFINED ARGS_PRIVATE_HEADERS)
-    jgd_header_file_set(PRIVATE TARGET ${target_name} HEADERS "${ARGS_PRIVATE_HEADERS}")
+    jcm_header_file_set(PRIVATE TARGET ${target_name} HEADERS "${ARGS_PRIVATE_HEADERS}")
   endif ()
 
   if(NOT ARGS_TYPE STREQUAL "INTERFACE")
-    jgd_header_file_set(PUBLIC TARGET ${target_name}
+    jcm_header_file_set(PUBLIC TARGET ${target_name}
       HEADERS "${ARGS_PUBLIC_HEADERS}" "${CMAKE_CURRENT_BINARY_DIR}/export_macros.hpp")
   endif()
 
@@ -182,7 +182,7 @@ function(jgd_add_library)
     PROPERTIES OUTPUT_NAME ${output_name}
     PREFIX ""
     EXPORT_NAME ${export_name}
-    COMPILE_OPTIONS "${JGD_DEFAULT_COMPILE_OPTIONS}")
+    COMPILE_OPTIONS "${JCM_DEFAULT_COMPILE_OPTIONS}")
 
   # shared library versioning
   if (PROJECT_VERSION AND lib_type STREQUAL "SHARED")
