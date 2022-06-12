@@ -3,7 +3,7 @@ project(
   jgd-cmake-modules
   VERSION 0.7.2
   DESCRIPTION "CMake library for standardized CMake projects for JGD"
-  HOMEPAGE_URL "https://gitlab.com/jgd-solutions/cmake-modules"
+  HOMEPAGE_URL "https://gitlab.com/jgd-solutions/jgd-cmake-modules"
   LANGUAGES NONE)
 
 list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/jgd-cmake-modules")
