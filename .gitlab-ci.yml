@@ -47,8 +47,8 @@ docker-build-alpine-amd64:
     - changes:
         - .gitlab/ci-dockerfiles/alpine-amd64
       when: always
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-      when: manual
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main" || $CI_COMMIT_BRANCH == "main"
+      when: always
   script:
     - IMG_NAME="$CI_REGISTRY_IMAGE/alpine-amd64:$IMG_TAG" && echo "Building image $IMG_NAME"
     - >-
