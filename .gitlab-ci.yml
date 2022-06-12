@@ -10,6 +10,7 @@ variables:
 
 workflow:
   rules:
+    # merge-results pipelines enabled -> build 'latest' image in MR
     - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main" || $CI_COMMIT_BRANCH == "main"
       variables:
         IMG_TAG: latest
