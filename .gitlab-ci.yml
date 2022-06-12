@@ -25,6 +25,7 @@ ci-env:
     - echo "=== GitLab CI/CD | All Environment Variables ==="
     - env | tee env_vars.sh
   artifacts:
+    expire_in: 2 days
     paths:
       - env_vars.sh
 
