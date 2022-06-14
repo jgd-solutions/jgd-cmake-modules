@@ -21,4 +21,5 @@ jcm_install_config_file_package(
   CONFIGURE_PACKAGE_CONFIG_FILES
   CMAKE_MODULES "jgd-cmake-modules")
 
+
 configure_file("${JCM_PROJECT_CMAKE_DIR}/vcpkg.json.in" "${PROJECT_SOURCE_DIR}/vcpkg.json" @ONLY)

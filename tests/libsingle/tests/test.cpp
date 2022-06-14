@@ -1,6 +1,7 @@
 #include <libsingle/factory.hpp>
 
-int main() {
+int main()
+{
   using namespace single;
   Factory f{};
   const auto w = f.manufacture();

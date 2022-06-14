@@ -79,7 +79,12 @@ macro(JCM_BASIC_COMPONENT_CONFIG project component)
     jcm_package_targets_file_name(PROJECT ${project} COMPONENT ${component} OUT_VAR targets_file)
     include("${CMAKE_CURRENT_LIST_DIR}/${targets_file}")
     unset(targets_file)
-    set(${project}_${component}_FOUND TRUE)
+
+    if(TARGET ${project}::${component})
+      set(${project}_${component}_FOUND TRUE)
+    else()
+      set(${project}_${component}_FOUND FALSE)
+    endif()
   endif ()
 
   unset(ARGS_REQUIRED_COMPONENTS)

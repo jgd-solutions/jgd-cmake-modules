@@ -19,10 +19,10 @@ namespace single {
  * properly represent reality.
  */
 class LIBSINGLE_EXPORT Factory {
- private:
+private:
   int factory_num{0};  //!< Internal factory number
 
- public:
+public:
   /*!
    * Default constructor for the headquarters
    */

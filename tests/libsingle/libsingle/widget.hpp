@@ -22,7 +22,7 @@ class LIBSINGLE_EXPORT Factory;
  * In detail, widgets are the best
  */
 class Widget {
- private:
+private:
   int value{0};
 
   /*
@@ -33,7 +33,7 @@ class Widget {
 
   friend Factory;  //!< Factory has special privilege
 
- public:
+public:
   Widget() = delete;
 
   /*!

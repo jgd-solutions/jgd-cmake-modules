@@ -2,7 +2,8 @@
 #include <libheaders/equality.hpp>
 #include <libheaders/sum.hpp>
 
-int main() {
+int main()
+{
   using namespace headers;
 
   const int result1 = sum(std::initializer_list{-4, -3, -2, -1, 0, 1, 2, 3, 4});
