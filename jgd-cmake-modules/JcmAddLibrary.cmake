@@ -19,7 +19,7 @@ function(jcm_add_library)
     "INTERFACE_HEADERS;PUBLIC_HEADERS;PRIVATE_HEADERS;SOURCES"
     ARGUMENTS "${ARGN}")
 
-  # Set library component
+  # library component argument
   if (DEFINED ARGS_COMPONENT AND NOT ARGS_COMPONENT STREQUAL PROJECT_NAME)
     set(comp_arg COMPONENT ${ARGS_COMPONENT})
     set(comp_err_msg "component (${ARGS_COMPONENT}) ")

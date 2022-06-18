@@ -122,7 +122,6 @@ function(jcm_install_config_file_package)
     endif ()
   endif ()
 
-
   # Install all CMake files
   install(
     FILES ${install_cmake_files}

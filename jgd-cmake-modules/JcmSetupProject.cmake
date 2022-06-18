@@ -112,7 +112,15 @@ macro(JCM_SETUP_PROJECT)
 
   # == Invariable Project Options ==
 
-  option(${JCM_PROJECT_PREFIX_NAME}_BUILD_TESTS "Build all automated tests for ${PROJECT_NAME}" ${BUILD_TESTING})
+  if(BUILD_TESTING and PROJECT_IS_TOP_LEVEL)
+    set(default_enable_tests ON)
+  else()
+    set(default_enable_tests OFF)
+  endif()
+
+  option(${JCM_PROJECT_PREFIX_NAME}_BUILD_TESTS "Build all automated tests for ${PROJECT_NAME}" ${default_enable_tests})
+  unset(default_enable_tests)
+
   option(${JCM_PROJECT_PREFIX_NAME}_BUILD_DOCS "Build all documentation for ${PROJECT_NAME}" OFF)
   # note: build shared options provided by jcm_add_library, if called
 
@@ -121,6 +129,7 @@ macro(JCM_SETUP_PROJECT)
   # basic
   _jcm_warn_set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
   _jcm_warn_set(CMAKE_OPTIMIZE_DEPENDENCIES ON)
+  _jcm_warn_set(CMAKE_LINK_WHAT_YOU_USE ON)
 
   # add project's cmake modules to path
   list(FIND CMAKE_MODULE_PATH "${JCM_PROJECT_CMAKE_DIR}" cmake_dir_idx)
