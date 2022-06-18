@@ -15,25 +15,18 @@ define_property(
   "The name of a library or executable component that the target represents.")
 
 macro(_JCM_WARN_SET variable value)
-  # Values that will be overridden by the project setup and should therefore not
-  # be set prior to calling setup, unless it was explicity in the cache, which
-  # occurs when variables are specified on the command line. This guard can only
-  # be enforced if we're sure that it was set by this CMake project. If this
-  # project was absorbed into the build of another project, by
-  # add_subdirectory(), the parent project may have set their own values. We
-  # will still override these values, nevertheless.
   if (PROJECT_IS_TOP_LEVEL
     AND DEFINED ${variable}
     AND NOT DEFINED CACHE{${variable}})
     message(
       AUTHOR_WARNING
-      "The variable ${variable} was set for project ${PROJECT_NAME} prior to "
-      "calling jcm_setup_project. This variable will by overridden to the "
-      "default value of ${value} in the project setup. If you wish to "
-      "override the default value, set ${variable} after calling "
-      "jcm_setup_project.")
+      "The variable ${variable} was set for project ${PROJECT_NAME} prior to calling "
+      "jcm_setup_project. This variable will by overridden to the default value of ${value} in the "
+      "project setup. If you wish to override the default value, set ${variable} after calling "
+      "jcm_setup_project or on the command-line.")
+  elseif(PROJECT_IS_TOP_LEVEL)
+    set(${variable} "${value}" ${ARGN})
   endif ()
-  set(${variable} "${value}" ${ARGN})
 endmacro()
 
 macro(_JCM_CHECK_SET variable value)
@@ -112,7 +105,7 @@ macro(JCM_SETUP_PROJECT)
 
   # == Invariable Project Options ==
 
-  if(BUILD_TESTING and PROJECT_IS_TOP_LEVEL)
+  if(BUILD_TESTING AND PROJECT_IS_TOP_LEVEL)
     set(default_enable_tests ON)
   else()
     set(default_enable_tests OFF)
@@ -139,16 +132,9 @@ macro(JCM_SETUP_PROJECT)
   unset(cmake_dir_idx)
 
   # build artifact destinations
-  if (PROJECT_IS_TOP_LEVEL)
-    _jcm_warn_set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
-    _jcm_warn_set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
-    _jcm_warn_set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
-  else ()
-    # welcome parent project's values, if defined
-    _jcm_check_set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
-    _jcm_check_set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
-    _jcm_check_set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
-  endif ()
+  _jcm_warn_set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
+  _jcm_warn_set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
+  _jcm_warn_set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
   # language standard requirements
   get_property(languages GLOBAL PROPERTY ENABLED_LANGUAGES)
@@ -222,18 +208,23 @@ macro(JCM_SETUP_PROJECT)
   endif ()
 
   # default install prefix to Filesystem Hierarchy Standard's "add-on" path
-  if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT
-    AND NOT CMAKE_SYSTEM_NAME STREQUAL "Windows"
-    AND PROJECT_IS_TOP_LEVEL)
-    # todo: follow opt/ with provider, once registered with LANANA
+  if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT AND NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    # can follow opt/ with provider, once registered with LANANA
     _jcm_warn_set(CMAKE_INSTALL_PREFIX "/opt/${PROJECT_NAME}" CACHE PATH "Base installation location. " FORCE)
   endif ()
 
   # enable testing by default so invoking ctest always succeeds
   enable_testing()
   if(PROJECT_IS_TOP_LEVEL AND ${JCM_PROJECT_PREFIX_NAME}_BUILD_TESTS)
+    if(DEFINED BUILD_TESTING)
+      set(original_build_testing_value ${BUILD_TESTING})
+    else()
+      unset(original_build_testing_value)
+    endif()
+
     set(BUILD_TESTING ON)
     include(CTest)
-    set(BUILD_TESTING OFF)
+
+    set(BUILD_TESTING ${original_build_testing_value})
   endif()
 endmacro()
