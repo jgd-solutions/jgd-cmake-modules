@@ -11,6 +11,7 @@ include(GenerateExportHeader)
 
 function(jcm_add_library)
   jcm_parse_arguments(
+    OPTIONS "WITHOUT_CANONICAL_PROJECT_CHECK"
     ONE_VALUE_KEYWORDS
     "COMPONENT;NAME;TYPE;OUT_TARGET_NAME"
     MULTI_VALUE_KEYWORDS
@@ -40,13 +41,15 @@ function(jcm_add_library)
   endif ()
 
   # ensure library is created in the appropriate canonical directory
-  jcm_canonical_lib_subdir(${comp_arg} OUT_VAR canonical_dir)
-  if (NOT CMAKE_CURRENT_SOURCE_DIR STREQUAL canonical_dir)
-    message(
-      FATAL_ERROR
-      "Creating a ${comp_err_msg}library for project ${PROJECT_NAME} must be "
-      "done in the canonical directory ${canonical_dir}.")
-  endif ()
+  if(NOT ARGS_WITHOUT_CANONICAL_PROJECT_CHECK)
+    jcm_canonical_lib_subdir(${comp_arg} OUT_VAR canonical_dir)
+    if (NOT CMAKE_CURRENT_SOURCE_DIR STREQUAL canonical_dir)
+      message(
+        FATAL_ERROR
+        "Creating a ${comp_err_msg}library for project ${PROJECT_NAME} must be "
+        "done in the canonical directory ${canonical_dir}.")
+    endif()
+  endif()
 
   # verify file naming
   if(DEFINED ARGS_SOURCES)
