@@ -20,24 +20,26 @@ include(JcmStandardDirs)
 #
 macro(_JCM_CHECK_ADD_SUBDIR out_added_subdirs)
   jcm_parse_arguments(
-    OPTIONS "ADD_SUBDIRS"
+    OPTIONS "ADD_SUBDIRS" "FATAL"
     ONE_VALUE_KEYWORDS "SUBDIR"
     REQUIRES_ALL "SUBDIR"
     ARGUMENTS "${ARGN}")
 
   if (ARGS_SUBDIR IN_LIST subdir_omissions)
-    message(STATUS "Omitting subdirectory from project ${PROJECT_NAME}: ${relative_subdir}")
-    return()
-  endif ()
-
-  if (IS_DIRECTORY "${ARGS_SUBDIR}")
+    message(STATUS "Omitting subdirectory from project ${PROJECT_NAME}: ${ARGS_SUBDIR}")
+  elseif (IS_DIRECTORY "${ARGS_SUBDIR}")
     list(APPEND ${out_added_subdirs} "${ARGS_SUBDIR}")
     if (ARGS_ADD_SUBDIRS)
       message(VERBOSE "${CMAKE_CURRENT_FUNCTION}: Adding directory ${ARGS_SUBDIR} to project "
         "${PROJECT_NAME}")
       add_subdirectory("${ARGS_SUBDIR}")
-    endif ()
-  endif ()
+    endif()
+  elseif(ARGS_FATAL)
+    message(
+      FATAL_ERROR
+      "${CMAKE_CURRENT_FUNCTION} could not add subdirectory ${subdir_path} for project "
+      "${PROJECT_NAME}. The directory does not exist.")
+  endif()
 endmacro()
 
 #
@@ -146,20 +148,11 @@ function(jcm_source_subdirectories)
   if (DEFINED ARGS_LIB_COMPONENTS)
     # add all library components' subdirectories
     foreach (component ${ARGS_LIB_COMPONENTS})
-      list(LENGTH subdirs_added old_len)
       jcm_canonical_lib_subdir(COMPONENT ${component} OUT_VAR subdir_path)
 
       set(JCM_CURRENT_COMPONENT ${component})
-      _jcm_check_add_subdir(subdirs_added ${add_subdirs_arg} SUBDIR "${subdir_path}")
+      _jcm_check_add_subdir(subdirs_added FATAL ${add_subdirs_arg} SUBDIR "${subdir_path}")
       unset(JCM_CURRENT_COMPONENT)
-
-      list(LENGTH subdirs_added new_len)
-      if (new_len EQUAL old_len)
-        message(
-          FATAL_ERROR
-          "${CMAKE_CURRENT_FUNCTION} could not add subdirectory ${subdir_path} for component "
-          "${component} or project ${PROJECT_NAME}. The directory does not exist.")
-      endif ()
     endforeach ()
   else ()
     # add single library subdirectory, if it exists
@@ -171,21 +164,11 @@ function(jcm_source_subdirectories)
   if (DEFINED ARGS_EXEC_COMPONENTS)
     # add all executable components' subdirectories
     foreach (component ${ARGS_EXEC_COMPONENTS})
-      list(LENGTH subdirs_added old_len)
       jcm_canonical_exec_subdir(COMPONENT ${component} OUT_VAR subdir_path)
 
       set(JCM_CURRENT_COMPONENT ${component})
-      _jcm_check_add_subdir(subdirs_added ${add_subdirs_arg} SUBDIR "${subdir_path}")
+      _jcm_check_add_subdir(subdirs_added FATAL ${add_subdirs_arg} SUBDIR "${subdir_path}")
       unset(JCM_CURRENT_COMPONENT)
-
-      list(LENGTH subdirs_added new_len)
-      if (new_len EQUAL old_len)
-        message(
-          FATAL_ERROR
-          "${CMAKE_CURRENT_FUNCTION} could not add subdirectory "
-          "${subdir_path} for component ${component} of project "
-          "${PROJECT_NAME}. Directory does not exist.")
-      endif ()
     endforeach ()
   else ()
     # add single executable subdirectory, if it exists
@@ -193,7 +176,7 @@ function(jcm_source_subdirectories)
     _jcm_check_add_subdir(subdirs_added ${add_subdirs_arg} SUBDIR "${exec_subdir}")
   endif ()
 
-  # Ensure at least one sub directory was added
+  # Ensure at least one subdirectory was added
   if (NOT subdirs_added)
     message(
       FATAL_ERROR
@@ -203,24 +186,21 @@ function(jcm_source_subdirectories)
 
   # Add supplementary source subdirectories
   if (ARGS_WITH_TESTS_DIR AND ${JCM_PROJECT_PREFIX_NAME}_BUILD_TESTS)
-    _jcm_check_add_subdir(subdirs_added ${add_subdirs_arg} SUBDIR "${JCM_PROJECT_TESTS_DIR}")
+    _jcm_check_add_subdir(subdirs_added FATAL ${add_subdirs_arg} SUBDIR "${JCM_PROJECT_TESTS_DIR}")
   endif ()
 
   if (ARGS_WITH_DOCS_DIR AND ${JCM_PROJECT_PREFIX_NAME}_BUILD_DOCS)
-    _jcm_check_add_subdir(subdirs_added ${add_subdirs_arg} SUBDIR "${JCM_PROJECT_DOCS_DIR}")
+    _jcm_check_add_subdir(subdirs_added FATAL ${add_subdirs_arg} SUBDIR "${JCM_PROJECT_DOCS_DIR}")
   endif ()
 
-  # Check for accidental additions to omission option
-  list(REMOVE_ITEM subdir_omissions ${subdirs_added})
-  if(subdir_omissions)
-    set(relative_omissions)
-    foreach(omission ${subdir_omissions})
-      file(RELATIVE_PATH relative_omission "${PROJECT_SOURCE_DIR}" "${omission}")
-      list(APPEND relative_omissions ${relative})
+  # Check for accidental additions to omissions option
+  if(ARGS_ADD_SUBDIRS)
+    foreach(omission IN LISTS ${JCM_PROJECT_PREFIX_NAME}_OMIT_TARGETS)
+      if(NOT TARGET ${omission})
+        message(WARNING "${omission} was specified in ${JCM_PROJECT_PREFIX_NAME}_OMIT_TARGETS, but "
+                        "this target is not built by the project ${PROJECT_NAME}.")
+      endif()
     endforeach()
-    message(FATAL_ERROR "The following subdirectories were omitted from the targets specified in "
-                        "${JCM_PROJECT_PREFIX_NAME}_OMIT_TARGETS but are not added by the"
-                        "project ${PROJECT_NAME}: ${relative_omissions}")
   endif()
 
   # Set result variable
