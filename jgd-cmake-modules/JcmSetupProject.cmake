@@ -114,7 +114,15 @@ macro(JCM_SETUP_PROJECT)
   unset(default_enable_tests)
 
   option(${JCM_PROJECT_PREFIX_NAME}_BUILD_DOCS "Build all documentation for ${PROJECT_NAME}" OFF)
-  # note: build shared options provided by jcm_add_library, if called
+
+  set(${JCM_PROJECT_PREFIX_NAME}_OMIT_TARGETS "" CACHE STRING
+    "List of project alias targets (${PROJECT_NAME}:: ...) to omit during CMake configuring")
+  foreach(target IN LISTS "${JCM_PROJECT_PREFIX_NAME}_OMIT_TARGETS")
+    if(NOT target MATCHES "^${PROJECT_NAME}::")
+      message(FATAL_ERROR "${JCM_PROJECT_PREFIX_NAME}_OMIT_TARGETS must contain only alias targets."
+                          " Target '${target}' does not start with '${PROJECT_NAME}::'")
+    endif()
+  endforeach()
 
   # == Variables Setting Default Target Properties ==
 

@@ -111,7 +111,9 @@ _install_use_project("libsingle")
 # == libcomponents ==
 
 _build_and_ctest("libcomponents"
-  BUILD_OPTIONS -DLIBCOMPONENTS_BUILD_TESTS=ON
+  BUILD_OPTIONS
+  -DLIBCOMPONENTS_BUILD_TESTS=ON
+  -DLIBCOMPONENTS_OMIT_TARGETS=''
   NAME_SUFFIX -format
   BUILD_TARGET clang-format-check)
 
@@ -124,6 +126,11 @@ _build_and_ctest("libcomponents"
 
 _install_use_project("libcomponents" core extra)
 
+_build_and_ctest("libcomponents"
+  BUILD_OPTIONS
+  -DLIBCOMPONENTS_BUILD_TESTS=ON
+  -DLIBCOMPONENTS_OMIT_TARGETS=libcomponents::extra
+  NAME_SUFFIX -omit-extra)
 
 # == libheaders ==
 

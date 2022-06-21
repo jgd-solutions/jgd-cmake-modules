@@ -25,10 +25,15 @@ macro(_JCM_CHECK_ADD_SUBDIR out_added_subdirs)
     REQUIRES_ALL "SUBDIR"
     ARGUMENTS "${ARGN}")
 
+  if (ARGS_SUBDIR IN_LIST subdir_omissions)
+    message(STATUS "Omitting subdirectory from project ${PROJECT_NAME}: ${relative_subdir}")
+    return()
+  endif ()
+
   if (IS_DIRECTORY "${ARGS_SUBDIR}")
     list(APPEND ${out_added_subdirs} "${ARGS_SUBDIR}")
     if (ARGS_ADD_SUBDIRS)
-      message(DEBUG "${CMAKE_CURRENT_FUNCTION}: Adding directory ${ARGS_SUBDIR} to project "
+      message(VERBOSE "${CMAKE_CURRENT_FUNCTION}: Adding directory ${ARGS_SUBDIR} to project "
         "${PROJECT_NAME}")
       add_subdirectory("${ARGS_SUBDIR}")
     endif ()
@@ -90,6 +95,50 @@ function(jcm_source_subdirectories)
   else()
     unset(add_subdirs_arg)
   endif ()
+
+  # Subdirectory Omissions
+  set(subdir_omissions)
+  if(ARGS_ADD_SUBDIRS)
+    foreach(target IN LISTS ${JCM_PROJECT_PREFIX_NAME}_OMIT_TARGETS)
+      string(REGEX REPLACE ".*::" "" target_name "${target}")
+      string(REGEX REPLACE "^${JCM_LIB_PREFIX}" "" proj_no_lib "${PROJECT_NAME}")
+      string(REGEX REPLACE "^${JCM_LIB_PREFIX}" "" name_no_lib "${target_name}")
+      string(REGEX REPLACE ".*-" "" name_ending "${target_name}")
+
+      set(comp_arg)
+
+      # executable proj
+      if(proj_no_lib STREQUAL PROJECT_NAME)
+        if(name_no_lib STREQUAL target_name)     # executable target
+          if(target_name STREQUAL PROJECT_NAME ) # executable component target
+            set(comp_arg COMPONENT ${target_name})
+          endif()
+          jcm_canonical_exec_subdir(OUT_VAR subdir_omission ${comp_arg})
+        else()                                     # library target
+          if(NOT name_ending STREQUAL target_name) # library component target
+            set(comp_arg COMPONENT ${name_ending})
+          endif()
+          jcm_canonical_lib_subdir(OUT_VAR subdir_omission ${comp_arg})
+        endif()
+
+      # library project
+      else()
+        if(target_name MATCHES "^${proj_no_lib}")  # executable target
+          if(NOT name_ending STREQUAL target_name) # executable component target
+            set(comp_arg COMPONENT ${name_ending})
+          endif()
+          jcm_canonical_exec_subdir(OUT_VAR subdir_omission ${comp_arg})
+        else()                                      # library target
+          if(NOT target_name STREQUAL PROJECT_NAME) # library component target
+            set(comp_arg COMPONENT ${target_name})
+          endif()
+          jcm_canonical_lib_subdir(OUT_VAR subdir_omission ${comp_arg})
+        endif()
+      endif()
+
+      list(APPEND subdir_omissions ${subdir_omission})
+    endforeach()
+  endif()
 
   # Add Subdirs
 
@@ -160,6 +209,19 @@ function(jcm_source_subdirectories)
   if (ARGS_WITH_DOCS_DIR AND ${JCM_PROJECT_PREFIX_NAME}_BUILD_DOCS)
     _jcm_check_add_subdir(subdirs_added ${add_subdirs_arg} SUBDIR "${JCM_PROJECT_DOCS_DIR}")
   endif ()
+
+  # Check for accidental additions to omission option
+  list(REMOVE_ITEM subdir_omissions ${subdirs_added})
+  if(subdir_omissions)
+    set(relative_omissions)
+    foreach(omission ${subdir_omissions})
+      file(RELATIVE_PATH relative_omission "${PROJECT_SOURCE_DIR}" "${omission}")
+      list(APPEND relative_omissions ${relative})
+    endforeach()
+    message(FATAL_ERROR "The following subdirectories were omitted from the targets specified in "
+                        "${JCM_PROJECT_PREFIX_NAME}_OMIT_TARGETS but are not added by the"
+                        "project ${PROJECT_NAME}: ${relative_omissions}")
+  endif()
 
   # Set result variable
   if (DEFINED ARGS_OUT_VAR)

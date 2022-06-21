@@ -46,7 +46,7 @@ function(jcm_canonical_lib_subdir)
     ARGUMENTS "${ARGN}")
   if (DEFINED ARGS_COMPONENT)
     string(JOIN "-" comp_dir ${PROJECT_NAME} ${ARGS_COMPONENT})
-    set(${ARGS_OUT_VAR} "${PROJECT_SOURCE_DIR}/${comp_dir}/${PROJECT_NAME}/${component}"
+    set(${ARGS_OUT_VAR} "${PROJECT_SOURCE_DIR}/${comp_dir}/${PROJECT_NAME}/${ARGS_COMPONENT}"
       PARENT_SCOPE)
   else ()
     string(REGEX REPLACE "^${JCM_LIB_PREFIX}" "" no_lib "${PROJECT_NAME}")

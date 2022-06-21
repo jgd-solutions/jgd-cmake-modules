@@ -7,7 +7,16 @@ include(JcmAllModules)
 jcm_setup_project()
 jcm_source_subdirectories(ADD_SUBDIRS WITH_TESTS_DIR LIB_COMPONENTS core extra)
 jcm_configure_config_header_file()
-jcm_install_config_file_package(CONFIGURE_PACKAGE_CONFIG_FILES
-  TARGETS libcomponents::core libcomponents::extra)
-jcm_create_clang_format_targets(VERBOSE EXCLUDE_REGEX "libcomponents_config.hpp$"
-  TARGETS libcomponents::core libcomponents::extra)
+
+set(libcomponent_targets libcomponents::core libcomponents::extra)
+list(REMOVE_ITEM libcomponent_targets ${LIBCOMPONENTS_OMIT_TARGETS})
+
+jcm_install_config_file_package(
+  CONFIGURE_PACKAGE_CONFIG_FILES
+  TARGETS ${libcomponent_targets}
+)
+jcm_create_clang_format_targets(
+  VERBOSE
+  EXCLUDE_REGEX "libcomponents_config.hpp$"
+  TARGETS ${libcomponent_targets}
+)

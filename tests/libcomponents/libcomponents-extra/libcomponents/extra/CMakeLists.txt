@@ -7,3 +7,9 @@ jcm_add_library(
   SOURCES extra.cpp more.cpp)
 
 target_link_libraries(${target} INTERFACE libcomponents::core)
+
+# part of testing
+if(LIBCOMPONENTS_OMIT_TARGETS)
+  message(FATAL_ERROR
+    "LIBCOMPONENTS_OMIT_TARGETS set, yet 'extra' component's subdirectory still added")
+endif()
