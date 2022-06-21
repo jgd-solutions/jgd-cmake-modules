@@ -72,7 +72,7 @@ function(jcm_create_clang_format_targets)
     endif()
   endforeach()
 
-  if(target_exited)
+  if(target_existed)
     return()
   endif()
 

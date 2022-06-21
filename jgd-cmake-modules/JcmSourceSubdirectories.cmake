@@ -108,9 +108,8 @@ function(jcm_source_subdirectories)
       if (new_len EQUAL old_len)
         message(
           FATAL_ERROR
-          "${CMAKE_CURRENT_FUNCTION} could not add subdirectory "
-          "${subdir_path} for component ${component} or project "
-          "${PROJECT_NAME}. Directory does not exist.")
+          "${CMAKE_CURRENT_FUNCTION} could not add subdirectory ${subdir_path} for component "
+          "${component} or project ${PROJECT_NAME}. The directory does not exist.")
       endif ()
     endforeach ()
   else ()

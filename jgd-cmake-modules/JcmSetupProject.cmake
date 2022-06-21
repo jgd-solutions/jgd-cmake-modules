@@ -51,8 +51,7 @@ macro(JCM_SETUP_PROJECT)
   endif ()
 
   # ensure this function is called in the list file that defined the project
-  if (NOT CMAKE_CURRENT_LIST_FILE STREQUAL
-    "${PROJECT_SOURCE_DIR}/CMakeLists.txt")
+  if (NOT CMAKE_CURRENT_LIST_FILE STREQUAL "${PROJECT_SOURCE_DIR}/CMakeLists.txt")
     message(
       FATAL_ERROR
       "jcm_setup_project must be called in the same CMakeLists.txt file that "
