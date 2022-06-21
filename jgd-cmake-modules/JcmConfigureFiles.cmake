@@ -70,3 +70,19 @@ function(jcm_configure_config_header_file)
 
   configure_file("${in_header_file}" "${header_file}" @ONLY)
 endfunction()
+
+function(jcm_configure_vcpkg_manifest_file)
+  if(NOT PROJECT_IS_TOP_LEVEL)
+    return()
+  endif()
+
+  set(manifest_file "${JCM_PROJECT_CMAKE_DIR}/vcpkg.json")
+  set(in_manifest_file "${manifest_file}${JCM_IN_FILE_EXTENSTION}")
+
+  if (NOT EXISTS "${in_manifest_file}")
+    message(FATAL_ERROR "Cannot configure a vcpkg manifest file for project ${PROJECT_NAME}. "
+      "Could not find file ${in_manifest_file}.")
+  endif ()
+
+  configure_file("${in_manifest_file}" "${manifest_file}" @ONLY)
+endfunction()
