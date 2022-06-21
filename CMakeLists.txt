@@ -10,6 +10,7 @@ list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/jgd-cmake-modules")
 include(JcmSetupProject)
 include(JcmStandardDirs)
 include(JcmInstallConfigFilePackage)
+include(JcmConfigureFiles)
 
 jcm_setup_project(PREFIX_NAME "JCM")
 
@@ -19,7 +20,6 @@ endif()
 
 jcm_install_config_file_package(
   CONFIGURE_PACKAGE_CONFIG_FILES
-  CMAKE_MODULES "jgd-cmake-modules")
-
-
-configure_file("${JCM_PROJECT_CMAKE_DIR}/vcpkg.json.in" "${PROJECT_SOURCE_DIR}/vcpkg.json" @ONLY)
+  CMAKE_MODULES "jgd-cmake-modules"
+)
+jcm_configure_vcpkg_manifest_file()

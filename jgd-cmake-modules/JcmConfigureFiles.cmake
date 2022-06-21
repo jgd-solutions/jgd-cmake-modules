@@ -2,6 +2,7 @@ include_guard()
 
 include(JcmParseArguments)
 include(JcmFileNaming)
+include(JcmCanonicalStructure)
 include(CMakePackageConfigHelpers)
 
 # without target -> for the project with target -> specifically for the target
@@ -76,13 +77,12 @@ function(jcm_configure_vcpkg_manifest_file)
     return()
   endif()
 
-  set(manifest_file "${JCM_PROJECT_CMAKE_DIR}/vcpkg.json")
-  set(in_manifest_file "${manifest_file}${JCM_IN_FILE_EXTENSTION}")
+  set(in_manifest_file "${JCM_PROJECT_CMAKE_DIR}/vcpkg.json${JCM_IN_FILE_EXTENSION}")
 
   if (NOT EXISTS "${in_manifest_file}")
     message(FATAL_ERROR "Cannot configure a vcpkg manifest file for project ${PROJECT_NAME}. "
       "Could not find file ${in_manifest_file}.")
   endif ()
 
-  configure_file("${in_manifest_file}" "${manifest_file}" @ONLY)
+  configure_file("${in_manifest_file}" "${PROJECT_SOURCE_DIR}/vcpkg.json" @ONLY)
 endfunction()
