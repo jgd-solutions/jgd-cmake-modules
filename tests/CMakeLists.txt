@@ -31,7 +31,7 @@ function(_build_and_ctest project_name)
 endfunction()
 
 
-function(_install_use_project project_name)
+function(_install_find_use_project project_name)
   set(${project_name}_ROOT "${CMAKE_CURRENT_BINARY_DIR}/${project_name}/install")
 
   add_test(
@@ -43,7 +43,7 @@ function(_install_use_project project_name)
     --prefix "${${project_name}_ROOT}")
 
   add_test(
-    NAME ${project_name}-use-install
+    NAME ${project_name}-find-use
     COMMAND
     "${CMAKE_CTEST_COMMAND}"
     --verbose
@@ -54,10 +54,30 @@ function(_install_use_project project_name)
       "${CMAKE_CURRENT_SOURCE_DIR}/test-project-consumption"
       "${CMAKE_CURRENT_BINARY_DIR}/test-project-consumption"
     --build-options
-      "-D TEST_PROJECT_CONSUMPTION_BUILD_TESTS:BOOL=ON"
+      "-D consumption_type=FIND_PACKAGE"
       "-D jgd-cmake-modules_ROOT:PATH=${jgd-cmake-modules_ROOT}"
       "-D ${project_name}_ROOT:PATH=${${project_name}_ROOT}"
-      "-D test_name=use-${project_name}"
+      "-D test_name=find-use-${project_name}"
+      "-D components=${ARGN}"
+    --test-command "${CMAKE_CTEST_COMMAND}")
+endfunction()
+
+function(_add_use_project project_name)
+  add_test(
+    NAME ${project_name}-add-use
+    COMMAND
+    "${CMAKE_CTEST_COMMAND}"
+    --verbose
+    --output-on-failure
+    --build-noclean
+    --build-generator "${CMAKE_GENERATOR}"
+    --build-and-test
+      "${CMAKE_CURRENT_SOURCE_DIR}/test-project-consumption"
+      "${CMAKE_CURRENT_BINARY_DIR}/test-project-consumption"
+    --build-options
+      "-D consumption_type=ADD_SUBDIRECTORY"
+      "-D jgd-cmake-modules_ROOT:PATH=${jgd-cmake-modules_ROOT}"
+      "-D test_name=add-use-${project_name}"
       "-D components=${ARGN}"
     --test-command "${CMAKE_CTEST_COMMAND}")
 endfunction()
@@ -83,7 +103,8 @@ _build_and_ctest("single-exec"
 _build_and_ctest("single-exec"
   BUILD_OPTIONS -DSINGLE_EXEC_BUILD_TESTS=ON)
 
-_install_use_project("single-exec")
+_install_find_use_project("single-exec")
+_add_use_project("single-exec")
 
 
 # == libsingle ==
@@ -105,7 +126,8 @@ _build_and_ctest("libsingle"
   NAME_SUFFIX -docs
   BUILD_TARGET doxygen-docs)
 
-_install_use_project("libsingle")
+_install_find_use_project("libsingle")
+_add_use_project("libsingle")
 
 
 # == libcomponents ==
@@ -124,11 +146,12 @@ _build_and_ctest("libcomponents"
   BUILD_OPTIONS -DLIBCOMPONENTS_BUILD_TESTS=ON -DLIBCOMPONENTS_CORE_BUILD_SHARED=ON
   NAME_SUFFIX -shared)
 
-_install_use_project("libcomponents" core extra)
+_install_find_use_project("libcomponents" core extra)
+_add_use_project("libcomponents")
 
 _build_and_ctest("libcomponents"
   BUILD_OPTIONS
-  -DLIBCOMPONENTS_BUILD_TESTS=ON
+  -DLIBCOMPONENTS_BUILD_TESTS=OFF
   -DLIBCOMPONENTS_OMIT_TARGETS=libcomponents::extra
   NAME_SUFFIX -omit-extra)
 
@@ -142,4 +165,5 @@ _build_and_ctest("libheaders"
 _build_and_ctest("libheaders"
   BUILD_OPTIONS -DLIBHEADERS_BUILD_TESTS=ON)
 
-_install_use_project("libheaders")
+_install_find_use_project("libheaders")
+_add_use_project("libheaders")

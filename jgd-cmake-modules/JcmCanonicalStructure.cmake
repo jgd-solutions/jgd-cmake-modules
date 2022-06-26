@@ -170,7 +170,7 @@ function(jcm_canonical_include_dirs)
   # Add appropriate binary dir for generated headers
   set(binary_dirs "${PROJECT_BINARY_DIR}")
   if (component)
-    set(binary_dirs "${PROJECT_BINARY_DIR};${PROJECT_BINARY_DIR}/${PROJECT_NAME}-${component}")
+    list(APPEND binary_dirs "${PROJECT_BINARY_DIR}/${PROJECT_NAME}-${component}")
   endif ()
 
   set(${ARGS_OUT_VAR} "${include_dir}" "${binary_dirs}" PARENT_SCOPE)

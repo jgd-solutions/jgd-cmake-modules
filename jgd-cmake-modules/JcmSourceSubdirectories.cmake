@@ -27,6 +27,7 @@ macro(_JCM_CHECK_ADD_SUBDIR out_added_subdirs)
 
   if (ARGS_SUBDIR IN_LIST subdir_omissions)
     message(STATUS "Omitting subdirectory from project ${PROJECT_NAME}: ${ARGS_SUBDIR}")
+    list(REMOVE_ITEM unused_subdir_omissions "${ARGS_SUBDIR}")
   elseif (IS_DIRECTORY "${ARGS_SUBDIR}")
     list(APPEND ${out_added_subdirs} "${ARGS_SUBDIR}")
     if (ARGS_ADD_SUBDIRS)
@@ -100,6 +101,7 @@ function(jcm_source_subdirectories)
 
   # Subdirectory Omissions
   set(subdir_omissions)
+  set(unused_subdir_omissions)
   if(ARGS_ADD_SUBDIRS)
     foreach(target IN LISTS ${JCM_PROJECT_PREFIX_NAME}_OMIT_TARGETS)
       string(REGEX REPLACE ".*::" "" target_name "${target}")
@@ -140,6 +142,7 @@ function(jcm_source_subdirectories)
 
       list(APPEND subdir_omissions ${subdir_omission})
     endforeach()
+    set(unused_subdir_omissions "${subdir_omissions}")
   endif()
 
   # Add Subdirs
@@ -194,13 +197,10 @@ function(jcm_source_subdirectories)
   endif ()
 
   # Check for accidental additions to omissions option
-  if(ARGS_ADD_SUBDIRS)
-    foreach(omission IN LISTS ${JCM_PROJECT_PREFIX_NAME}_OMIT_TARGETS)
-      if(NOT TARGET ${omission})
-        message(WARNING "${omission} was specified in ${JCM_PROJECT_PREFIX_NAME}_OMIT_TARGETS, but "
-                        "this target is not built by the project ${PROJECT_NAME}.")
-      endif()
-    endforeach()
+  if(unused_subdir_omissions)
+    message(WARNING "The following subdirectories are omitted based on the targets specified in "
+                    "${JCM_PROJECT_PREFIX_NAME}_OMIT_TARGETS but never get added by the project: "
+                    "${unused_subdir_omissions}")
   endif()
 
   # Set result variable

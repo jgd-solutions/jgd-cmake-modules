@@ -35,7 +35,7 @@ function(jcm_create_doxygen_target)
   jcm_parse_arguments(
     OPTIONS "README_MAIN_PAGE"
     MULTI_VALUE_KEYWORDS "TARGETS;ADDITIONAL_PATHS;EXCLUDE_REGEX"
-    REQUIRES_ALL "TARGETS" ARGUMENTS "${ARGN}")
+    REQUIRES_ANY "TARGETS;ADDITIONAL_PATHS" ARGUMENTS "${ARGN}")
 
   if (NOT DOXYGEN_FOUND)
     message(FATAL_ERROR "Doxygen must be previously found to use ${CMAKE_CURRENT_FUNCTION}")

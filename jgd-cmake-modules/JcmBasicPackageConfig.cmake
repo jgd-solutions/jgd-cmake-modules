@@ -62,7 +62,7 @@ endmacro()
 macro(JCM_BASIC_COMPONENT_CONFIG project component)
   jcm_parse_arguments(MULTI_VALUE_KEYWORDS "REQUIRED_COMPONENTS" ARGUMENTS "${ARGN}")
 
-  if (NOT TARGET ${project}::${component} AND NOT ${project}_BINARY_DIR)
+  if (NOT TARGET ${project}::${component})
     # store argument in case included config file overwrites it
     set(${project}_${component}_stored_req_components ${ARGS_REQUIRED_COMPONENTS})
 

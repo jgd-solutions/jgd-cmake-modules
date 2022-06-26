@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.23)
 project(test-project-consumption VERSION 0.0.0 LANGUAGES CXX)
+enable_testing()
 
 # == Usage Guards ==
 if(NOT DEFINED test_name)
@@ -11,28 +12,39 @@ if(NOT DEFINED jgd-cmake-modules_ROOT)
     "testing to ensure that the correct one under test is found.")
 endif()
 
-# == Find Package Under Test ==
-
-if(components)
-  set(comp_arg COMPONENTS ${components})
-else()
-  unset(comp_arg)
+if(NOT DEFINED consumption_type OR NOT consumption_type MATCHES "FIND_PACKAGE|ADD_SUBDIRECTORY")
+  message(FATAL_ERROR "'consumption_type' must be defined to either FIND_PACKAGE or "
+    "ADD_SUBDIRECTORY for ${PROJECT_NAME}")
 endif()
-string(REGEX REPLACE "^use-" "" package_name "${test_name}")
-find_package(${package_name} CONFIG REQUIRED ${comp_arg})
+
+# == Find or Add Package Under Test ==
+
+string(REGEX REPLACE "^.*-use-" "" package_name "${test_name}")
+
+if(consumption_type STREQUAL FIND_PACKAGE)
+  if(components)
+    set(comp_arg COMPONENTS ${components})
+  else()
+    unset(comp_arg)
+  endif()
+
+  find_package(${package_name} CONFIG REQUIRED ${comp_arg})
+else()
+  add_subdirectory(contrib/${package_name})
+endif()
 
 # == Create Tests to Use Package ==
 
-if(test_name STREQUAL use-single-exec)
+if(test_name MATCHES "single-exec")
   add_test(NAME ${test_name} COMMAND single-exec::single-exec)
   return()
-elseif(test_name STREQUAL use-libsingle)
+elseif(test_name MATCHES "libsingle")
   add_executable(${test_name} use_libsingle.cpp)
   target_link_libraries(${test_name} PRIVATE libsingle::libsingle)
-elseif(test_name STREQUAL use-libcomponents)
+elseif(test_name MATCHES "libcomponents")
   add_executable(${test_name} use_libcomponents.cpp)
   target_link_libraries(${test_name} PRIVATE libcomponents::extra)
-elseif(test_name STREQUAL use-libheaders)
+elseif(test_name MATCHES "libheaders")
   add_executable(${test_name} use_libheaders.cpp)
   target_link_libraries(${test_name} PRIVATE libheaders::libheaders)
 else()
