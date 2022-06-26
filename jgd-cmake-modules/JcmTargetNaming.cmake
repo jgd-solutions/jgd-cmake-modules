@@ -133,8 +133,7 @@ function(jcm_executable_naming)
     "OUT_TARGET_NAME"
     "OUT_EXPORT_NAME"
     "OUT_OUTPUT_NAME"
-    ARGUMENTS
-    "${ARGN}")
+    ARGUMENTS "${ARGN}")
 
   # Resolve component
   if (DEFINED ARGS_COMPONENT AND NOT ARGS_COMPONENT STREQUAL PROJECT_NAME)
@@ -170,4 +169,71 @@ function(jcm_executable_naming)
     # prepend project name to avoid possible conflicts if added as subdirectory
     set(${ARGS_OUT_TARGET_NAME} ${PROJECT_NAME}_${base_name} PARENT_SCOPE)
   endif ()
+endfunction()
+
+
+function(jcm_target_type_component_from_name)
+  jcm_parse_arguments(
+    ONE_VALUE_KEYWORDS
+    "TARGET_NAME"
+    "OUT_TYPE"
+    "OUT_COMPONENT"
+    REQUIRES_ANY
+    "OUT_TYPE"
+    "OUT_COMPONENT"
+    ARGUMENTS "${ARGN}")
+
+  # Usage guard
+  if(NOT ARGS_TARGET_NAME MATCHES "^${PROJECT_NAME}(::|_)")
+    message(FATAL_ERROR "TARGET_NAME provided to ${CMAKE_CURRENT_FUNCTION} does not start with "
+      "'${PROJECT_NAME}::' or '${PROJECT_NAME}_' and does therefore not follow the target naming "
+      "structure or is not part of project ${PROJECT_NAME}. Target type and component cannot be "
+      "deduced from the name '${ARGS_TARGET_NAME}'")
+  endif()
+
+  if(ARGS_TARGET_NAME MATCHES "::") # alias
+    string(REGEX REPLACE "^${PROJECT_NAME}::" "" base_name "${ARGS_TARGET_NAME}")
+  else()
+    string(REGEX REPLACE "^${PROJECT_NAME}_" "" base_name "${ARGS_TARGET_NAME}")
+  endif()
+
+  string(REGEX REPLACE "^${JCM_LIB_PREFIX}" "" proj_no_lib "${PROJECT_NAME}")
+  string(REGEX REPLACE "^${JCM_LIB_PREFIX}" "" name_no_lib "${base_name}")
+  string(REGEX REPLACE ".*-" "" name_ending "${base_name}")
+
+  set(type)
+  set(component)
+
+  # executable proj
+  if(proj_no_lib STREQUAL PROJECT_NAME)
+    if(name_no_lib STREQUAL base_name)    # executable target
+      set(type "EXECUTABLE")
+      if(base_name STREQUAL PROJECT_NAME) # executable component target
+        set(component "${base_name}")
+      endif()
+    else()                                   # library target
+      set(type "LIBRARY")
+      if(NOT name_ending STREQUAL base_name) # library component target
+        set(component "${name_ending}")
+      endif()
+    endif()
+
+  # library project
+  else()
+    if(base_name MATCHES "^${proj_no_lib}")  # executable target
+      set(type "EXECUTABLE")
+      if(NOT name_ending STREQUAL base_name) # executable component target
+        set(component "${name_ending}")
+      endif()
+    else()                                    # library target
+      set(type "LIBRARY")
+      if(NOT base_name STREQUAL PROJECT_NAME) # library component target
+        set(component "${base_name}")
+      endif()
+    endif()
+  endif()
+
+  # Set output variables
+  set(${ARGS_OUT_TYPE} ${type} PARENT_SCOPE)
+  set(${ARGS_OUT_COMPONENT} "${component}" PARENT_SCOPE)
 endfunction()

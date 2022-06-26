@@ -104,42 +104,7 @@ function(jcm_source_subdirectories)
   set(unused_subdir_omissions)
   if(ARGS_ADD_SUBDIRS)
     foreach(target IN LISTS ${JCM_PROJECT_PREFIX_NAME}_OMIT_TARGETS)
-      string(REGEX REPLACE ".*::" "" target_name "${target}")
-      string(REGEX REPLACE "^${JCM_LIB_PREFIX}" "" proj_no_lib "${PROJECT_NAME}")
-      string(REGEX REPLACE "^${JCM_LIB_PREFIX}" "" name_no_lib "${target_name}")
-      string(REGEX REPLACE ".*-" "" name_ending "${target_name}")
-
-      set(comp_arg)
-
-      # executable proj
-      if(proj_no_lib STREQUAL PROJECT_NAME)
-        if(name_no_lib STREQUAL target_name)     # executable target
-          if(target_name STREQUAL PROJECT_NAME ) # executable component target
-            set(comp_arg COMPONENT ${target_name})
-          endif()
-          jcm_canonical_exec_subdir(OUT_VAR subdir_omission ${comp_arg})
-        else()                                     # library target
-          if(NOT name_ending STREQUAL target_name) # library component target
-            set(comp_arg COMPONENT ${name_ending})
-          endif()
-          jcm_canonical_lib_subdir(OUT_VAR subdir_omission ${comp_arg})
-        endif()
-
-      # library project
-      else()
-        if(target_name MATCHES "^${proj_no_lib}")  # executable target
-          if(NOT name_ending STREQUAL target_name) # executable component target
-            set(comp_arg COMPONENT ${name_ending})
-          endif()
-          jcm_canonical_exec_subdir(OUT_VAR subdir_omission ${comp_arg})
-        else()                                      # library target
-          if(NOT target_name STREQUAL PROJECT_NAME) # library component target
-            set(comp_arg COMPONENT ${target_name})
-          endif()
-          jcm_canonical_lib_subdir(OUT_VAR subdir_omission ${comp_arg})
-        endif()
-      endif()
-
+      jcm_canonical_subdir(TARGET ${target} OUT_VAR subdir_omission)
       list(APPEND subdir_omissions ${subdir_omission})
     endforeach()
     set(unused_subdir_omissions "${subdir_omissions}")

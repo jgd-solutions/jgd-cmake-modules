@@ -9,6 +9,7 @@ include_guard()
 #   chosen, enforced in JcmFileNaming
 
 include(JcmParseArguments)
+include(JcmTargetNaming)
 
 set(JCM_LIB_PREFIX "lib")
 
@@ -93,6 +94,42 @@ function(jcm_canonical_exec_subdir)
   endif ()
 endfunction()
 
+
+function(jcm_canonical_subdir)
+  jcm_parse_arguments(ONE_VALUE_KEYWORDS "TARGET;OUT_VAR"
+                      REQUIRES_ALL "TARGET;OUT_VAR" ARGUMENTS "${ARGN}")
+
+  # Usage Guards
+  if(NOT ARGS_TARGET MATCHES "^${PROJECT_NAME}(::|_)")
+    message(FATAL_ERROR "TARGET '${ARGS_TARGET}' provided to ${CMAKE_CURRENT_FUNCTION} does not "
+      "start with '${PROJECT_NAME}::' or '${PROJECT_NAME}_' and is therefore not a target of "
+      "project ${PROJECT_NAME} or does not follow the target naming structure.")
+  endif()
+
+  if (TARGET ${ARGS_TARGET})
+    get_target_property(target_type ${ARGS_TARGET} TYPE)
+    get_target_property(component ${ARGS_TARGET} COMPONENT)
+  else()
+    jcm_target_type_component_from_name(
+      TARGET_NAME ${ARGS_TARGET} OUT_TYPE target_type OUT_COMPONENT component)
+  endif()
+
+  # Resolve subdir based on type
+  if(component)
+    set(comp_arg COMPONENT ${component})
+  else()
+    unset(comp_arg)
+  endif()
+
+  if(target_type STREQUAL "EXECUTABLE")
+    jcm_canonical_exec_subdir(${comp_arg} OUT_VAR canonical_subdir)
+  else()
+    jcm_canonical_lib_subdir(${comp_arg} OUT_VAR canonical_subdir)
+  endif()
+
+  set(${ARGS_OUT_VAR} ${canonical_subdir} PARENT_SCOPE)
+endfunction()
+
 #
 # Sets the variable specified by OUT_VAR to the canonical include directory for
 # the TARGET.
@@ -113,58 +150,50 @@ endfunction()
 # list.
 #
 function(jcm_canonical_include_dirs)
-  jcm_parse_arguments(ONE_VALUE_KEYWORDS "TARGET;OUT_VAR" REQUIRES_ALL
-    "TARGET;OUT_VAR" ARGUMENTS "${ARGN}")
+  jcm_parse_arguments(ONE_VALUE_KEYWORDS "TARGET;OUT_VAR"
+                      REQUIRES_ALL "TARGET;OUT_VAR" ARGUMENTS "${ARGN}")
 
-  # Usage guard
+  # Usage guards
+  if(NOT ARGS_TARGET MATCHES "^${PROJECT_NAME}(::|_)")
+    message(FATAL_ERROR "TARGET '${ARGS_TARGET}' provided to ${CMAKE_CURRENT_FUNCTION} does not "
+      "start with '${PROJECT_NAME}::' or '${PROJECT_NAME}_' and is therefore not a target of "
+      "project ${PROJECT_NAME} or does not follow the target naming structure.")
+  endif()
+
   if (NOT TARGET ${ARGS_TARGET})
     message(FATAL_ERROR "${ARGS_TARGET} is not a target and must first be created before calling "
       "${CMAKE_CURRENT_FUNCTION}.")
   endif ()
 
-  # Get the target's properties
+
+  # Target properties
   get_target_property(source_dir ${ARGS_TARGET} SOURCE_DIR)
   get_target_property(target_type ${ARGS_TARGET} TYPE)
   get_target_property(component ${ARGS_TARGET} COMPONENT)
 
   # Helpful macro to check & emit error
-  macro(_CHECK_ERR subdir target_type_name)
+  macro(_CHECK_ERR subdir)
     if (NOT source_dir MATCHES "^${subdir}")
       message(
         FATAL_ERROR
-        "Unable to resolve default include directory for target "
-        "${ARGS_TARGET}. The source directory, "
-        "${source_dir}, is not within the ${target_type_name}'s canonical "
-        "include directory of ${subdir}.")
+        "Unable to resolve default include directory for target ${ARGS_TARGET}. The source "
+        "subdirectory, ${source_dir}, is not a parent of its canonical include, ${subdir}.")
     endif ()
   endmacro()
 
   # Set include directory from canonical directories for respective target type
-  if (target_type STREQUAL "EXECUTABLE")
-    # executable
-    jcm_canonical_exec_subdir(OUT_VAR exec_subdir)
-    _check_err("${exec_subdir}" "executable")
-    set(prefix_parents 1)
-    set(include_dir "${exec_subdir}")
+  jcm_canonical_subdir(TARGET ${ARGS_TARGET} OUT_VAR include_directory)
+  _check_err("${source_subdirectory}")
+
+  if (NOT target_type STREQUAL "EXECUTABLE" AND component)
+    set(prefix_parents 2)
   else ()
-    if (component)
-      # library component
-      jcm_canonical_lib_subdir(COMPONENT ${component} OUT_VAR comp_subdir)
-      _check_err("${comp_subdir}" "library component")
-      set(prefix_parents 2)
-      set(include_dir "${comp_subdir}")
-    else ()
-      # main library
-      jcm_canonical_lib_subdir(OUT_VAR lib_subdir)
-      _check_err("${comp_subdir}" "library")
-      set(prefix_parents 1)
-      set(include_dir "${lib_subdir}")
-    endif ()
+    set(prefix_parents 1)
   endif ()
 
   # Set include dir up the canonical source path to create include prefix
   foreach (i RANGE 1 ${prefix_parents})
-    cmake_path(GET include_dir PARENT_PATH include_dir)
+    cmake_path(GET include_directory PARENT_PATH include_directory)
   endforeach ()
 
   # Add appropriate binary dir for generated headers
@@ -173,5 +202,5 @@ function(jcm_canonical_include_dirs)
     list(APPEND binary_dirs "${PROJECT_BINARY_DIR}/${PROJECT_NAME}-${component}")
   endif ()
 
-  set(${ARGS_OUT_VAR} "${include_dir}" "${binary_dirs}" PARENT_SCOPE)
+  set(${ARGS_OUT_VAR} "${include_directory}" "${binary_dirs}" PARENT_SCOPE)
 endfunction()
