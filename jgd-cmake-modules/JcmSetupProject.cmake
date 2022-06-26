@@ -15,18 +15,18 @@ define_property(
   "The name of a library or executable component that the target represents.")
 
 macro(_JCM_WARN_SET variable value)
-  if (PROJECT_IS_TOP_LEVEL
-    AND DEFINED ${variable}
-    AND NOT DEFINED CACHE{${variable}})
-    message(
-      AUTHOR_WARNING
-      "The variable ${variable} was set for project ${PROJECT_NAME} prior to calling "
-      "jcm_setup_project. This variable will by overridden to the default value of ${value} in the "
-      "project setup. If you wish to override the default value, set ${variable} after calling "
-      "jcm_setup_project or on the command-line.")
-  elseif(PROJECT_IS_TOP_LEVEL)
+  if (PROJECT_IS_TOP_LEVEL)
+    if (DEFINED ${variable} AND NOT DEFINED CACHE{${variable}})
+      message(
+        AUTHOR_WARNING
+        "The variable ${variable} was set for project ${PROJECT_NAME} prior to calling "
+        "jcm_setup_project. This variable will by overridden to the default value of ${value} in the "
+        "project setup. If you wish to override the default value, set ${variable} after calling "
+        "jcm_setup_project or in the CMake cache, such as through the command-line.")
+    endif ()
+
     set(${variable} "${value}" ${ARGN})
-  endif ()
+  endif()
 endmacro()
 
 macro(_JCM_CHECK_SET variable value)
