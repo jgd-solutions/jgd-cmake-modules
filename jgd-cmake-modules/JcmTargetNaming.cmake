@@ -183,12 +183,17 @@ function(jcm_target_type_component_from_name)
     "OUT_COMPONENT"
     ARGUMENTS "${ARGN}")
 
-  # Usage guard
+  # Usage guards
   if(NOT ARGS_TARGET_NAME MATCHES "^${PROJECT_NAME}(::|_)")
     message(FATAL_ERROR "TARGET_NAME provided to ${CMAKE_CURRENT_FUNCTION} does not start with "
       "'${PROJECT_NAME}::' or '${PROJECT_NAME}_' and does therefore not follow the target naming "
       "structure or is not part of project ${PROJECT_NAME}. Target type and component cannot be "
       "deduced from the name '${ARGS_TARGET_NAME}'")
+  endif()
+
+  if(TARGET ARGS_TARGET_NAME)
+    message(FATAL_ERROR "${CMAKE_CURRENT_FUNCTION} is designed for target names, when the target "
+        "does not exist. '${ARGS_TARGET}' is a target and its properties need to be read instead.")
   endif()
 
   if(ARGS_TARGET_NAME MATCHES "::") # alias
