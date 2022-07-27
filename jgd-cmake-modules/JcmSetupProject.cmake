@@ -130,6 +130,7 @@ macro(JCM_SETUP_PROJECT)
   _jcm_warn_set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
   _jcm_warn_set(CMAKE_OPTIMIZE_DEPENDENCIES ON)
   _jcm_warn_set(CMAKE_LINK_WHAT_YOU_USE ON)
+  _jcm_warn_set(CMAKE_COLOR_DIAGNOSTICS ON)
 
   # add project's cmake modules to path
   list(FIND CMAKE_MODULE_PATH "${JCM_PROJECT_CMAKE_DIR}" cmake_dir_idx)
