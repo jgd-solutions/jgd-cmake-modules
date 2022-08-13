@@ -63,7 +63,7 @@ macro(JCM_PARSE_ARGUMENTS)
   # ensure required keywords are a subset of the function's parsed keywords
   set(parsed_keywords ${INS_OPTIONS} ${INS_ONE_VALUE_KEYWORDS} ${INS_MULTI_VALUE_KEYWORDS})
 
-  foreach (req_keyword ${INS_REQUIRES_ALL} ${INS_REQUIRES_ANY})
+  foreach (req_keyword IN LISTS INS_REQUIRES_ALL INS_REQUIRES_ANY)
     list(FIND parsed_keywords ${req_keyword} idx)
     if (idx EQUAL -1)
       message(
@@ -96,7 +96,7 @@ macro(JCM_PARSE_ARGUMENTS)
   # validate keywords that must have one present
   if (INS_REQUIRES_ANY)
     set(at_least_one_defined FALSE)
-    foreach (keyword ${INS_REQUIRES_ANY})
+    foreach (keyword IN LISTS INS_REQUIRES_ANY)
       if (DEFINED ${INS_PREFIX}_${keyword})
         set(at_least_one_defined TRUE)
         break()
@@ -116,7 +116,7 @@ macro(JCM_PARSE_ARGUMENTS)
   unset(first_keyword)
   unset(second_keyword)
 
-  foreach(keyword ${INS_MUTUALLY_EXCLUSIVE})
+  foreach(keyword IN LISTS INS_MUTUALLY_EXCLUSIVE)
     list(FIND INS_ARGUMENTS ${keyword} idx)
     if (NOT idx EQUAL -1)
       if (DEFINED first_keyword)
@@ -140,10 +140,10 @@ macro(JCM_PARSE_ARGUMENTS)
   # validate caller's argument format
   if (NOT INS_WITHOUT_MISSING_VALUES_CHECK AND ${INS_PREFIX}_KEYWORDS_MISSING_VALUES)
     message(FATAL_ERROR "Keywords provided without any values: "
-      "${${ARGS}_KEYWORDS_MISSING_VALUES}")
+      "${${INS_PREFIX}_KEYWORDS_MISSING_VALUES}")
   endif ()
 
   if (NOT INS_WITHOUT_UNPARSED_CHECK AND ${INS_PREFIX}_UNPARSED_ARGUMENTS)
-    message(WARNING "Unparsed arguments provided: ${${ARGS}_UNPARSED_ARGUMENTS} ")
+    message(WARNING "Unparsed arguments provided: ${${INS_PREFIX}_UNPARSED_ARGUMENTS} ")
   endif ()
 endmacro()

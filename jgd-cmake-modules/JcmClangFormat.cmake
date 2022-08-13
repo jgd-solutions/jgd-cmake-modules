@@ -2,7 +2,7 @@ include_guard()
 
 include(JcmSourceSubdirectories)
 include(JcmExpandDirectories)
-include(JcmSeparateList)
+include(JcmListTransformations)
 
 # Locate the clang-format executable on system
 if(NOT CLANG_FORMAT_COMMAND)

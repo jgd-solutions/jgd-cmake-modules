@@ -3,7 +3,7 @@ include_guard()
 include(JcmParseArguments)
 include(JcmExpandDirectories)
 include(JcmCanonicalStructure)
-include(JcmSeparateList)
+include(JcmListTransformations)
 
 #
 # Creates a target, "doxygen-docs", that generates documentation of the provided

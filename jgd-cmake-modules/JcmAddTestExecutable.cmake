@@ -4,6 +4,7 @@ include(JcmParseArguments)
 include(JcmDefaultCompileOptions)
 include(JcmFileNaming)
 include(JcmStandardDirs)
+include(JcmListTransformations)
 
 #
 # A convenience function to create an executable and add it as a test in one
@@ -45,13 +46,18 @@ function(jcm_add_test_executable)
   endif ()
 
   set(regex "${JCM_HEADER_REGEX}|${test_source_regex}")
-  foreach (source ${ARGS_SOURCES})
-    string(REGEX MATCH "${regex}" matched "${source}")
-    if (NOT matched)
-      message(FATAL_ERROR "Provided source file, ${source}, does not match the "
-        "regex for test executable sources: ${regex}.")
-    endif ()
-  endforeach ()
+  jcm_separate_list(
+    IN_LIST "${ARGS_SOURCES};${ARGS_MAIN_SOURCES}"
+    REGEX "${regex}"
+    TRANSFORM "FILENAME"
+    OUT_UNMATCHED incorrectly_named
+  )
+  if (incorrectly_named)
+    message(
+      FATAL_ERROR
+      "Provided source files do not match the regex for test executable sources, ${regex}: "
+      "${incorrectly_named}.")
+  endif ()
 
   # Default test name
   set(test_name "${ARGS_EXECUTABLE}")
@@ -60,7 +66,8 @@ function(jcm_add_test_executable)
   endif ()
 
   # Test executable
-  add_executable(${ARGS_EXECUTABLE} "${ARGS_SOURCES}")
+  jcm_transform_list(ABSOLUTE_PATH INPUT "${ARGS_SOURCES}" OUT_VAR abs_sources)
+  add_executable(${ARGS_EXECUTABLE} "${abs_sources}")
   add_test(NAME ${test_name} COMMAND ${ARGS_EXECUTABLE})
 
   # Default properties

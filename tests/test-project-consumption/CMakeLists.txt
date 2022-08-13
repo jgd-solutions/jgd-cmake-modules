@@ -31,6 +31,7 @@ if(consumption_type STREQUAL FIND_PACKAGE)
   find_package(${package_name} CONFIG REQUIRED ${comp_arg})
 else()
   add_subdirectory(contrib/${package_name})
+  set(components ${components}) # use components variable
 endif()
 
 # == Create Tests to Use Package ==

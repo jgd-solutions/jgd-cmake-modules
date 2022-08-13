@@ -3,7 +3,7 @@ include_guard()
 include(JcmParseArguments)
 include(JcmFileNaming)
 include(JcmTargetNaming)
-include(JcmSeparateList)
+include(JcmListTransformations)
 include(JcmCanonicalStructure)
 include(JcmDefaultCompileOptions)
 
@@ -41,14 +41,11 @@ function(jcm_add_executable)
   # verify source naming
   set(regex "${JCM_HEADER_REGEX}|${JCM_SOURCE_REGEX}")
   jcm_separate_list(
-    IN_LIST
-    "${ARGS_SOURCES};${ARGS_MAIN_SOURCES}"
-    REGEX
-    "${regex}"
-    TRANSFORM
-    "FILENAME"
-    OUT_UNMATCHED
-    incorrectly_named)
+    IN_LIST "${ARGS_SOURCES};${ARGS_MAIN_SOURCES}"
+    REGEX "${regex}"
+    TRANSFORM "FILENAME"
+    OUT_UNMATCHED incorrectly_named
+  )
   if (incorrectly_named)
     message(
       FATAL_ERROR
@@ -76,7 +73,8 @@ function(jcm_add_executable)
   endif ()
 
   # create executable target
-  add_executable(${target_name} "${ARGS_MAIN_SOURCES}")
+  jcm_transform_list(TRANSFORM "ABSOLUTE_PATH" INPUT "${ARGS_MAIN_SOURCES}" OUT_VAR abs_main_sources)
+  add_executable(${target_name} "${abs_main_sources}")
   add_executable(${PROJECT_NAME}::${export_name} ALIAS ${target_name})
 
   # == Set Target Properties ==
@@ -103,7 +101,8 @@ function(jcm_add_executable)
 
   # create library of exec's objects, allowing unit testing of exec's sources
   if (DEFINED ARGS_SOURCES)
-    add_library(${target_name}-objects OBJECT "${ARGS_SOURCES}")
+    jcm_transform_list(TRANSFORM "ABSOLUTE_PATH" INPUT "${ARGS_SOURCES}" OUT_VAR abs_sources)
+    add_library(${target_name}-objects OBJECT "${abs_sources}")
 
     # properties on executable objects
     target_compile_options(${target_name}-objects PRIVATE "${JCM_DEFAULT_COMPILE_OPTIONS}")

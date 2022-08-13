@@ -6,7 +6,7 @@ include(JcmStandardDirs)
 include(JcmCanonicalStructure)
 include(JcmConfigureFiles)
 include(JcmExpandDirectories)
-include(JcmSeparateList)
+include(JcmListTransformations)
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 

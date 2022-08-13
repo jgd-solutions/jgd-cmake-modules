@@ -3,7 +3,7 @@ include_guard()
 include(JcmParseArguments)
 include(JcmFileNaming)
 include(JcmTargetNaming)
-include(JcmSeparateList)
+include(JcmListTransformations)
 include(JcmCanonicalStructure)
 include(JcmDefaultCompileOptions)
 include(JcmHeaderFileSet)
@@ -61,8 +61,8 @@ function(jcm_add_library)
     if (incorrectly_named)
       message(
         FATAL_ERROR
-        "Provided source files do not match the regex for library sources, "
-        "${regex}: ${incorrectly_named}.")
+        "Provided source files do not match the regex for library sources, ${regex}: "
+        "${incorrectly_named}.")
     endif ()
   endif()
 
@@ -70,7 +70,8 @@ function(jcm_add_library)
     IN_LIST "${ARGS_INTERFACE_HEADERS}" "${ARGS_PUBLIC_HEADERS}" "${ARGS_PRIVATE_HEADERS}"
     REGEX "${JCM_HEADER_REGEX}"
     TRANSFORM "FILENAME"
-    OUT_UNMATCHED incorrectly_named)
+    OUT_UNMATCHED incorrectly_named
+  )
   if (incorrectly_named)
     message(
       FATAL_ERROR
@@ -138,11 +139,16 @@ function(jcm_add_library)
 
   # == Create Library Target ==
 
+  jcm_transform_list(ABSOLUTE_PATH INPUT "${ARGS_INTERFACE_HEADERS}" OUT_VAR abs_interface_headers)
+  jcm_transform_list(ABSOLUTE_PATH INPUT "${ARGS_PUBLIC_HEADERS}" OUT_VAR abs_public_headers)
+  jcm_transform_list(ABSOLUTE_PATH INPUT "${ARGS_PRIVATE_HEADERS}" OUT_VAR abs_private_headers)
+  jcm_transform_list(ABSOLUTE_PATH INPUT "${ARGS_SOURCES}" OUT_VAR abs_sources)
+
   add_library("${target_name}" ${lib_type}
-    ${ARGS_INTERFACE_HEADERS}
-    ${ARGS_PUBLIC_HEADERS}
-    ${ARGS_PRIVATE_HEADERS}
-    ${ARGS_SOURCES})
+    "${abs_interface_headers}"
+    "${abs_public_headers}"
+    "${abs_private_headers}"
+    "${abs_sources}")
 
   add_library(${PROJECT_NAME}::${export_name} ALIAS ${target_name})
 
@@ -169,14 +175,14 @@ function(jcm_add_library)
 
   # header properties
   if (DEFINED ARGS_INTERFACE_HEADERS)
-    jcm_header_file_set(INTERFACE TARGET ${target_name} HEADERS "${ARGS_INTERFACE_HEADERS}")
+    jcm_header_file_set(INTERFACE TARGET ${target_name} HEADERS "${abs_interface_headers}")
   elseif (DEFINED ARGS_PRIVATE_HEADERS)
-    jcm_header_file_set(PRIVATE TARGET ${target_name} HEADERS "${ARGS_PRIVATE_HEADERS}")
+    jcm_header_file_set(PRIVATE TARGET ${target_name} HEADERS "${abs_private_headers}")
   endif ()
 
   if(NOT ARGS_TYPE STREQUAL "INTERFACE")
     jcm_header_file_set(PUBLIC TARGET ${target_name}
-      HEADERS "${ARGS_PUBLIC_HEADERS}" "${CMAKE_CURRENT_BINARY_DIR}/export_macros.hpp")
+      HEADERS "${abs_public_headers}" "${CMAKE_CURRENT_BINARY_DIR}/export_macros.hpp")
   endif()
 
   # common properties

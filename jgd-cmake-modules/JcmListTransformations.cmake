@@ -63,3 +63,56 @@ function(jcm_separate_list)
   set(${ARGS_OUT_MATCHED} "${matched_elements}" PARENT_SCOPE)
   set(${ARGS_OUT_UNMATCHED} "${unmatched_elements}" PARENT_SCOPE)
 endfunction()
+
+
+function(jcm_transform_list)
+  # Argument parsing, allowing value to INPUT to be empty
+  jcm_parse_arguments(
+    WITHOUT_MISSING_VALUES_CHECK
+    OPTIONS ABSOLUTE_PATH
+    ONE_VALUE_KEYWORDS "BASE;OUT_VAR"
+    MULTI_VALUE_KEYWORDS "INPUT"
+    REQUIRES_ALL "OUT_VAR"
+    REQUIRES_ANY "ABSOLUTE_PATH"
+    MUTUALLY_EXCLUSIVE "ABSOLUTE_PATH"
+    ARGUMENTS "${ARGN}"
+  )
+
+  if(ARGS_KEYWORDS_MISSING_VALUES)
+    jcm_separate_list(
+      REGEX "INPUT"
+      IN_LIST "${ARGS_KEYWORDS_MISSING_VALUES}"
+      OUT_UNMATCHED missing_required_keywords)
+
+    if(missing_required_keywords)
+      message(FATAL_ERROR "Keywords provided without any values: ${missing_required_keywords}")
+    endif()
+  endif()
+
+  # Set transformation code based on selected transformation argument
+  if(ARGS_ABSOLUTE_PATH)
+    if(NOT DEFINED ARGS_BASE)
+      set(absolute_base_path "${CMAKE_CURRENT_SOURCE_DIR}")
+    else()
+      set(absolute_base_path "${ARGS_BASE}")
+    endif()
+
+    set(selected_transformation [=[
+      if(IS_ABSOLUTE "${input}")
+        set(transformed_result "${input}")
+      else()
+        set(transformed_result "${absolute_base_path}/${input}")
+      endif()
+    ]=])
+  endif()
+
+  # Transform list
+  set(transformed_results)
+  foreach(input IN LISTS ARGS_INPUT)
+    set(transformed_result)
+    cmake_language(EVAL CODE "${selected_transformation}")
+    list(APPEND transformed_results "${transformed_result}")
+  endforeach()
+
+  set(${ARGS_OUT_VAR} "${transformed_results}" PARENT_SCOPE)
+endfunction()
