@@ -1,6 +1,6 @@
 # tests
 
-This directory contains the tests for the CMake modules provided by this library.
+This directory contains the automated tests for the CMake modules provided by this library.
 
 ## Testing Operation
 

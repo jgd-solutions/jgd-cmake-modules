@@ -6,7 +6,9 @@ project(
   HOMEPAGE_URL "https://gitlab.com/jgd-solutions/jgd-cmake-modules"
   LANGUAGES NONE)
 
+# must amend module path, as we can't find_package on ourself
 list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/jgd-cmake-modules")
+
 include(JcmSetupProject)
 include(JcmStandardDirs)
 include(JcmInstallConfigFilePackage)

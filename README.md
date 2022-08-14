@@ -1,56 +1,78 @@
-# cmake-modules
+# jgd-cmake-modules
 
-## Concept
+A set of CMake modules to easily and consistently develop proper CMake based projects.
 
-A set of CMake modules to easily and consistently develop CMake based projects.
+For a short overview of the project, see [Overview](docs/overview.md)
 
-## Design
+## Using jgd-cmake-modules
 
-The modules' interface are designed to be functional and clear.
-Each function is designed to produce reproducible results in any invocation.
+### 1. Acquire the project
 
-## External requirements
+**Option 1:** From Source
 
-The provider of external requirements are not defined in CMake.
-This keeps the project agnostic to C++ package managers, system package managers, etc.
-All external requirements are to be found with find_package() and target_link_libraries()
+  Clone source code and enter project root
 
-## Components
+  ```bash
+  git clone https://gitlab.com/jgd-solutions/jgd-cmake-modules.git 
+  cd jgd-cmake-modules
+  ```
 
-Components are merely subsets of a project. In the vast majority of cases, these components represent libraries (one
-library per component) but may rarely represent an executable. For example, if a project produces multiple executables
-that are used together, such as a CLI and a daemon, these may be offered as components. By default, every project has
-a parent component of the same name as the project that represents the entire project, and links to any
-library components that may exist. Executable components are excluded, as executables simply aren't consumed together.
-The parent component can be used to link against every library offered by the project - something that doesn't
-make sense for
+  Configure, build, and install
 
-## Notes
+  ```bash
+  cmake -B build -G Ninja
+  cmake --build build
+  cmake --install build
+  ```
 
-### sub projects
+**Option 2:** From [vcpkg](https://vcpkg.io/en/index.html)
 
-Shouldn't be done but will try to support it.
+  Add "jgd-cmake-modules" as a project dependency in `vcpkg.json`
 
-## TODO
+  ```json
+  "dependencies": [
+    "jgd-cmake-modules"
+  ]
+  ```
 
-- check if certain calls, like setup_project() and install_package() have already been called for the given project and
-  emit a warnign
-- set(CMAKE_INSTALL_DOCDIR \${CMAKE_INSTALL_DATAROOTDIR}/doc/\${PROJECT_NAME}) on each include of gnu install dirs
+  Add [vcpkg-registry](https://gitlab.com/jgd-solutions/vcpkg-registry) as a registry in your `vcpkg-configurations.json`
 
-- for things like prefix and include paths, etc. (those that are calculated or
-  change per target) should these be passed down through variables or with functions?
+  ```json
+  {
+    "registries": [
+      {
+        "kind": "git",
+        "baseline": "<desired-vcpkg-registry-ref>",
+        "repository": "git@gitlab.com:jgd-solutions/vcpkg-registry.git",
+        "packages": [
+          "jgd-cmake-modules"
+        ]
+      }
+    ]
+  }
+  ```
 
-- how the f do we select lib types and how do the install components change those
-- look into iinstall components
-- configuration headers
-- support usage as subproject
-- include directories
-- tests
+### 2. Locate jgd-cmake-modules
 
-- ensure cmake project name doesn't have spaces. Does project() even allow this?
-  NO, project will fail
+Find *jgd-cmake-modules* as an external package in your top-level *CMakeLists.txt*
 
-- verify CMAKE_SYSTEM_NAME w/ linux clang
-  GOOD
+```cmake
+find_package(jgd-cmake-modules CONFIG REQUIRED)
+```
 
-- each executable has a private library
+### 2. Include and Use Modules
+
+```cmake
+include(JcmClangFormat)
+jcm_create_clang_format_targets(TARGETS libexample::libexample)
+```
+
+## Examples
+
+This project uses its own modules, and acts as its own example!
+
+Additionally, the `tests/` directory has sample projects that use *jgd-cmake-modules*. These projects are
+configured and built as part of *jgd-cmake-modules*'s automated tests. Each project also acts as an
+example of using *jgd-cmake-modules* and the [Canonical Project
+Structure](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p1204r0.html#:~:text=The%20canonical%20structure%20is%20primarily,specific%20and%20well%2Ddefined%20function.).
+See [tests/README.md](tests/README.md) for more information.
