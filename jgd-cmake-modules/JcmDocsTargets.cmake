@@ -106,3 +106,7 @@ function(jcm_create_doxygen_target)
   doxygen_add_docs(doxygen-docs "${doxygen_input}" ALL WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
   set_target_properties(doxygen-docs PROPERTIES EXCLUDE_FROM_ALL TRUE)
 endfunction()
+
+
+function(jcm_create_sphinx_target)
+endfunction()
