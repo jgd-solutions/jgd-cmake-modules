@@ -21,7 +21,16 @@ Result Variables
   True if the sphinx build executable was found
 
 :cmake:variable:`Sphinx_VERSION`
-  The found sphinx version
+  The found sphinx version, where version is in the form <major>.<minor>.<patch>
+
+:cmake:variable:`Sphinx_VERSION_MAJOR`
+  The found sphinx major version
+
+:cmake:variable:`Sphinx_VERSION_MINOR`
+  The found sphinx minor version
+
+:cmake:variable:`Sphinx_VERSION_PATCH`
+  The found sphinx patch version
 
 Imported Targets
 ~~~~~~~~~~~~~~~~
@@ -95,8 +104,6 @@ find_package_handle_standard_args(Sphinx
   REQUIRED_VARS Sphinx_EXECUTABLE
   VERSION_VAR Sphinx_VERSION
 )
-
-message(STATUS "VERSION VAR: ${Sphinx_VERSION}")
 
 if (Sphinx_FOUND AND NOT TARGET Sphinx::build)
   add_executable(Sphinx::build IMPORTED)
