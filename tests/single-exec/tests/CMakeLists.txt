@@ -7,6 +7,7 @@ add_test(NAME ${exec-target} COMMAND ${exec-target})
 
 # Run separate "integration" test, testing object library from main exec
 jcm_add_test_executable(
-  EXECUTABLE ${PROJECT_NAME}-integration
+  NAME ${PROJECT_NAME}-integration
   SOURCES integration.cpp
-  LIBS ${exec-target}-objects)
+  LIBS ${exec-target}-objects
+)

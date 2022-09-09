@@ -3,7 +3,7 @@ include_guard()
 #[=======================================================================[.rst:
 
 JcmAddLibrary
-=============
+-------------
 
 #]=======================================================================]
 
@@ -18,25 +18,21 @@ include(GenerateExportHeader)
 
 #[=======================================================================[.rst:
 
---------------------------------------------
-
 .. cmake:command:: jcm_add_library
 
-.. code-block:: cmake
+  .. code-block:: cmake
 
-  jcm_add_library(
-    [WITHOUT_CANONICAL_PROJECT_CHECK]
-    [COMPONENT <component>]
-    [NAME <name>]
-    [OUT_TARGET_NAME <out-var>]
-    [TYPE <type>]
-    ([INTERFACE_HEADERS <header>...]
-     [PUBLIC_HEADERS <header>...]
-     [PRIVATE_HEADERS <header>...]
-     [SOURCES <source>...])
-  )
-
---------------------------------------------
+    jcm_add_library(
+      [WITHOUT_CANONICAL_PROJECT_CHECK]
+      [COMPONENT <component>]
+      [NAME <name>]
+      [OUT_TARGET_NAME <out-var>]
+      [TYPE <type>]
+      ([INTERFACE_HEADERS <header>...]
+      [PUBLIC_HEADERS <header>...]
+      [PRIVATE_HEADERS <header>...]
+      [SOURCES <source>...])
+    )
 
 
 Adds a library target to the project, similar to CMake's `add_library`, but with enhancements.
@@ -63,6 +59,7 @@ This function will:
   :cmake:variable:`*_HEADERS` parameters.
 - Generate a header file, `${CMAKE_CURRENT_BINARY_DIR}/export_macros.hpp`, with  generate_export_header
 - set target properties:
+
   - OUTPUT_NAME
   - EXPORT_NAME
   - PREFIX
@@ -130,6 +127,8 @@ Examples
 .. code-block:: cmake
 
   # PROJECT_NAME is *car*
+  # Target will be named *car::libengine* (query through OUT_TARGET_NAME)
+  # Shared options will be BUILD_SHARED_LIBS, CAR_BUILD_SHARED_LIBS, CAR_ENGINE_BUILD_SHARED
 
   jcm_add_library(
     COMPONENT engine
@@ -140,7 +139,6 @@ Examples
 
   jcm_add_executable(SOURCES main.cpp)
   target_link_libraries(car::car PRIVATE car::libengine)
-
 
 #]=======================================================================]
 function(jcm_add_library)

@@ -1,40 +1,103 @@
 include_guard()
 
+#[=======================================================================[.rst:
+
+JcmAddTestExecutable
+--------------------
+
+#]=======================================================================]
+
 include(JcmParseArguments)
 include(JcmDefaultCompileOptions)
 include(JcmFileNaming)
 include(JcmStandardDirs)
 include(JcmListTransformations)
 
-#
-# A convenience function to create an executable and add it as a test in one
-# command, while also setting default target compile options from
-# JcmDefaultCompileOptions. An executable with name EXECUTABLE will be created
-# from the sources provided to SOURCES. This executable will then be registered
-# as a test with name NAME, or EXECUTABLE, if NAME is not provided. This
-# function has no affect if <JCM_PROJECT_PREFIX_NAME>_BUILD_TESTS is not set.
-#
-# Arguments:
-#
-# EXECUTABLE: one-value arg; the name of the test executable to generate.
-#
-# NAME: one-value arg; the name of the test to register with CTest. Optional -
-# will be set to EXECUTABLE, if not provided.
-#
-# SOURCES: multi-value arg; the sources to create EXECUTABLE from.
-#
-# LIBS: multi value arg; list of libraries to privately link against the test
-# executable. Commonly the library under test. Optional.
-#
+#[=======================================================================[.rst:
+
+.. cmake:command:: jcm_add_test_executable
+
+  .. code-block:: cmake
+
+    jcm_add_test_executable(
+      NAME <name>
+      [TEST_NAME <test-name>]
+      [LIBS <lib>...]
+      SOURCES <source>...
+    )
+
+A convenience function to create an executable and add it as a test in one command, while also
+setting target properties. This function has no affect if <JCM_PROJECT_PREFIX_NAME>_BUILD_TESTS is
+not set.
+
+This function will:
+
+- verify the naming conventions of the input source files, and transform them to absolute paths.
+- create an executable with name NAME from SOURCES.
+- register this executable as a test via CTest with name TEST_NAME, or NAME, if TEST_NAME is not
+  provided.
+- set target properties:
+
+  - OUTPUT_NAME
+  - COMPILE_OPTIONS
+  - LINK_LIBRARIES
+
+Parameters
+##########
+
+One Value
+~~~~~~~~~~
+
+:cmake:variable:`NAME`
+  Sets the target name and output name of the created executable. Used as the default test name if
+  :cmake:variable:`TEST_NAME` is not provided.
+
+:cmake:variable:`TEST_NAME`
+  Sets the test name to be registered with CTest.
+
+
+Multi Value
+~~~~~~~~~~~
+
+:cmake:variable:`LIBS`
+  Libraries to privately link against the created executable. Commonly the library that the created
+  executable will test, and a testing framework.
+
+:cmake:variable:`SOURCES`
+  Sources used to create the executable
+
+Examples
+########
+
+.. code-block:: cmake
+
+  jcm_add_test_executable(NAME my_test SOURCES my_test.cpp)
+
+.. code-block:: cmake
+
+  jcm_add_executable(
+    OUT_TARGET_NAME target
+    SOURCES main.cpp
+    OBJ_SOURCES engine.cpp
+  )
+
+  jcm_add_test_executable(
+    NAME test_engine
+    SOURCES test_engine.cpp
+    LIBS ${target}-objects Boost::ut
+  )
+
+
+#]=======================================================================]
 function(jcm_add_test_executable)
   if (NOT ${JCM_PROJECT_PREFIX_NAME}_BUILD_TESTS)
     return()
   endif ()
 
   jcm_parse_arguments(
-    ONE_VALUE_KEYWORDS "EXECUTABLE;NAME"
+    ONE_VALUE_KEYWORDS "NAME;TEST_NAME"
     MULTI_VALUE_KEYWORDS "SOURCES;LIBS"
-    REQUIRES_ALL "EXECUTABLE;SOURCES"
+    REQUIRES_ALL "NAME;SOURCES"
     ARGUMENTS "${ARGN}")
 
   # Verify source naming
@@ -60,20 +123,20 @@ function(jcm_add_test_executable)
   endif ()
 
   # Default test name
-  set(test_name "${ARGS_EXECUTABLE}")
-  if (DEFINED ARGS_NAME)
-    set(test_name "${ARGS_NAME}")
+  set(test_name "${ARGS_NAME}")
+  if (DEFINED ARGS_TEST_NAME)
+    set(test_name "${ARGS_TEST_NAME}")
   endif ()
 
   # Test executable
   jcm_transform_list(ABSOLUTE_PATH INPUT "${ARGS_SOURCES}" OUT_VAR abs_sources)
-  add_executable(${ARGS_EXECUTABLE} "${abs_sources}")
-  add_test(NAME ${test_name} COMMAND ${ARGS_EXECUTABLE})
+  add_executable(${ARGS_NAME} "${abs_sources}")
+  add_test(NAME ${test_name} COMMAND ${ARGS_NAME})
 
   # Default properties
   set_target_properties(
-    ${ARGS_EXECUTABLE}
-    PROPERTIES OUTPUT_NAME ${ARGS_EXECUTABLE}
+    ${ARGS_NAME}
+    PROPERTIES OUTPUT_NAME ${ARGS_NAME}
     COMPILE_OPTIONS "${JCM_DEFAULT_COMPILE_OPTIONS}"
     LINK_LIBRARIES "${ARGS_LIBS}")
 endfunction()

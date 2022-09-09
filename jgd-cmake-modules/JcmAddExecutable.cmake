@@ -3,7 +3,7 @@ include_guard()
 #[=======================================================================[.rst:
 
 JcmAddExecutable
-================
+----------------
 
 #]=======================================================================]
 
@@ -17,8 +17,6 @@ include(JcmDefaultCompileOptions)
 
 #[=======================================================================[.rst:
 
----------------------------------------------
-
 .. cmake:command:: jcm_add_executable
 
   .. code-block:: cmake
@@ -26,13 +24,11 @@ include(JcmDefaultCompileOptions)
     jcm_add_executable(
       [WITHOUT_CANONICAL_PROJECT_CHECK]
       [COMPONENT <component>]
-      [EXECUTABLE <executable>]
+      [NAME <name>]
       [OUT_TARGET_NAME <out-var>]
       [OBJ_SOURCES <source>...]
       SOURCES <source>...
     )
-
----------------------------------------------
 
 Adds an executable target to the project, similar to CMake's `add_executable`, but with enhancements
 . It allows creating both the executable and, optionally, an associated object library to
@@ -45,12 +41,13 @@ This function will:
   input source files, transform  SOURCES and OBJ_SOURCES to absolute paths.
 - create an executable target with :cmake:command:`add_executable`, including an associated alias
   (<PROJECT_NAME>::<target>) - both following JCM's target naming conventions
-- set target properties
-    - OUTPUT_NAME
-    - EXPORT_NAME
-    - COMPILE_OPTIONS
-    - INCLUDE_DIRECTORIES
-    - COMPONENT (custom property to JCM)
+- set target properties:
+
+  - OUTPUT_NAME
+  - EXPORT_NAME
+  - COMPILE_OPTIONS
+  - INCLUDE_DIRECTORIES
+  - COMPONENT (custom property to JCM)
 
 Parameters
 ##########
@@ -69,7 +66,7 @@ One Value
   Specifies the component that this executable represents. Used to set `COMPONENT` property and when
   naming the target
 
-:cmake:variable:`EXECUTABLE`
+:cmake:variable:`NAME`
   Overrides the target name, output name, and exported name from those automatically created to
   conform to JCM's naming conventions
 
@@ -98,15 +95,18 @@ Examples
 
 .. code-block:: cmake
 
+  # PROJECT_NAME is *xml*
+  # :cmake:variable:`target` will be *xml::xml*
+
   jcm_add_executable(
     OUT_TARGET_NAME target
     SOURCES main.cpp
-    OBJ_SOURCES engine.cpp
+    OBJ_SOURCES xml.cpp
   )
 
   jcm_add_test_executable(
-    NAME test_engine
-    SOURCES test_engine.cpp
+    NAME test_parser
+    SOURCES test_parser.cpp
     LIBS ${target}-objects Boost::ut
   )
 
@@ -114,7 +114,7 @@ Examples
 function(jcm_add_executable)
   jcm_parse_arguments(
     OPTIONS "WITHOUT_CANONICAL_PROJECT_CHECK"
-    ONE_VALUE_KEYWORDS "COMPONENT;EXECUTABLE;OUT_TARGET_NAME"
+    ONE_VALUE_KEYWORDS "COMPONENT;NAME;OUT_TARGET_NAME"
     MULTI_VALUE_KEYWORDS "SOURCES;OBJ_SOURCES"
     REQUIRES_ALL "SOURCES"
     ARGUMENTS "${ARGN}")
@@ -159,10 +159,10 @@ function(jcm_add_executable)
   # == Create Executable ==
 
   # resolve executable names
-  if (DEFINED ARGS_EXECUTABLE)
-    set(target_name ${ARGS_EXECUTABLE})
-    set(export_name ${ARGS_EXECUTABLE})
-    set(output_name ${ARGS_EXECUTABLE})
+  if (DEFINED ARGS_NAME)
+    set(target_name ${ARGS_NAME})
+    set(export_name ${ARGS_NAME})
+    set(output_name ${ARGS_NAME})
   else ()
     jcm_executable_naming(
       ${comp_arg}

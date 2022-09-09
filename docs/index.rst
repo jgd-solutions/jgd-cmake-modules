@@ -1,22 +1,24 @@
-.. jgd-cmake-modules documentation master file, created by
-   sphinx-quickstart on Sun Aug 14 19:43:31 2022.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+.. jgd-cmake-modules documentation master file
 
-Welcome to jgd-cmake-modules's documentation!
-=============================================
+Get the latest news at `CNN`_.
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+.. _Canonical Project Structure: https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p1204r0.html#:~:text=The%20canonical%20structure%20is%20primarily,specific%20and%20well%2Ddefined%20function.
 
-   another
+Welcome to JCM's documentation!
+===============================
 
-
-
-Indices and tables
+Indices
 ==================
 
+.. toctree::
+   :maxdepth: 1
+
+   find_modules
+   modules
+   overview
+   tests_readme_link
+
 * :ref:`genindex`
-* :ref:`modindex`
 * :ref:`search`
+
+.. include:: ../README.rst
