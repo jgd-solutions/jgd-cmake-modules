@@ -1,5 +1,12 @@
 include_guard()
 
+#[=======================================================================[.rst:
+
+JcmAddLibrary
+=============
+
+#]=======================================================================]
+
 include(JcmParseArguments)
 include(JcmFileNaming)
 include(JcmTargetNaming)
@@ -9,6 +16,133 @@ include(JcmDefaultCompileOptions)
 include(JcmHeaderFileSet)
 include(GenerateExportHeader)
 
+#[=======================================================================[.rst:
+
+--------------------------------------------
+
+.. cmake:command:: jcm_add_library
+
+.. code-block:: cmake
+
+  jcm_add_library(
+    [WITHOUT_CANONICAL_PROJECT_CHECK]
+    [COMPONENT <component>]
+    [NAME <name>]
+    [OUT_TARGET_NAME <out-var>]
+    [TYPE <type>]
+    ([INTERFACE_HEADERS <header>...]
+     [PUBLIC_HEADERS <header>...]
+     [PRIVATE_HEADERS <header>...]
+     [SOURCES <source>...])
+  )
+
+--------------------------------------------
+
+
+Adds a library target to the project, similar to CMake's `add_library`, but with enhancements.
+
+This function will:
+
+- ensure it's called within a canonical source subdirectory, verify the naming conventions of the
+  input source files, and transform SOURCES and OBJ_SOURCES to absolute paths.
+- create a library target with :cmake:command:`add_library`, including an associated alias
+  (<PROJECT_NAME>::<target>) - both following JCM's target naming conventions
+- create project options to control building the library shared. The more specific options take
+  precedence.
+
+  BUILD_SHARED_LIBS
+    global
+
+  <JCM_PROJECT_PREFIX_NAME>_BUILD_SHARED_LIBS
+    specific to the project. Default: :cmake:variable:`BUILD_SHARED_LIBS`
+
+  <JCM_PROJECT_PREFIX_NAME>_<UPPERCASE_COMPONENT>_BUILD_SHARED
+    specific to component, if COMPONENT is provided. Default: :cmake:variable:`<JCM_PROJECT_PREFIX_NAME>_BUILD_SHARED_LIBS`
+
+- create PRIVATE, PUBLIC, and INTERFACE header sets with the respective
+  :cmake:variable:`*_HEADERS` parameters.
+- Generate a header file, `${CMAKE_CURRENT_BINARY_DIR}/export_macros.hpp`, with  generate_export_header
+- set target properties:
+  - OUTPUT_NAME
+  - EXPORT_NAME
+  - PREFIX
+  - COMPILE_OPTIONS
+  - INTERFACE_INCLUDE_DIRECTORIES
+  - INCLUDE_DIRECTORIES
+  - VERSION
+  - SOVERSION
+  - COMPONENT (custom property to JCM)
+
+Parameters
+##########
+
+Options
+~~~~~~~~~~
+
+:cmake:variable:`WITHOUT_CANONICAL_PROJECT_CHECK`
+  When provided, will forgo the default check that the function is called within an executable
+  source subdirectory, as defined by the `Canonical Project Structure`_
+
+One Value
+~~~~~~~~~~
+
+:cmake:variable:`COMPONENT`
+  Specifies the component that this executable represents. Used to set `COMPONENT` property and when
+  naming the target
+
+:cmake:variable:`NAME`
+  Overrides the target name, output name, and exported name from those automatically created to
+  conform to JCM's naming conventions
+
+:cmake:variable:`OUT_TARGET_NAME`
+  The variable named will be set to the created target's name
+
+:cmake:variable:`TYPE`
+  Overrides the library type from the default value, either STATIC or SHARED, as specified by the
+  the :cmake:variable`*_BUILD_SHARED_LIBS`. When specified, this call will not create any of the
+  :cmake:variable:`*_BUILD_SHARED_LIBS` options.
+
+Multi Value
+~~~~~~~~~~~
+
+:cmake:variable:`INTERFACE_HEADERS`
+  Header files required by consumers of this library, but not this library itself. Required when
+  :cmake:variable:`TYPE` is *INTERFACE*.
+
+:cmake:variable:`PUBLIC_HEADERS`
+  Header files required by both consumers of this library and this library itself. Prohibited when
+  :cmake:variable:`TYPE` is *INTERFACE*.
+
+:cmake:variable:`PRIVATE_HEADERS`
+  Header files required by this library itself, but not any consumers of this library. Prohibited when
+  :cmake:variable:`TYPE` is *INTERFACE*.
+
+:cmake:variable:`SOURCES`
+  Sources used to create the library
+
+Examples
+########
+
+.. code-block:: cmake
+
+  jcm_add_library(PUBLIC_HEADERS engine.hpp SOURCES engine.cpp)
+
+.. code-block:: cmake
+
+  # PROJECT_NAME is *car*
+
+  jcm_add_library(
+    COMPONENT engine
+    PUBLIC_HEADERS engine.hpp
+    PRIVATE_HEADERS crank.hpp
+    SOURCES engine.cpp crank.cpp
+  )
+
+  jcm_add_executable(SOURCES main.cpp)
+  target_link_libraries(car::car PRIVATE car::libengine)
+
+
+#]=======================================================================]
 function(jcm_add_library)
   jcm_parse_arguments(
     OPTIONS "WITHOUT_CANONICAL_PROJECT_CHECK"
@@ -188,7 +322,8 @@ function(jcm_add_library)
   # common properties
   set_target_properties(
     ${target_name}
-    PROPERTIES OUTPUT_NAME ${output_name}
+    PROPERTIES
+    OUTPUT_NAME ${output_name}
     PREFIX ""
     EXPORT_NAME ${export_name}
     COMPILE_OPTIONS "${JCM_DEFAULT_COMPILE_OPTIONS}")

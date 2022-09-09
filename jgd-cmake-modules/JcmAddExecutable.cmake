@@ -16,6 +16,7 @@ include(JcmDefaultCompileOptions)
 
 
 #[=======================================================================[.rst:
+
 ---------------------------------------------
 
 .. cmake:command:: jcm_add_executable
@@ -41,8 +42,7 @@ name as the executable, but with '-objects' appended (main -> main-objects).
 This function will:
 
 - ensure it's called within a canonical source subdirectory and verify the naming conventions of the
-  input source files
-- automatically be transform all sources provided to SOURCES and OBJ_SOURCES to absolute paths.
+  input source files, transform  SOURCES and OBJ_SOURCES to absolute paths.
 - create an executable target with :cmake:command:`add_executable`, including an associated alias
   (<PROJECT_NAME>::<target>) - both following JCM's target naming conventions
 - set target properties
@@ -94,7 +94,7 @@ Examples
 .. code-block:: cmake
 
   jcm_add_executable(SOURCES main.cpp)
-  target_link_libraries(main::main PRIVATE libthird::party)
+  target_link_libraries(example::example PRIVATE libthird::party)
 
 .. code-block:: cmake
 
