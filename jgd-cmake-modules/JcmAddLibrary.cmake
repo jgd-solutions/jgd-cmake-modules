@@ -126,8 +126,8 @@ Examples
 
 .. code-block:: cmake
 
-  # PROJECT_NAME is *car*
-  # Target will be named *car::libengine* (query through OUT_TARGET_NAME)
+  # PROJECT_NAME is car
+  # Target will be named car::libengine (query through OUT_TARGET_NAME)
   # Shared options will be BUILD_SHARED_LIBS, CAR_BUILD_SHARED_LIBS, CAR_ENGINE_BUILD_SHARED
 
   jcm_add_library(

@@ -95,8 +95,8 @@ Examples
 
 .. code-block:: cmake
 
-  # PROJECT_NAME is *xml*
-  # :cmake:variable:`target` will be *xml::xml*
+  # PROJECT_NAME is xml
+  # target will be xml::xml
 
   jcm_add_executable(
     OUT_TARGET_NAME target
