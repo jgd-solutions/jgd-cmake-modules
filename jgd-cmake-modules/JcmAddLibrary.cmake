@@ -78,7 +78,7 @@ Options
 
 :cmake:variable:`WITHOUT_CANONICAL_PROJECT_CHECK`
   When provided, will forgo the default check that the function is called within an executable
-  source subdirectory, as defined by the `Canonical Project Structure`_
+  source subdirectory, as defined by the `Canonical Project Structure`_.
 
 One Value
 ~~~~~~~~~~

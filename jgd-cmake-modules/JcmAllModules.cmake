@@ -1,5 +1,14 @@
 include_guard()
 
+#[=======================================================================[.rst:
+
+JcmAllModules
+-------------
+
+When included, includes all of JCM's CMake modules.
+
+#]=======================================================================]
+
 file(
   GLOB cmake_modules
   LIST_DIRECTORIES false

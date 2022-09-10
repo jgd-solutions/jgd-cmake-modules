@@ -33,7 +33,7 @@ include(JcmDefaultCompileOptions)
 Adds an executable target to the project, similar to CMake's `add_executable`, but with enhancements
 . It allows creating both the executable and, optionally, an associated object library to
 allow better automated testing of the executable's sources. This object library will have the same
-name as the executable, but with '-objects' appended (main -> main-objects).
+name as the executable, but with '-objects' appended (*main* -> *main-objects*).
 
 This function will:
 
@@ -57,7 +57,7 @@ Options
 
 :cmake:variable:`WITHOUT_CANONICAL_PROJECT_CHECK`
   When provided, will forgo the default check that the function is called within an executable
-  source subdirectory, as defined by the `Canonical Project Structure`_
+  source subdirectory, as defined by the `Canonical Project Structure`_.
 
 One Value
 ~~~~~~~~~~
