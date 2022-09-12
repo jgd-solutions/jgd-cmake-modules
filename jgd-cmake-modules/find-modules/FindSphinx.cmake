@@ -47,7 +47,6 @@ Examples
 
 #]=======================================================================]
 
-
 include(FindPackageHandleStandardArgs)
 
 # use python interpreter path as a base of search

@@ -78,13 +78,13 @@ Examples
   jcm_add_executable(
     OUT_TARGET_NAME target
     SOURCES main.cpp
-    OBJ_SOURCES engine.cpp
+    LIB_SOURCES engine.cpp
   )
 
   jcm_add_test_executable(
     NAME test_engine
     SOURCES test_engine.cpp
-    LIBS ${target}-objects Boost::ut
+    LIBS ${target}-library Boost::ut
   )
 
 
@@ -110,7 +110,7 @@ function(jcm_add_test_executable)
 
   set(regex "${JCM_HEADER_REGEX}|${test_source_regex}")
   jcm_separate_list(
-    IN_LIST "${ARGS_SOURCES};${ARGS_MAIN_SOURCES}"
+    INPUT "${ARGS_SOURCES};${ARGS_MAIN_SOURCES}"
     REGEX "${regex}"
     TRANSFORM "FILENAME"
     OUT_UNMATCHED incorrectly_named

@@ -40,7 +40,7 @@ Adds a library target to the project, similar to CMake's `add_library`, but with
 This function will:
 
 - ensure it's called within a canonical source subdirectory, verify the naming conventions of the
-  input source files, and transform SOURCES and OBJ_SOURCES to absolute paths.
+  input source files, and transform SOURCES to absolute paths.
 - create a library target with :cmake:command:`add_library`, including an associated alias
   (<PROJECT_NAME>::<target>) - both following JCM's target naming conventions
 - create project options to control building the library shared. The more specific options take
@@ -186,7 +186,7 @@ function(jcm_add_library)
   # verify file naming
   if(DEFINED ARGS_SOURCES)
     jcm_separate_list(
-      IN_LIST "${ARGS_SOURCES}"
+      INPUT "${ARGS_SOURCES}"
       REGEX "${JCM_SOURCE_REGEX}"
       TRANSFORM "FILENAME"
       OUT_UNMATCHED incorrectly_named)
@@ -199,7 +199,7 @@ function(jcm_add_library)
   endif()
 
   jcm_separate_list(
-    IN_LIST "${ARGS_INTERFACE_HEADERS}" "${ARGS_PUBLIC_HEADERS}" "${ARGS_PRIVATE_HEADERS}"
+    INPUT "${ARGS_INTERFACE_HEADERS}" "${ARGS_PUBLIC_HEADERS}" "${ARGS_PRIVATE_HEADERS}"
     REGEX "${JCM_HEADER_REGEX}"
     TRANSFORM "FILENAME"
     OUT_UNMATCHED incorrectly_named

@@ -28,7 +28,8 @@ This macro will:
 
 - include the associated targets file from the current list directory, if it exists
 - include the components's config files and targets files for the components requested by the
-  consumer's :cmake:command:`find_package` call. Requested components of `${project}` are ignored.
+  consumer's :cmake:command:`find_package` call, or all of those installed, if no components are
+  explicitly requested. Requested components of `${project}` are ignored.
 - if any CMake modules not corresponding to config-file packages (config files, targets files,
   version files...) exist in :cmake:variable:`CMAKE_CURRENT_LIST_DIR`, the directory will be
   appended to :cmake:variable:`CMAKE_MODULE_PATH` so consumers have access to these additional
@@ -68,54 +69,79 @@ Most package config files will take this form.
 #]=======================================================================]
 macro(JCM_BASIC_PACKAGE_CONFIG project)
   # Include main targets file
-  jcm_package_targets_file_name(PROJECT ${project} OUT_VAR target_file_name)
-  if (EXISTS "${CMAKE_CURRENT_LIST_DIR}/${target_file_name}")
-    list(APPEND config_package_files "${target_file_name}")
-    include("${CMAKE_CURRENT_LIST_DIR}/${target_file_name}")
+  jcm_package_targets_file_name(PROJECT ${project} OUT_VAR jcm_target_file_name)
+  if (EXISTS "${CMAKE_CURRENT_LIST_DIR}/${jcm_target_file_name}")
+    list(APPEND jcm_config_package_files "${jcm_target_file_name}")
+    include("${CMAKE_CURRENT_LIST_DIR}/${jcm_target_file_name}")
   endif ()
-  unset(target_file_name)
+  unset(jcm_target_file_name)
 
   # Include package components' config file
-  foreach (component ${${project}_FIND_COMPONENTS})
-    if(component STREQUAL project)
-      continue()
-    endif()
+  if(${project}_FIND_COMPONENTS)
+    # include specified components
+    foreach (component ${${project}_FIND_COMPONENTS})
+      if(component STREQUAL project)
+        continue()
+      endif()
 
-    jcm_package_config_file_name(PROJECT ${project} COMPONENT ${component} OUT_VAR component_file)
-    list(APPEND config_package_files "${component_file}")
-    include("${CMAKE_CURRENT_LIST_DIR}/${component_file}")
-  endforeach ()
-  unset(component_file)
+      jcm_package_config_file_name(
+        PROJECT ${project}
+        COMPONENT ${component}
+        OUT_VAR jcm_component_config
+      )
+      include("${CMAKE_CURRENT_LIST_DIR}/${jcm_component_config}")
+
+      # add component's config and targets file to collection of package modules
+      jcm_package_targets_file_name(
+        PROJECT ${project}
+        COMPONENT ${component}
+        OUT_VAR jcm_component_targets
+      )
+      list(APPEND jcm_config_package_files "${jcm_component_config}" "${jcm_component_targets}")
+    endforeach ()
+
+    unset(jcm_component_config)
+    unset(jcm_component_targets)
+  else()
+    # include all components' config files
+    file(GLOB jcm_components_configs LIST_DIRECTORIES false "${CMAKE_CURRENT_LIST_DIR}/*-config.cmake")
+    list(REMOVE_ITEM jcm_components_configs "${CMAKE_CURRENT_LIST_FILE}")
+
+    foreach (jcm_component_config IN LISTS jcm_components_configs)
+      include("${jcm_component_config}")
+    endforeach ()
+
+    # add component's config and targets file to collection of package modules
+    set(jcm_components_targets "${jcm_components_configs}")
+    list(TRANSFORM jcm_components_targets REPLACE "-config.cmake$" "-targets.cmake")
+    list(APPEND jcm_config_package_files "${jcm_components_configs}" "${jcm_components_targets}")
+
+    unset(jcm_components_configs)
+    unset(jcm_components_targets)
+  endif()
 
   # Add config package's version file to collection of package modules
-  jcm_package_version_file_name(PROJECT ${project} OUT_VAR version_file)
-  if (EXISTS ${version_file})
-    list(APPEND config_package_files ${version_file})
+  jcm_package_version_file_name(PROJECT ${project} OUT_VAR jcm_version_file)
+  if (EXISTS ${jcm_version_file})
+    list(APPEND jcm_config_package_files ${jcm_version_file})
   endif ()
-  unset(version_file)
-
-  # Add config package's component target files to collection of package modules
-  foreach (component ${${project}_FIND_COMPONENTS})
-    jcm_package_targets_file_name(PROJECT ${project} COMPONENT ${component} OUT_VAR target_file)
-    list(APPEND config_package_files ${target_file})
-  endforeach ()
-  unset(target_file)
+  unset(jcm_version_file)
 
   # Append module path for any additional (non-package) CMake modules
-  list(FIND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}" idx)
-  if (idx EQUAL -1)
-    file(GLOB_RECURSE additional_modules
+  list(FIND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}" jcm_current_dir_idx)
+  if (jcm_current_dir_idx EQUAL -1)
+    file(GLOB_RECURSE jcm_additional_modules
       LIST_DIRECTORIES false
       RELATIVE "${CMAKE_CURRENT_LIST_DIR}" "*.cmake")
-    list(REMOVE_ITEM additional_modules ${config_package_files})
-    unset(config_package_files)
+    list(REMOVE_ITEM jcm_additional_modules ${jcm_config_package_files})
+    unset(jcm_config_package_files)
 
-    if (additional_modules)
+    if (jcm_additional_modules)
       list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")
     endif ()
-    unset(additional_modules)
+    unset(jcm_additional_modules)
   endif ()
-  unset(idx)
+  unset(jcm_current_dir_idx)
 
   # As recommended in CMake's configure_package_config_file command, ensure
   # required components have been found

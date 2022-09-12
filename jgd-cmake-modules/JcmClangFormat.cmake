@@ -104,6 +104,10 @@ function(jcm_create_clang_format_targets)
     endif()
 
     foreach (source_file ${sources} ${interface_sources})
+      if (NOT source_file)
+        continue()
+      endif()
+
       if (IS_ABSOLUTE "${source_file}")
         set(abs_source_path "${source_file}")
       else ()
@@ -117,7 +121,7 @@ function(jcm_create_clang_format_targets)
 
   # Filter out unwanted source files
   if (DEFINED ARGS_EXCLUDE_REGEX AND files_to_format)
-    jcm_separate_list(REGEX "${ARGS_EXCLUDE_REGEX}" IN_LIST "${files_to_format}" OUT_UNMATCHED files_to_format)
+    jcm_separate_list(REGEX "${ARGS_EXCLUDE_REGEX}" INPUT "${files_to_format}" OUT_UNMATCHED files_to_format)
     if (NOT files_to_format)
       message(
         AUTHOR_WARNING "All of the sources for targets ${ARGS_TARGETS} were excluded by the EXCLUDE_REGEX ${ARGS_EXCLUDE_REGEX}")

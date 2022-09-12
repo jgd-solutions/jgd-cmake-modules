@@ -26,19 +26,19 @@ include(JcmDefaultCompileOptions)
       [COMPONENT <component>]
       [NAME <name>]
       [OUT_TARGET_NAME <out-var>]
-      [OBJ_SOURCES <source>...]
+      [LIB_SOURCES <source>...]
       SOURCES <source>...
     )
 
 Adds an executable target to the project, similar to CMake's `add_executable`, but with enhancements
-. It allows creating both the executable and, optionally, an associated object library to
-allow better automated testing of the executable's sources. This object library will have the same
-name as the executable, but with '-objects' appended (*main* -> *main-objects*).
+. It allows creating both the executable and, optionally, an associated object or interface library
+to allow better automated testing of the executable's sources. This library will have the
+same name as the executable, but with '-library' appended (*main* -> *main-library*).
 
 This function will:
 
 - ensure it's called within a canonical source subdirectory and verify the naming conventions of the
-  input source files, transform  SOURCES and OBJ_SOURCES to absolute paths.
+  input source files, transform  SOURCES and LIB_SOURCES to absolute paths.
 - create an executable target with :cmake:command:`add_executable`, including an associated alias
   (<PROJECT_NAME>::<target>) - both following JCM's target naming conventions
 - set target properties:
@@ -76,11 +76,12 @@ One Value
 Multi Value
 ~~~~~~~~~~~
 
-:cmake:variable:`OBJ_SOURCES`
-  Sources used to create the executable's associated object library. When provided, an object
-  library will be created, it will be linked against the executable, and its include directories
-  will be set (PUBLIC) instead of the executable's. This object library will have the same name as the
-  executable, but with '-objects' appended (main -> main-objects).
+:cmake:variable:`LIB_SOURCES`
+  Sources used to create the executable's associated object/interface library. When provided, an
+  object or interface library will be created, it will be linked against the executable, and its
+  include directories will be set instead of the executable's. An object library
+  will be created when any of the files provided end in :cmake:variable:`JCM_SOURCE_EXTENSION`,
+  while an interface library will be created otherwise (just header files).
 
 :cmake:variable:`SOURCES`
   Sources used to create the executable
@@ -101,13 +102,23 @@ Examples
   jcm_add_executable(
     OUT_TARGET_NAME target
     SOURCES main.cpp
-    OBJ_SOURCES xml.cpp
+    LIB_SOURCES xml.cpp
   )
 
   jcm_add_test_executable(
     NAME test_parser
     SOURCES test_parser.cpp
-    LIBS ${target}-objects Boost::ut
+    LIBS ${target}-library Boost::ut
+  )
+
+.. code-block:: cmake
+
+  # creates associated interface library, instead of object library
+
+  jcm_add_executable(
+    OUT_TARGET_NAME target
+    SOURCES main.cpp
+    LIB_SOURCES coffee.hpp
   )
 
 #]=======================================================================]
@@ -115,7 +126,7 @@ function(jcm_add_executable)
   jcm_parse_arguments(
     OPTIONS "WITHOUT_CANONICAL_PROJECT_CHECK"
     ONE_VALUE_KEYWORDS "COMPONENT;NAME;OUT_TARGET_NAME"
-    MULTI_VALUE_KEYWORDS "SOURCES;OBJ_SOURCES"
+    MULTI_VALUE_KEYWORDS "SOURCES;LIB_SOURCES"
     REQUIRES_ALL "SOURCES"
     ARGUMENTS "${ARGN}")
 
@@ -131,6 +142,7 @@ function(jcm_add_executable)
   # == Usage Guards ==
 
   # ensure executable is created in the appropriate canonical directory
+  # defining executable components within root executable directory is allowed
   if(NOT ARGS_WITHOUT_CANONICAL_PROJECT_CHECK)
     jcm_canonical_exec_subdir(${comp_arg} OUT_VAR canonical_dir)
     if (NOT CMAKE_CURRENT_SOURCE_DIR STREQUAL canonical_dir)
@@ -144,7 +156,7 @@ function(jcm_add_executable)
   # verify source naming
   set(regex "${JCM_HEADER_REGEX}|${JCM_SOURCE_REGEX}")
   jcm_separate_list(
-    IN_LIST "${ARGS_SOURCES};${ARGS_OBJ_SOURCES}"
+    INPUT "${ARGS_SOURCES};${ARGS_LIB_SOURCES}"
     REGEX "${regex}"
     TRANSFORM "FILENAME"
     OUT_UNMATCHED incorrectly_named
@@ -176,7 +188,7 @@ function(jcm_add_executable)
   endif ()
 
   # create executable target
-  jcm_transform_list(TRANSFORM "ABSOLUTE_PATH" INPUT "${ARGS_SOURCES}" OUT_VAR abs_sources)
+  jcm_transform_list(ABSOLUTE_PATH INPUT "${ARGS_SOURCES}" OUT_VAR abs_sources)
   add_executable(${target_name} "${abs_sources}")
   add_executable(${PROJECT_NAME}::${export_name} ALIAS ${target_name})
 
@@ -190,8 +202,8 @@ function(jcm_add_executable)
     EXPORT_NAME ${export_name}
     COMPILE_OPTIONS "${JCM_DEFAULT_COMPILE_OPTIONS}")
 
-  # include directories, if no object library will be created to provide them
-  if (NOT DEFINED ARGS_OBJ_SOURCES)
+  # include directories, if no library will be created to provide them
+  if (NOT DEFINED ARGS_LIB_SOURCES)
     target_include_directories(${target_name} PRIVATE "$<BUILD_INTERFACE:${include_dirs}>")
   endif ()
 
@@ -200,18 +212,44 @@ function(jcm_add_executable)
     set_target_properties(${target_name} PROPERTIES ${comp_arg})
   endif ()
 
-  # == Object Library ==
+  # == Associated Library ==
 
-  # create library of exec's objects, allowing unit testing of exec's sources
-  if (DEFINED ARGS_OBJ_SOURCES)
-    jcm_transform_list(TRANSFORM "ABSOLUTE_PATH" INPUT "${ARGS_OBJ_SOURCES}" OUT_VAR abs_obj_sources)
-    add_library(${target_name}-objects OBJECT "${abs_obj_sources}")
+  # create library of exec's sources, allowing unit testing of exec's sources
+  if (DEFINED ARGS_LIB_SOURCES)
+    # check for actual source files
+    jcm_regex_find_list(
+      REGEX "${JCM_SOURCE_REGEX}"
+      INPUT "${ARGS_LIB_SOURCES}"
+      OUT_IDX found_source_idx
+    )
 
-    # properties on executable objects
-    target_compile_options(${target_name}-objects PRIVATE "${JCM_DEFAULT_COMPILE_OPTIONS}")
-    target_include_directories(${target_name}-objects PUBLIC "$<BUILD_INTERFACE:${include_dirs}>")
+    # absolute paths
+    jcm_transform_list(
+      ABSOLUTE_PATH
+      INPUT "${ARGS_LIB_SOURCES}"
+      OUT_VAR abs_lib_sources
+    )
 
-    # link target to associated object files & usage requirements
-    target_link_libraries(${target_name} PRIVATE ${target_name}-objects)
+    message(STATUS "HHHHHHHHHHHHHH found source idx for ${target_name}: ${found_source_idx}")
+
+    # create interface or object library
+    if(found_source_idx EQUAL -1)
+      add_library(${target_name}-library INTERFACE)
+      target_include_directories(
+        ${target_name}-library
+        INTERFACE
+        "$<BUILD_INTERFACE:${include_dirs}>"
+      )
+      message(STATUS "HHHHHHHHHHHHHH Adding interface lib: ${target_name}")
+    else()
+      add_library(${target_name}-library OBJECT "${abs_lib_sources}")
+      target_compile_options(${target_name}-library PRIVATE "${JCM_DEFAULT_COMPILE_OPTIONS}")
+      target_include_directories(${target_name}-library PUBLIC "$<BUILD_INTERFACE:${include_dirs}>")
+      message(STATUS "HHHHHHHHHHHHHH Adding object lib: ${target_name}")
+    endif()
+
+
+    # link target to associated object files &/or usage requirements
+    target_link_libraries(${target_name} PRIVATE ${target_name}-library)
   endif ()
 endfunction()

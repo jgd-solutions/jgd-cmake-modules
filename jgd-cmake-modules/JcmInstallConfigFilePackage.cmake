@@ -104,7 +104,7 @@ function(jcm_install_config_file_package)
 
     if (module_files)
       jcm_separate_list(
-        IN_LIST "${module_files}"
+        INPUT "${module_files}"
         REGEX "${JCM_CMAKE_MODULE_REGEX}"
         TRANSFORM "FILENAME"
         OUT_MATCHED correct_files

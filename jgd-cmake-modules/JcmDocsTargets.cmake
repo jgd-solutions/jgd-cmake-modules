@@ -71,7 +71,7 @@ function(jcm_create_doxygen_target)
 
     # Exclude header files based on provided regex
     if (ARGS_EXCLUDE_REGEX AND header_files)
-      jcm_separate_list(REGEX "${ARGS_EXCLUDE_REGEX}" IN_LIST "${header_files}"
+      jcm_separate_list(REGEX "${ARGS_EXCLUDE_REGEX}" INPUT "${header_files}"
         OUT_UNMATCHED header_files)
       if (NOT header_files)
         message(

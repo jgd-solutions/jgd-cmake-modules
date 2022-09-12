@@ -3,17 +3,17 @@ include_guard()
 include(JcmParseArguments)
 
 #
-# Separates the IN_LIST into two groups: OUT_MATCHED, if the element matches the
+# Separates the INPUT into two groups: OUT_MATCHED, if the element matches the
 # provided REGEX and OUT_UNMATCHED, otherwise. Before matching, the elements can
 # optionally be transformed by the selected TRANSFORM before being matched.
-# Nevertheless, IN_LIST is not modified, and the results in the out-variables
-# will always be identical to those provided via IN_LIST.
+# Nevertheless, INPUT is not modified, and the results in the out-variables
+# will always be identical to those provided via INPUT.
 #
 # Arguments:
 #
-# IN_LIST: multi-value arg; list of values to split based on the provided REGEX.
+# INPUT: multi-value arg; list of values to split based on the provided REGEX.
 #
-# REGEX: one-value arg; the regex to match each IN_LIST element against.
+# REGEX: one-value arg; the regex to match each INPUT element against.
 #
 # TRANSFORM: one-value arg; a transformation to make on each input element
 # before matching it against the regex. Must be one of (only one so far):
@@ -29,8 +29,8 @@ function(jcm_separate_list)
   jcm_parse_arguments(
     ONE_VALUE_KEYWORDS
     "REGEX;OUT_MATCHED;OUT_UNMATCHED;TRANSFORM"
-    MULTI_VALUE_KEYWORDS "IN_LIST"
-    REQUIRES_ALL "REGEX;IN_LIST"
+    MULTI_VALUE_KEYWORDS "INPUT"
+    REQUIRES_ALL "REGEX;INPUT"
     REQUIRES_ANY "OUT_MATCHED;OUT_UNMATCHED"
     ARGUMENTS "${ARGN}")
 
@@ -43,7 +43,7 @@ function(jcm_separate_list)
   # Split input into two lists
   set(matched_elements)
   set(unmatched_elements)
-  foreach(element ${ARGS_IN_LIST})
+  foreach(element ${ARGS_INPUT})
     # transform element to be matched
     set(transformed_element "${element}")
     if(ARGS_TRANSFORM STREQUAL "FILENAME")
@@ -69,7 +69,7 @@ function(jcm_transform_list)
   # Argument parsing, allowing value to INPUT to be empty
   jcm_parse_arguments(
     WITHOUT_MISSING_VALUES_CHECK
-    OPTIONS ABSOLUTE_PATH
+    OPTIONS "ABSOLUTE_PATH"
     ONE_VALUE_KEYWORDS "BASE;OUT_VAR"
     MULTI_VALUE_KEYWORDS "INPUT"
     REQUIRES_ALL "OUT_VAR"
@@ -78,12 +78,10 @@ function(jcm_transform_list)
     ARGUMENTS "${ARGN}"
   )
 
+  # check for missing values on other variables, besides INPUT
   if(ARGS_KEYWORDS_MISSING_VALUES)
-    jcm_separate_list(
-      REGEX "INPUT"
-      IN_LIST "${ARGS_KEYWORDS_MISSING_VALUES}"
-      OUT_UNMATCHED missing_required_keywords)
-
+    set(missing_required_keywords "${ARGS_KEYWORDS_MISSING_VAL}")
+    list(FILTER missing_required_keywords EXCLUDE REGEX "INPUT")
     if(missing_required_keywords)
       message(FATAL_ERROR "Keywords provided without any values: ${missing_required_keywords}")
     endif()
@@ -115,4 +113,27 @@ function(jcm_transform_list)
   endforeach()
 
   set(${ARGS_OUT_VAR} "${transformed_results}" PARENT_SCOPE)
+endfunction()
+
+function(jcm_regex_find_list)
+  jcm_parse_arguments(
+    ONE_VALUE_KEYWORDS "OUT_IDX;REGEX"
+    MULTI_VALUE_KEYWORDS "INPUT"
+    REQUIRES_ALL "OUT_IDX;REGEX;INPUT"
+    ARGUMENTS "${ARGN}"
+  )
+
+  set(found_idx -1)
+  set(current_idx 0)
+
+  foreach(input ${ARGS_INPUT})
+    if(input MATCHES "${ARGS_REGEX}")
+      set(found_idx ${current_idx})
+      break()
+    endif()
+
+    math(EXPR current_idx "${current_idx}+1")
+  endforeach()
+
+  set(${ARGS_OUT_IDX} "${found_idx}" PARENT_SCOPE)
 endfunction()
