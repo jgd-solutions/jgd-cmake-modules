@@ -3,9 +3,10 @@
 JcmBasicPackageConfig
 ---------------------
 
-Provides macros to create `Config-file Packages <https://cmake.org/cmake/help/latest/manual/cmake-packages.7.html#config-file-packages>`.
-Offers the :cmake:command:`jcm_basic_package_config` macro for top-level config-files, and
-the :cmake:command:`jcm_basic_component_config` macro for config-files of individual components.
+Provides macros to create `Config-file Packages
+<https://cmake.org/cmake/help/latest/manual/cmake-packages.7.html#config-file-packages>`.  Offers
+the :cmake:command:`jcm_basic_package_config` macro for top-level config-files, and the
+:cmake:command:`jcm_basic_component_config` macro for config-files of individual components.
 
 #]=======================================================================]
 
@@ -22,7 +23,7 @@ include(JcmParseArguments)
 
 Provides all CMake commands that are required in a package config-files to create relocatable,
 config-file packages. Call this macro at the *end* of your package config-file template
-(<project>-config.cmake.in), after :cmake:variable:`@PACKAGE_INIT@`.
+(<project>-config.cmake.in), after :cmake:`@PACKAGE_INIT@`.
 
 This macro will:
 
@@ -36,9 +37,10 @@ This macro will:
   modules.
 - call :cmake:command:`check_required_components`, as `KitWare recommends
   <https://cmake.org/cmake/help/latest/module/CMakePackageConfigHelpers.html#generating-a-package-configuration-file>`
-  at the end of every package config-file.  Ensure your config-file template is configured through
-  :cmake:command:`configure_package_config_file`, to get this macro in :cmake:variable:`PACKAGE_INIT`,
-  or preferrably enable configuring in :cmake:command:`jcm_install_config_file_package`.
+  at the end of every package config-file. To get this macro in :cmake:variable:`PACKAGE_INIT`,
+  ensure your config-file template is configured through
+  :cmake:command:`configure_package_config_file`, or preferrably enable configuring in
+  :cmake:command:`jcm_install_config_file_package`.
 
 Parameters
 ##########
@@ -47,7 +49,7 @@ Positional
 ~~~~~~~~~~
 
 :cmake:variable:`project`
-  The name of the project being packaged. Don't use :cmake:variable:`${PROJECT_NAME}`, as this will
+  The name of the project being packaged. Don't use :cmake:`${PROJECT_NAME}`, as this will
   resolve to the consuming project name.
 
 Examples
@@ -166,7 +168,7 @@ This macro will:
 
 - include the config-files of any dependent components
 - include the associated targets file from the current list directory
-- set the component's associated :cmake:variable:`<project>_<component>_FOUND` variables that
+- set the component's associated `<project>_<component>_FOUND` variables that
   :cmake:command:`check_required_components` uses.
 
 Parameters
@@ -176,7 +178,7 @@ Positional
 ~~~~~~~~~~
 
 :cmake:variable:`project`
-  The name of the project being packaged. Don't use :cmake:variable:`${PROJECT_NAME}`, as this will
+  The name of the project being packaged. Don't use :cmake:`${PROJECT_NAME}`, as this will
   resolve to the consuming project name.
 
 :cmake:variable:`component`

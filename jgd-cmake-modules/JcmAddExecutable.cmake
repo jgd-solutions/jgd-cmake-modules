@@ -64,7 +64,7 @@ One Value
 
 :cmake:variable:`COMPONENT`
   Specifies the component that this executable represents. Used to set `COMPONENT` property and when
-  naming the target
+  naming the target.
 
 :cmake:variable:`NAME`
   Overrides the target name, output name, and exported name from those automatically created to
@@ -230,8 +230,6 @@ function(jcm_add_executable)
       OUT_VAR abs_lib_sources
     )
 
-    message(STATUS "HHHHHHHHHHHHHH found source idx for ${target_name}: ${found_source_idx}")
-
     # create interface or object library
     if(found_source_idx EQUAL -1)
       add_library(${target_name}-library INTERFACE)
@@ -240,12 +238,10 @@ function(jcm_add_executable)
         INTERFACE
         "$<BUILD_INTERFACE:${include_dirs}>"
       )
-      message(STATUS "HHHHHHHHHHHHHH Adding interface lib: ${target_name}")
     else()
       add_library(${target_name}-library OBJECT "${abs_lib_sources}")
       target_compile_options(${target_name}-library PRIVATE "${JCM_DEFAULT_COMPILE_OPTIONS}")
       target_include_directories(${target_name}-library PUBLIC "$<BUILD_INTERFACE:${include_dirs}>")
-      message(STATUS "HHHHHHHHHHHHHH Adding object lib: ${target_name}")
     endif()
 
 

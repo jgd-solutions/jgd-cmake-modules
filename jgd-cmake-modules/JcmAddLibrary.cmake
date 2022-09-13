@@ -56,7 +56,7 @@ This function will:
     specific to component, if COMPONENT is provided. Default: :cmake:variable:`<JCM_PROJECT_PREFIX_NAME>_BUILD_SHARED_LIBS`
 
 - create PRIVATE, PUBLIC, and INTERFACE header sets with the respective
-  :cmake:variable:`*_HEADERS` parameters.
+  *\*_HEADERS* parameters.
 - Generate a header file, `${CMAKE_CURRENT_BINARY_DIR}/export_macros.hpp`, with  generate_export_header
 - set target properties:
 
@@ -96,8 +96,8 @@ One Value
 
 :cmake:variable:`TYPE`
   Overrides the library type from the default value, either STATIC or SHARED, as specified by the
-  the :cmake:variable`*_BUILD_SHARED_LIBS`. When specified, this call will not create any of the
-  :cmake:variable:`*_BUILD_SHARED_LIBS` options.
+  the *\*_BUILD_SHARED_LIBS*. When specified, this call will not create any of the
+  *\*_BUILD_SHARED_LIBS* options.
 
 Multi Value
 ~~~~~~~~~~~

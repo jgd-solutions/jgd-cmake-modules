@@ -66,7 +66,7 @@ set(JCM_IN_FILE_EXTENSION ".in")
 Sets the variable specified by :cmake:variable:`OUT_VAR` to the canonical source subdirectory for
 either an executable or library of project :cmake:variable:`PROJECT_NAME`. Calls either
 :cmake:command:`jcm_canonical_lib_subdir` or :cmake:command:`jcm_canonical_exec_subdir` based on the
-target :cmake:variable:`TYPE` property, or the deduced type from the target name, if the target is
+target *TYPE* property, or the deduced type from the target name, if the target is
 not yet created.
 
 Parameters

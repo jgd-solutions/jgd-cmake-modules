@@ -26,6 +26,7 @@ if(JCM_BUILD_DOCS)
 endif()
 
 jcm_install_config_file_package(
+  INSTALL_LICENSES
   CONFIGURE_PACKAGE_CONFIG_FILES
   CMAKE_MODULES "${PROJECT_NAME}"
 )

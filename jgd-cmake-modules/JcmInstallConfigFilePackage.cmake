@@ -12,9 +12,9 @@ include(CMakePackageConfigHelpers)
 
 function(jcm_install_config_file_package)
   jcm_parse_arguments(
-    OPTIONS "CONFIGURE_PACKAGE_CONFIG_FILES"
+    OPTIONS "CONFIGURE_PACKAGE_CONFIG_FILES" "INSTALL_LICENSES"
     MULTI_VALUE_KEYWORDS "TARGETS;CMAKE_MODULES"
-    REQUIRES_ANY "TARGETS;CMAKE_MODULES"
+    REQUIRES_ANY "TARGETS;CMAKE_MODULES;INSTALL_LICENSES"
     ARGUMENTS "${ARGN}")
 
   # Usage guard
@@ -196,6 +196,8 @@ function(jcm_install_config_file_package)
     endforeach ()
   endfunction()
 
-  install_licenses("LICENSE*" "")
-  install_licenses("licenses/*" "licenses")
+  if(ARGS_INSTALL_LICENSES)
+    install_licenses("LICENSE*" "")
+    install_licenses("licenses/*" "licenses")
+  endif()
 endfunction()
