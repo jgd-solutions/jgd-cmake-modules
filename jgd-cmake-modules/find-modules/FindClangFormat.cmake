@@ -8,7 +8,7 @@ A CMake `find module
 `ClangFormat <https://clang.llvm.org/docs/ClangFormat.html>`_ code formatter. This module provides
 access to the `clang-format` executable via CMake targets and variables. When a version is provided
 to :cmake:command:`find_package`, this find-module will also consider version-suffixed clang-format
-executables. See :ref:`Examples` below.
+executables. See :ref:`Examples<ExamplesAnchor>` below.
 
 Clang offers a `config-file package
 <https://github.com/llvm/llvm-project/blob/main/clang/cmake/modules/ClangConfig.cmake.in>`_, which
@@ -46,12 +46,21 @@ Imported Targets
 clang::format
   The clang-format executable, as an imported CMake target
 
+.. _ExamplesAnchor:
+
 Examples
 ~~~~~~~~
 
 .. code-block:: cmake
 
-  find_package(ClangFormat REQUIRED)
+  find_package(ClangFormat)
+
+.. code-block:: cmake
+
+  # additionally considers executables "clang-format-14" and "clang-format-14.0"
+
+  find_package(ClangFormat 14.0 REQUIRED)
+
 
 #]=======================================================================]
 
