@@ -1,8 +1,5 @@
 .. jgd-cmake-modules documentation master file
 
-.. role:: cmake(code)
-   :language: cmake
-
 Welcome to JCM's documentation!
 ===============================
 

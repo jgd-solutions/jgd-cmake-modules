@@ -52,50 +52,54 @@ include(FindPackageHandleStandardArgs)
 # use python interpreter path as a base of search
 find_package(Python COMPONENTS Interpreter)
 if(Python_Interpreter_FOUND)
-  get_filename_component(_pyinterp_dir "${Python_EXECUTABLE}" DIRECTORY)
-  set(_sphinx_hints  "${_pyinterp_dir}" "${_pyinterp_dir}/bin" "${_pyinterp_dir}/Scripts")
-  unset(_pyinterp_dir)
+  get_filename_component(_Python_interp_dir "${Python_EXECUTABLE}" DIRECTORY)
+  set(_Sphinx_hints
+    "${_Python_interp_dir}"
+    "${_Python_interp_dir}/bin"
+    "${_Python_interp_dir}/Scripts"
+  )
+  unset(_Python_interp_dir)
 endif()
 
 find_program(
   Sphinx_EXECUTABLE
   NAMES sphinx-build sphinx-build2 sphinx-build3
-  HINTS "${_sphinx_hints}"
+  HINTS "${_Sphinx_hints}"
   DOC "Path to Sphinx documentation builder executable"
 )
-unset(_sphinx_hints)
+unset(_Sphinx_hints)
 mark_as_advanced(Sphinx_EXECUTABLE)
 
 # executable version
 if(Sphinx_EXECUTABLE)
   execute_process(
     COMMAND "${Sphinx_EXECUTABLE}" --version
-    OUTPUT_VARIABLE _sphinx_version_stdout
-    ERROR_VARIABLE _sphinx_version_stderr
+    OUTPUT_VARIABLE _Sphinx_version_stdout
+    ERROR_VARIABLE _Sphinx_version_stderr
+    OUTPUT_STRIP_TRAILING_WHITESPACE
   )
 
-  if(_sphinx_version_stderr)
+  if(_Sphinx_version_stderr)
     message(WARNING
       "Failed to determine version of sphinx build executable (${Sphinx_EXECUTABLE})! Error:\n"
-      "${_sphinx_version_stderr}"
+      "${_Sphinx_version_stderr}"
     )
-  elseif(NOT _sphinx_version_stdout MATCHES "sphinx-build[23]? [0-9].[0-9].[0-9]")
+  elseif(NOT _Sphinx_version_stdout MATCHES "sphinx-build[23]? [0-9]+\\.[0-9]+\\.[0-9]+")
     message(WARNING
-      "Sphinx's version output is not recognized by this find module (${_sphinx_version_stdout})!)"
+      "Sphinx's version output is not recognized by this find module (${_Sphinx_version_stdout})!)"
     )
   else()
     # extract version from stdout
-    string(STRIP "${_sphinx_version_stdout}" _sphinx_version_stdout)
-    string(REGEX REPLACE "sphinx-build[23]? " "" Sphinx_VERSION "${_sphinx_version_stdout}")
-    string(REPLACE "." ";" _sphinx_version_components "${Sphinx_VERSION}")
-    list(GET _sphinx_version_components 0 Sphinx_VERSION_MAJOR)
-    list(GET _sphinx_version_components 1 Sphinx_VERSION_MINOR)
-    list(GET _sphinx_version_components 2 Sphinx_VERSION_PATCH)
+    string(REGEX REPLACE "sphinx-build[23]? " "" Sphinx_VERSION "${_Sphinx_version_stdout}")
+    string(REPLACE "." ";" _Sphinx_version_components "${Sphinx_VERSION}")
+    list(GET _Sphinx_version_components 0 Sphinx_VERSION_MAJOR)
+    list(GET _Sphinx_version_components 1 Sphinx_VERSION_MINOR)
+    list(GET _Sphinx_version_components 2 Sphinx_VERSION_PATCH)
   endif()
 
-  unset(_sphinx_version_components)
-  unset(_sphinx_version_stderr)
-  unset(_sphinx_version_stdout)
+  unset(_Sphinx_version_components)
+  unset(_Sphinx_version_stderr)
+  unset(_Sphinx_version_stdout)
 endif()
 
 find_package_handle_standard_args(Sphinx

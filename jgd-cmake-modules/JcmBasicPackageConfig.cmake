@@ -23,7 +23,7 @@ include(JcmParseArguments)
 
 Provides all CMake commands that are required in a package config-files to create relocatable,
 config-file packages. Call this macro at the *end* of your package config-file template
-(<project>-config.cmake.in), after :cmake:`@PACKAGE_INIT@`.
+(<project>-config.cmake.in), after :code:`@PACKAGE_INIT@`.
 
 This macro will:
 

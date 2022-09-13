@@ -164,8 +164,9 @@ function(jcm_add_executable)
   if (incorrectly_named)
     message(
       FATAL_ERROR
-      "Provided source files do not match the regex for executable sources, "
-      "${regex}: ${incorrectly_named}.")
+      "Provided source files do not match the regex for executable sources, ${regex}: "
+      "${incorrectly_named}."
+    )
   endif ()
 
   # == Create Executable ==

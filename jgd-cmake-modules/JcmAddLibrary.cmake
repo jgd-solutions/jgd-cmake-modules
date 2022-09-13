@@ -47,7 +47,7 @@ This function will:
   precedence.
 
   BUILD_SHARED_LIBS
-    global
+    global to entire build; used by almost all projects
 
   <JCM_PROJECT_PREFIX_NAME>_BUILD_SHARED_LIBS
     specific to the project. Default: :cmake:variable:`BUILD_SHARED_LIBS`

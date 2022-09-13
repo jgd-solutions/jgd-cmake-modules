@@ -5,8 +5,6 @@ jcm_add_executable(
   LIB_SOURCES reformat.hpp .../shared.hpp
 )
 
-message(STATUS "HHHHHHHHHHHH target name: ${formatter-target}")
-
 target_compile_features(${formatter-target} PUBLIC cxx_std_20)
 
 jcm_add_test_executable(

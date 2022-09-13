@@ -6,7 +6,7 @@ JcmSetupProject
 ----------------
 
 Offers utilities to properly setup a CMake project for consumption as both a sub-project and a
-binary package. Creates target component, :cmake:variable:`COMPONENT`, and defines macro
+binary package. Creates target component, *COMPONENT*, and defines macro
 :cmake:command:`jcm_setup_project` used to setup a CMake project.
 
 #]=======================================================================]
@@ -71,36 +71,36 @@ This function will:
 
       ${JCM_PROJECT_PREFIX_NAME}_BUILD_DOCS
         Enables/disables building project documentation for this specific project. Default:
-        :cmake:variable:`OFF`
+        *OFF*
 
       ${JCM_PROJECT_PREFIX_NAME}_OMIT_TARGETS
         List of project alias targets (${PROJECT_NAME}:: ...) to omit during CMake configuration
 
-  - sets default values for CMake variables controlling the build when the current project is the
+  - set default values for CMake variables controlling the build when the current project is the
     top-level project
 
-    - CMAKE_EXPORT_COMPILE_COMMANDS
-    - CMAKE_LINK_WHAT_YOU_USE
-    - CMAKE_COLOR_DIAGNOSTICS
-    - CMAKE_INSTALL_PREFIX
-    - CMAKE_OBJECT_PATH_MAX (Windows)
+    - :cmake:variable:`CMAKE_EXPORT_COMPILE_COMMANDS`
+    - :cmake:variable:`CMAKE_LINK_WHAT_YOU_USE`
+    - :cmake:variable:`CMAKE_COLOR_DIAGNOSTICS`
+    - :cmake:variable:`CMAKE_INSTALL_PREFIX`
+    - :cmake:variable:`CMAKE_OBJECT_PATH_MAX` (Windows)
 
-  - sets values for variables CMake uses to initialize target properties, only when the current
+  - set values for variables CMake uses to initialize target properties, only when the current
     project is top-level
 
-    - CMAKE_INSTALL_RPATH (runtime search path (RPATH) for shared object libraries)
-    - CMAKE_ARCHIVE_OUTPUT_DIRECTORY
-    - CMAKE_LIBRARY_OUTPUT_DIRECTORY
-    - CMAKE_RUNTIME_OUTPUT_DIRECTORY
-    - CMAKE_<LANG>_STANDARD
-    - CMAKE_<LANG>_STANDARD_REQUIRED
-    - CMAKE_<LANG>_EXTENSIONS
-    - CMAKE_<LANG>_VISIBILITY_PRESET
-    - CMAKE_VISIBILITY_INLINES_HIDDEN
+    - :cmake:variable:`CMAKE_INSTALL_RPATH` (runtime search path (RPATH) for shared object libraries)
+    - :cmake:variable:`CMAKE_ARCHIVE_OUTPUT_DIRECTORY`
+    - :cmake:variable:`CMAKE_LIBRARY_OUTPUT_DIRECTORY`
+    - :cmake:variable:`CMAKE_RUNTIME_OUTPUT_DIRECTORY`
+    - :cmake:variable:`CMAKE_<LANG>_STANDARD`
+    - :cmake:variable:`CMAKE_<LANG>_STANDARD_REQUIRED`
+    - :cmake:variable:`CMAKE_<LANG>_EXTENSIONS`
+    - :cmake:variable:`CMAKE_<LANG>_VISIBILITY_PRESET`
+    - :cmake:variable:`CMAKE_VISIBILITY_INLINES_HIDDEN`
 
-  - enables interprocedural optimization in *Release* mode
-  - always enables testing so testing never fails, even if there are no tests, and includes CTest
-    when ${JCM_PROJECT_PREFIX_NAME}_BUILD_TESTS
+  - enable interprocedural optimization in *Release* mode
+  - always enable testing so testing never fails, even if there are no tests, and includes CTest
+    when *${JCM_PROJECT_PREFIX_NAME}_BUILD_TESTS* is set.
 
 
 Parameters

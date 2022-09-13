@@ -29,6 +29,10 @@ html_domain_indices = False
 html_static_path = ["_static"]
 
 canonical_proj_url = r"https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p1204r0.html#:~:text=The%20canonical%20structure%20is%20primarily,specific%20and%20well%2Ddefined%20function."
-# canonical_proj_url = "https://google.com"
-# rst_epilog = ".. |canonical_proj| replace:: `Canonical <https://godbolt.org/>`_"
-rst_epilog = f".. _Canonical Project Structure: {canonical_proj_url}"
+rst_prolog = f"""
+.. role:: cmake(code)
+   :language: cmake
+"""
+rst_epilog = f"""
+.. _Canonical Project Structure: {canonical_proj_url}
+"""

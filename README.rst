@@ -19,7 +19,7 @@ Sample
   jcm_setup_project()
   jcm_source_subdirectories(ADD_SUBDIRS WITH_TESTS_DIR WITH_DOCS_DIR)
   jcm_configure_config_header_file()
-  jcm_create_clang_format_targets(TARGETS libsample::libsample)
+  jcm_create_clang_format_targets(SOURCE_TARGETS libsample::libsample)
   jcm_create_doxygen_target(README_MAIN_PAGE TARGETS libsample::libsample)
   jcm_install_config_file_package(CONFIGURE_PACKAGE_CONFIG_FILES TARGETS libsample::libsample)
 
@@ -97,8 +97,8 @@ Find *jgd-cmake-modules* as an external package in your top-level *CMakeLists.tx
 
 .. code-block:: cmake
 
-  include(JcmClangFormat)
-  jcm_create_clang_format_targets(TARGETS libexample::libexample)
+  include(JcmCreateAccessoryTargets)
+  jcm_create_clang_format_targets(SOURCE_TARGETS libexample::libexample)
 
 Examples
 --------

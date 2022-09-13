@@ -4,7 +4,6 @@ jcm_add_executable(
   SOURCES main.cpp
   LIB_SOURCES compile.hpp ../shared.hpp
 )
-message(STATUS "HHHHHHHHHHHH target name: ${compiler-target}")
 
 target_compile_features(${compiler-target} PUBLIC cxx_std_20)
 
