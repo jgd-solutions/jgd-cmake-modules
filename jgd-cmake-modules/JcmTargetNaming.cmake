@@ -40,6 +40,7 @@ include(JcmCanonicalStructure)
 function(jcm_library_naming)
   jcm_parse_arguments(
     ONE_VALUE_KEYWORDS
+    "PROJECT"
     "COMPONENT"
     "OUT_TARGET_NAME"
     "OUT_EXPORT_NAME"
@@ -48,18 +49,25 @@ function(jcm_library_naming)
     "OUT_TARGET_NAME"
     "OUT_EXPORT_NAME"
     "OUT_OUTPUT_NAME"
-    ARGUMENTS
-    "${ARGN}")
+    ARGUMENTS "${ARGN}"
+  )
+
+  # Resolve project name
+  if(ARGS_PROJECT)
+    set(project_name ${ARGS_PROJECT})
+  else()
+    set(project_name ${PROJECT_NAME})
+  endif()
 
   # Resolve component
-  if (DEFINED ARGS_COMPONENT AND NOT ARGS_COMPONENT STREQUAL PROJECT_NAME)
+  if (DEFINED ARGS_COMPONENT AND NOT ARGS_COMPONENT STREQUAL project_name)
     set(component ${ARGS_COMPONENT})
   else()
     unset(component)
   endif ()
 
   # Base name upon which library names will be derived
-  string(REGEX REPLACE "^${JCM_LIB_PREFIX}" "" no_prefix ${PROJECT_NAME})
+  string(REGEX REPLACE "^${JCM_LIB_PREFIX}" "" no_prefix ${project_name})
   set(base_name "${JCM_LIB_PREFIX}${no_prefix}")
   if (DEFINED component)
     string(APPEND base_name "-${component}")
@@ -68,7 +76,7 @@ function(jcm_library_naming)
   # Export name
   if (DEFINED ARGS_OUT_EXPORT_NAME)
     # there's a component and the project starts with JCM_LIB_PREFIX
-    if (DEFINED component AND NOT no_prefix STREQUAL PROJECT_NAME)
+    if (DEFINED component AND NOT no_prefix STREQUAL project_name)
       set(${ARGS_OUT_EXPORT_NAME} ${component} PARENT_SCOPE)
     else ()
       set(${ARGS_OUT_EXPORT_NAME} ${base_name} PARENT_SCOPE)
@@ -83,7 +91,7 @@ function(jcm_library_naming)
   # Target name
   if (DEFINED ARGS_OUT_TARGET_NAME)
     # prepend project name to avoid possible conflicts if added as subdirectory
-    set(${ARGS_OUT_TARGET_NAME} ${PROJECT_NAME}_${base_name} PARENT_SCOPE)
+    set(${ARGS_OUT_TARGET_NAME} ${project_name}_${base_name} PARENT_SCOPE)
   endif ()
 endfunction()
 
@@ -125,6 +133,7 @@ endfunction()
 function(jcm_executable_naming)
   jcm_parse_arguments(
     ONE_VALUE_KEYWORDS
+    "PROJECT"
     "COMPONENT"
     "OUT_TARGET_NAME"
     "OUT_EXPORT_NAME"
@@ -133,17 +142,25 @@ function(jcm_executable_naming)
     "OUT_TARGET_NAME"
     "OUT_EXPORT_NAME"
     "OUT_OUTPUT_NAME"
-    ARGUMENTS "${ARGN}")
+    ARGUMENTS "${ARGN}"
+  )
+
+  # Resolve project name
+  if(ARGS_PROJECT)
+    set(project_name ${ARGS_PROJECT})
+  else()
+    set(project_name ${PROJECT_NAME})
+  endif()
 
   # Resolve component
-  if (DEFINED ARGS_COMPONENT AND NOT ARGS_COMPONENT STREQUAL PROJECT_NAME)
+  if (DEFINED ARGS_COMPONENT AND NOT ARGS_COMPONENT STREQUAL project_name)
     set(component ${ARGS_COMPONENT})
   else()
     unset(component)
   endif ()
 
   # Base name upon which executable names will be derived
-  string(REGEX REPLACE "^${JCM_LIB_PREFIX}" "" no_prefix ${PROJECT_NAME})
+  string(REGEX REPLACE "^${JCM_LIB_PREFIX}" "" no_prefix ${project_name})
   set(base_name ${no_prefix})
   if (DEFINED component)
     string(APPEND base_name "-${component}")
@@ -152,7 +169,7 @@ function(jcm_executable_naming)
   # Export name
   if (DEFINED ARGS_OUT_EXPORT_NAME)
     # there's a component and the project doesn't start with JCM_LIB_PREFIX
-    if (DEFINED component AND no_prefix STREQUAL PROJECT_NAME)
+    if (DEFINED component AND no_prefix STREQUAL project_name)
       set(${ARGS_OUT_EXPORT_NAME} ${component} PARENT_SCOPE)
     else ()
       set(${ARGS_OUT_EXPORT_NAME} ${base_name} PARENT_SCOPE)
@@ -167,7 +184,7 @@ function(jcm_executable_naming)
   # Target name
   if (DEFINED ARGS_OUT_TARGET_NAME)
     # prepend project name to avoid possible conflicts if added as subdirectory
-    set(${ARGS_OUT_TARGET_NAME} ${PROJECT_NAME}_${base_name} PARENT_SCOPE)
+    set(${ARGS_OUT_TARGET_NAME} ${project_name}_${base_name} PARENT_SCOPE)
   endif ()
 endfunction()
 
@@ -175,6 +192,7 @@ endfunction()
 function(jcm_target_type_component_from_name)
   jcm_parse_arguments(
     ONE_VALUE_KEYWORDS
+    "PROJECT"
     "TARGET_NAME"
     "OUT_TYPE"
     "OUT_COMPONENT"
@@ -183,11 +201,18 @@ function(jcm_target_type_component_from_name)
     "OUT_COMPONENT"
     ARGUMENTS "${ARGN}")
 
+  # Resolve project name
+  if(ARGS_PROJECT)
+    set(project_name ${ARGS_PROJECT})
+  else()
+    set(project_name ${PROJECT_NAME})
+  endif()
+
   # Usage guards
-  if(NOT ARGS_TARGET_NAME MATCHES "^${PROJECT_NAME}(::|_)")
+  if(NOT ARGS_TARGET_NAME MATCHES "^${project_name}(::|_)")
     message(FATAL_ERROR "TARGET_NAME provided to ${CMAKE_CURRENT_FUNCTION} does not start with "
-      "'${PROJECT_NAME}::' or '${PROJECT_NAME}_' and does therefore not follow the target naming "
-      "structure or is not part of project ${PROJECT_NAME}. Target type and component cannot be "
+      "'${project_name}::' or '${project_name}_' and does therefore not follow the target naming "
+      "structure or is not part of project ${project_name}. Target type and component cannot be "
       "deduced from the name '${ARGS_TARGET_NAME}'")
   endif()
 
@@ -197,12 +222,12 @@ function(jcm_target_type_component_from_name)
   endif()
 
   if(ARGS_TARGET_NAME MATCHES "::") # alias
-    string(REGEX REPLACE "^${PROJECT_NAME}::" "" base_name "${ARGS_TARGET_NAME}")
+    string(REGEX REPLACE "^${project_name}::" "" base_name "${ARGS_TARGET_NAME}")
   else()
-    string(REGEX REPLACE "^${PROJECT_NAME}_" "" base_name "${ARGS_TARGET_NAME}")
+    string(REGEX REPLACE "^${project_name}_" "" base_name "${ARGS_TARGET_NAME}")
   endif()
 
-  string(REGEX REPLACE "^${JCM_LIB_PREFIX}" "" proj_no_lib "${PROJECT_NAME}")
+  string(REGEX REPLACE "^${JCM_LIB_PREFIX}" "" proj_no_lib "${project_name}")
   string(REGEX REPLACE "^${JCM_LIB_PREFIX}" "" name_no_lib "${base_name}")
   string(REGEX REPLACE ".*-" "" name_ending "${base_name}")
 
@@ -210,10 +235,10 @@ function(jcm_target_type_component_from_name)
   set(component)
 
   # executable proj
-  if(proj_no_lib STREQUAL PROJECT_NAME)
+  if(proj_no_lib STREQUAL project_name)
     if(name_no_lib STREQUAL base_name)    # executable target
       set(type "EXECUTABLE")
-      if(base_name STREQUAL PROJECT_NAME) # executable component target
+      if(base_name STREQUAL project_name) # executable component target
         set(component "${base_name}")
       endif()
     else()                                   # library target
@@ -232,7 +257,7 @@ function(jcm_target_type_component_from_name)
       endif()
     else()                                    # library target
       set(type "LIBRARY")
-      if(NOT base_name STREQUAL PROJECT_NAME) # library component target
+      if(NOT base_name STREQUAL project_name) # library component target
         set(component "${base_name}")
       endif()
     endif()

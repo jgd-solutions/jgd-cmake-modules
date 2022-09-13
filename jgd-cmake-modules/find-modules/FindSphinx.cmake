@@ -21,7 +21,7 @@ Result Variables
   True if the sphinx build executable was found
 
 :cmake:variable:`Sphinx_VERSION`
-  The found sphinx version, where version is in the form <major>.<minor>.<patch>
+  The found sphinx version, where version is in the form *<major>.<minor>.<patch>*
 
 :cmake:variable:`Sphinx_VERSION_MAJOR`
   The found sphinx major version
@@ -106,6 +106,7 @@ find_package_handle_standard_args(Sphinx
   FOUND_VAR Sphinx_FOUND
   REQUIRED_VARS Sphinx_EXECUTABLE
   VERSION_VAR Sphinx_VERSION
+  REASON_FAILURE_MESSAGE "A Python virtual environment may not have been activated."
 )
 
 if (Sphinx_FOUND AND NOT TARGET Sphinx::build)

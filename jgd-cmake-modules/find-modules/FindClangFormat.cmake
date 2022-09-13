@@ -29,7 +29,7 @@ Result Variables
   True if the clang-format executable was found
 
 :cmake:variable:`ClangFormat_VERSION`
-  The found version, where version is in the form <major>.<minor>.<patch>
+  The found version, where version is in the form *<major>.<minor>.<patch>*
 
 :cmake:variable:`ClangFormat_VERSION_MAJOR`
   The found major version

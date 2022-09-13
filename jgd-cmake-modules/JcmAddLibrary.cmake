@@ -42,7 +42,7 @@ This function will:
 - ensure it's called within a canonical source subdirectory, verify the naming conventions of the
   input source files, and transform SOURCES to absolute paths.
 - create a library target with :cmake:command:`add_library`, including an associated alias
-  (<PROJECT_NAME>::<target>) - both following JCM's target naming conventions
+  (<PROJECT_NAME>::<EXPORT_NAME>) - both following JCM's target naming conventions
 - create project options to control building the library shared. The more specific options take
   precedence.
 

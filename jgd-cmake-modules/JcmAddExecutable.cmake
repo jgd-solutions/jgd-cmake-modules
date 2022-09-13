@@ -40,7 +40,7 @@ This function will:
 - ensure it's called within a canonical source subdirectory and verify the naming conventions of the
   input source files, transform  SOURCES and LIB_SOURCES to absolute paths.
 - create an executable target with :cmake:command:`add_executable`, including an associated alias
-  (<PROJECT_NAME>::<target>) - both following JCM's target naming conventions
+  (<PROJECT_NAME>::<EXPORT_NAME>) - both following JCM's target naming conventions
 - set target properties:
 
   - OUTPUT_NAME

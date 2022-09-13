@@ -10,8 +10,9 @@ the :cmake:command:`jcm_basic_package_config` macro for top-level config-files, 
 
 #]=======================================================================]
 
-include(JcmFileNaming)
 include(JcmParseArguments)
+include(JcmFileNaming)
+include(JcmTargetNaming)
 
 #[=======================================================================[.rst:
 .. cmake:command:: jcm_basic_package_config
@@ -36,7 +37,7 @@ This macro will:
   appended to :cmake:variable:`CMAKE_MODULE_PATH` so consumers have access to these additional
   modules.
 - call :cmake:command:`check_required_components`, as `KitWare recommends
-  <https://cmake.org/cmake/help/latest/module/CMakePackageConfigHelpers.html#generating-a-package-configuration-file>`
+  <https://cmake.org/cmake/help/latest/module/CMakePackageConfigHelpers.html#generating-a-package-configuration-file>`_
   at the end of every package config-file. To get this macro in :cmake:variable:`PACKAGE_INIT`,
   ensure your config-file template is configured through
   :cmake:command:`configure_package_config_file`, or preferrably enable configuring in
@@ -51,6 +52,14 @@ Positional
 :cmake:variable:`project`
   The name of the project being packaged. Don't use :cmake:`${PROJECT_NAME}`, as this will
   resolve to the consuming project name.
+
+One Value
+~~~~~~~~~
+
+:cmake:variable:`NO_TARGETS`
+  Indicates that this package does not provide any CMake targets at the top-level, causing this
+  macro to skip inclusion of a targets file (<project>-targets.cmake). Consider a CMake library, for
+  instance, or a library with components providing their own targets files.
 
 Examples
 ########
@@ -70,43 +79,59 @@ Most package config files will take this form.
 
 #]=======================================================================]
 macro(JCM_BASIC_PACKAGE_CONFIG project)
+  jcm_parse_arguments(
+    OPTIONS "NO_TARGETS"
+    ARGUMENTS "${ARGN}"
+  )
+
   # Include main targets file
-  jcm_package_targets_file_name(PROJECT ${project} OUT_VAR jcm_target_file_name)
-  if (EXISTS "${CMAKE_CURRENT_LIST_DIR}/${jcm_target_file_name}")
-    list(APPEND jcm_config_package_files "${jcm_target_file_name}")
-    include("${CMAKE_CURRENT_LIST_DIR}/${jcm_target_file_name}")
+  if (NOT ARGS_NO_TARGETS)
+    jcm_package_targets_file_name(PROJECT ${project} OUT_VAR jcm_targets_file_name)
+    list(APPEND jcm_config_package_files "${jcm_targets_file_name}")
+    include("${CMAKE_CURRENT_LIST_DIR}/${jcm_targets_file_name}")
+    unset(jcm_targets_file_name)
   endif ()
-  unset(jcm_target_file_name)
+  unset(ARGS_NO_TARGETS)
 
   # Include package components' config file
   if(${project}_FIND_COMPONENTS)
     # include specified components
-    foreach (component ${${project}_FIND_COMPONENTS})
-      if(component STREQUAL project)
+    foreach (jcm_find_component ${${project}_FIND_COMPONENTS})
+      if(jcm_find_component STREQUAL project)
         continue()
       endif()
 
       jcm_package_config_file_name(
         PROJECT ${project}
-        COMPONENT ${component}
+        COMPONENT ${jcm_find_component}
         OUT_VAR jcm_component_config
       )
-      include("${CMAKE_CURRENT_LIST_DIR}/${jcm_component_config}")
+      if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/${jcm_component_config}")
+        include("${CMAKE_CURRENT_LIST_DIR}/${jcm_component_config}")
+        list(APPEND jcm_config_package_files "${jcm_component_config}")
+      elseif(${project}_FIND_REQUIRED_${jcm_find_component})
+        set(${project}_${jcm_find_component}_FOUND FALSE)
+      endif()
 
-      # add component's config and targets file to collection of package modules
+      # add component's targets file to collection of package modules
       jcm_package_targets_file_name(
         PROJECT ${project}
-        COMPONENT ${component}
+        COMPONENT ${jcm_find_component}
         OUT_VAR jcm_component_targets
       )
-      list(APPEND jcm_config_package_files "${jcm_component_config}" "${jcm_component_targets}")
+      list(APPEND jcm_config_package_files "${jcm_component_targets}")
     endforeach ()
 
     unset(jcm_component_config)
     unset(jcm_component_targets)
   else()
     # include all components' config files
-    file(GLOB jcm_components_configs LIST_DIRECTORIES false "${CMAKE_CURRENT_LIST_DIR}/*-config.cmake")
+    file(
+      GLOB
+      jcm_components_configs
+      LIST_DIRECTORIES false
+      "${CMAKE_CURRENT_LIST_DIR}/*-config.cmake"
+    )
     list(REMOVE_ITEM jcm_components_configs "${CMAKE_CURRENT_LIST_FILE}")
 
     foreach (jcm_component_config IN LISTS jcm_components_configs)
@@ -132,18 +157,23 @@ macro(JCM_BASIC_PACKAGE_CONFIG project)
   # Append module path for any additional (non-package) CMake modules
   list(FIND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}" jcm_current_dir_idx)
   if (jcm_current_dir_idx EQUAL -1)
-    file(GLOB_RECURSE jcm_additional_modules
+    file(
+      GLOB_RECURSE
+      jcm_additional_modules
       LIST_DIRECTORIES false
-      RELATIVE "${CMAKE_CURRENT_LIST_DIR}" "*.cmake")
+      RELATIVE "${CMAKE_CURRENT_LIST_DIR}"
+      "*.cmake"
+    )
     list(REMOVE_ITEM jcm_additional_modules ${jcm_config_package_files})
     unset(jcm_config_package_files)
 
     if (jcm_additional_modules)
       list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")
     endif ()
-    unset(jcm_additional_modules)
   endif ()
+
   unset(jcm_current_dir_idx)
+  unset(jcm_additional_modules)
 
   # As recommended in CMake's configure_package_config_file command, ensure
   # required components have been found
@@ -184,6 +214,15 @@ Positional
 :cmake:variable:`component`
   The name of the component provided by this config-file.
 
+One Value
+~~~~~~~~~
+
+:cmake:variable:`NO_TARGETS`
+  Indicates that this package does not provide any CMake targets, causing this macro to skip
+  inclusion of a targets file (<project>-<component>-targets.cmake). The requirement for the
+  presence of the expected target will also be skipped before setting `<project>_<component>_FOUND`
+  to :cmake:`TRUE`.
+
 Multi Value
 ~~~~~~~~~~~
 
@@ -218,32 +257,69 @@ fantasy project, *libvideo*, offering components *core*, *compression*, *stream*
 
 #]=======================================================================]
 macro(JCM_BASIC_COMPONENT_CONFIG project component)
-  jcm_parse_arguments(MULTI_VALUE_KEYWORDS "REQUIRED_COMPONENTS" ARGUMENTS "${ARGN}")
+  jcm_parse_arguments(
+    OPTIONS "NO_TARGETS"
+    MULTI_VALUE_KEYWORDS "REQUIRED_COMPONENTS"
+    ARGUMENTS "${ARGN}"
+  )
 
-  if (NOT TARGET ${project}::${component})
-    # store argument in case included config file overwrites it
+  if (NOT ${project}_${component}_FOUND)
+    # store arguments in case included config file overwrites it
     set(${project}_${component}_stored_req_components ${ARGS_REQUIRED_COMPONENTS})
+    set(${project}_${component}_stored_no_targets ${ARGS_NO_TARGETS})
 
-    foreach (required_component ${ARGS_REQUIRED_COMPONENTS})
-      jcm_package_config_file_name(PROJECT ${project} COMPONENT ${required_component} OUT_VAR config_file)
-      include("${CMAKE_CURRENT_LIST_DIR}/${config_file}")
+    # include required components' config files
+    foreach (jcm_required_component ${ARGS_REQUIRED_COMPONENTS})
+      jcm_package_config_file_name(
+        PROJECT ${project}
+        COMPONENT ${jcm_required_component}
+        OUT_VAR jcm_required_component_config_file
+      )
+      include("${CMAKE_CURRENT_LIST_DIR}/${jcm_required_component_config_file}")
     endforeach ()
-    unset(config_file)
+    unset(jcm_required_component_config_file)
 
-    # restore argument
+    # restore arguments
     set(ARGS_REQUIRED_COMPONENTS ${${project}_${component}_stored_req_components})
+    set(ARGS_NO_TARGETS ${${project}_${component}_stored_no_targets})
     unset(${project}_${component}_stored_req_components)
+    unset(${project}_${component}_stored_no_targets)
 
-    jcm_package_targets_file_name(PROJECT ${project} COMPONENT ${component} OUT_VAR targets_file)
-    include("${CMAKE_CURRENT_LIST_DIR}/${targets_file}")
-    unset(targets_file)
+    if(NOT ARGS_NO_TARGETS)
+      # include associated targets file
+      jcm_package_targets_file_name(
+        PROJECT ${project}
+        COMPONENT ${component}
+        OUT_VAR jcm_component_targets
+      )
+      include("${CMAKE_CURRENT_LIST_DIR}/${jcm_component_targets}")
+      unset(jcm_component_targets)
 
-    if(TARGET ${project}::${component})
-      set(${project}_${component}_FOUND TRUE)
+      # check for presence of expected target
+      jcm_executable_naming(
+        PROJECT ${project}
+        COMPONENT ${component}
+        OUT_EXPORT_NAME jcm_executable_component_export_name
+      )
+      jcm_library_naming(
+        PROJECT ${project}
+        COMPONENT ${component}
+        OUT_EXPORT_NAME jcm_library_component_export_name
+      )
+
+      if(TARGET ${project}::${jcm_executable_component_export_name} OR
+         TARGET ${project}::${jcm_library_component_export_name})
+        set(${project}_${component}_FOUND TRUE)
+      else()
+        set(${project}_${component}_FOUND FALSE)
+      endif()
+
     else()
-      set(${project}_${component}_FOUND FALSE)
+      set(${project}_${component}_FOUND TRUE)
     endif()
+
   endif ()
 
   unset(ARGS_REQUIRED_COMPONENTS)
+  unset(ARGS_NO_TARGETS)
 endmacro()
