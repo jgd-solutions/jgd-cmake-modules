@@ -8,7 +8,8 @@ function(jcm_header_file_set scope)
     ONE_VALUE_KEYWORDS "TARGET"
     MULTI_VALUE_KEYWORDS "HEADERS"
     REQUIRES_ALL "HEADERS"
-    ARGUMENTS "${ARGN}")
+    ARGUMENTS "${ARGN}"
+  )
 
   # Usage Guards
 

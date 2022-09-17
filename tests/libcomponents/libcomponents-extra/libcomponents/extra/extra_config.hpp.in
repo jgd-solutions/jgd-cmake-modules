@@ -1,0 +1,5 @@
+#pragma once
+
+namespace components {
+inline constexpr int can_find_configured_variable{0};
+}

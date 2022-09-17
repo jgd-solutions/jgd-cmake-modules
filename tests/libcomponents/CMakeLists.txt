@@ -7,7 +7,6 @@ include(JcmAllModules)
 
 jcm_setup_project()
 jcm_source_subdirectories(ADD_SUBDIRS WITH_TESTS_DIR LIB_COMPONENTS core extra)
-jcm_configure_config_header_file()
 
 set(libcomponent_targets libcomponents::core libcomponents::extra)
 list(REMOVE_ITEM libcomponent_targets ${LIBCOMPONENTS_OMIT_TARGETS})

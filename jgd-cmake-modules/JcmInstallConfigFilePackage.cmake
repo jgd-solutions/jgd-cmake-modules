@@ -17,15 +17,22 @@ function(jcm_install_config_file_package)
     REQUIRES_ANY "TARGETS;CMAKE_MODULES;INSTALL_LICENSES"
     ARGUMENTS "${ARGN}")
 
-  # Usage guard
+  # Usage guards
   if (NOT DEFINED ${PROJECT_NAME}_VERSION)
     message(
       AUTHOR_WARNING
       "It's not recommended to install a config file package without a "
       "project version, as consumers won't be able to version their "
-      "consumption and all versions will be installed into the same directory"
-    )
+      "consumption and all versions will be installed into the same directory")
   endif ()
+
+  foreach(target ${ARGS_TARGETS})
+    if(NOT TARGET ${target})
+      message(
+        FATAL_ERROR
+        "Cannot install target ${target}. The target does not exist!")
+    endif()
+  endforeach()
 
   set(install_cmake_files) # list of cmake files to install at end
 
@@ -108,7 +115,8 @@ function(jcm_install_config_file_package)
         REGEX "${JCM_CMAKE_MODULE_REGEX}"
         TRANSFORM "FILENAME"
         OUT_MATCHED correct_files
-        OUT_UNMATCHED incorrect_files)
+        OUT_UNMATCHED incorrect_files
+      )
       if (incorrect_files)
         message(
           AUTHOR_WARNING
@@ -126,7 +134,8 @@ function(jcm_install_config_file_package)
   install(
     FILES ${install_cmake_files}
     DESTINATION "${JCM_INSTALL_CMAKE_DESTINATION}"
-    COMPONENT ${PROJECT_NAME}_devel)
+    COMPONENT ${PROJECT_NAME}_devel
+  )
 
   # == Install targets via export sets ==
 
@@ -165,7 +174,8 @@ function(jcm_install_config_file_package)
       ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
       COMPONENT ${PROJECT_NAME}_devel
       ${file_set_args}
-      INCLUDES DESTINATION "${JCM_INSTALL_INCLUDE_DIR}")
+      INCLUDES DESTINATION "${JCM_INSTALL_INCLUDE_DIR}"
+    )
 
     install(
       EXPORT ${export_set_name}

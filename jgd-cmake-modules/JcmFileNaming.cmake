@@ -10,12 +10,13 @@ set(JCM_CMAKE_MODULE_REGEX "^([A-Z][a-z]*)+\\.cmake$")
 # JcmCanonicalStructure. Variables of the same name, but with _EXTENSION
 # replaced with _REGEX
 foreach (ext_var
-  JCM_HEADER_EXTENSION;JCM_SOURCE_EXTENSION;JCM_TEST_SOURCE_EXTENSION
-  JCM_MODULE_EXTENSION;JCM_IN_FILE_EXTENSION)
+   JCM_HEADER_EXTENSION;JCM_SOURCE_EXTENSION;JCM_TEST_SOURCE_EXTENSION JCM_MODULE_EXTENSION)
   string(REPLACE "_EXTENSION" "_REGEX" regex_var "${ext_var}")
   string(REPLACE "." "\\." ${regex_var} "${${ext_var}}")
-  set(${regex_var} "^[a-z][a-z_0-9]*${${regex_var}}$")
+  set(${regex_var} "^[a-z][a-z0-9_]*${${regex_var}}$")
 endforeach ()
+
+set(JCM_IN_FILE_REGEX "\\${JCM_IN_FILE_EXTENSION}$")
 
 #
 # Private macro to the module. Constructs a consistent file name based on the
@@ -63,9 +64,11 @@ macro(_JCM_JOINED_FILE_NAME)
   if (NOT ARGS_COMPONENT OR (ARGS_COMPONENT STREQUAL project))
     set(${ARGS_OUT_VAR} "${project}${delim}${suffix}" PARENT_SCOPE)
   else ()
-    set(${ARGS_OUT_VAR}
+    set(
+      ${ARGS_OUT_VAR}
       "${project}${delim}${ARGS_COMPONENT}${delim}${suffix}"
-      PARENT_SCOPE)
+      PARENT_SCOPE
+    )
   endif ()
 
   unset(suffix)
@@ -80,8 +83,11 @@ macro(_JCM_FILE_NAMING_ARGUMENTS with_component args)
     unset(comp_keyword)
   endif ()
 
-  jcm_parse_arguments(ONE_VALUE_KEYWORDS "${comp_keyword};PROJECT;OUT_VAR"
-    REQUIRES_ALL "OUT_VAR" ARGUMENTS "${args}")
+  jcm_parse_arguments(
+    ONE_VALUE_KEYWORDS "${comp_keyword};PROJECT;OUT_VAR"
+    REQUIRES_ALL "OUT_VAR"
+    ARGUMENTS "${args}"
+  )
   if (DEFINED ARGS_PROJECT)
     set(proj_arg PROJECT ${ARGS_PROJECT})
   else()
@@ -114,9 +120,13 @@ endmacro()
 # resulting file name.
 #
 function(jcm_package_config_file_name)
-  _jcm_file_naming_arguments(1 "${ARGN}")
-  _jcm_joined_file_name(${comp_arg} SUFFIX "config.cmake" ${proj_arg} OUT_VAR
-    "${ARGS_OUT_VAR}")
+  _jcm_file_naming_arguments(TRUE "${ARGN}")
+  _jcm_joined_file_name(
+    ${proj_arg}
+    ${comp_arg}
+    SUFFIX "config.cmake"
+    OUT_VAR "${ARGS_OUT_VAR}"
+  )
 endfunction()
 
 #
@@ -136,9 +146,12 @@ endfunction()
 # resulting file name.
 #
 function(jcm_package_version_file_name)
-  _jcm_file_naming_arguments(false "${ARGN}")
-  _jcm_joined_file_name(SUFFIX "config-version.cmake" ${proj_arg} OUT_VAR
-    ${ARGS_OUT_VAR})
+  _jcm_file_naming_arguments(FALSE "${ARGN}")
+  _jcm_joined_file_name(
+    ${proj_arg}
+    SUFFIX "config-version.cmake"
+    OUT_VAR "${ARGS_OUT_VAR}"
+  )
 endfunction()
 
 #
@@ -157,29 +170,11 @@ endfunction()
 # resulting file name.
 #
 function(jcm_package_targets_file_name)
-  _jcm_file_naming_arguments(1 "${ARGN}")
-  _jcm_joined_file_name(${comp_arg} SUFFIX "targets.cmake" ${proj_arg} OUT_VAR ${ARGS_OUT_VAR})
-endfunction()
-
-#
-# Constructs a consistent snake-case config header file name based on the
-# PROJECT argument or the PROJECT_NAME variable. The resulting file name will be
-# placed in the variable specified by OUT_VAR. Result will be
-# <PROJECT_NAME>_config.<JCM_HEADER_EXTENSION>, ex. proj_config.hpp
-#
-# Arguments:
-#
-# PROJECT: on-value arg; override of PROJECT_NAME. Optional - if not provided,
-# PROJECT_NAME will be used, which is more common.
-#
-# OUT_VAR: one-value arg; the name of the output variable which will store the
-# resulting file name.
-#
-function(jcm_config_header_file_name)
-  _jcm_file_naming_arguments(1 "${ARGN}")
+  _jcm_file_naming_arguments(TRUE "${ARGN}")
   _jcm_joined_file_name(
+    ${proj_arg}
     ${comp_arg}
-    DELIMITER "_"
-    SUFFIX "config${JCM_HEADER_EXTENSION}"
-    OUT_VAR ${ARGS_OUT_VAR})
+    SUFFIX "targets.cmake"
+    OUT_VAR ${ARGS_OUT_VAR}
+  )
 endfunction()

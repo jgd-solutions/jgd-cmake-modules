@@ -6,8 +6,8 @@ find_package(ClangFormat)
 include(JcmAllModules)
 
 jcm_setup_project()
-jcm_source_subdirectories(ADD_SUBDIRS WITH_TESTS_DIR EXEC_COMPONENTS compiler formatter)
-jcm_configure_config_header_file()
+jcm_source_subdirectories(ADD_SUBDIRS WITH_TESTS_DIR)
+
 jcm_install_config_file_package(
   CONFIGURE_PACKAGE_CONFIG_FILES
   TARGETS

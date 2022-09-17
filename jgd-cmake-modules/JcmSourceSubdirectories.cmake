@@ -47,6 +47,10 @@ macro(_JCM_CHECK_ADD_SUBDIR out_added_subdirs)
         "${CMAKE_CURRENT_FUNCTION} could not add subdirectory ${subdir_path} for project "
         "${PROJECT_NAME}. The directory does not contain a CMakeLists.txt file."
       )
+    elseif (CMAKE_CURRENT_SOURCE_DIR STREQUAL ARGS_SUBDIR)
+      on_fatal_message(
+        "${CMAKE_CURRENT_SOURCE_DIR} tries to add itself as a subdirectory."
+      )
     else()
       # directory and file exist, deal with subdirectory
       list(APPEND ${out_added_subdirs} "${ARGS_SUBDIR}")
@@ -129,27 +133,15 @@ function(jcm_source_subdirectories)
 
   # Add Subdirs
 
-  # library subdirectories
+  # add single library subdirectory, if it exists
+  jcm_canonical_lib_subdir(OUT_VAR lib_subdir)
+  _jcm_check_add_subdir(subdirs_added ${add_subdirs_arg} SUBDIR "${lib_subdir}")
+
+  # library component subdirectories
   if (DEFINED ARGS_LIB_COMPONENTS)
     # add all library components' subdirectories
     foreach (component ${ARGS_LIB_COMPONENTS})
       jcm_canonical_lib_subdir(COMPONENT ${component} OUT_VAR subdir_path)
-
-      set(JCM_CURRENT_COMPONENT ${component})
-      _jcm_check_add_subdir(subdirs_added FATAL ${add_subdirs_arg} SUBDIR "${subdir_path}")
-      unset(JCM_CURRENT_COMPONENT)
-    endforeach ()
-  else ()
-    # add single library subdirectory, if it exists
-    jcm_canonical_lib_subdir(OUT_VAR lib_subdir)
-    _jcm_check_add_subdir(subdirs_added ${add_subdirs_arg} SUBDIR "${lib_subdir}")
-  endif ()
-
-  # executable subdirectories
-  if (DEFINED ARGS_EXEC_COMPONENTS)
-    # add all executable components' subdirectories
-    foreach (component ${ARGS_EXEC_COMPONENTS})
-      jcm_canonical_exec_subdir(COMPONENT ${component} OUT_VAR subdir_path)
 
       set(JCM_CURRENT_COMPONENT ${component})
       _jcm_check_add_subdir(subdirs_added FATAL ${add_subdirs_arg} SUBDIR "${subdir_path}")
@@ -160,6 +152,18 @@ function(jcm_source_subdirectories)
   # add single executable subdirectory, if it exists
   jcm_canonical_exec_subdir(OUT_VAR exec_subdir)
   _jcm_check_add_subdir(subdirs_added ${add_subdirs_arg} SUBDIR "${exec_subdir}")
+
+  # executable component subdirectories
+  if (DEFINED ARGS_EXEC_COMPONENTS)
+    # add all executable components' subdirectories
+    foreach (component ${ARGS_EXEC_COMPONENTS})
+      jcm_canonical_exec_subdir(COMPONENT ${component} OUT_VAR subdir_path)
+
+      set(JCM_CURRENT_COMPONENT ${component})
+      _jcm_check_add_subdir(subdirs_added FATAL ${add_subdirs_arg} SUBDIR "${subdir_path}")
+      unset(JCM_CURRENT_COMPONENT)
+    endforeach ()
+  endif ()
 
   # Ensure at least one subdirectory was added
   if (NOT subdirs_added)
@@ -181,8 +185,9 @@ function(jcm_source_subdirectories)
   # Check for accidental entries in omissions option
   if(unused_subdir_omissions)
     message(WARNING "The following subdirectories are omitted based on the targets specified in "
-                    "${JCM_PROJECT_PREFIX_NAME}_OMIT_TARGETS but never get added by the project: "
-                    "${unused_subdir_omissions}")
+                    "${JCM_PROJECT_PREFIX_NAME}_OMIT_TARGETS, but these subdirectories aren't "
+                    "added by the project: ${unused_subdir_omissions}"
+    )
   endif()
 
   # Set result variable

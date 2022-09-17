@@ -189,7 +189,8 @@ function(jcm_add_library)
       INPUT "${ARGS_SOURCES}"
       REGEX "${JCM_SOURCE_REGEX}"
       TRANSFORM "FILENAME"
-      OUT_UNMATCHED incorrectly_named)
+      OUT_UNMATCHED incorrectly_named
+    )
     if (incorrectly_named)
       message(
         FATAL_ERROR
@@ -215,13 +216,14 @@ function(jcm_add_library)
 
   if (NOT DEFINED ARGS_TYPE)
     # commonly used (build-wide) build-shared option
-    option(BUILD_SHARED_LIBS "Dictates if libraries with unspecified types should be built shared." OFF)
+    option(BUILD_SHARED_LIBS "Build libraries with unspecified types shared." OFF)
 
     # project specific build shared option
     option(
       ${JCM_PROJECT_PREFIX_NAME}_BUILD_SHARED_LIBS
-      "Dictates if libraries of project ${PROJECT_NAME} with unspecified types should be built shared."
-      ${BUILD_SHARED_LIBS})
+      "Build libraries of project ${PROJECT_NAME} with unspecified types shared."
+      ${BUILD_SHARED_LIBS}
+    )
 
     # component specific build shared option
     if (DEFINED comp_arg)
@@ -229,8 +231,9 @@ function(jcm_add_library)
       string(REPLACE "-" "_" comp_upper ${comp_temp})
       option(
         ${JCM_PROJECT_PREFIX_NAME}_${comp_upper}_BUILD_SHARED
-        "Dictates if the library component ${ARGS_COMPONENT} of project ${PROJECT_NAME} should be built shared."
-        ${${JCM_PROJECT_PREFIX_NAME}_BUILD_SHARED_LIBS})
+        "Build library component ${ARGS_COMPONENT} of project ${PROJECT_NAME} shared."
+        ${${JCM_PROJECT_PREFIX_NAME}_BUILD_SHARED_LIBS}
+      )
     endif ()
   endif ()
 
@@ -280,8 +283,8 @@ function(jcm_add_library)
     "${abs_interface_headers}"
     "${abs_public_headers}"
     "${abs_private_headers}"
-    "${abs_sources}")
-
+    "${abs_sources}"
+  )
   add_library(${PROJECT_NAME}::${export_name} ALIAS ${target_name})
 
   # == Generate an export header ==
@@ -295,7 +298,8 @@ function(jcm_add_library)
     generate_export_header(
       ${target_name}
       BASE_NAME ${base_name}
-      EXPORT_FILE_NAME "export_macros.hpp")
+      EXPORT_FILE_NAME "export_macros.hpp"
+    )
   endif()
 
   # == Set Target Properties ==
@@ -313,23 +317,28 @@ function(jcm_add_library)
   endif ()
 
   if(NOT ARGS_TYPE STREQUAL "INTERFACE")
-    jcm_header_file_set(PUBLIC TARGET ${target_name}
-      HEADERS "${abs_public_headers}" "${CMAKE_CURRENT_BINARY_DIR}/export_macros.hpp")
+    jcm_header_file_set(
+      PUBLIC
+      TARGET ${target_name}
+      HEADERS "${abs_public_headers}" "${CMAKE_CURRENT_BINARY_DIR}/export_macros.hpp"
+    )
   endif()
 
   # common properties
-  set_target_properties(
-    ${target_name}
+  set_target_properties(${target_name}
     PROPERTIES
     OUTPUT_NAME ${output_name}
     PREFIX ""
     EXPORT_NAME ${export_name}
-    COMPILE_OPTIONS "${JCM_DEFAULT_COMPILE_OPTIONS}")
+    COMPILE_OPTIONS "${JCM_DEFAULT_COMPILE_OPTIONS}"
+  )
 
   # shared library versioning
   if (PROJECT_VERSION AND lib_type STREQUAL "SHARED")
-    set_target_properties(
-      ${target_name} PROPERTIES VERSION ${PROJECT_VERSION}
-      SOVERSION ${PROJECT_VERSION_MAJOR})
+    set_target_properties(${target_name}
+      PROPERTIES
+      VERSION ${PROJECT_VERSION}
+      SOVERSION ${PROJECT_VERSION_MAJOR}
+    )
   endif ()
 endfunction()

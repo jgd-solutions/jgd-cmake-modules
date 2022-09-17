@@ -1,5 +1,7 @@
 include(JcmAddLibrary)
 
+jcm_configure_file(IN_FILE extra_config.hpp.in)
+
 jcm_add_library(
   OUT_TARGET_NAME target
   COMPONENT "${JCM_CURRENT_COMPONENT}"
@@ -11,7 +13,7 @@ target_link_libraries(${target}
 )
 
 # part of testing:
-if(LIBCOMPONENTS_OMIT_TARGETS)
+if(LIBCOMPONENTS_OMIT_TARGETS MATCHES "libcomponents::extra")
   message(FATAL_ERROR
-    "LIBCOMPONENTS_OMIT_TARGETS set, yet 'extra' component's subdirectory still added")
+    "LIBCOMPONENTS_OMIT_TARGETS contains 'extra', yet 'extra' component's subdirectory still added")
 endif()

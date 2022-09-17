@@ -2,7 +2,7 @@ jcm_add_executable(
   COMPONENT formatter
   OUT_TARGET_NAME formatter-target
   SOURCES main.cpp
-  LIB_SOURCES reformat.hpp .../shared.hpp
+  LIB_SOURCES reformat.hpp ../shared.hpp
 )
 
 target_compile_features(${formatter-target} PUBLIC cxx_std_20)
