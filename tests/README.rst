@@ -24,3 +24,4 @@ Test Layout
 - **libsingle:** Produces a single library, either static or shared.
 - **libcomponents:** Produces multiple libraries through a single project, offered as library components.
 - **libheaders:** Produces a single header-only library.
+- **many-exec:** Produces multiple executables through a single project, offered as executable components.
