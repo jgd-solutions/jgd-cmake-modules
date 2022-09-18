@@ -17,9 +17,13 @@ include(JcmDefaultCompileOptions)
 
 #[=======================================================================[.rst:
 
+jcm_add_executable
+^^^^^^^^^^^^^^^^^^
+
 .. cmake:command:: jcm_add_executable
 
   .. code-block:: cmake
+    :name: exec
 
     jcm_add_executable(
       [WITHOUT_CANONICAL_PROJECT_CHECK]
@@ -37,8 +41,9 @@ same name as the executable, but with '-library' appended (*main* -> *main-libra
 
 This function will:
 
-- ensure it's called within a canonical source subdirectory and verify the naming conventions of the
-  input source files, transform  SOURCES and LIB_SOURCES to absolute paths.
+- ensure it's called within a canonical source subdirectory, verify the naming conventions and
+  locations of the input source files, and transform :cmake:variable:`SOURCES` and
+  :cmake:variable:`LIB_SOURCES` to normalized absolute paths.
 - create an executable target with :cmake:command:`add_executable`, including an associated alias
   (<PROJECT_NAME>::<EXPORT_NAME>) - both following JCM's target naming conventions
 - set target properties:
@@ -48,6 +53,13 @@ This function will:
   - COMPILE_OPTIONS
   - INCLUDE_DIRECTORIES
   - COMPONENT (custom property to JCM)
+
+.. note::
+  Unlike libraries, executables are not linked against, so there is less of a need to be restrictive
+  with their include directories. Instead of building header file-sets for only the provided header
+  files and their scopes, like :cmake:command:`jcm_add_library`, all of the include directories from
+  :cmake:command:`jcm_canonical_include_directories` for the created target are used when setting
+  `\*INCLUDE_DIRECTORIES` target properties.
 
 Parameters
 ##########
@@ -130,6 +142,17 @@ function(jcm_add_executable)
     REQUIRES_ALL "SOURCES"
     ARGUMENTS "${ARGN}")
 
+  # transform arguments to normalized absolute paths
+  foreach(source_type "" "_LIB")
+    set(arg_name ARGS${source_type}_SOURCES)
+    if(DEFINED ${arg_name})
+      jcm_transform_list(ABSOLUTE_PATH INPUT "${${arg_name}}" OUT_VAR ${arg_name})
+      jcm_transform_list(NORMALIZE_PATH INPUT "${${arg_name}}" OUT_VAR ${arg_name})
+    endif()
+  endforeach()
+
+  set(all_input_files "${ARGS_SOURCES}" "${ARGS_LIB_SOURCES}")
+
   # Set executable component
   if (DEFINED ARGS_COMPONENT AND NOT ARGS_COMPONENT STREQUAL PROJECT_NAME)
     set(comp_arg COMPONENT ${ARGS_COMPONENT})
@@ -159,7 +182,7 @@ function(jcm_add_executable)
     INPUT "${ARGS_SOURCES};${ARGS_LIB_SOURCES}"
     REGEX "${regex}"
     TRANSFORM "FILENAME"
-    OUT_UNMATCHED incorrectly_named
+    OUT_MISMATCHED incorrectly_named
   )
   if (incorrectly_named)
     message(
@@ -168,6 +191,12 @@ function(jcm_add_executable)
       "${incorrectly_named}."
     )
   endif ()
+
+  # verify file locations
+  _jcm_verify_source_locations(
+    ${comp_arg}
+    SOURCES "${all_input_files}"
+  )
 
   # == Create Executable ==
 
@@ -189,13 +218,15 @@ function(jcm_add_executable)
   endif ()
 
   # create executable target
-  jcm_transform_list(ABSOLUTE_PATH INPUT "${ARGS_SOURCES}" OUT_VAR abs_sources)
-  add_executable(${target_name} "${abs_sources}")
+  add_executable(${target_name} "${ARGS_SOURCES}")
   add_executable(${PROJECT_NAME}::${export_name} ALIAS ${target_name})
 
   # == Set Target Properties ==
 
-  jcm_canonical_include_dirs(TARGET ${target_name} OUT_VAR include_dirs)
+  jcm_canonical_include_dirs(
+    WITH_BINARY_INCLUDE_DIRS
+    TARGET ${target_name}
+    OUT_VAR include_dirs)
 
   # basic properties
   set_target_properties(${target_name}
@@ -219,17 +250,9 @@ function(jcm_add_executable)
   if (DEFINED ARGS_LIB_SOURCES)
     # check for actual source files
     jcm_regex_find_list(
-      REGEX "${JCM_SOURCE_REGEX}"
+      REGEX "\\${JCM_SOURCE_EXTENSION}$"
       INPUT "${ARGS_LIB_SOURCES}"
-      OUT_IDX found_source_idx
-    )
-
-    # absolute paths
-    jcm_transform_list(
-      ABSOLUTE_PATH
-      INPUT "${ARGS_LIB_SOURCES}"
-      OUT_VAR abs_lib_sources
-    )
+      OUT_IDX found_source_idx)
 
     # create interface or object library
     if(found_source_idx EQUAL -1)
@@ -237,14 +260,12 @@ function(jcm_add_executable)
       target_include_directories(
         ${target_name}-library
         INTERFACE
-        "$<BUILD_INTERFACE:${include_dirs}>"
-      )
+        "$<BUILD_INTERFACE:${include_dirs}>")
     else()
-      add_library(${target_name}-library OBJECT "${abs_lib_sources}")
+      add_library(${target_name}-library OBJECT "${ARGS_LIB_SOURCES}")
       target_compile_options(${target_name}-library PRIVATE "${JCM_DEFAULT_COMPILE_OPTIONS}")
       target_include_directories(${target_name}-library PUBLIC "$<BUILD_INTERFACE:${include_dirs}>")
     endif()
-
 
     # link target to associated object files &/or usage requirements
     target_link_libraries(${target_name} PRIVATE ${target_name}-library)

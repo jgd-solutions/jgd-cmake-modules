@@ -13,7 +13,7 @@ naming is implemented in *JcmFileNaming*, which uses the file extensions defined
   This module is often just an implementation detail of JCM, and doesn't need to be used directly.
 
 Variables
-#########
+^^^^^^^^^
 
 :cmake:variable:`JCM_LIB_PREFIX`
   The prefix used throughout JCM for libraries. Used in project names and when naming targets. Set
@@ -37,11 +37,13 @@ Variables
   File extension used for input files that will undergo substitution through some version of
   :cmake:command:`configure_file`. This is a custom file extension for JCM, placed here for unity.
 
+--------------------------------------------------------------------------
 
 #]=======================================================================]
 
 include(JcmParseArguments)
 include(JcmTargetNaming)
+include(JcmListTransformations)
 
 
 set(JCM_LIB_PREFIX "lib")
@@ -53,6 +55,9 @@ set(JCM_MODULE_EXTENSION ".mpp") # cmake doesn't support modules, but for future
 set(JCM_IN_FILE_EXTENSION ".in")
 
 #[=======================================================================[.rst:
+
+jcm_canonical_subdir
+^^^^^^^^^^^^^^^^^^^^
 
 .. cmake:command:: jcm_canonical_subdir
 
@@ -99,6 +104,8 @@ Examples
   ...
   jcm_canonical_subdir(OUT_VAR cli_subdir TARGET ssh::cli)
   message(STATUS "${cli_subdir}") # ssh/ssh/cli
+
+--------------------------------------------------------------------------
 
 #]=======================================================================]
 function(jcm_canonical_subdir)
@@ -153,6 +160,9 @@ function(jcm_canonical_subdir)
 endfunction()
 
 #[=======================================================================[.rst:
+
+jcm_canonical_lib_subdir
+^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. cmake:command:: jcm_canonical_lib_subdir
 
@@ -211,6 +221,8 @@ Examples
   jcm_canonical_lib_subdir(OUT_VAR restore_subdir COMPONENT restore)
   message(STATUS "${restore_subdir}") # libdecorate/libdecorate-restore/libdecorate/restore
 
+--------------------------------------------------------------------------
+
 #]=======================================================================]
 function(jcm_canonical_lib_subdir)
   jcm_parse_arguments(
@@ -230,6 +242,9 @@ function(jcm_canonical_lib_subdir)
 endfunction()
 
 #[=======================================================================[.rst:
+
+jcm_canonical_exec_subdir
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. cmake:command:: jcm_canonical_exec_subdir
 
@@ -287,6 +302,8 @@ Examples
   jcm_canonical_exec_subdir(OUT_VAR decorate_subdir)
   message(STATUS "${decorate_subdir}") # libdecorate/decorate
 
+--------------------------------------------------------------------------
+
 #]=======================================================================]
 function(jcm_canonical_exec_subdir)
   jcm_parse_arguments(
@@ -305,11 +322,15 @@ endfunction()
 
 #[=======================================================================[.rst:
 
+jcm_canonical_include_dirs
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 .. cmake:command:: jcm_canonical_include_dirs
 
   .. code-block:: cmake
 
     jcm_canonical_include_dirs(
+      [WITH_BINARY_INCLUDE_DIRS]
       OUT_VAR <out-var>
       TARGET <target>
     )
@@ -321,11 +342,19 @@ The provided target's :cmake:variable:`SOURCE_DIR`, :cmake:variable:`TYPE`, and
 :cmake:variable:`COMPONENT` properties will be queried to resolve the target's include directory in
 the source tree. This will be one or two parent directories from its canonical source directory.
 This creates the include prefix of `<PROJECT_NAME>`, or `<PROJECT_NAME>/<COMPONENT>` when the target
-is a component.  :cmake:variable:`PROJECT_BINARY_DIR` will then be appended to the source include
-directory for generated headers.
+is a component. Binary directories :cmake:variable:`PROJECT_BINARY_DIR` and
+`${PROJECT_BINARY_DIR}/${PROJECT_NAME}-<COMPONENT>` can be appended to the result for generated
+headers.
 
 Parameters
 ##########
+
+Options
+~~~~~~~
+
+:cmake:variable:`WITH_BINARY_INCLUDE_DIRS`
+  Append the appropriate binary include directories for the provided :cmake:variable:`TARGET`,
+  while considering its `COMPONENT` property, to the result.
 
 One Value
 ~~~~~~~~~~
@@ -340,24 +369,43 @@ Examples
 ########
 
 .. code-block:: cmake
-  :caption: ssh/CMakeLists.txt
 
-  project(ssh VERSION 0.0.0)
-  ...
-  jcm_canonical_exec_subdir(OUT_VAR ssh_subdir)
-  message(STATUS "${ssh_subdir}") # ssh/ssh
+  jcm_canonical_include_dirs(
+    TARGET libcup::libcup
+    OUT_VAR source_include_dirs
+  )
+
+  message(STATUS "${source_include_dirs} == ${PROJECT_SOURCE_DIR}")
 
 .. code-block:: cmake
-  :caption: libdecorate/CMakeLists.txt
 
-  project(libdecorate VERSION 0.0.0)
-  ...
-  jcm_canonical_exec_subdir(OUT_VAR decorate_subdir)
-  message(STATUS "${decorate_subdir}") # libdecorate/decorate
+  jcm_canonical_include_dirs(
+    TARGET libcup::mug
+    OUT_VAR source_include_dirs
+  )
+
+  message(STATUS "${source_include_dirs} == ${PROJECT_SOURCE_DIR}/libcup-mug")
+
+.. code-block:: cmake
+
+  jcm_canonical_include_dirs(
+    WITH_BINARY_INCLUDE_DIRS
+    TARGET libcup::mug
+    OUT_VAR include_dirs
+  )
+
+  message(STATUS
+    "${include_dirs} MATCHES ${PROJECT_SOURCE_DIR}/libcup-mug"
+    "${include_dirs} MATCHES ${PROJECT_BINARY_DIR}/libcup-mug"
+    "${include_dirs} MATCHES ${PROJECT_BINARY_DIR}"
+  )
+
+--------------------------------------------------------------------------
 
 #]=======================================================================]
 function(jcm_canonical_include_dirs)
   jcm_parse_arguments(
+    OPTIONS "WITH_BINARY_INCLUDE_DIRS"
     ONE_VALUE_KEYWORDS "TARGET;OUT_VAR"
     REQUIRES_ALL "TARGET;OUT_VAR"
     ARGUMENTS "${ARGN}"
@@ -400,10 +448,67 @@ function(jcm_canonical_include_dirs)
   endforeach ()
 
   # Add appropriate binary dir for generated headers
-  set(binary_dirs "${PROJECT_BINARY_DIR}")
-  if (component)
-    list(APPEND binary_dirs "${PROJECT_BINARY_DIR}/${PROJECT_NAME}-${component}")
-  endif ()
+  set(include_dirs "${include_directory}")
 
-  set(${ARGS_OUT_VAR} "${include_directory}" "${binary_dirs}" PARENT_SCOPE)
+  if(ARGS_WITH_BINARY_INCLUDE_DIRS)
+    list(APPEND include_dirs "${PROJECT_BINARY_DIR}")
+    if (component)
+      list(APPEND include_dirs "${PROJECT_BINARY_DIR}/${PROJECT_NAME}-${component}")
+    endif ()
+  endif()
+
+  set(${ARGS_OUT_VAR} "${include_dirs}" PARENT_SCOPE)
+endfunction()
+
+#
+# Given a list of absolute, normalized source file paths in SOURCES, will check each source file
+# against the possible paths in ROOT_DIRS. If ROOT_DIRS is not provided, ROOT_DIRS will contain the
+# current source directory, current binary directory, and the project binary directory, if that's
+# different from the current binary directory.
+#
+# This function assumes it is called within a canonical source subdirectory, which is why the
+# CURRRENT_* variables are used.
+#
+# A fatal error is emitted if one of the source files is not within one of the ROOT_DIRS
+#
+function(_jcm_verify_source_locations)
+  jcm_parse_arguments(
+    ONE_VALUE_KEYWORDS "COMPONENT"
+    MULTI_VALUE_KEYWORDS "SOURCES" "ROOT_DIRS"
+    REQUIRES_ALL "SOURCES"
+    ARGUMENTS "${ARGN}"
+  )
+
+  if(DEFINED ARGS_ROOT_DIRS)
+    set(root_dirs "${ARGS_ROOT_DIRS}")
+  else()
+    set(root_source_dirs "${CMAKE_CURRENT_SOURCE_DIR}")
+    set(root_binary_dirs "${CMAKE_CURRENT_BINARY_DIR};${PROJECT_BINARY_DIR}")
+    list(REMOVE_DUPLICATES root_binary_dirs)
+
+    if(DEFINED ARGS_COMPONENT)
+      cmake_path(GET CMAKE_CURRENT_SOURCE_DIR PARENT_PATH non_component_source_dir)
+      cmake_path(GET CMAKE_CURRENT_BINARY_DIR PARENT_PATH non_component_binary_dir)
+      list(APPEND root_source_dirs "${non_component_source_dir}")
+      list(APPEND root_binary_dirs "${non_component_binary_dir}")
+    endif()
+
+    set(root_dirs "${root_source_dirs}" "${root_binary_dirs}")
+  endif()
+
+  foreach(root_dir IN LISTS root_dirs)
+    jcm_regex_find_list(
+      MISMATCH
+      REGEX "^${root_dir}"
+      OUT_IDX misplaced_file_idx
+      INPUT  "${ARGS_SOURCES}")
+
+    if(misplaced_file_idx GREATER -1)
+      list(GET ARGS_SOURCES ${misplaced_file_idx} misplaced_file)
+      message(FATAL_ERROR
+        "The following file is not an acceptable input file for the library at ${CMAKE_CURRENT_SOURCE_DIR}. "
+        "The file must be located within one of ${root_dirs}. "
+        "Misplaced file: ${misplaced_file}")
+    endif()
+  endforeach()
 endfunction()

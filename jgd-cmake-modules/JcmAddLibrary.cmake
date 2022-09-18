@@ -18,6 +18,9 @@ include(GenerateExportHeader)
 
 #[=======================================================================[.rst:
 
+jcm_add_library
+^^^^^^^^^^^^^^^
+
 .. cmake:command:: jcm_add_library
 
   .. code-block:: cmake
@@ -39,12 +42,17 @@ Adds a library target to the project, similar to CMake's `add_library`, but with
 
 This function will:
 
-- ensure it's called within a canonical source subdirectory, verify the naming conventions of the
-  input source files, and transform SOURCES to absolute paths.
+- ensure it's called within a canonical source subdirectory, verify the naming conventions and
+  locations of the input source files, and transform :cmake:variable:`SOURCES` to normalized,
+  absolute paths
 - create a library target with :cmake:command:`add_library`, including an associated alias
   (<PROJECT_NAME>::<EXPORT_NAME>) - both following JCM's target naming conventions
-- create project options to control building the library shared. The more specific options take
-  precedence.
+- create PRIVATE, PUBLIC, and INTERFACE header sets with :cmake:command:`jcm_header_file_set` using
+  the respective *\*_HEADERS* parameters
+- Generate a header file, `${CMAKE_CURRENT_BINARY_DIR}/export_macros.hpp`, with
+  :cmake:command:`generate_export_header`
+- create project options to control building the library shared. The precedence of the options
+  increases with their specificity
 
   BUILD_SHARED_LIBS
     global to entire build; used by almost all projects
@@ -54,10 +62,6 @@ This function will:
 
   <JCM_PROJECT_PREFIX_NAME>_<UPPERCASE_COMPONENT>_BUILD_SHARED
     specific to component, if COMPONENT is provided. Default: :cmake:variable:`<JCM_PROJECT_PREFIX_NAME>_BUILD_SHARED_LIBS`
-
-- create PRIVATE, PUBLIC, and INTERFACE header sets with the respective
-  *\*_HEADERS* parameters.
-- Generate a header file, `${CMAKE_CURRENT_BINARY_DIR}/export_macros.hpp`, with  generate_export_header
 - set target properties:
 
   - OUTPUT_NAME
@@ -144,13 +148,26 @@ Examples
 function(jcm_add_library)
   jcm_parse_arguments(
     OPTIONS "WITHOUT_CANONICAL_PROJECT_CHECK"
-    ONE_VALUE_KEYWORDS
-    "COMPONENT;NAME;TYPE;OUT_TARGET_NAME"
-    MULTI_VALUE_KEYWORDS
-    "INTERFACE_HEADERS;PUBLIC_HEADERS;PRIVATE_HEADERS;SOURCES"
-    REQUIRES_ANY
-    "INTERFACE_HEADERS;PUBLIC_HEADERS;PRIVATE_HEADERS;SOURCES"
-    ARGUMENTS "${ARGN}")
+    ONE_VALUE_KEYWORDS "COMPONENT;NAME;TYPE;OUT_TARGET_NAME"
+    MULTI_VALUE_KEYWORDS "INTERFACE_HEADERS;PUBLIC_HEADERS;PRIVATE_HEADERS;SOURCES"
+    REQUIRES_ANY "INTERFACE_HEADERS;PUBLIC_HEADERS;PRIVATE_HEADERS;SOURCES"
+    ARGUMENTS "${ARGN}"
+  )
+
+  # transform arguments to normalized absolute paths
+  foreach(source_type "INTERFACE_HEADERS" "PUBLIC_HEADERS" "PRIVATE_HEADERS" "SOURCES")
+    set(arg_name ARGS_${source_type})
+    if(DEFINED ${arg_name})
+      jcm_transform_list(ABSOLUTE_PATH INPUT "${${arg_name}}" OUT_VAR ${arg_name})
+      jcm_transform_list(NORMALIZE_PATH INPUT "${${arg_name}}" OUT_VAR ${arg_name})
+    endif()
+  endforeach()
+
+  set(all_input_files
+    "${ARGS_INTERFACE_HEADERS}"
+    "${ARGS_PUBLIC_HEADERS}"
+    "${ARGS_PRIVATE_HEADERS}"
+    "${ARGS_SOURCES}")
 
   # library component argument
   if (DEFINED ARGS_COMPONENT AND NOT ARGS_COMPONENT STREQUAL PROJECT_NAME)
@@ -189,7 +206,7 @@ function(jcm_add_library)
       INPUT "${ARGS_SOURCES}"
       REGEX "${JCM_SOURCE_REGEX}"
       TRANSFORM "FILENAME"
-      OUT_UNMATCHED incorrectly_named
+      OUT_MISMATCHED incorrectly_named
     )
     if (incorrectly_named)
       message(
@@ -203,7 +220,7 @@ function(jcm_add_library)
     INPUT "${ARGS_INTERFACE_HEADERS}" "${ARGS_PUBLIC_HEADERS}" "${ARGS_PRIVATE_HEADERS}"
     REGEX "${JCM_HEADER_REGEX}"
     TRANSFORM "FILENAME"
-    OUT_UNMATCHED incorrectly_named
+    OUT_MISMATCHED incorrectly_named
   )
   if (incorrectly_named)
     message(
@@ -211,6 +228,12 @@ function(jcm_add_library)
       "Provided header files do not match the regex for library headers, "
       "${regex}: ${incorrectly_named}.")
   endif ()
+
+  # verify file locations
+  _jcm_verify_source_locations(
+    ${comp_arg}
+    SOURCES "${all_input_files}"
+  )
 
   # == Build options related to libraries and this library ==
 
@@ -274,16 +297,11 @@ function(jcm_add_library)
 
   # == Create Library Target ==
 
-  jcm_transform_list(ABSOLUTE_PATH INPUT "${ARGS_INTERFACE_HEADERS}" OUT_VAR abs_interface_headers)
-  jcm_transform_list(ABSOLUTE_PATH INPUT "${ARGS_PUBLIC_HEADERS}" OUT_VAR abs_public_headers)
-  jcm_transform_list(ABSOLUTE_PATH INPUT "${ARGS_PRIVATE_HEADERS}" OUT_VAR abs_private_headers)
-  jcm_transform_list(ABSOLUTE_PATH INPUT "${ARGS_SOURCES}" OUT_VAR abs_sources)
-
   add_library("${target_name}" ${lib_type}
-    "${abs_interface_headers}"
-    "${abs_public_headers}"
-    "${abs_private_headers}"
-    "${abs_sources}"
+    "${ARGS_INTERFACE_HEADERS}"
+    "${ARGS_PUBLIC_HEADERS}"
+    "${ARGS_PRIVATE_HEADERS}"
+    "${ARGS_SOURCES}"
   )
   add_library(${PROJECT_NAME}::${export_name} ALIAS ${target_name})
 
@@ -311,16 +329,16 @@ function(jcm_add_library)
 
   # header properties
   if (DEFINED ARGS_INTERFACE_HEADERS)
-    jcm_header_file_set(INTERFACE TARGET ${target_name} HEADERS "${abs_interface_headers}")
+    jcm_header_file_set(INTERFACE TARGET ${target_name} HEADERS "${ARGS_INTERFACE_HEADERS}")
   elseif (DEFINED ARGS_PRIVATE_HEADERS)
-    jcm_header_file_set(PRIVATE TARGET ${target_name} HEADERS "${abs_private_headers}")
+    jcm_header_file_set(PRIVATE TARGET ${target_name} HEADERS "${ARGS_PRIVATE_HEADERS}")
   endif ()
 
   if(NOT ARGS_TYPE STREQUAL "INTERFACE")
     jcm_header_file_set(
       PUBLIC
       TARGET ${target_name}
-      HEADERS "${abs_public_headers}" "${CMAKE_CURRENT_BINARY_DIR}/export_macros.hpp"
+      HEADERS "${ARGS_PUBLIC_HEADERS}" "${CMAKE_CURRENT_BINARY_DIR}/export_macros.hpp"
     )
   endif()
 

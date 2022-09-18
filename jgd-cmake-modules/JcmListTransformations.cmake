@@ -4,7 +4,7 @@ include(JcmParseArguments)
 
 #
 # Separates the INPUT into two groups: OUT_MATCHED, if the element matches the
-# provided REGEX and OUT_UNMATCHED, otherwise. Before matching, the elements can
+# provided REGEX and OUT_MISMATCHED, otherwise. Before matching, the elements can
 # optionally be transformed by the selected TRANSFORM before being matched.
 # Nevertheless, INPUT is not modified, and the results in the out-variables
 # will always be identical to those provided via INPUT.
@@ -20,18 +20,18 @@ include(JcmParseArguments)
 # "FILENAME". Optional.
 #
 # OUT_MATCHED: out-value arg; the name of the variable that will store the list
-# of matched elements. Optional if OUT_UNMATCHED is provided.
+# of matched elements. Optional if OUT_MISMATCHED is provided.
 #
-# OUT_UNMATCHED: out-value arg; the name of the variable that will store the
-# list of unmatched elements. Optional if OUT_MATCHED is provided.
+# OUT_MISMATCHED: out-value arg; the name of the variable that will store the
+# list of mismatched elements. Optional if OUT_MATCHED is provided.
 #
 function(jcm_separate_list)
   jcm_parse_arguments(
     ONE_VALUE_KEYWORDS
-    "REGEX;OUT_MATCHED;OUT_UNMATCHED;TRANSFORM"
+    "REGEX;OUT_MATCHED;OUT_MISMATCHED;TRANSFORM"
     MULTI_VALUE_KEYWORDS "INPUT"
     REQUIRES_ALL "REGEX;INPUT"
-    REQUIRES_ANY "OUT_MATCHED;OUT_UNMATCHED"
+    REQUIRES_ANY "OUT_MATCHED;OUT_MISMATCHED"
     ARGUMENTS "${ARGN}")
 
   set(supported_transforms "FILENAME")
@@ -42,7 +42,7 @@ function(jcm_separate_list)
 
   # Split input into two lists
   set(matched_elements)
-  set(unmatched_elements)
+  set(mismatched_elements)
   foreach(element ${ARGS_INPUT})
     # transform element to be matched
     set(transformed_element "${element}")
@@ -55,13 +55,13 @@ function(jcm_separate_list)
     if(matched)
       list(APPEND matched_elements "${element}")
     else()
-      list(APPEND unmatched_elements "${element}")
+      list(APPEND mismatched_elements "${element}")
     endif()
   endforeach()
 
   # Set out variables
   set(${ARGS_OUT_MATCHED} "${matched_elements}" PARENT_SCOPE)
-  set(${ARGS_OUT_UNMATCHED} "${unmatched_elements}" PARENT_SCOPE)
+  set(${ARGS_OUT_MISMATCHED} "${mismatched_elements}" PARENT_SCOPE)
 endfunction()
 
 
@@ -69,12 +69,12 @@ function(jcm_transform_list)
   # Argument parsing, allowing value to INPUT to be empty
   jcm_parse_arguments(
     WITHOUT_MISSING_VALUES_CHECK
-    OPTIONS "ABSOLUTE_PATH"
+    OPTIONS "ABSOLUTE_PATH" "NORMALIZE_PATH"
     ONE_VALUE_KEYWORDS "BASE;OUT_VAR"
     MULTI_VALUE_KEYWORDS "INPUT"
     REQUIRES_ALL "OUT_VAR"
     REQUIRES_ANY "ABSOLUTE_PATH"
-    MUTUALLY_EXCLUSIVE "ABSOLUTE_PATH"
+    MUTUALLY_EXCLUSIVE "ABSOLUTE_PATH" "NORMALIZE_PATH"
     ARGUMENTS "${ARGN}"
   )
 
@@ -102,6 +102,10 @@ function(jcm_transform_list)
         set(transformed_result "${absolute_base_path}/${input}")
       endif()
     ]=])
+  elseif(ARGS_NORMALIZE_PATH)
+    set(selected_transformation [=[
+      cmake_path(SET transformed_result NORMALIZE "${input}")
+    ]=])
   endif()
 
   # Transform list
@@ -117,16 +121,23 @@ endfunction()
 
 function(jcm_regex_find_list)
   jcm_parse_arguments(
+    OPTIONS "MISMATCH"
     ONE_VALUE_KEYWORDS "OUT_IDX;REGEX"
     MULTI_VALUE_KEYWORDS "INPUT"
     REQUIRES_ALL "OUT_IDX;REGEX;INPUT"
     ARGUMENTS "${ARGN}"
   )
 
+  if(ARGS_MISMATCH)
+    set(mismatch_not NOT)
+  else()
+    unset(mismatch_not)
+  endif()
+
   set(found_idx -1)
   set(current_idx 0)
 
-  foreach(input ${ARGS_INPUT})
+  foreach(${mismatch_not} input ${ARGS_INPUT})
     if(input MATCHES "${ARGS_REGEX}")
       set(found_idx ${current_idx})
       break()

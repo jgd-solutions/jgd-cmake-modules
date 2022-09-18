@@ -9,6 +9,8 @@ Offers utilities to properly setup a CMake project for consumption as both a sub
 binary package. Creates target component, *COMPONENT*, and defines macro
 :cmake:command:`jcm_setup_project` used to setup a CMake project.
 
+--------------------------------------------------------------------------
+
 #]=======================================================================]
 
 include(JcmParseArguments)
@@ -47,6 +49,9 @@ macro(_JCM_CHECK_SET variable value)
 endmacro()
 
 #[=======================================================================[.rst:
+
+jcm_setup_project
+^^^^^^^^^^^^^^^^^
 
 .. cmake:command:: jcm_setup_project
 

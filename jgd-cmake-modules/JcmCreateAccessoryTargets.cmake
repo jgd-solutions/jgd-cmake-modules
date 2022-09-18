@@ -10,6 +10,8 @@ targets that run development operations, which could be formatting, static analy
 generation, etc. These targets are not targets offered by a projects, like a library or executable
 target.
 
+--------------------------------------------------------------------------
+
 #]=======================================================================]
 
 include(JcmParseArguments)
@@ -17,25 +19,25 @@ include(JcmSourceSubdirectories)
 include(JcmExpandDirectories)
 include(JcmListTransformations)
 include(JcmCanonicalStructure)
+include(JcmStandardDirs)
 
-function(_jcm_build_error_clang_format_targets err_msg)
+function(_jcm_build_error_targets err_msg targets)
     set(exit_failure "${CMAKE_COMMAND}" -E false)
-    set(print_err
-      "${CMAKE_COMMAND}" -E echo "${err_msg}"
-    )
-    add_custom_target(
-      clang-format
-      COMMAND "${print_err}"
-      COMMAND "${exit_failure}"
-    )
-    add_custom_target(
-      clang-format-check
-      COMMAND "${print_err}"
-      COMMAND "${exit_failure}"
-    )
+    set(print_err "${CMAKE_COMMAND}" -E echo "${err_msg}")
+
+    foreach(target IN LISTS targets)
+      add_custom_target(
+        ${target}
+        COMMAND "${print_err}"
+        COMMAND "${exit_failure}"
+      )
+    endforeach()
 endfunction()
 
 #[=======================================================================[.rst:
+
+jcm_create_clang_format_targets
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. cmake:command:: jcm_create_clang_format_targets
 
@@ -51,7 +53,7 @@ endfunction()
 
 Creates custom targets "clang-format" and "clang-format-check" for use with a `.clang-format` file
 in the project's root. Both invoke the `clang::format` target, or the provided
-:cmake:variable`COMMAND`, on all the sources for the provided :cmake:variable:`SOURCE_TARGETS` and
+:cmake:variable:`COMMAND`, on all the sources for the provided :cmake:variable:`SOURCE_TARGETS` and
 any additional files within :cmake:variable:`ADDITIONAL_PATHS`, using a `.clang-format` file in the
 project's root. The created "clang-format" target will format the files in-place, while
 "clang-format-check" will report any formatting errors to the console and exit with an error.
@@ -105,6 +107,9 @@ Examples
       completely/separate/file.hpp
       completely/separate/file.cpp
   )
+
+--------------------------------------------------------------------------
+
 #]=======================================================================]
 function(jcm_create_clang_format_targets)
   jcm_parse_arguments(
@@ -117,14 +122,14 @@ function(jcm_create_clang_format_targets)
 
   unset(clang_format_err)
 
-  if(ARGS_COMMAND)
+  if(DEFINED ARGS_COMMAND)
     set(clang_format_cmd "${ARGS_COMMAND}")
   else()
     set(clang_format_cmd clang::format)
     if(NOT TARGET clang::format)
-      set(clang_format_err
-        "The clang-format executable must be available to use ${CMAKE_CURRENT_FUNCTION}"
-      )
+      string(CONCAT clang_format_err
+        "The clang-format executable could not be found!\n"
+        "Maybe you forgot to call 'find_package(ClangFormat)'")
     endif()
   endif()
 
@@ -151,7 +156,7 @@ function(jcm_create_clang_format_targets)
   endif ()
 
   if (clang_format_err)
-    _jcm_build_error_clang_format_targets("${clang_format_err}")
+    _jcm_build_error_targets("${clang_format_err}" "clang-format;clang-format-check")
     return()
   endif ()
 
@@ -189,7 +194,7 @@ function(jcm_create_clang_format_targets)
     jcm_separate_list(
       REGEX "${ARGS_EXCLUDE_REGEX}"
       INPUT "${files_to_format}"
-      OUT_UNMATCHED files_to_format
+      OUT_MISMATCHED files_to_format
     )
     if (NOT files_to_format)
       message(
@@ -261,11 +266,21 @@ function(jcm_create_doxygen_target)
   jcm_parse_arguments(
     OPTIONS "README_MAIN_PAGE"
     MULTI_VALUE_KEYWORDS "TARGETS;ADDITIONAL_PATHS;EXCLUDE_REGEX"
-    REQUIRES_ANY "TARGETS;ADDITIONAL_PATHS" ARGUMENTS "${ARGN}")
+    REQUIRES_ANY "TARGETS;ADDITIONAL_PATHS"
+    ARGUMENTS "${ARGN}")
 
-  if (NOT DOXYGEN_FOUND)
-    message(FATAL_ERROR "Doxygen must be previously found to use ${CMAKE_CURRENT_FUNCTION}")
-  endif ()
+  # Usage Guards
+  if(NOT CMAKE_CURRENT_SOURCE_DIR STREQUAL JCM_PROJECT_DOCS_DIR)
+    message(AUTHOR_WARNING
+      "${CMAKE_CURRENT_SOURCE_DIR} should be invoked in ${JCM_PROJECT_DOCS_DIR}/CMakeLists.txt")
+  endif()
+
+  if(NOT TARGET Doxygen::doxygen)
+    _jcm_build_error_targets(
+      "The doxygen executable could not be found!\nMaybe you forgot to call 'find_package(Doxygen)'"
+      doxygen-docs)
+    return()
+  endif()
 
   # Extract all include directories from targets
   set(include_dirs)
@@ -298,7 +313,7 @@ function(jcm_create_doxygen_target)
     # Exclude header files based on provided regex
     if (ARGS_EXCLUDE_REGEX AND header_files)
       jcm_separate_list(REGEX "${ARGS_EXCLUDE_REGEX}" INPUT "${header_files}"
-        OUT_UNMATCHED header_files)
+        OUT_MISMATCHED header_files)
       if (NOT header_files)
         message(
           WARNING "All of the headers in the following include directories for "
@@ -335,4 +350,61 @@ endfunction()
 
 
 function(jcm_create_sphinx_target)
+  jcm_parse_arguments(
+    OPTIONS "CONFIGURE_CONF_PY"
+    ONE_VALUE_KEYWORDS "COMMAND" "SOURCE_DIRECTORY" "BUILD_DIRECTORY"
+    ARGUMENTS "${ARGN}")
+
+  # Usage Guards
+  if(NOT CMAKE_CURRENT_SOURCE_DIR STREQUAL JCM_PROJECT_DOCS_DIR)
+    message(AUTHOR_WARNING
+      "${CMAKE_CURRENT_SOURCE_DIR} should be invoked in ${JCM_PROJECT_DOCS_DIR}/CMakeLists.txt")
+  endif()
+
+  # Default Arguments
+  if(DEFINED ARGS_COMMAND)
+    set(sphinx_cmd "${ARGS_COMMAND}")
+  else()
+    set(sphinx_cmd Sphinx::build)
+    if(NOT TARGET Sphinx::build)
+      _jcm_build_error_targets(
+        "The sphinx build executable could not be found!\nMaybe you forgot to call 'find_package(Sphinx)'"
+        sphinx-docs)
+      return()
+    endif()
+  endif()
+
+  if(DEFINED ARGS_SOURCE_DIRECTORY)
+    set(sphinx_source_dir "${ARGS_SOURCE_DIRECTORY}")
+  else()
+    set(sphinx_source_dir "${CMAKE_CURRENT_SOURCE_DIR}")
+  endif()
+
+  if(DEFINED ARGS_BUILD_DIRECTORY)
+    set(sphinx_build_dir "${ARGS_BUILD_DIRECTORY}")
+  else()
+    set(sphinx_build_dir "${CMAKE_CURRENT_BINARY_DIR}/sphinx")
+  endif()
+
+  if(ARGS_CONFIGURE_CONF_PY)
+    configure_file("${sphinx_source_dir}/conf.py.in" "conf.py")
+    set(sphinx_config_dir "${CMAKE_CURRENT_BINARY_DIR}")
+  else()
+    set(sphinx_config_dir "${sphinx_source_dir}")
+  endif()
+
+  # Verify locations
+
+  if(NOT EXISTS "${sphinx_source_dir}")
+    _jcm_build_error_targets(
+      "Sphinx source directory does not exist: ${sphinx_source_dir}" sphinx-docs)
+  endif()
+
+  # Build Target
+  add_custom_target(sphinx-docs
+    COMMAND
+      ${sphinx_cmd}
+      -c ${sphinx_config_dir}
+      "${sphinx_source_dir}"
+      "${sphinx_build_dir}")
 endfunction()

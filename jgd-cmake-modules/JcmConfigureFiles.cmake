@@ -12,6 +12,8 @@ their respective use-case.
 All input file names are simply the output file name with :cmake:variable:`JCM_IN_FILE_EXTENSION`
 (.in) appended.
 
+--------------------------------------------------------------------------
+
 #]=======================================================================]
 
 include(JcmParseArguments)
@@ -21,7 +23,10 @@ include(CMakePackageConfigHelpers)
 
 #[=======================================================================[.rst:
 
-.. cmake:command:: jcm_add_library
+jcm_configure_package_config_file
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. cmake:command:: jcm_configure_package_config_file
 
   .. code-block:: cmake
 
@@ -77,6 +82,7 @@ Examples
 
   jcm_configure_package_config_file(COMPONENT toppings)
 
+--------------------------------------------------------------------------
 
 #]=======================================================================]
 function(jcm_configure_package_config_file)
@@ -124,6 +130,9 @@ endfunction()
 
 #[=======================================================================[.rst:
 
+jcm_configure_file
+^^^^^^^^^^^^^^^^^^
+
 .. cmake:command:: jcm_configure_file
 
   .. code-block:: cmake
@@ -165,6 +174,8 @@ Examples
 
   jcm_configure_file(IN_FILE my_config.hpp.in)
 
+--------------------------------------------------------------------------
+
 #]=======================================================================]
 function(jcm_configure_file)
   jcm_parse_arguments(
@@ -205,6 +216,9 @@ endfunction()
 
 #[=======================================================================[.rst:
 
+jcm_configure_vcpkg_manifest_file
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 .. cmake:command:: jcm_configure_vcpkg_manifest_file
 
   .. code-block:: cmake
@@ -222,6 +236,8 @@ Examples
 .. code-block:: cmake
 
   jcm_configure_vcpkg_manifest_file()
+
+--------------------------------------------------------------------------
 
 #]=======================================================================]
 function(jcm_configure_vcpkg_manifest_file)

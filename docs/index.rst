@@ -7,7 +7,7 @@ Pages
 -----
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
    find_modules
    modules

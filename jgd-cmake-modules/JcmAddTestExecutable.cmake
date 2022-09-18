@@ -12,8 +12,12 @@ include(JcmDefaultCompileOptions)
 include(JcmFileNaming)
 include(JcmStandardDirs)
 include(JcmListTransformations)
+include(JcmCanonicalStructure)
 
 #[=======================================================================[.rst:
+
+jcm_add_test_executable
+^^^^^^^^^^^^^^^^^^^^^^^
 
 .. cmake:command:: jcm_add_test_executable
 
@@ -27,8 +31,8 @@ include(JcmListTransformations)
     )
 
 A convenience function to create an executable and add it as a test in one command, while also
-setting target properties. This function has no affect if <JCM_PROJECT_PREFIX_NAME>_BUILD_TESTS is
-not set.
+setting target properties. This function has no affect if
+:cmake:`${JCM_PROJECT_PREFIX_NAME}_BUILD_TESTS` is not set.
 
 This function will:
 
@@ -87,7 +91,6 @@ Examples
     LIBS ${target}-library Boost::ut
   )
 
-
 #]=======================================================================]
 function(jcm_add_test_executable)
   if (NOT ${JCM_PROJECT_PREFIX_NAME}_BUILD_TESTS)
@@ -100,6 +103,13 @@ function(jcm_add_test_executable)
     REQUIRES_ALL "NAME;SOURCES"
     ARGUMENTS "${ARGN}")
 
+  # transform arguments to normalized absolute paths
+  jcm_transform_list(ABSOLUTE_PATH INPUT "${ARGS_SOURCES}" OUT_VAR ARGS_SOURCES)
+  jcm_transform_list(NORMALIZE_PATH INPUT "${ARGS_SOURCES}" OUT_VAR ARGS_SOURCES)
+
+  # verify source locations
+  _jcm_verify_source_locations(SOURCES "${ARGS_SOURCES}")
+
   # Verify source naming
 
   if (CMAKE_CURRENT_SOURCE_DIR MATCHES "^${JCM_PROJECT_TESTS_DIR}")
@@ -110,10 +120,10 @@ function(jcm_add_test_executable)
 
   set(regex "${JCM_HEADER_REGEX}|${test_source_regex}")
   jcm_separate_list(
-    INPUT "${ARGS_SOURCES};${ARGS_MAIN_SOURCES}"
+    INPUT "${ARGS_SOURCES}"
     REGEX "${regex}"
     TRANSFORM "FILENAME"
-    OUT_UNMATCHED incorrectly_named
+    OUT_MISMATCHED incorrectly_named
   )
   if (incorrectly_named)
     message(
@@ -123,14 +133,14 @@ function(jcm_add_test_executable)
   endif ()
 
   # Default test name
-  set(test_name "${ARGS_NAME}")
   if (DEFINED ARGS_TEST_NAME)
     set(test_name "${ARGS_TEST_NAME}")
+  else()
+    set(test_name "${ARGS_NAME}")
   endif ()
 
   # Test executable
-  jcm_transform_list(ABSOLUTE_PATH INPUT "${ARGS_SOURCES}" OUT_VAR abs_sources)
-  add_executable(${ARGS_NAME} "${abs_sources}")
+  add_executable(${ARGS_NAME} "${ARGS_SOURCES}")
   add_test(NAME ${test_name} COMMAND ${ARGS_NAME})
 
   # Default properties

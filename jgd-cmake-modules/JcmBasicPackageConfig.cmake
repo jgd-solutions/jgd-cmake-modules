@@ -4,9 +4,14 @@ JcmBasicPackageConfig
 ---------------------
 
 Provides macros to create `Config-file Packages
-<https://cmake.org/cmake/help/latest/manual/cmake-packages.7.html#config-file-packages>`.  Offers
+<https://cmake.org/cmake/help/latest/manual/cmake-packages.7.html#config-file-packages>`_.  Offers
 the :cmake:command:`jcm_basic_package_config` macro for top-level config-files, and the
 :cmake:command:`jcm_basic_component_config` macro for config-files of individual components.
+
+The utilities here follow a pattern of each target providing its on config-file and targets-file.
+This makes managing inter-project dependencies very easy and simplifies overall logic.
+
+--------------------------------------------------------------------------
 
 #]=======================================================================]
 
@@ -15,6 +20,10 @@ include(JcmFileNaming)
 include(JcmTargetNaming)
 
 #[=======================================================================[.rst:
+
+jcm_basic_package_config
+^^^^^^^^^^^^^^^^^^^^^^^^
+
 .. cmake:command:: jcm_basic_package_config
 
   .. code-block:: cmake
@@ -51,7 +60,7 @@ Positional
 
 :cmake:variable:`project`
   The name of the project being packaged. Don't use :cmake:`${PROJECT_NAME}`, as this will
-  resolve to the consuming project name.
+  resolve to the consuming project's name.
 
 One Value
 ~~~~~~~~~
@@ -76,6 +85,8 @@ Most package config files will take this form.
 
   include(JcmBasicPackageConfig)
   jcm_basic_package_config(@PROJECT_NAME@)
+
+--------------------------------------------------------------------------
 
 #]=======================================================================]
 macro(JCM_BASIC_PACKAGE_CONFIG project)
@@ -182,6 +193,10 @@ endmacro()
 
 
 #[=======================================================================[.rst:
+
+jcm_basic_component_config
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 .. cmake:command:: jcm_basic_component_config
 
   .. code-block:: cmake
@@ -198,7 +213,7 @@ This macro will:
 
 - include the config-files of any dependent components
 - include the associated targets file from the current list directory
-- set the component's associated `<project>_<component>_FOUND` variables that
+- set the component's associated :cmake:variable:`<project>_<component>_FOUND` variables that
   :cmake:command:`check_required_components` uses.
 
 Parameters
@@ -220,8 +235,8 @@ One Value
 :cmake:variable:`NO_TARGETS`
   Indicates that this package does not provide any CMake targets, causing this macro to skip
   inclusion of a targets file (<project>-<component>-targets.cmake). The requirement for the
-  presence of the expected target will also be skipped before setting `<project>_<component>_FOUND`
-  to :cmake:`TRUE`.
+  presence of the expected target will also be skipped before setting
+  :cmake:variable:`<project>_<component>_FOUND` to :cmake:`TRUE`.
 
 Multi Value
 ~~~~~~~~~~~
