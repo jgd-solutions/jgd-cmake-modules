@@ -7,97 +7,18 @@ For a short overview of the project, see `Overview <docs/overview>`_.
 Sample
 ------
 
-.. code-block:: cmake
-  :caption: libsample/CMakeLists.txt
+.. figure:: data/images/top_level_sample.svg
+   :width: 60%
+   :align: center
+   :alt: Sample code of top-level cmake with jgd-cmake-modules
 
-  cmake_minimum_required(VERSION 3.24)
-  project(libsample VERSION 4.2.0)
+   libsample/CMakeLists.txt
 
-  find_package(jgd-cmake-modules CONFIG REQUIRED)
+.. figure:: data/images/subdirectory_sample.svg
+   :align: center
+   :alt: Sample code of subdirectory cmake with jgd-cmake-modules
 
-  include(JcmAllModules)
-  jcm_setup_project()
-  jcm_source_subdirectories(ADD_SUBDIRS WITH_TESTS_DIR WITH_DOCS_DIR)
-  jcm_create_clang_format_targets(SOURCE_TARGETS libsample::libsample)
-  jcm_create_doxygen_target(README_MAIN_PAGE TARGETS libsample::libsample)
-  jcm_install_config_file_package(CONFIGURE_PACKAGE_CONFIG_FILES TARGETS libsample::libsample)
-
-.. code-block:: cmake
-  :caption: libsample/libsample/CMakeLists.txt
-
-  jcm_add_library(
-    PUBLIC_HEADERS widget.hpp factory.hpp
-    SOURCES widget.cpp factory.cpp
-  )
-
-
-Using jgd-cmake-modules
------------------------
-
-1. Acquire the project
-~~~~~~~~~~~~~~~~~~~~~~
-
-**Option 1:** From Source
-
-  Clone source code and enter the project root
-
-  .. code-block:: bash
-
-    git clone https://gitlab.com/jgd-solutions/jgd-cmake-modules.git
-    cd jgd-cmake-modules
-
-  Configure, build, and install
-
-  .. code-block:: bash
-
-    cmake -B build -G Ninja
-    cmake --build build
-    cmake --install build
-
-**Option 2:** From `vcpkg <https://vcpkg.io/en/index.html>`_
-
-  Add *jgd-cmake-modules* as a project dependency in `vcpkg.json`
-
-  .. code-block:: json
-
-    "dependencies": [
-      "jgd-cmake-modules"
-    ]
-
-  Add `vcpkg-registry <https://gitlab.com/jgd-solutions/vcpkg-registry>`_ as a registry in your
-  `vcpkg-configurations.json`
-
-  .. code-block:: json
-
-    {
-      "registries": [
-        {
-          "kind": "git",
-          "baseline": "<desired-vcpkg-registry-ref>",
-          "repository": "git@gitlab.com:jgd-solutions/vcpkg-registry.git",
-          "packages": [
-            "jgd-cmake-modules"
-          ]
-        }
-      ]
-    }
-
-2. Locate jgd-cmake-modules
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Find *jgd-cmake-modules* as an external package in your top-level *CMakeLists.txt*
-
-.. code-block:: cmake
-
-  find_package(jgd-cmake-modules CONFIG REQUIRED)
-
-3. Include and Use Modules
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. code-block:: cmake
-
-  include(JcmCreateAccessoryTargets)
-  jcm_create_clang_format_targets(SOURCE_TARGETS libexample::libexample)
+   libsample/libsample/CMakeLists.txt
 
 Examples
 --------

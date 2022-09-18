@@ -9,6 +9,7 @@ Pages
 .. toctree::
    :maxdepth: 2
 
+   getting_started
    find_modules
    modules
    overview
@@ -19,7 +20,6 @@ Indices
 
 * :ref:`genindex`
 * :ref:`search`
-
 
 
 .. include:: ../README.rst
