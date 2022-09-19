@@ -84,10 +84,12 @@ This function will:
   - set default values for CMake variables controlling the build when the current project is the
     top-level project
 
+    - :cmake:variable:`CMAKE_BUILD_TYPE`
     - :cmake:variable:`CMAKE_EXPORT_COMPILE_COMMANDS`
     - :cmake:variable:`CMAKE_LINK_WHAT_YOU_USE`
     - :cmake:variable:`CMAKE_COLOR_DIAGNOSTICS`
     - :cmake:variable:`CMAKE_INSTALL_PREFIX`
+    - :cmake:variable:`CMAKE_DEBUG_POSTFIX`
     - :cmake:variable:`CMAKE_OBJECT_PATH_MAX` (Windows)
 
   - set values for variables CMake uses to initialize target properties, only when the current
@@ -220,10 +222,12 @@ macro(JCM_SETUP_PROJECT)
   # == Variables Setting Default Target Properties ==
 
   # basic
+  _jcm_check_set(CMAKE_BUILD_TYPE "Release")
   _jcm_warn_set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
   _jcm_warn_set(CMAKE_OPTIMIZE_DEPENDENCIES ON)
   _jcm_warn_set(CMAKE_LINK_WHAT_YOU_USE ON)
   _jcm_warn_set(CMAKE_COLOR_DIAGNOSTICS ON)
+  _jcm_warn_set(CMAKE_DEBUG_POSTFIX "-debug")
 
   # add project's cmake modules to path
   list(FIND CMAKE_MODULE_PATH "${JCM_PROJECT_CMAKE_DIR}" cmake_dir_idx)
@@ -316,13 +320,16 @@ macro(JCM_SETUP_PROJECT)
 
   # enable testing by default so invoking ctest always succeeds
   enable_testing()
-  if(PROJECT_IS_TOP_LEVEL AND ${JCM_PROJECT_PREFIX_NAME}_BUILD_TESTS)
+
+  # include CMake's CTest when testing
+  if(${JCM_PROJECT_PREFIX_NAME}_BUILD_TESTS)
     if(DEFINED BUILD_TESTING)
       set(original_build_testing_value ${BUILD_TESTING})
     else()
       unset(original_build_testing_value)
     endif()
 
+    # CTest needs BUILD_TESTING
     set(BUILD_TESTING ON)
     include(CTest)
 
