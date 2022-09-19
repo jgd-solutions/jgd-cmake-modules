@@ -106,7 +106,7 @@ if(ClangFormat_EXECUTABLE)
   else()
     # extract version from stdout
     string(
-      REGEX REPLACE "clang-format.* version " ""
+      REGEX REPLACE ".*clang-format.* version " ""
       ClangFormat_VERSION "${_ClangFormat_version_stdout}"
     )
     string(REPLACE "." ";" _ClangFormat_version_components "${ClangFormat_VERSION}")

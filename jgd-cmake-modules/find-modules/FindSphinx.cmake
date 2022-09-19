@@ -90,7 +90,7 @@ if(Sphinx_EXECUTABLE)
     )
   else()
     # extract version from stdout
-    string(REGEX REPLACE "sphinx-build[23]? " "" Sphinx_VERSION "${_Sphinx_version_stdout}")
+    string(REGEX REPLACE ".*sphinx-build[23]? " "" Sphinx_VERSION "${_Sphinx_version_stdout}")
     string(REPLACE "." ";" _Sphinx_version_components "${Sphinx_VERSION}")
     list(GET _Sphinx_version_components 0 Sphinx_VERSION_MAJOR)
     list(GET _Sphinx_version_components 1 Sphinx_VERSION_MINOR)
