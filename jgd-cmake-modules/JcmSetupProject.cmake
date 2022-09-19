@@ -286,8 +286,7 @@ macro(JCM_SETUP_PROJECT)
 
   # interprocedural/link-time optimization
 
-  if ((NOT languages STREQUAL "NONE") AND (CMAKE_BUILD_TYPE MATCHES
-    "Release|RelWithDepInfo"))
+  if ((NOT languages STREQUAL "NONE") AND (CMAKE_BUILD_TYPE MATCHES "Release|RelWithDepInfo"))
     check_ipo_supported(RESULT ipo_supported OUTPUT err_msg)
     if (ipo_supported)
       _jcm_warn_set(CMAKE_INTERPROCEDURAL_OPTIMIZATION $<IF:$<CONFIG:DEBUG>,OFF,ON>)
@@ -315,7 +314,8 @@ macro(JCM_SETUP_PROJECT)
   # default install prefix to Filesystem Hierarchy Standard's "add-on" path
   if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT AND NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
     # can follow opt/ with provider, once registered with LANANA
-    _jcm_warn_set(CMAKE_INSTALL_PREFIX "/opt/${PROJECT_NAME}" CACHE PATH "Base installation location. " FORCE)
+    _jcm_warn_set(
+      CMAKE_INSTALL_PREFIX "/opt/${PROJECT_NAME}" CACHE PATH "Base installation location. " FORCE)
   endif ()
 
   # enable testing by default so invoking ctest always succeeds
@@ -332,7 +332,7 @@ macro(JCM_SETUP_PROJECT)
     # CTest needs BUILD_TESTING
     set(BUILD_TESTING ON)
     include(CTest)
-
     set(BUILD_TESTING ${original_build_testing_value})
+
   endif()
 endmacro()

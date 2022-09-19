@@ -1,5 +1,5 @@
-Getting Started with jgd-cmake-modules
------------------------
+Getting Started
+---------------
 
 1. Acquire the project
 ~~~~~~~~~~~~~~~~~~~~~~
