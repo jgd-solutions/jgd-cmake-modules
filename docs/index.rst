@@ -31,14 +31,14 @@ the `Canonical Project Structure`_.
 Sample
 ------
 
-.. figure:: ../data/images/top_level_sample.svg
+.. figure:: data/top_level_sample.svg
    :width: 60%
    :align: center
    :alt: Sample code of top-level cmake with jgd-cmake-modules
 
    CMakeLists.txt
 
-.. figure:: ../data/images/subdirectory_sample.svg
+.. figure:: data/subdirectory_sample.svg
    :width: 60%
    :align: center
    :alt: Sample code of subdirectory cmake with jgd-cmake-modules

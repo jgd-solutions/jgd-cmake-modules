@@ -8,13 +8,13 @@ For documentation, see DOOOOOOOOOCS
 
 <p align="center">
   <img
-    src="data/images/top_level_sample.svg"
+    src="docs/data/top_level_sample.svg"
     alt="Sample code of top-level cmake with jgd-cmake-modules"
     width="60%"/>
 </p>
 <p align="center">
   <img
-    src="data/images/subdirectory_sample.svg"
+    src="docs/data/subdirectory_sample.svg"
     alt="Sample code of subdirectory cmake with jgd-cmake-modules"
     width="60%"/>
 </p>
