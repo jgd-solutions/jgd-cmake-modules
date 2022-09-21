@@ -1,17 +1,31 @@
-name: GitHub Actions Demo
+name: jgd-cmake-modules
+
 on: [push, pull_request]
+
 jobs:
-  Explore-GitHub-Actions:
+  build-test:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
-      - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
-      - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
       - name: Check out repository code
         uses: actions/checkout@v3
-      - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
-      - run: echo "🖥️ The workflow is now ready to test your code on the runner."
-      - name: List files in the repository
+      - name: Install ninja-build and cmake
+        uses: lukka/get-cmake@v.3.23.2
+      - name: Install Python for documentation
+        uses: actions/setup-python@v4.2.0
+        with:
+          python-version: "3.10"
+      - name: Python Dependencies
         run: |
-          ls ${{ github.workspace }}
-      - run: echo "🍏 This job's status is ${{ job.status }}."
+          mkdir .venv
+          pip install pipenv
+          pipenv install --dev
+          pipenv shell
+      - name: Configure all targets
+        run: |
+          cmake --preset all-ninja
+      - name: Run all automated tests
+        run: |
+          ctest --preset tests
+      - name: Build documentation
+        run: |
+          cmake --build --preset all-ninja

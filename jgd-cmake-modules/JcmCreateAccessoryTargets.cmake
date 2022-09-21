@@ -269,6 +269,10 @@ function(jcm_create_doxygen_target)
     REQUIRES_ANY "TARGETS;ADDITIONAL_PATHS"
     ARGUMENTS "${ARGN}")
 
+  if (NOT ${JCM_PROJECT_PREFIX_NAME}_BUILD_DOCS)
+    return()
+  endif ()
+
   # Usage Guards
   if(NOT CMAKE_CURRENT_SOURCE_DIR STREQUAL JCM_PROJECT_DOCS_DIR)
     message(AUTHOR_WARNING
@@ -354,6 +358,10 @@ function(jcm_create_sphinx_target)
     OPTIONS "CONFIGURE_CONF_PY"
     ONE_VALUE_KEYWORDS "COMMAND" "SOURCE_DIRECTORY" "BUILD_DIRECTORY"
     ARGUMENTS "${ARGN}")
+
+  if (NOT ${JCM_PROJECT_PREFIX_NAME}_BUILD_DOCS)
+    return()
+  endif ()
 
   # Usage Guards
   if(NOT CMAKE_CURRENT_SOURCE_DIR STREQUAL JCM_PROJECT_DOCS_DIR)
