@@ -8,7 +8,7 @@ include(JcmCanonicalStructure)
 # consistent, unique library names that libraries can use to initialize their
 # properties.
 #
-# OUT_TARGET_NAME's variable specifies the library target name to use within
+# OUT_TARGET's variable specifies the library target name to use within
 # CMake commands; it will be <PROJECT_NAME>_<JCM_LIB_PREFIX><name>[-COMPONENT].
 # OUT_EXPORT_NAME's variable specifies the exported target name that consumers
 # will use; it will be <JCM_LIB_PREFIX><name>, or <COMPONENT> if COMPONENT is
@@ -28,7 +28,7 @@ include(JcmCanonicalStructure)
 # generated name constitutes. A COMPONENT that matches the PROJECT_NAME will be
 # ignored. Optional.
 #
-# OUT_TARGET_NAME: one-value arg; the name of the variable that will store the
+# OUT_TARGET: one-value arg; the name of the variable that will store the
 # library target name. Add a library with this name.
 #
 # OUT_EXPORT_NAME: one-value arg; the name of the variable that will store the
@@ -42,11 +42,11 @@ function(jcm_library_naming)
     ONE_VALUE_KEYWORDS
     "PROJECT"
     "COMPONENT"
-    "OUT_TARGET_NAME"
+    "OUT_TARGET"
     "OUT_EXPORT_NAME"
     "OUT_OUTPUT_NAME"
     REQUIRES_ANY
-    "OUT_TARGET_NAME"
+    "OUT_TARGET"
     "OUT_EXPORT_NAME"
     "OUT_OUTPUT_NAME"
     ARGUMENTS "${ARGN}"
@@ -89,9 +89,9 @@ function(jcm_library_naming)
   endif ()
 
   # Target name
-  if (DEFINED ARGS_OUT_TARGET_NAME)
+  if (DEFINED ARGS_OUT_TARGET)
     # prepend project name to avoid possible conflicts if added as subdirectory
-    set(${ARGS_OUT_TARGET_NAME} ${project_name}_${base_name} PARENT_SCOPE)
+    set(${ARGS_OUT_TARGET} ${project_name}_${base_name} PARENT_SCOPE)
   endif ()
 endfunction()
 
@@ -101,7 +101,7 @@ endfunction()
 # their properties. As a note, it's rare for an executable to be a component or
 # be exported.
 #
-# OUT_TARGET_NAME's variable specifies the executable target name to use within
+# OUT_TARGET's variable specifies the executable target name to use within
 # CMake commands; it will be <PROJECT_NAME>_<name>[-COMPONENT].
 # OUT_EXPORT_NAME's variable specifies the exported target name that consumers
 # will use; it will be <name>[-COMPONENT], or <COMPONENT> if COMPONENT is
@@ -121,7 +121,7 @@ endfunction()
 # the generated name constitutes. A COMPONENT that matches the PROJECT_NAME will
 # be ignored. Optional.
 #
-# OUT_TARGET_NAME: one-value arg; the name of the variable that will store the
+# OUT_TARGET: one-value arg; the name of the variable that will store the
 # executable target name. Add a executable with this name.
 #
 # OUT_EXPORT_NAME: one-value arg; the name of the variable that will store the
@@ -135,11 +135,11 @@ function(jcm_executable_naming)
     ONE_VALUE_KEYWORDS
     "PROJECT"
     "COMPONENT"
-    "OUT_TARGET_NAME"
+    "OUT_TARGET"
     "OUT_EXPORT_NAME"
     "OUT_OUTPUT_NAME"
     REQUIRES_ANY
-    "OUT_TARGET_NAME"
+    "OUT_TARGET"
     "OUT_EXPORT_NAME"
     "OUT_OUTPUT_NAME"
     ARGUMENTS "${ARGN}"
@@ -182,9 +182,9 @@ function(jcm_executable_naming)
   endif ()
 
   # Target name
-  if (DEFINED ARGS_OUT_TARGET_NAME)
+  if (DEFINED ARGS_OUT_TARGET)
     # prepend project name to avoid possible conflicts if added as subdirectory
-    set(${ARGS_OUT_TARGET_NAME} ${project_name}_${base_name} PARENT_SCOPE)
+    set(${ARGS_OUT_TARGET} ${project_name}_${base_name} PARENT_SCOPE)
   endif ()
 endfunction()
 

@@ -1,6 +1,6 @@
 jcm_add_executable(
   COMPONENT compiler
-  OUT_TARGET_NAME compiler-target
+  OUT_TARGET compiler-target
   SOURCES main.cpp
   LIB_SOURCES compile.hpp ../shared.hpp
 )

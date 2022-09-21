@@ -80,7 +80,7 @@ Examples
 .. code-block:: cmake
 
   jcm_add_executable(
-    OUT_TARGET_NAME target
+    OUT_TARGET target
     SOURCES main.cpp
     LIB_SOURCES engine.cpp
   )

@@ -210,7 +210,7 @@ function(jcm_configure_file)
 
   # Out Var
   if(DEFINED ARGS_OUT_FILE_VAR)
-    set(${ARGS_OUT_FILE_VAR} "${out_file_path}" PARENT_SCOPE)
+    set(${ARGS_OUT_FILE_VAR} "${CMAKE_CURRENT_BINARY_DIR}/${out_file_name}" PARENT_SCOPE)
   endif()
 endfunction()
 

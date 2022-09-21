@@ -29,7 +29,7 @@ jcm_add_executable
       [WITHOUT_CANONICAL_PROJECT_CHECK]
       [COMPONENT <component>]
       [NAME <name>]
-      [OUT_TARGET_NAME <out-var>]
+      [OUT_TARGET <out-var>]
       [LIB_SOURCES <source>...]
       SOURCES <source>...
     )
@@ -82,7 +82,7 @@ One Value
   Overrides the target name, output name, and exported name from those automatically created to
   conform to JCM's naming conventions
 
-:cmake:variable:`OUT_TARGET_NAME`
+:cmake:variable:`OUT_TARGET`
   The variable named will be set to the created target's name
 
 Multi Value
@@ -112,7 +112,7 @@ Examples
   # target will be xml::xml
 
   jcm_add_executable(
-    OUT_TARGET_NAME target
+    OUT_TARGET target
     SOURCES main.cpp
     LIB_SOURCES xml.cpp
   )
@@ -128,7 +128,7 @@ Examples
   # creates associated interface library, instead of object library
 
   jcm_add_executable(
-    OUT_TARGET_NAME target
+    OUT_TARGET target
     SOURCES main.cpp
     LIB_SOURCES coffee.hpp
   )
@@ -137,7 +137,7 @@ Examples
 function(jcm_add_executable)
   jcm_parse_arguments(
     OPTIONS "WITHOUT_CANONICAL_PROJECT_CHECK"
-    ONE_VALUE_KEYWORDS "COMPONENT;NAME;OUT_TARGET_NAME"
+    ONE_VALUE_KEYWORDS "COMPONENT;NAME;OUT_TARGET"
     MULTI_VALUE_KEYWORDS "SOURCES;LIB_SOURCES"
     REQUIRES_ALL "SOURCES"
     ARGUMENTS "${ARGN}")
@@ -208,13 +208,13 @@ function(jcm_add_executable)
   else ()
     jcm_executable_naming(
       ${comp_arg}
-      OUT_TARGET_NAME target_name
+      OUT_TARGET target_name
       OUT_EXPORT_NAME export_name
       OUT_OUTPUT_NAME output_name)
   endif ()
 
-  if (DEFINED ARGS_OUT_TARGET_NAME)
-    set(${ARGS_OUT_TARGET_NAME} ${target_name} PARENT_SCOPE)
+  if (DEFINED ARGS_OUT_TARGET)
+    set(${ARGS_OUT_TARGET} ${target_name} PARENT_SCOPE)
   endif ()
 
   # create executable target

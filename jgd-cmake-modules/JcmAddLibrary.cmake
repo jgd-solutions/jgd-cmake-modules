@@ -29,7 +29,7 @@ jcm_add_library
       [WITHOUT_CANONICAL_PROJECT_CHECK]
       [COMPONENT <component>]
       [NAME <name>]
-      [OUT_TARGET_NAME <out-var>]
+      [OUT_TARGET <out-var>]
       [TYPE <type>]
       ([INTERFACE_HEADERS <header>...]
       [PUBLIC_HEADERS <header>...]
@@ -95,7 +95,7 @@ One Value
   Overrides the target name, output name, and exported name from those automatically created to
   conform to JCM's naming conventions
 
-:cmake:variable:`OUT_TARGET_NAME`
+:cmake:variable:`OUT_TARGET`
   The variable named will be set to the created target's name
 
 :cmake:variable:`TYPE`
@@ -131,7 +131,7 @@ Examples
 .. code-block:: cmake
 
   # PROJECT_NAME is car
-  # Target will be named car::libengine (query through OUT_TARGET_NAME)
+  # Target will be named car::libengine (query through OUT_TARGET)
   # Shared options will be BUILD_SHARED_LIBS, CAR_BUILD_SHARED_LIBS, CAR_ENGINE_BUILD_SHARED
 
   jcm_add_library(
@@ -148,7 +148,7 @@ Examples
 function(jcm_add_library)
   jcm_parse_arguments(
     OPTIONS "WITHOUT_CANONICAL_PROJECT_CHECK"
-    ONE_VALUE_KEYWORDS "COMPONENT;NAME;TYPE;OUT_TARGET_NAME"
+    ONE_VALUE_KEYWORDS "COMPONENT;NAME;TYPE;OUT_TARGET"
     MULTI_VALUE_KEYWORDS "INTERFACE_HEADERS;PUBLIC_HEADERS;PRIVATE_HEADERS;SOURCES"
     REQUIRES_ANY "INTERFACE_HEADERS;PUBLIC_HEADERS;PRIVATE_HEADERS;SOURCES"
     ARGUMENTS "${ARGN}"
@@ -286,13 +286,13 @@ function(jcm_add_library)
   else ()
     jcm_library_naming(
       ${comp_arg}
-      OUT_TARGET_NAME target_name
+      OUT_TARGET target_name
       OUT_EXPORT_NAME export_name
       OUT_OUTPUT_NAME output_name)
   endif ()
 
-  if (DEFINED ARGS_OUT_TARGET_NAME)
-    set(${ARGS_OUT_TARGET_NAME} ${target_name} PARENT_SCOPE)
+  if (DEFINED ARGS_OUT_TARGET)
+    set(${ARGS_OUT_TARGET} ${target_name} PARENT_SCOPE)
   endif ()
 
   # == Create Library Target ==

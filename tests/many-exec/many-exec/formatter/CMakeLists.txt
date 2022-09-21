@@ -1,6 +1,6 @@
 jcm_add_executable(
   COMPONENT formatter
-  OUT_TARGET_NAME formatter-target
+  OUT_TARGET formatter-target
   SOURCES main.cpp
   LIB_SOURCES reformat.hpp ../shared.hpp
 )

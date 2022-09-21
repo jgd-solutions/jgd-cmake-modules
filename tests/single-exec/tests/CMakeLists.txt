@@ -2,7 +2,7 @@ include(JcmTargetNaming)
 include(JcmAddTestExecutable)
 
 # Run the main executable to test its operation
-jcm_executable_naming(OUT_TARGET_NAME exec-target)
+jcm_executable_naming(OUT_TARGET exec-target)
 add_test(NAME ${exec-target} COMMAND ${exec-target})
 
 # Run separate "integration" test, testing associated library from main exec

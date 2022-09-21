@@ -8,6 +8,8 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
+        with:
+          submodules: true
       - name: Install GCC with C++20
         uses: egor-tensin/setup-gcc@v1
         with:
@@ -28,7 +30,6 @@ jobs:
           pip install -r sphinx-requirements.txt
       - name: Configure all targets
         run: |
-          which python
           cmake --preset all-ninja
       - name: Run all automated tests
         run: |
