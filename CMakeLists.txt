@@ -10,6 +10,8 @@ set(CMAKE_INSTALL_LIBDIR "lib") # not used - set to calm GNUInstallDirs
 
 # must amend module path, as we can't find_package on ourself
 list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}")
+list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}/find-modules")
+
 include(JcmSetupProject)
 include(JcmStandardDirs)
 include(JcmInstallConfigFilePackage)
@@ -18,14 +20,17 @@ include(JcmConfigureFiles)
 jcm_setup_project(PREFIX_NAME "JCM")
 
 if(JCM_BUILD_TESTS)
+  # Unnecessarily finding ClangFormat here to see what ClangFormat test projects will use
+  find_package(ClangFormat)
   add_subdirectory("${JCM_PROJECT_TESTS_DIR}")
 endif()
 
 if(JCM_BUILD_DOCS)
-  list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}/find-modules")
   find_package(Sphinx REQUIRED)
   add_subdirectory("${JCM_PROJECT_DOCS_DIR}")
 endif()
+
+message(STATUS "compilers: ${CMAKE_CXX_COMPILER}")
 
 jcm_install_config_file_package(
   INSTALL_LICENSES

@@ -56,8 +56,7 @@ if(Python_Interpreter_FOUND)
   set(_Sphinx_hints
     "${_Python_interp_dir}"
     "${_Python_interp_dir}/bin"
-    "${_Python_interp_dir}/Scripts"
-  )
+    "${_Python_interp_dir}/Scripts")
   unset(_Python_interp_dir)
 endif()
 
@@ -76,18 +75,15 @@ if(Sphinx_EXECUTABLE)
     COMMAND "${Sphinx_EXECUTABLE}" --version
     OUTPUT_VARIABLE _Sphinx_version_stdout
     ERROR_VARIABLE _Sphinx_version_stderr
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-  )
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
 
   if(_Sphinx_version_stderr)
     message(WARNING
       "Failed to determine version of sphinx build executable (${Sphinx_EXECUTABLE})! Error:\n"
-      "${_Sphinx_version_stderr}"
-    )
+      "${_Sphinx_version_stderr}")
   elseif(NOT _Sphinx_version_stdout MATCHES "sphinx-build[23]? [0-9]+\\.[0-9]+\\.[0-9]+")
     message(WARNING
-      "Sphinx's version output is not recognized by this find module (${_Sphinx_version_stdout})!)"
-    )
+      "Sphinx's version output is not recognized by this find module (${_Sphinx_version_stdout})!)")
   else()
     # extract version from stdout
     string(REGEX REPLACE ".*sphinx-build[23]? " "" Sphinx_VERSION "${_Sphinx_version_stdout}")
@@ -102,12 +98,18 @@ if(Sphinx_EXECUTABLE)
   unset(_Sphinx_version_stdout)
 endif()
 
+string(CONCAT _Sphinx_failure_message
+    "Sphinx is not installed or a Python virtual environment may not have been activated.\n"
+    "'Sphinx_ROOT' can be set to refer to a Sphinx installation root, even within a virtual environment. "
+    "Ex. `cmake -B build -D Sphinx_ROOT=/home/me/.venv/bin`")
+
 find_package_handle_standard_args(Sphinx
   FOUND_VAR Sphinx_FOUND
   REQUIRED_VARS Sphinx_EXECUTABLE
   VERSION_VAR Sphinx_VERSION
-  REASON_FAILURE_MESSAGE "A Python virtual environment may not have been activated."
+  REASON_FAILURE_MESSAGE ${_Sphinx_failure_message}
 )
+unset(_Sphinx_failure_message)
 
 if (Sphinx_FOUND AND NOT TARGET Sphinx::build)
   add_executable(Sphinx::build IMPORTED)

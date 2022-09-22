@@ -3,8 +3,8 @@ project(many-exec VERSION 0.0.0 LANGUAGES CXX)
 
 find_package(jgd-cmake-modules CONFIG REQUIRED)
 find_package(ClangFormat)
-include(JcmAllModules)
 
+include(JcmAllModules)
 jcm_setup_project()
 jcm_source_subdirectories(ADD_SUBDIRS WITH_TESTS_DIR)
 

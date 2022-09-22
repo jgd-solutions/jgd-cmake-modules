@@ -13,7 +13,7 @@ executables. See :ref:`Examples<ExamplesAnchor>` below.
 Clang offers a `config-file package
 <https://github.com/llvm/llvm-project/blob/main/clang/cmake/modules/ClangConfig.cmake.in>`_, which
 can be used to locate ClangFormat from CMake. However, this requires having the *dev* packages
-of LLVM & Clang installed. Additionally, LLVM often isn't a dependency of ClangFormat packages,
+of LLVM & Clang installed. Additionally, LLVM often isn't a dependency of Clang(Format) packages,
 which are frequently distributed independently.
 
 Cache Variables
@@ -70,8 +70,7 @@ if(ClangFormat_FIND_VERSION)
   set(_ClangFormat_versioned_names
     "clang-format-${ClangFormat_FIND_VERSION_MAJOR}"
     "clang-format-${ClangFormat_FIND_VERSION_MAJOR}.${ClangFormat_FIND_VERSION_MINOR}"
-    "clang-format-${ClangFormat_FIND_VERSION}"
-  )
+    "clang-format-${ClangFormat_FIND_VERSION}")
 endif()
 
 
@@ -81,7 +80,7 @@ find_program(
   DOC "Path to clang-format executable"
 )
 unset(_ClangFormat_versioned_names)
-mark_as_advanced(Sphinx_EXECUTABLE)
+mark_as_advanced(ClangFormat_EXECUTABLE)
 
 # executable version
 if(ClangFormat_EXECUTABLE)
@@ -89,20 +88,17 @@ if(ClangFormat_EXECUTABLE)
     COMMAND "${ClangFormat_EXECUTABLE}" --version
     OUTPUT_VARIABLE _ClangFormat_version_stdout
     ERROR_VARIABLE _ClangFormat_version_stderr
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-  )
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
 
   if(_ClangFormat_version_stderr)
     message(WARNING
       "Failed to determine version of clang-format executable (${ClangFormat_EXECUTABLE})! Error:\n"
-      "${_ClangFormat_version_stderr}"
-    )
+      "${_ClangFormat_version_stderr}")
   elseif(NOT _ClangFormat_version_stdout MATCHES
           "clang-format(-[\\.0-9]+)? version [0-9]+\\.[0-9]+\\.[0-9]+")
     message(WARNING
       "clang-format's version output is not recognized by this find module"
-      " (${_ClangFormat_version_stdout})!)"
-    )
+      " (${_ClangFormat_version_stdout})!)")
   else()
     # extract version from stdout
     string(

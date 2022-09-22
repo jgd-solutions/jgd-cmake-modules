@@ -3,28 +3,25 @@ name: jgd-cmake-modules
 on: [push, pull_request]
 
 jobs:
-  build-test:
-    runs-on: ubuntu-latest
+  build-test-doc:
+    runs-on: ubuntu-22.04
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
         with:
           submodules: true
-      - name: Install GCC with C++20
-        uses: egor-tensin/setup-gcc@v1
+      - name: Install ninja-build
+        uses: seanmiddleditch/gha-setup-ninja@master
         with:
-          version: 11
-          platform: x64
-      - name: Install ninja-build and cmake
-        uses: lukka/get-cmake@v.3.23.2
+          version: 1.11.1
+
+      - name: ensure ninja
+        run: |
+          which ninja && ninja --version
       - name: Install Doxygen for tests
         run: |
           sudo apt-get update
           sudo apt-get install doxygen
-      - name: Install Python for documentation
-        uses: actions/setup-python@v4.2.0
-        with:
-          python-version: "3.10"
       - name: Install Python dependencies
         run: |
           pip install -r sphinx-requirements.txt
@@ -36,4 +33,4 @@ jobs:
           ctest --preset tests
       - name: Build documentation
         run: |
-          cmake --build --preset all-ninja
+          cmake --build --preset sphinx-docs

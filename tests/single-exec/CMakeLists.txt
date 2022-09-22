@@ -3,9 +3,8 @@ project(single-exec VERSION 0.0.0 LANGUAGES CXX)
 
 find_package(jgd-cmake-modules CONFIG REQUIRED)
 find_package(ClangFormat)
+
 include(JcmAllModules)
-
-
 jcm_setup_project()
 message(STATUS "STANDARD ${CMAKE_CXX_STANDARD}")
 jcm_source_subdirectories(ADD_SUBDIRS WITH_TESTS_DIR)
