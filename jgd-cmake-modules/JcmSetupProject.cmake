@@ -284,6 +284,11 @@ macro(JCM_SETUP_PROJECT)
     unset(rpath_base)
   endif ()
 
+  # CMake default sets CMAKE_MACOSX_RPATH, so only warn about setting if it's been set to OFF
+  if (NOT CMAKE_MACOSX_RPATH)
+    _jcm_warn_set(CMAKE_MACOSX_RPATH ON)
+  endif()
+
   # interprocedural/link-time optimization
 
   if ((NOT languages STREQUAL "NONE") AND (CMAKE_BUILD_TYPE MATCHES "Release|RelWithDepInfo"))

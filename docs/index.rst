@@ -3,6 +3,14 @@
 Welcome to JCM's documentation!
 ===============================
 
+jgd-cmake-modules
+-----------------
+
+A set of CMake modules to easily and consistently develop proper CMake based projects conforming to
+the `Canonical Project Structure`_.
+
+Check out the full `documentation <https://jgd-solutions.github.io/jgd-cmake-modules/>`_.
+
 Pages
 -----
 
@@ -15,20 +23,13 @@ Pages
    modules
    tests_readme_link
 
+
 Indices
 -------
 
 * :ref:`genindex`
 * :ref:`search`
 
-
-jgd-cmake-modules
-=================
-
-A set of CMake modules to easily and consistently develop proper CMake based projects conforming to
-the `Canonical Project Structure`_.
-
-Check out the full `documentation <https://jgd-solutions.github.io/jgd-cmake-modules/>`_.
 
 Sample
 ------
@@ -47,11 +48,11 @@ Sample
 
    libsample/CMakeLists.txt
 
+
 Examples
 --------
 
 This project uses its own modules, and acts as its own example!
 
 Additionally, the `tests/ <https://github.com/jgd-solutions/jgd-cmake-modules/tree/main/tests>`_ directory has sample projects that use *jgd-cmake-modules*.  Each project
-acts as an example of using *jgd-cmake-modules* and the `Canonical Project Structure`_.  See
-:doc:`tests/README.rst <tests_readme_link>` for more information.
+acts as an example of using *jgd-cmake-modules* and the `Canonical Project Structure`_.
