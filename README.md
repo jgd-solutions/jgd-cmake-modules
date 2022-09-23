@@ -10,7 +10,7 @@ Checkout the full [documentation](https://jgd-solutions.github.io/jgd-cmake-modu
   <img
     src="docs/data/top_level_sample.svg"
     alt="Sample code of top-level cmake with jgd-cmake-modules"
-    width="40%"
+    width="50%"
   />
 </p>
 
@@ -19,5 +19,8 @@ Examples
 
 This project uses its own modules, and acts as its own example!
 
-Additionally, the `tests/` directory has sample projects that use *jgd-cmake-modules*.
-Each project acts as an example of using *jgd-cmake-modules* and the [Canonical Project Structure](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p1204r0.html#:~:text=The%20canonical%20structure%20is%20primarily,specific%20and%20well%2Ddefined%20function.).
+Additionally, the [tests/](https://github.com/jgd-solutions/jgd-cmake-modules/tree/main/tests) directory has sample
+projects that use *jgd-cmake-modules*.
+Each project acts as an example of using *jgd-cmake-modules* and
+the [Canonical Project Structure](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p1204r0.html#:~:text=The%20canonical%20structure%20is%20primarily,specific%20and%20well%2Ddefined%20function.)
+.

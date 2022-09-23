@@ -52,6 +52,6 @@ Examples
 
 This project uses its own modules, and acts as its own example!
 
-Additionally, the `tests/` directory has sample projects that use *jgd-cmake-modules*.  Each project
+Additionally, the `tests/ <https://github.com/jgd-solutions/jgd-cmake-modules/tree/main/tests>`_ directory has sample projects that use *jgd-cmake-modules*.  Each project
 acts as an example of using *jgd-cmake-modules* and the `Canonical Project Structure`_.  See
 :doc:`tests/README.rst <tests_readme_link>` for more information.
