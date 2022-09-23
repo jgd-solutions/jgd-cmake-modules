@@ -3,10 +3,10 @@ name: jgd-cmake-modules
 on: [push, pull_request]
 
 jobs:
-  build-test-doc:
+  build-test:
     runs-on: ubuntu-22.04
     steps:
-      - name: Check out repository code
+      - name: Checkout
         uses: actions/checkout@v3
         with:
           submodules: true
@@ -14,23 +14,11 @@ jobs:
         uses: seanmiddleditch/gha-setup-ninja@master
         with:
           version: 1.11.1
-
-      - name: ensure ninja
-        run: |
-          which ninja && ninja --version
       - name: Install Doxygen for tests
         run: |
           sudo apt-get update
           sudo apt-get install doxygen
-      - name: Install Python dependencies
-        run: |
-          pip install -r sphinx-requirements.txt
-      - name: Configure all targets
-        run: |
-          cmake --preset all-ninja
+      - name: Configure tests target
+        run: cmake --preset tests-ninja
       - name: Run all automated tests
-        run: |
-          ctest --preset tests
-      - name: Build documentation
-        run: |
-          cmake --build --preset sphinx-docs
+        run: ctest --preset tests

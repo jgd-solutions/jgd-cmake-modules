@@ -30,8 +30,6 @@ if(JCM_BUILD_DOCS)
   add_subdirectory("${JCM_PROJECT_DOCS_DIR}")
 endif()
 
-message(STATUS "compilers: ${CMAKE_CXX_COMPILER}")
-
 jcm_install_config_file_package(
   INSTALL_LICENSES
   CONFIGURE_PACKAGE_CONFIG_FILES
