@@ -2,7 +2,7 @@
 
 A set of CMake modules to easily and consistently develop proper CMake based projects conforming to the [Canonical Project Structure](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p1204r0.html#:~:text=The%20canonical%20structure%20is%20primarily,specific%20and%20well%2Ddefined%20function.).
 
-For documentation, see DOOOOOOOOOCS
+Checkout the full [documentation](https://jgd-solutions.github.io/jgd-cmake-modules/).
 
 ## Sample
 
