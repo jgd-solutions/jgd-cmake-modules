@@ -1,0 +1,38 @@
+# Configuration file for the Sphinx documentation builder.
+#
+# For the full list of built-in configuration values, see the documentation:
+# https://www.sphinx-doc.org/en/master/usage/configuration.html
+
+# -- Project information -----------------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
+
+project = "@PROJECT_NAME@"
+copyright = "2022, Justen Di Ruscio"
+author = "Justen Di Ruscio"
+version = "@PROJECT_VERSION_MAJOR@.@PROJECT_VERSION_MINOR@"  # feature version
+release = "@PROJECT_VERSION@"  # full version string
+
+# -- General configuration ---------------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
+extensions = ["sphinxcontrib.moderncmakedomain"]
+
+templates_path = ["_templates"]
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+
+
+# -- Options for HTML output -------------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
+
+html_theme = "sphinx_rtd_theme"
+html_use_index = True
+html_domain_indices = False
+html_static_path = ["_static"]
+
+canonical_proj_url = r"https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p1204r0.html#:~:text=The%20canonical%20structure%20is%20primarily,specific%20and%20well%2Ddefined%20function."
+rst_prolog = f"""
+.. role:: cmake(code)
+   :language: cmake
+"""
+rst_epilog = f"""
+.. _Canonical Project Structure: {canonical_proj_url}
+"""

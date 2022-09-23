@@ -39,12 +39,34 @@ endif()
 if(test_name MATCHES "single-exec")
   add_test(NAME ${test_name} COMMAND single-exec::single-exec)
   return()
+elseif(test_name MATCHES "many-exec")
+
+  if(components MATCHES "compiler")
+    add_test(NAME ${test_name}-compiler COMMAND many-exec::compiler arg)
+  endif()
+  if(components MATCHES "formatter")
+    add_test(NAME ${test_name}-formatter COMMAND many-exec::formatter arg)
+  endif()
+  return()
+
 elseif(test_name MATCHES "libsingle")
   add_executable(${test_name} use_libsingle.cpp)
   target_link_libraries(${test_name} PRIVATE libsingle::libsingle)
 elseif(test_name MATCHES "libcomponents")
-  add_executable(${test_name} use_libcomponents.cpp)
-  target_link_libraries(${test_name} PRIVATE libcomponents::extra)
+
+  if(NOT components OR components MATCHES "extra")
+    add_executable(${test_name} use_libcomponents_extra.cpp)
+    target_link_libraries(${test_name} PRIVATE libcomponents::extra)
+  elseif(components MATCHES "core")
+    add_executable(${test_name} use_libcomponents_core.cpp)
+    target_link_libraries(${test_name} PRIVATE libcomponents::core)
+  elseif()
+    message(
+      FATAL_ERROR
+      "No recognized components specified for testing libcomponents: ${components}"
+    )
+  endif()
+
 elseif(test_name MATCHES "libheaders")
   add_executable(${test_name} use_libheaders.cpp)
   target_link_libraries(${test_name} PRIVATE libheaders::libheaders)

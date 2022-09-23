@@ -1,8 +1,15 @@
-include(JcmAddExecutable)
-include(JcmAddTestExecutable)
+jcm_configure_file(IN_FILE single-exec_config.hpp.in)
 
-jcm_add_executable(MAIN_SOURCES main.cpp SOURCES exec.hpp exec.cpp OUT_TARGET_NAME exec-target)
+jcm_add_executable(
+  OUT_TARGET exec-target
+  SOURCES main.cpp
+  LIB_SOURCES exec.hpp exec.cpp
+)
+
+target_compile_features(${exec-target} PRIVATE cxx_std_17)
+
 jcm_add_test_executable(
-  EXECUTABLE ${PROJECT_NAME}-unit-test
+  NAME ${PROJECT_NAME}-unit-test
   SOURCES exec.test.cpp
-  LIBS ${exec-target}-objects)
+  LIBS ${exec-target}-library
+)

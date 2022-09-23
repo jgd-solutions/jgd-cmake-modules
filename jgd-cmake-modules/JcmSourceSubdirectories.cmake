@@ -23,23 +23,44 @@ macro(_JCM_CHECK_ADD_SUBDIR out_added_subdirs)
     OPTIONS "ADD_SUBDIRS" "FATAL"
     ONE_VALUE_KEYWORDS "SUBDIR"
     REQUIRES_ALL "SUBDIR"
-    ARGUMENTS "${ARGN}")
+    ARGUMENTS "${ARGN}"
+  )
+
+  macro(on_fatal_message msg)
+    if(ARGS_FATAL)
+      message(FATAL_ERROR "${msg}")
+    endif()
+  endmacro()
 
   if (ARGS_SUBDIR IN_LIST subdir_omissions)
+    # skip subdirectory all together
     message(STATUS "Omitting subdirectory from project ${PROJECT_NAME}: ${ARGS_SUBDIR}")
     list(REMOVE_ITEM unused_subdir_omissions "${ARGS_SUBDIR}")
-  elseif (IS_DIRECTORY "${ARGS_SUBDIR}")
-    list(APPEND ${out_added_subdirs} "${ARGS_SUBDIR}")
-    if (ARGS_ADD_SUBDIRS)
-      message(VERBOSE "${CMAKE_CURRENT_FUNCTION}: Adding directory ${ARGS_SUBDIR} to project "
-        "${PROJECT_NAME}")
-      add_subdirectory("${ARGS_SUBDIR}")
+  else()
+    if (NOT IS_DIRECTORY "${ARGS_SUBDIR}")
+      on_fatal_message(
+        "${CMAKE_CURRENT_FUNCTION} could not add subdirectory ${subdir_path} for project "
+        "${PROJECT_NAME}. The directory does not exist."
+      )
+    elseif (NOT EXISTS "${ARGS_SUBDIR}/CMakeLists.txt")
+      on_fatal_message(
+        "${CMAKE_CURRENT_FUNCTION} could not add subdirectory ${subdir_path} for project "
+        "${PROJECT_NAME}. The directory does not contain a CMakeLists.txt file."
+      )
+    elseif (CMAKE_CURRENT_SOURCE_DIR STREQUAL ARGS_SUBDIR)
+      on_fatal_message(
+        "${CMAKE_CURRENT_SOURCE_DIR} tries to add itself as a subdirectory."
+      )
+    else()
+      # directory and file exist, deal with subdirectory
+      list(APPEND ${out_added_subdirs} "${ARGS_SUBDIR}")
+      if (ARGS_ADD_SUBDIRS)
+        message(VERBOSE "${CMAKE_CURRENT_FUNCTION}: Adding directory ${ARGS_SUBDIR} to project "
+          "${PROJECT_NAME}")
+        add_subdirectory("${ARGS_SUBDIR}")
+      endif()
     endif()
-  elseif(ARGS_FATAL)
-    message(
-      FATAL_ERROR
-      "${CMAKE_CURRENT_FUNCTION} could not add subdirectory ${subdir_path} for project "
-      "${PROJECT_NAME}. The directory does not exist.")
+
   endif()
 endmacro()
 
@@ -112,7 +133,11 @@ function(jcm_source_subdirectories)
 
   # Add Subdirs
 
-  # library subdirectories
+  # add single library subdirectory, if it exists
+  jcm_canonical_lib_subdir(OUT_VAR lib_subdir)
+  _jcm_check_add_subdir(subdirs_added ${add_subdirs_arg} SUBDIR "${lib_subdir}")
+
+  # library component subdirectories
   if (DEFINED ARGS_LIB_COMPONENTS)
     # add all library components' subdirectories
     foreach (component ${ARGS_LIB_COMPONENTS})
@@ -122,13 +147,13 @@ function(jcm_source_subdirectories)
       _jcm_check_add_subdir(subdirs_added FATAL ${add_subdirs_arg} SUBDIR "${subdir_path}")
       unset(JCM_CURRENT_COMPONENT)
     endforeach ()
-  else ()
-    # add single library subdirectory, if it exists
-    jcm_canonical_lib_subdir(OUT_VAR lib_subdir)
-    _jcm_check_add_subdir(subdirs_added ${add_subdirs_arg} SUBDIR "${lib_subdir}")
   endif ()
 
-  # executable subdirectories
+  # add single executable subdirectory, if it exists
+  jcm_canonical_exec_subdir(OUT_VAR exec_subdir)
+  _jcm_check_add_subdir(subdirs_added ${add_subdirs_arg} SUBDIR "${exec_subdir}")
+
+  # executable component subdirectories
   if (DEFINED ARGS_EXEC_COMPONENTS)
     # add all executable components' subdirectories
     foreach (component ${ARGS_EXEC_COMPONENTS})
@@ -138,10 +163,6 @@ function(jcm_source_subdirectories)
       _jcm_check_add_subdir(subdirs_added FATAL ${add_subdirs_arg} SUBDIR "${subdir_path}")
       unset(JCM_CURRENT_COMPONENT)
     endforeach ()
-  else ()
-    # add single executable subdirectory, if it exists
-    jcm_canonical_exec_subdir(OUT_VAR exec_subdir)
-    _jcm_check_add_subdir(subdirs_added ${add_subdirs_arg} SUBDIR "${exec_subdir}")
   endif ()
 
   # Ensure at least one subdirectory was added
@@ -161,11 +182,12 @@ function(jcm_source_subdirectories)
     _jcm_check_add_subdir(subdirs_added FATAL ${add_subdirs_arg} SUBDIR "${JCM_PROJECT_DOCS_DIR}")
   endif ()
 
-  # Check for accidental additions to omissions option
+  # Check for accidental entries in omissions option
   if(unused_subdir_omissions)
     message(WARNING "The following subdirectories are omitted based on the targets specified in "
-                    "${JCM_PROJECT_PREFIX_NAME}_OMIT_TARGETS but never get added by the project: "
-                    "${unused_subdir_omissions}")
+                    "${JCM_PROJECT_PREFIX_NAME}_OMIT_TARGETS, but these subdirectories aren't "
+                    "added by the project: ${unused_subdir_omissions}"
+    )
   endif()
 
   # Set result variable

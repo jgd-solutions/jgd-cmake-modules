@@ -1,5 +1,18 @@
 include_guard()
 
+#[=======================================================================[.rst:
+
+JcmSetupProject
+----------------
+
+Offers utilities to properly setup a CMake project for consumption as both a sub-project and a
+binary package. Creates target component, *COMPONENT*, and defines macro
+:cmake:command:`jcm_setup_project` used to setup a CMake project.
+
+--------------------------------------------------------------------------
+
+#]=======================================================================]
+
 include(JcmParseArguments)
 include(JcmFileNaming)
 include(JcmStandardDirs)
@@ -35,10 +48,92 @@ macro(_JCM_CHECK_SET variable value)
   endif ()
 endmacro()
 
-# JCM_PROJECT_PREFIX_NAME, guards against basic project issues sets a bunch of
-# CMAKE_ variables to set default target properties & configure cmake operation
-# enables testing so it's never forgotten, even if there's no tests, it can
-# still be run
+#[=======================================================================[.rst:
+
+jcm_setup_project
+^^^^^^^^^^^^^^^^^
+
+.. cmake:command:: jcm_setup_project
+
+  .. code-block:: cmake
+
+    jcm_setup_project([PREFIX_NAME] <project-prefix>)
+
+Sets up a CMake project in the top-level `CMakeLists.txt`.
+
+This function will:
+  - guard against misuse and malpractice, such as :cmake:variable:`PROJECT_NAME` being defined, the
+    call-site is in the top-level CMakeLists.txt, preventing in-source builds, and ensuring project
+    naming conventions.
+  - set variable :cmake:variable:`JCM_PROJECT_PREFIX_NAME` to the upper-case project name, or
+    :cmake:variable:`PREFIX_NAME`, if provided. This variable is used as the prefix name to subsequent
+    macros, options, and variables.
+  - create options:
+
+      ${JCM_PROJECT_PREFIX_NAME}_BUILD_TESTS
+        Enables/disables building project tests for this specific project. Default:
+        :cmake:variable:`BUILD_TESTING`
+
+      ${JCM_PROJECT_PREFIX_NAME}_BUILD_DOCS
+        Enables/disables building project documentation for this specific project. Default:
+        *OFF*
+
+      ${JCM_PROJECT_PREFIX_NAME}_OMIT_TARGETS
+        List of project alias targets (${PROJECT_NAME}:: ...) to omit during CMake configuration
+
+  - set default values for CMake variables controlling the build when the current project is the
+    top-level project
+
+    - :cmake:variable:`CMAKE_BUILD_TYPE`
+    - :cmake:variable:`CMAKE_EXPORT_COMPILE_COMMANDS`
+    - :cmake:variable:`CMAKE_LINK_WHAT_YOU_USE`
+    - :cmake:variable:`CMAKE_COLOR_DIAGNOSTICS`
+    - :cmake:variable:`CMAKE_INSTALL_PREFIX`
+    - :cmake:variable:`CMAKE_DEBUG_POSTFIX`
+    - :cmake:variable:`CMAKE_OBJECT_PATH_MAX` (Windows)
+
+  - set values for variables CMake uses to initialize target properties, only when the current
+    project is top-level
+
+    - :cmake:variable:`CMAKE_INSTALL_RPATH` (runtime search path (RPATH) for shared object libraries)
+    - :cmake:variable:`CMAKE_ARCHIVE_OUTPUT_DIRECTORY`
+    - :cmake:variable:`CMAKE_LIBRARY_OUTPUT_DIRECTORY`
+    - :cmake:variable:`CMAKE_RUNTIME_OUTPUT_DIRECTORY`
+    - :cmake:variable:`CMAKE_<LANG>_STANDARD`
+    - :cmake:variable:`CMAKE_<LANG>_STANDARD_REQUIRED`
+    - :cmake:variable:`CMAKE_<LANG>_EXTENSIONS`
+    - :cmake:variable:`CMAKE_<LANG>_VISIBILITY_PRESET`
+    - :cmake:variable:`CMAKE_VISIBILITY_INLINES_HIDDEN`
+
+  - enable interprocedural optimization in *Release* mode
+  - always enable testing so testing never fails, even if there are no tests, and includes CTest
+    when *${JCM_PROJECT_PREFIX_NAME}_BUILD_TESTS* is set.
+
+
+Parameters
+##########
+
+One Value
+~~~~~~~~~~
+
+:cmake:variable:`PREFIX_NAME`
+  Sets variable :cmake:variable:`JCM_PROJECT_PREFIX_NAME`, which is used as the prefix for
+  variables, macros, options, etc. specific to this project.
+
+Examples
+########
+
+.. code-block:: cmake
+
+  jcm_setup_project()
+
+
+.. code-block:: cmake
+
+  jcm_setup_project(PREFIX_NAME STX)
+
+#]=======================================================================]
+
 macro(JCM_SETUP_PROJECT)
   # == Usage Guards ==
 
@@ -127,10 +222,12 @@ macro(JCM_SETUP_PROJECT)
   # == Variables Setting Default Target Properties ==
 
   # basic
+  _jcm_check_set(CMAKE_BUILD_TYPE "Release")
   _jcm_warn_set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
   _jcm_warn_set(CMAKE_OPTIMIZE_DEPENDENCIES ON)
   _jcm_warn_set(CMAKE_LINK_WHAT_YOU_USE ON)
   _jcm_warn_set(CMAKE_COLOR_DIAGNOSTICS ON)
+  _jcm_warn_set(CMAKE_DEBUG_POSTFIX "-debug")
 
   # add project's cmake modules to path
   list(FIND CMAKE_MODULE_PATH "${JCM_PROJECT_CMAKE_DIR}" cmake_dir_idx)
@@ -189,8 +286,7 @@ macro(JCM_SETUP_PROJECT)
 
   # interprocedural/link-time optimization
 
-  if ((NOT languages STREQUAL "NONE") AND (CMAKE_BUILD_TYPE MATCHES
-    "Release|RelWithDepInfo"))
+  if ((NOT languages STREQUAL "NONE") AND (CMAKE_BUILD_TYPE MATCHES "Release|RelWithDepInfo"))
     check_ipo_supported(RESULT ipo_supported OUTPUT err_msg)
     if (ipo_supported)
       _jcm_warn_set(CMAKE_INTERPROCEDURAL_OPTIMIZATION $<IF:$<CONFIG:DEBUG>,OFF,ON>)
@@ -218,21 +314,25 @@ macro(JCM_SETUP_PROJECT)
   # default install prefix to Filesystem Hierarchy Standard's "add-on" path
   if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT AND NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
     # can follow opt/ with provider, once registered with LANANA
-    _jcm_warn_set(CMAKE_INSTALL_PREFIX "/opt/${PROJECT_NAME}" CACHE PATH "Base installation location. " FORCE)
+    _jcm_warn_set(
+      CMAKE_INSTALL_PREFIX "/opt/${PROJECT_NAME}" CACHE PATH "Base installation location. " FORCE)
   endif ()
 
   # enable testing by default so invoking ctest always succeeds
   enable_testing()
-  if(PROJECT_IS_TOP_LEVEL AND ${JCM_PROJECT_PREFIX_NAME}_BUILD_TESTS)
+
+  # include CMake's CTest when testing
+  if(${JCM_PROJECT_PREFIX_NAME}_BUILD_TESTS)
     if(DEFINED BUILD_TESTING)
       set(original_build_testing_value ${BUILD_TESTING})
     else()
       unset(original_build_testing_value)
     endif()
 
+    # CTest needs BUILD_TESTING
     set(BUILD_TESTING ON)
     include(CTest)
-
     set(BUILD_TESTING ${original_build_testing_value})
+
   endif()
 endmacro()

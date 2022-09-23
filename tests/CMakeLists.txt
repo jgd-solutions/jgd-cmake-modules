@@ -7,7 +7,8 @@ function(_build_and_ctest project_name)
   jcm_parse_arguments(
     ONE_VALUE_KEYWORDS "NAME_SUFFIX" "BUILD_TARGET"
     MULTI_VALUE_KEYWORDS "BUILD_OPTIONS"
-    ARGUMENTS "${ARGN}")
+    ARGUMENTS "${ARGN}"
+  )
 
   if(NOT ARGS_BUILD_TARGET)
     set(ARGS_BUILD_TARGET all)
@@ -30,8 +31,7 @@ function(_build_and_ctest project_name)
     ${test_arg})
 endfunction()
 
-
-function(_install_find_use_project project_name)
+function(_install_project project_name)
   set(${project_name}_ROOT "${CMAKE_CURRENT_BINARY_DIR}/${project_name}/install")
 
   add_test(
@@ -40,10 +40,30 @@ function(_install_find_use_project project_name)
     "${CMAKE_COMMAND}"
     --install "${CMAKE_CURRENT_BINARY_DIR}/${project_name}"
     --verbose
-    --prefix "${${project_name}_ROOT}")
+    --prefix "${${project_name}_ROOT}"
+  )
+endfunction()
+
+function(_find_use_project project_name)
+  jcm_parse_arguments(
+    ONE_VALUE_KEYWORDS "PROJECT_NAME"
+    MULTI_VALUE_KEYWORDS "COMPONENTS"
+    ARGUMENTS "${ARGN}"
+  )
+
+  if(ARGS_COMPONENTS)
+    set(specified_components "${ARGS_COMPONENTS}")
+    string(REPLACE ";" "-" test_name_suffix "${specified_components}")
+    set(test_name_suffix "-${test_name_suffix}")
+  else()
+    unset(specified_components)
+    unset(test_name_suffix)
+  endif()
+
+  set(${project_name}_ROOT "${CMAKE_CURRENT_BINARY_DIR}/${project_name}/install")
 
   add_test(
-    NAME ${project_name}-find-use
+    NAME ${project_name}-find-use${test_name_suffix}
     COMMAND
     "${CMAKE_CTEST_COMMAND}"
     --verbose
@@ -58,8 +78,9 @@ function(_install_find_use_project project_name)
       "-D jgd-cmake-modules_ROOT:PATH=${jgd-cmake-modules_ROOT}"
       "-D ${project_name}_ROOT:PATH=${${project_name}_ROOT}"
       "-D test_name=find-use-${project_name}"
-      "-D components=${ARGN}"
-    --test-command "${CMAKE_CTEST_COMMAND}")
+      "-D components=${specified_components}"
+    --test-command "${CMAKE_CTEST_COMMAND}"
+  )
 endfunction()
 
 function(_add_use_project project_name)
@@ -90,7 +111,8 @@ add_test(
   "${CMAKE_COMMAND}"
   --install "${PROJECT_BINARY_DIR}"
   --verbose
-  --prefix "${jgd-cmake-modules_ROOT}")
+  --prefix "${jgd-cmake-modules_ROOT}"
+)
 
 
 # == single-exec ==
@@ -103,8 +125,26 @@ _build_and_ctest("single-exec"
 _build_and_ctest("single-exec"
   BUILD_OPTIONS -DSINGLE_EXEC_BUILD_TESTS=ON)
 
-_install_find_use_project("single-exec")
+
+_install_project("single-exec")
+_find_use_project("single-exec")
 _add_use_project("single-exec")
+
+# == many-exec ==
+
+_build_and_ctest("many-exec"
+  BUILD_OPTIONS -DMANY_EXEC_BUILD_TESTS=ON
+  NAME_SUFFIX -format
+  BUILD_TARGET clang-format-check)
+
+_build_and_ctest("many-exec"
+  BUILD_OPTIONS -DMANY_EXEC_BUILD_TESTS=ON)
+
+_install_project("many-exec")
+_find_use_project("many-exec")
+_find_use_project("many-exec" COMPONENTS formatter)
+_find_use_project("many-exec" COMPONENTS compiler formatter)
+_add_use_project("many-exec")
 
 
 # == libsingle ==
@@ -126,7 +166,8 @@ _build_and_ctest("libsingle"
   NAME_SUFFIX -docs
   BUILD_TARGET doxygen-docs)
 
-_install_find_use_project("libsingle")
+_install_project("libsingle")
+_find_use_project("libsingle")
 _add_use_project("libsingle")
 
 
@@ -146,7 +187,11 @@ _build_and_ctest("libcomponents"
   BUILD_OPTIONS -DLIBCOMPONENTS_BUILD_TESTS=ON -DLIBCOMPONENTS_CORE_BUILD_SHARED=ON
   NAME_SUFFIX -shared)
 
-_install_find_use_project("libcomponents" core extra)
+_install_project("libcomponents")
+_find_use_project("libcomponents")
+_find_use_project("libcomponents" COMPONENTS core)
+_find_use_project("libcomponents" COMPONENTS extra)
+_find_use_project("libcomponents" COMPONENTS core extra)
 _add_use_project("libcomponents")
 
 _build_and_ctest("libcomponents"
@@ -165,5 +210,6 @@ _build_and_ctest("libheaders"
 _build_and_ctest("libheaders"
   BUILD_OPTIONS -DLIBHEADERS_BUILD_TESTS=ON)
 
-_install_find_use_project("libheaders")
+_install_project("libheaders")
+_find_use_project("libheaders")
 _add_use_project("libheaders")

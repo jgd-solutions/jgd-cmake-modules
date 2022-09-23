@@ -8,7 +8,8 @@ function(jcm_header_file_set scope)
     ONE_VALUE_KEYWORDS "TARGET"
     MULTI_VALUE_KEYWORDS "HEADERS"
     REQUIRES_ALL "HEADERS"
-    ARGUMENTS "${ARGN}")
+    ARGUMENTS "${ARGN}"
+  )
 
   # Usage Guards
 
@@ -21,41 +22,52 @@ function(jcm_header_file_set scope)
     message(FATAL_ERROR "One of ${supported_scopes} must be provided as the scope to ${CMAKE_CURRENT_FUNCTION}")
   endif ()
 
-  get_target_property(target_source_dir ${ARGS_TARGET} SOURCE_DIR)
-  jcm_canonical_include_dirs(TARGET ${ARGS_TARGET} OUT_VAR include_dirs)
+  # Transform headers to normalized absolute paths
+  jcm_transform_list(ABSOLUTE_PATH INPUT "${ARGS_HEADERS}" OUT_VAR ARGS_HEADERS)
+  jcm_transform_list(NORMALIZE_PATH INPUT "${ARGS_HEADERS}" OUT_VAR ARGS_HEADERS)
+
+  # Resolve the canonical include directory to which each header belongs
+  jcm_canonical_include_dirs(
+    WITH_BINARY_INCLUDE_DIRS
+    TARGET ${ARGS_TARGET}
+    OUT_VAR available_include_dirs
+  )
 
   foreach (header_path ${ARGS_HEADERS})
-    if (NOT IS_ABSOLUTE "${header_path}")
-      set(header_path "${target_source_dir}/${header_path}")
-    endif ()
-
-    set(shortest_relative_length 65000)
-    set(base_dir)
-    foreach (include_dir ${include_dirs})
+    set(shortest_distance_from_include_dir 65000)
+    unset(chosen_include_dir)
+    foreach (include_dir ${available_include_dirs})
       if (NOT header_path MATCHES "^${include_dir}")
         continue()
       endif ()
 
-      string(REPLACE "${include_dir}" "" relative_path "${header_path}")
-      string(LENGTH "${relative_path}" relative_length)
+      string(REPLACE "${include_dir}" "" relative_to_include "${header_path}")
+      string(LENGTH "${relative_to_include}" distance_from_include)
 
-      if (relative_length LESS shortest_relative_length)
-        set(shortest_relative_length ${relative_length})
-        set(base_dir "${include_dir}")
-      elseif (relative_length EQUAL shortest_relative_length)
-        message(AUTHOR_WARNING "Multiple canonical include directories refer to the same path: "
-          "${include_dir} & ${base_dir}")
+      if (distance_from_include LESS shortest_distance_from_include_dir)
+        set(shortest_distance_from_include_dir ${distance_from_include})
+        set(chosen_include_dir "${include_dir}")
+      elseif (distance_from_include EQUAL shortest_distance_from_include_dir)
+        message(AUTHOR_WARNING
+          "Multiple canonical include directories refer to the same path: "
+          "${include_dir} & ${chosen_include_dir}")
       endif ()
     endforeach ()
 
-    if (NOT base_dir)
+    if (NOT DEFINED chosen_include_dir)
       message(FATAL_ERROR "Could not resolve the canonical include directory for ${header_path}")
     endif ()
 
-    string(MD5 base_dir_hash "${base_dir}")
-    string(REPLACE "-" "_" file_set_name "${ARGS_TARGET}_${scope}_${base_dir_hash}")
+    # add the header to the header file set for its belonging include directory
+    string(MD5 include_dir_hash "${chosen_include_dir}")
+    string(REPLACE "-" "_" file_set_name "${ARGS_TARGET}_${scope}_${include_dir_hash}")
 
-    target_sources(${ARGS_TARGET} ${scope} FILE_SET "${file_set_name}"
-      TYPE HEADERS BASE_DIRS "${base_dir}" FILES "${header_path}")
+    target_sources(${ARGS_TARGET}
+      ${scope}
+      FILE_SET "${file_set_name}"
+      TYPE HEADERS
+      BASE_DIRS "${chosen_include_dir}"
+      FILES "${header_path}"
+    )
   endforeach ()
 endfunction()

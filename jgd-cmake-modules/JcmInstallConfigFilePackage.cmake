@@ -12,20 +12,27 @@ include(CMakePackageConfigHelpers)
 
 function(jcm_install_config_file_package)
   jcm_parse_arguments(
-    OPTIONS "CONFIGURE_PACKAGE_CONFIG_FILES"
+    OPTIONS "CONFIGURE_PACKAGE_CONFIG_FILES" "INSTALL_LICENSES"
     MULTI_VALUE_KEYWORDS "TARGETS;CMAKE_MODULES"
-    REQUIRES_ANY "TARGETS;CMAKE_MODULES"
+    REQUIRES_ANY "TARGETS;CMAKE_MODULES;INSTALL_LICENSES"
     ARGUMENTS "${ARGN}")
 
-  # Usage guard
+  # Usage guards
   if (NOT DEFINED ${PROJECT_NAME}_VERSION)
     message(
       AUTHOR_WARNING
       "It's not recommended to install a config file package without a "
       "project version, as consumers won't be able to version their "
-      "consumption and all versions will be installed into the same directory"
-    )
+      "consumption and all versions will be installed into the same directory")
   endif ()
+
+  foreach(target ${ARGS_TARGETS})
+    if(NOT TARGET ${target})
+      message(
+        FATAL_ERROR
+        "Cannot install target ${target}. The target does not exist!")
+    endif()
+  endforeach()
 
   set(install_cmake_files) # list of cmake files to install at end
 
@@ -104,11 +111,12 @@ function(jcm_install_config_file_package)
 
     if (module_files)
       jcm_separate_list(
-        IN_LIST "${module_files}"
+        INPUT "${module_files}"
         REGEX "${JCM_CMAKE_MODULE_REGEX}"
         TRANSFORM "FILENAME"
         OUT_MATCHED correct_files
-        OUT_UNMATCHED incorrect_files)
+        OUT_MISMATCHED incorrect_files
+      )
       if (incorrect_files)
         message(
           AUTHOR_WARNING
@@ -126,7 +134,8 @@ function(jcm_install_config_file_package)
   install(
     FILES ${install_cmake_files}
     DESTINATION "${JCM_INSTALL_CMAKE_DESTINATION}"
-    COMPONENT ${PROJECT_NAME}_devel)
+    COMPONENT ${PROJECT_NAME}_devel
+  )
 
   # == Install targets via export sets ==
 
@@ -165,7 +174,8 @@ function(jcm_install_config_file_package)
       ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
       COMPONENT ${PROJECT_NAME}_devel
       ${file_set_args}
-      INCLUDES DESTINATION "${JCM_INSTALL_INCLUDE_DIR}")
+      INCLUDES DESTINATION "${JCM_INSTALL_INCLUDE_DIR}"
+    )
 
     install(
       EXPORT ${export_set_name}
@@ -196,6 +206,8 @@ function(jcm_install_config_file_package)
     endforeach ()
   endfunction()
 
-  install_licenses("LICENSE*" "")
-  install_licenses("licenses/*" "licenses")
+  if(ARGS_INSTALL_LICENSES)
+    install_licenses("LICENSE*" "")
+    install_licenses("licenses/*" "licenses")
+  endif()
 endfunction()

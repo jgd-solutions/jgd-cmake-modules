@@ -1,9 +1,8 @@
 include(JcmAddTestExecutable)
 jcm_add_test_executable(
-  EXECUTABLE
-  components-test
+  NAME components-test
   LIBS
-  libcomponents::core
-  libcomponents::extra
-  SOURCES
-  test.cpp)
+    libcomponents::core
+    libcomponents::extra
+  SOURCES test.cpp
+)

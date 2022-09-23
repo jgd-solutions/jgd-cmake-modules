@@ -1,0 +1,3 @@
+include(JcmCreateAccessoryTargets)
+
+jcm_create_sphinx_target(CONFIGURE_CONF_PY)

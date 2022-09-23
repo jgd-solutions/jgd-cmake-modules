@@ -1,0 +1,64 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 23,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "default-ninja",
+      "displayName": "Default with Ninja",
+      "description": "Default CMake options configures the project",
+      "binaryDir": "${sourceDir}/build",
+      "generator": "Ninja"
+    },
+    {
+      "name": "tests-ninja",
+      "displayName": "Tests with Ninja",
+      "description": "CMake options to configure the project and automated tests",
+      "inherits": "default-ninja",
+      "cacheVariables": {
+        "JCM_BUILD_TESTS": true
+      }
+    },
+    {
+      "name": "docs-ninja",
+      "displayName": "Docs with Ninja",
+      "description": "CMake options to configure the project and docs",
+      "inherits": "default-ninja",
+      "cacheVariables": {
+        "JCM_BUILD_DOCS": true
+      }
+    },
+    {
+      "name": "all-ninja",
+      "displayName": "All with Ninja",
+      "description": "CMake options to configure all targets",
+      "inherits": [
+        "tests-ninja",
+        "docs-ninja"
+      ]
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "sphinx-docs",
+      "displayName": "Sphinx Docs",
+      "description": "Build Sphinx documentation",
+      "configurePreset": "docs-ninja",
+      "targets": "sphinx-docs"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "tests",
+      "displayName": "Tests",
+      "description": "Run all automated tests",
+      "configurePreset": "tests-ninja",
+      "output": {
+        "outputOnFailure": true
+      }
+    }
+  ]
+}
