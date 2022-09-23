@@ -65,7 +65,7 @@ jcm_canonical_subdir
 
     jcm_canonical_subdir(
       OUT_VAR <out-var>
-      [COMPONENT <component>]
+      TARGET <target>
     )
 
 Sets the variable specified by :cmake:variable:`OUT_VAR` to the canonical source subdirectory for
@@ -83,8 +83,8 @@ One Value
 :cmake:variable:`OUT_VAR`
   The variable named will be set to the computed subdirectory
 
-:cmake:variable:`COMPONENT`
-  The name of the library/executable component for which the path will be computed.
+:cmake:variable:`TARGET`
+  The name of the target for which the path will be computed.
 
 Examples
 ########
@@ -109,8 +109,10 @@ Examples
 
 #]=======================================================================]
 function(jcm_canonical_subdir)
-  jcm_parse_arguments(ONE_VALUE_KEYWORDS "TARGET;OUT_VAR"
-                      REQUIRES_ALL "TARGET;OUT_VAR" ARGUMENTS "${ARGN}")
+  jcm_parse_arguments(
+      ONE_VALUE_KEYWORDS "TARGET;OUT_VAR"
+      REQUIRES_ALL "TARGET;OUT_VAR"
+      ARGUMENTS "${ARGN}")
 
   # Usage Guards
   if(NOT ARGS_TARGET MATCHES "^${PROJECT_NAME}(::|_)")
