@@ -57,7 +57,7 @@ Examples
 
 .. code-block:: cmake
 
-  # additionally considers executables "clang-format-14" and "clang-format-14.0"
+  # additionally considers executables "clang-format-14.0" and "clang-format-14"
 
   find_package(ClangFormat 14.0 REQUIRED)
 
@@ -68,15 +68,15 @@ include(FindPackageHandleStandardArgs)
 
 if(ClangFormat_FIND_VERSION)
   set(_ClangFormat_versioned_names
-    "clang-format-${ClangFormat_FIND_VERSION_MAJOR}"
-    "clang-format-${ClangFormat_FIND_VERSION_MAJOR}.${ClangFormat_FIND_VERSION_MINOR}"
-    "clang-format-${ClangFormat_FIND_VERSION}")
+     "clang-format-${ClangFormat_FIND_VERSION}"
+     "clang-format-${ClangFormat_FIND_VERSION_MAJOR}.${ClangFormat_FIND_VERSION_MINOR}"
+    "clang-format-${ClangFormat_FIND_VERSION_MAJOR}")
 endif()
 
 
 find_program(
   ClangFormat_EXECUTABLE
-  NAMES "clang-format" ${_ClangFormat_versioned_names}
+  NAMES ${_ClangFormat_versioned_names} "clang-format"
   DOC "Path to clang-format executable"
 )
 unset(_ClangFormat_versioned_names)
