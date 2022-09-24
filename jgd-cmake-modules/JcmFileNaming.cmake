@@ -1,22 +1,52 @@
-include_guard()
-
 include(JcmParseArguments)
 include(JcmCanonicalStructure)
 
 # non-package-config cmake modules
 set(JCM_CMAKE_MODULE_REGEX "^([A-Z][a-z]*)+\\.cmake$")
+set(JCM_IN_FILE_REGEX "\\${JCM_IN_FILE_EXTENSION}$")
 
-# Create regexs of file names based on file extensions from
-# JcmCanonicalStructure. Variables of the same name, but with _EXTENSION
-# replaced with _REGEX
+# Create regexs of file names based on file extensions from JcmCanonicalStructure.
+# Variables of the same name, but with _EXTENSION replaced with _REGEX
 foreach (ext_var
-   JCM_HEADER_EXTENSION;JCM_SOURCE_EXTENSION;JCM_TEST_SOURCE_EXTENSION JCM_MODULE_EXTENSION)
+   JCM_CXX_HEADER_EXTENSION JCM_CXX_SOURCE_EXTENSION JCM_CXX_TEST_SOURCE_EXTENSION JCM_CXX_MODULE_EXTENSION
+   JCM_C_HEADER_EXTENSION JCM_C_SOURCE_EXTENSION JCM_C_TEST_SOURCE_EXTENSION
+   JCM_CUDA_HEADER_EXTENSION JCM_CUDA_SOURCE_EXTENSION JCM_CUDA_TEST_SOURCE_EXTENSION
+   JCM_OBJC_HEADER_EXTENSION JCM_OBJC_SOURCE_EXTENSION JCM_OBJC_TEST_SOURCE_EXTENSION
+   JCM_OBJCXX_HEADER_EXTENSION JCM_OBJCXX_SOURCE_EXTENSION JCM_OBJCXX_TEST_SOURCE_EXTENSION
+   JCM_HIP_HEADER_EXTENSION JCM_HIP_SOURCE_EXTENSION JCM_HIP_TEST_SOURCE_EXTENSION)
+
   string(REPLACE "_EXTENSION" "_REGEX" regex_var "${ext_var}")
   string(REPLACE "." "\\." ${regex_var} "${${ext_var}}")
   set(${regex_var} "^[a-z][a-z0-9_]*${${regex_var}}$")
 endforeach ()
 
-set(JCM_IN_FILE_REGEX "\\${JCM_IN_FILE_EXTENSION}$")
+
+# Create cumulative regexes for all currently enabled languages
+set(_jcm_supported_languages CXX C CUDA OBJC OBJCXX HIP)
+get_property(_jcm_languages GLOBAL PROPERTY ENABLED_LANGUAGES)
+if(_jcm_languages)
+  list(REMOVE_ITEM _jcm_languages NONE)
+
+  foreach(lang IN LISTS _jcm_languages)
+    if(NOT "${lang}" IN_LIST _jcm_supported_languages)
+      message(AUTHOR_WARNING
+          "The enabled languages '${lang}' is not currently supported by JCM."
+          "The associated REGEX variables will not be created")
+      continue()
+    endif()
+    list(APPEND JCM_HEADER_REGEX "${JCM_${lang}_HEADER_REGEX}")
+    list(APPEND JCM_SOURCE_REGEX "${JCM_${lang}_SOURCE_REGEX}")
+    list(APPEND JCM_TEST_SOURCE_REGEX "${JCM_${lang}_TEST_SOURCE_REGEX}")
+  endforeach()
+
+  list(JOIN JCM_HEADER_REGEX "|" JCM_HEADER_REGEX)
+  list(JOIN JCM_SOURCE_REGEX "|" JCM_SOURCE_REGEX)
+  list(JOIN JCM_TEST_SOURCE_REGEX "|" JCM_TEST_SOURCE_REGEX)
+endif()
+unset(_jcm_supported_languages)
+unset(_jcm_languages)
+
+include_guard()
 
 #
 # Private macro to the module. Constructs a consistent file name based on the

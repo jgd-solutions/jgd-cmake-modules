@@ -15,27 +15,30 @@ naming is implemented in *JcmFileNaming*, which uses the file extensions defined
 Variables
 ^^^^^^^^^
 
+The file extensions specified by the Canonical Project Structure have been extended for the CMake recognized languages
+of CXX, C, CUDA, OBJC, OBJCXX, and HIP.
+
 :cmake:variable:`JCM_LIB_PREFIX`
   The prefix used throughout JCM for libraries. Used in project names and when naming targets. Set
   as 'lib' from `Canonical Project Structure`_.
 
-:cmake:variable:`JCM_HEADER_EXTENSION`
-  File extension for header files. '.hpp' option selected from `Canonical Project Structure`_
-
-:cmake:variable:`JCM_SOURCE_EXTENSION`
-  File extension for source files. '.cpp' option selected from `Canonical Project Structure`_
-
-:cmake:variable:`JCM_TEST_SOURCE_EXTENSION`
-  File extension for unit testing source files. '.test.cpp' option selected from `Canonical Project
-  Structure`_
-
-:cmake:variable:`JCM_MODULE_EXTENSION`
-  File extension for module interface files. '.mpp' option selected from `Canonical Project
-  Structure`_
-
 :cmake:variable:`JCM_IN_FILE_EXTENSION`
   File extension used for input files that will undergo substitution through some version of
   :cmake:command:`configure_file`. This is a custom file extension for JCM, placed here for unity.
+
+:cmake:variable:`JCM_<LANG>_HEADER_EXTENSION`
+  File extension for header files. '.hpp' option selected from `Canonical Project Structure`_ for C++
+
+:cmake:variable:`JCM_<LANG>_SOURCE_EXTENSION`
+  File extension for source files. '.cpp' option selected from `Canonical Project Structure`_ for C++
+
+:cmake:variable:`JCM_<LANG>_TEST_SOURCE_EXTENSION`
+  File extension for unit testing source files. '.test.cpp' option selected from `Canonical Project
+  Structure`_ for C++
+
+:cmake:variable:`JCM_CXX_MODULE_EXTENSION`
+  File extension for module interface files. '.mpp' option selected from `Canonical Project
+  Structure`_
 
 --------------------------------------------------------------------------
 
@@ -45,14 +48,33 @@ include(JcmParseArguments)
 include(JcmTargetNaming)
 include(JcmListTransformations)
 
-
 set(JCM_LIB_PREFIX "lib")
-
-set(JCM_HEADER_EXTENSION ".hpp")
-set(JCM_SOURCE_EXTENSION ".cpp")
-set(JCM_TEST_SOURCE_EXTENSION ".test.cpp")
-set(JCM_MODULE_EXTENSION ".mpp") # cmake doesn't support modules, but for future
 set(JCM_IN_FILE_EXTENSION ".in")
+
+set(JCM_CXX_HEADER_EXTENSION ".hpp")
+set(JCM_CXX_SOURCE_EXTENSION ".cpp")
+set(JCM_CXX_MODULE_EXTENSION ".mpp") # cmake doesn't support modules, but for future
+set(JCM_CXX_TEST_SOURCE_EXTENSION ".test${JCM_CXX_SOURCE_EXTENSION}")
+
+set(JCM_C_HEADER_EXTENSION ".h")
+set(JCM_C_SOURCE_EXTENSION ".c")
+set(JCM_C_TEST_SOURCE_EXTENSION ".test${JCM_C_SOURCE_EXTENSION}")
+
+set(JCM_CUDA_HEADER_EXTENSION ".cuh")
+set(JCM_CUDA_SOURCE_EXTENSION ".cu")
+set(JCM_CUDA_TEST_SOURCE_EXTENSION ".test${JCM_CUDA_SOURCE_EXTENSION}")
+
+set(JCM_OBJC_HEADER_EXTENSION ".h")
+set(JCM_OBJC_SOURCE_EXTENSION ".m")
+set(JCM_OBJC_TEST_SOURCE_EXTENSION ".test${JCM_OBJC_SOURCE_EXTENSION}")
+
+set(JCM_OBJCXX_HEADER_EXTENSION ".h")
+set(JCM_OBJCXX_SOURCE_EXTENSION ".mm")
+set(JCM_OBJCXX_TEST_SOURCE_EXTENSION ".test${JCM_OBJCXX_SOURCE_EXTENSION}")
+
+set(JCM_HIP_HEADER_EXTENSION ".hpp")
+set(JCM_HIP_SOURCE_EXTENSION ".cpp")
+set(JCM_HIP_TEST_SOURCE_EXTENSION ".test${JCM_HIP_SOURCE_EXTENSION}")
 
 #[=======================================================================[.rst:
 

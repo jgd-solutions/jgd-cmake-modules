@@ -92,8 +92,9 @@ Multi Value
   Sources used to create the executable's associated object/interface library. When provided, an
   object or interface library will be created, it will be linked against the executable, and its
   include directories will be set instead of the executable's. An object library
-  will be created when any of the files provided end in :cmake:variable:`JCM_SOURCE_EXTENSION`,
-  while an interface library will be created otherwise (just header files).
+  will be created when any of the file names of :cmake:variable:`LIB_SOURCES` match
+  :cmake:variable:`JCM_SOURCE_REGEX`, while an interface library will be created otherwise
+  (just header files).
 
 :cmake:variable:`SOURCES`
   Sources used to create the executable
@@ -249,9 +250,12 @@ function(jcm_add_executable)
   # create library of exec's sources, allowing unit testing of exec's sources
   if (DEFINED ARGS_LIB_SOURCES)
     # check for actual source files
+    jcm_transform_list(FILENAME
+        INPUT "${ARGS_LIB_SOURCES}"
+        OUT_VAR lib_sources_filenames)
     jcm_regex_find_list(
-      REGEX "\\${JCM_SOURCE_EXTENSION}$"
-      INPUT "${ARGS_LIB_SOURCES}"
+      REGEX "${JCM_SOURCE_REGEX}"
+      INPUT "${lib_sources_filenames}"
       OUT_IDX found_source_idx)
 
     # create interface or object library

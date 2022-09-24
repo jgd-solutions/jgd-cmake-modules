@@ -69,12 +69,12 @@ function(jcm_transform_list)
   # Argument parsing, allowing value to INPUT to be empty
   jcm_parse_arguments(
     WITHOUT_MISSING_VALUES_CHECK
-    OPTIONS "ABSOLUTE_PATH" "NORMALIZE_PATH"
+    OPTIONS "ABSOLUTE_PATH" "NORMALIZE_PATH" "FILENAME"
     ONE_VALUE_KEYWORDS "BASE;OUT_VAR"
     MULTI_VALUE_KEYWORDS "INPUT"
     REQUIRES_ALL "OUT_VAR"
-    REQUIRES_ANY "ABSOLUTE_PATH"
-    MUTUALLY_EXCLUSIVE "ABSOLUTE_PATH" "NORMALIZE_PATH"
+    REQUIRES_ANY "ABSOLUTE_PATH" "NORMALIZE_PATH" "FILENAME"
+    MUTUALLY_EXCLUSIVE "ABSOLUTE_PATH" "NORMALIZE_PATH" "FILENAME"
     ARGUMENTS "${ARGN}"
   )
 
@@ -85,6 +85,12 @@ function(jcm_transform_list)
     if(missing_required_keywords)
       message(FATAL_ERROR "Keywords provided without any values: ${missing_required_keywords}")
     endif()
+  endif()
+
+  # usage guard
+  if(DEFINED ARGS_BASE AND NOT ABSOLUTE_PATH)
+    message(FATAL_ERROR
+        "'BASE' may only be provided to ${CMAKE_CURRENT_FUNCTION} with the 'ABSOLUTE_PATH' transformation")
   endif()
 
   # Set transformation code based on selected transformation argument
@@ -105,6 +111,10 @@ function(jcm_transform_list)
   elseif(ARGS_NORMALIZE_PATH)
     set(selected_transformation [=[
       cmake_path(SET transformed_result NORMALIZE "${input}")
+    ]=])
+  elseif(ARGS_FILENAME)
+    set(selected_transformation [=[
+      cmake_path(GET input FILENAME transformed_result)
     ]=])
   endif()
 
