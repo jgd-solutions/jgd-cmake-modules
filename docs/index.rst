@@ -9,8 +9,6 @@ jgd-cmake-modules
 A set of CMake modules to easily and consistently develop proper CMake based projects conforming to
 the `Canonical Project Structure`_.
 
-Check out the full `documentation <https://jgd-solutions.github.io/jgd-cmake-modules/>`_.
-
 Pages
 -----
 

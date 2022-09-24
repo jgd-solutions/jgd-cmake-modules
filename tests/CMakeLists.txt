@@ -213,3 +213,17 @@ _build_and_ctest("libheaders"
 _install_project("libheaders")
 _find_use_project("libheaders")
 _add_use_project("libheaders")
+
+# == libcstr ==
+
+_build_and_ctest("libcstr"
+    BUILD_OPTIONS -DLIBCSTR_BUILD_TESTS=ON
+    NAME_SUFFIX -format
+    BUILD_TARGET clang-format-check)
+
+_build_and_ctest("libcstr"
+    BUILD_OPTIONS -DLIBCSTR_BUILD_TESTS=ON)
+
+_install_project("libcstr")
+_find_use_project("libcstr")
+_add_use_project("libcstr")

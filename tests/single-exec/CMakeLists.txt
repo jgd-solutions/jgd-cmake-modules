@@ -6,7 +6,6 @@ find_package(ClangFormat)
 
 include(JcmAllModules)
 jcm_setup_project()
-message(STATUS "STANDARD ${CMAKE_CXX_STANDARD}")
 jcm_source_subdirectories(ADD_SUBDIRS WITH_TESTS_DIR)
 
 jcm_install_config_file_package(
