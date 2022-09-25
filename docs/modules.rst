@@ -10,3 +10,4 @@ Modules
 .. cmake-module:: ../jgd-cmake-modules/JcmDefaultCompileOptions.cmake
 .. cmake-module:: ../jgd-cmake-modules/JcmCreateAccessoryTargets.cmake
 .. cmake-module:: ../jgd-cmake-modules/JcmBasicPackageConfig.cmake
+.. cmake-module:: ../jgd-cmake-modules/JcmExpandDirectories.cmake
