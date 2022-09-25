@@ -23,7 +23,6 @@ jcm_add_executable
 .. cmake:command:: jcm_add_executable
 
   .. code-block:: cmake
-    :name: exec
 
     jcm_add_executable(
       [WITHOUT_CANONICAL_PROJECT_CHECK]

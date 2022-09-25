@@ -1,20 +1,110 @@
 include_guard()
 
+#[=======================================================================[.rst:
+
+JcmHeaderFileSet
+----------------
+
+#]=======================================================================]
+
 include(JcmParseArguments)
 include(JcmCanonicalStructure)
 
+#[=======================================================================[.rst:
+
+jcm_header_file_set
+^^^^^^^^^^^^^^^^^^^
+
+.. cmake:command:: jcm_header_file_set
+
+  .. code-block:: cmake
+
+    jcm_header_file_set(
+      [TARGET <target>]
+      [HEADERS <file-path>...]
+    )
+
+Creates header `file-sets
+<https://cmake.org/cmake/help/latest/command/target_sources.html#file-sets>`_ of the provided
+`scope` containing the files in :cmake:variable:`HEADERS`.
+
+For each header file-path, the closest canonical include directory, one of those provided by
+:cmake:command:`jcm_canonical_include_dirs`, will be found. For each canonical include directory
+matched, a new header file-set will be created on the :cmake:variable:`TARGET` using the provided
+`scope` if it doesn't already exist. The original header file will be added to that file-set.
+
+Header file-sets <https://cmake.org/cmake/help/latest/command/target_sources.html#file-sets>`_ are
+an excellent way to manage header files for libraries because they support installing INTERFACE and
+HEADER files when the target is installed and support modifying the target's respective
+`*INCLUDE_DIRECTORIES` properties, as is done by this function.  The subset of canonical include
+directories that are matched by the provided :cmake:variable:`HEADERS` are added to the target's
+respective `*INCLUDE_DIRECTORIES` properties, based on the `scope`, and are wrapped in the
+:cmake:$<BUILD_INTERFACE:...> generator expression.
+
+:cmake:command:`jcm_add_library` uses this function, and it is often not necessary to use directly,
+unless supplementary headers sets are to be created.
+
+.. note::
+  Use a target's `HEADER_SETS` and `INTERFACE_HEADER_SETS` `properties
+  <https://cmake.org/cmake/help/latest/prop_tgt/HEADER_SETS.html>`_ to query its header sets.
+
+Parameters
+##########
+
+Positional
+~~~~~~~~~~
+
+:cmake:variable:`scope`
+  The desired scope of the created file-set. One of INTERFACE, PUBLIC, or PRIVATE
+
+One Value
+~~~~~~~~~
+
+:cmake:variable:`TARGET`
+  The target on which the created header file-sets will be created and `*INCLUDE_DIRECTORIES`
+  properties will be manipulated.
+
+Multi Value
+~~~~~~~~~~~
+
+:cmake:variable:`HEADERS`
+  Header file paths to add to the created header file-sets. Each file path will be converted to a
+  normalized, absolute path, with respect to :cmake:variable:`CMAKE_CURRENT_SOURCE_DIR`.
+
+Examples
+########
+
+.. code-block:: cmake
+
+  jcm_header_file_set(PUBLIC
+    TARGET libimage_libimage
+    HEADERS image.hpp
+  )
+
+  # canonical include directory of image.hpp added PUBLICally to libimage_libimage
+  # now it's available when linking against libimage_libimage
+
+  jcm_add_test_executable(
+    NAME use_image_hpp
+    SOURCES use_image_hpp.cpp
+    LIBS libimage_libimage
+  )
+
+#]=======================================================================]
 function(jcm_header_file_set scope)
   jcm_parse_arguments(
     ONE_VALUE_KEYWORDS "TARGET"
     MULTI_VALUE_KEYWORDS "HEADERS"
-    REQUIRES_ALL "HEADERS"
+    REQUIRES_ALL "TARGET" "HEADERS"
     ARGUMENTS "${ARGN}"
   )
 
   # Usage Guards
 
   if (NOT TARGET ${ARGS_TARGET})
-    message(FATAL_ERROR "${ARGS_TARGET} is not a target and must be created before calling ${CMAKE_CURRENT_FUNCTION}")
+    message(FATAL_ERROR
+      "${ARGS_TARGET} is not a target and must be created before calling"
+      "${CMAKE_CURRENT_FUNCTION}")
   endif ()
 
   set(supported_scopes "INTERFACE|PUBLIC|PRIVATE")

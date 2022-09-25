@@ -231,7 +231,7 @@ endfunction()
 #[=======================================================================[.rst:
 
 jcm_package_version_file_name
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. cmake:command:: jcm_package_version_file_name
 
