@@ -158,9 +158,11 @@ function(jcm_add_executable)
   if (DEFINED ARGS_COMPONENT AND NOT ARGS_COMPONENT STREQUAL PROJECT_NAME)
     set(comp_arg COMPONENT ${ARGS_COMPONENT})
     set(comp_err_msg "n component (${ARGS_COMPONENT})")
+    set(add_parent_arg ADD_PARENT)
   else()
     unset(comp_arg)
     unset(comp_err_msg)
+    unset(add_parent_arg)
   endif ()
 
   # == Usage Guards ==
@@ -194,10 +196,7 @@ function(jcm_add_executable)
   endif ()
 
   # verify file locations
-  _jcm_verify_source_locations(
-    ${comp_arg}
-    SOURCES "${all_input_files}"
-  )
+  _jcm_verify_source_locations(${add_parent_arg} SOURCES "${all_input_files}")
 
   # == Create Executable ==
 

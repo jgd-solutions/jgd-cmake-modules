@@ -488,7 +488,8 @@ endfunction()
 # Given a list of absolute, normalized source file paths in SOURCES, will check each source file
 # against the possible paths in ROOT_DIRS. If ROOT_DIRS is not provided, ROOT_DIRS will contain the
 # current source directory, current binary directory, and the project binary directory, if that's
-# different from the current binary directory.
+# different from the current binary directory. ADD_PARENT will append the parent source and binary
+# directory to ROOT_DIRS for executable components' common files.
 #
 # This function assumes it is called within a canonical source subdirectory, which is why the
 # CURRRENT_* variables are used.
@@ -497,9 +498,10 @@ endfunction()
 #
 function(_jcm_verify_source_locations)
   jcm_parse_arguments(
-    ONE_VALUE_KEYWORDS "COMPONENT"
+    OPTIONS "ADD_PARENT"
     MULTI_VALUE_KEYWORDS "SOURCES" "ROOT_DIRS"
     REQUIRES_ALL "SOURCES"
+    MUTUALLY_EXCLUSIVE "ADD_PARENT"
     ARGUMENTS "${ARGN}"
   )
 
@@ -508,9 +510,8 @@ function(_jcm_verify_source_locations)
   else()
     set(root_source_dirs "${CMAKE_CURRENT_SOURCE_DIR}")
     set(root_binary_dirs "${CMAKE_CURRENT_BINARY_DIR};${PROJECT_BINARY_DIR}")
-    list(REMOVE_DUPLICATES root_binary_dirs)
 
-    if(DEFINED ARGS_COMPONENT)
+    if(ARGS_ADD_PARENT)
       cmake_path(GET CMAKE_CURRENT_SOURCE_DIR PARENT_PATH non_component_source_dir)
       cmake_path(GET CMAKE_CURRENT_BINARY_DIR PARENT_PATH non_component_binary_dir)
       list(APPEND root_source_dirs "${non_component_source_dir}")
@@ -519,6 +520,8 @@ function(_jcm_verify_source_locations)
 
     set(root_dirs "${root_source_dirs}" "${root_binary_dirs}")
   endif()
+
+  list(REMOVE_DUPLICATES root_dirs)
 
   foreach(root_dir IN LISTS root_dirs)
     jcm_regex_find_list(

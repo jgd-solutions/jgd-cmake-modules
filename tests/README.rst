@@ -21,7 +21,8 @@ Test Layout
 
 - **test-project-consumption:** A project that finds and consumes each of the following test projects.
 - **single-exec:** Produces a single executable.
-- **libsingle:** Produces a single library, either static or shared.
+- **libsingle:** Produces a single library, either static or shared. Also has Doxygen documentation generation.
 - **libcomponents:** Produces multiple libraries through a single project, offered as library components.
 - **libheaders:** Produces a single header-only library.
 - **many-exec:** Produces multiple executables through a single project, offered as executable components.
+- **libcstr:** Produces a single library in C, in order to test and exemplify usage of a C project

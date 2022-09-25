@@ -230,10 +230,7 @@ function(jcm_add_library)
   endif ()
 
   # verify file locations
-  _jcm_verify_source_locations(
-    ${comp_arg}
-    SOURCES "${all_input_files}"
-  )
+  _jcm_verify_source_locations(SOURCES "${all_input_files}")
 
   # == Build options related to libraries and this library ==
 

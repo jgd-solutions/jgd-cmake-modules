@@ -39,7 +39,7 @@ public:
   /*!
    * Simply returns the internal Widget#value
    */
-  constexpr int get_value() const noexcept { return this->value; }
+  [[nodiscard]] constexpr int get_value() const noexcept { return this->value; }
 };
 
 }  // namespace single
