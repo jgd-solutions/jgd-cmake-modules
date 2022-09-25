@@ -27,7 +27,7 @@ function(_build_and_ctest project_name)
     --build-generator "${CMAKE_GENERATOR}"
     --build-target ${ARGS_BUILD_TARGET}
     --build-and-test "${CMAKE_CURRENT_SOURCE_DIR}/${project_name}" "${CMAKE_CURRENT_BINARY_DIR}/${project_name}"
-    --build-options "-Djgd-cmake-modules_ROOT:PATH=${jgd-cmake-modules_ROOT}" ${ARGS_BUILD_OPTIONS}
+    --build-options "-Djgd-cmake-modules_ROOT:PATH=${jgd-cmake-modules_ROOT}" "-DCMAKE_VERBOSE_MAKEFILE=ON" ${ARGS_BUILD_OPTIONS}
     ${test_arg})
 endfunction()
 

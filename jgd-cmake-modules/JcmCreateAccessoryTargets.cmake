@@ -418,7 +418,6 @@ function(jcm_create_doxygen_target)
   endif ()
 
   # Target to generate Doxygen documentation
-  message(WARNING "here are the header files: ${doxygen_input_files}")
   set(DOXYGEN_STRIP_FROM_INC_PATH "${include_dirs}")
   set(DOXYGEN_OUTPUT_DIRECTORY "${ARGS_OUTPUT_DIRECTORY}")
   doxygen_add_docs(doxygen-docs "${header_files}" ALL WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
