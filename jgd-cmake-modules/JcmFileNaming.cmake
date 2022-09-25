@@ -1,3 +1,36 @@
+#[=======================================================================[.rst:
+
+JcmFileNaming
+-------------
+
+Provides variables and functions to help enforce file naming conventions.
+
+For each of the enabled languages at the point of inclusion, as per the global `ENABLED_LANGUAGES`
+property, the following variables are defined. These contain regular expressions for suitable file
+names for the given language. Supported languages are currently C,CXX,CUDA,OBJC,OBJCXX,HIP
+
+- :cmake:variable:`JCM_<LANG>_HEADER_REGEX`
+- :cmake:variable:`JCM_<LANG>_SOURCE_REGEX`
+- :cmake:variable:`JCM_<LANG>_TEST_SOURCE_REGEX`
+
+The following variables provide cumulative regular expressions for all the enabled languages
+encountered to the point of inclusion. These are built by joining the variables above with the '|'
+character.
+
+- :cmake:variable:`JCM_HEADER_REGEX`
+- :cmake:variable:`JCM_SOURCE_REGEX`
+- :cmake:variable:`JCM_TEST_SOURCE_REGEX`
+
+Additional, non-languages specific variables with regular expressions for file names are introduced:
+
+- :cmake:variable:`JCM_CMAKE_MODULE_REGEX`. This is for normal CMake modules, not package-config files.
+- :cmake:variable:`JCM_IN_FILE_REGEX`
+- :cmake:variable:`JCM_CXX_MODULE_REGEX`
+
+--------------------------------------------------------------------------
+
+#]=======================================================================]
+
 include(JcmCanonicalStructure)
 
 # non-package-config cmake modules
@@ -56,31 +89,18 @@ include_guard()
 include(JcmParseArguments)
 
 #
-# Private macro to the module. Constructs a consistent file name based on the
-# PROJECT argument or the PROJECT_NAME variable, the provided COMPONENT, and
-# SUFFIX arguments. The resulting file name will be placed in the variable
-# specified by OUT_VAR. Result will be <PROJECT_NAME>-[COMPONENT-]<suffix>,
-# where 'suffix' is the provided suffix with any leading dashes removed.
-#
-# Arguments:
-#
-# COMPONENT: one-value arg; specifies the component that the file will describe.
-# A COMPONENT that matches PROJECT_NAME, or PROJECT, if provided, will be
-# ignored. Optional.
-#
-# SUFFIX: one-value arg; the suffix to append to the generated kebab-case file
-# name. Ex. ".cmake"
-#
-# PROJECT: on-value arg; override of PROJECT_NAME. Optional - if not provided,
-# PROJECT_NAME will be used, which is more common.
-#
-# OUT_VAR: one-value arg; the name of the output variable which will store the
-# resulting file name.
+# Private macro to the module. Constructs a consistent file name based on the PROJECT argument or
+# the PROJECT_NAME variable, the provided COMPONENT, and SUFFIX arguments. The resulting file name
+# will be placed in the variable specified by OUT_VAR. Result will be
+# <PROJECT_NAME><DELIMITER>[COMPONENT<DELIMETER>]<suffix>, where 'suffix' is the provided suffix
+# with any leading dashes removed. DELIMITER is '-', by default.
 #
 macro(_JCM_JOINED_FILE_NAME)
   jcm_parse_arguments(
     ONE_VALUE_KEYWORDS "COMPONENT;DELIMITER;SUFFIX;PROJECT;OUT_VAR"
-    REQUIRES_ALL "SUFFIX;OUT_VAR" ARGUMENTS "${ARGN}")
+    REQUIRES_ALL "SUFFIX;OUT_VAR"
+    ARGUMENTS "${ARGN}")
+
   # project name
   if (DEFINED ARGS_PROJECT)
     set(project ${ARGS_PROJECT})
@@ -113,6 +133,8 @@ macro(_JCM_JOINED_FILE_NAME)
   unset(project)
 endmacro()
 
+# handles parsing arguments for the following *_file_name commands, as they all accept similar
+# arguments.
 macro(_JCM_FILE_NAMING_ARGUMENTS with_component args)
   if (${with_component})
     set(comp_keyword COMPONENT)
@@ -138,24 +160,64 @@ macro(_JCM_FILE_NAMING_ARGUMENTS with_component args)
   endif ()
 endmacro()
 
-#
-# Constructs a consistent kebab-case package configuration file name based on
-# the PROJECT argument or the PROJECT_NAME variable, and the provided COMPONENT.
-# The resulting file name will be placed in the variable specified by OUT_VAR.
-# Result will be <PROJECT_NAME>-[COMPONENT-]config.cmake. Ex 1.
-# proj-config.cmake Ex 2. proj-comp-config.cmake.
-#
-# Arguments:
-#
-# COMPONENT: one-value arg; specifies the component that the file will describe.
-# A COMPONENT that matches PROJECT_NAME or PROJECT will be ignored. Optional.
-#
-# PROJECT: on-value arg; override of PROJECT_NAME. Optional - if not provided,
-# PROJECT_NAME will be used, which is more common.
-#
-# OUT_VAR: one-value arg; the name of the output variable which will store the
-# resulting file name.
-#
+#[=======================================================================[.rst:
+
+jcm_package_config_file_name
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. cmake:command:: jcm_package_config_file_name
+
+  .. code-block:: cmake
+
+    jcm_package_config_file_name(
+      [PROJECT <project>]
+      [COMPONENT <component>]
+      OUT_VAR <out-var>
+    )
+
+Constructs a consistent kebab-case package configuration file name based on the
+:cmake:variable:`PROJECT`, which defaults to :cmake:variable:`PROJECT_NAME`, and
+:cmake:variable:`COMPONENT`, if provided.  The resulting file name will be placed in the variable
+specified by :cmake:variable:`OUT_VAR`. Result will be `<PROJECT>-[COMPONENT-]config.cmake`.
+
+Parameters
+##########
+
+One Value
+~~~~~~~~~
+
+:cmake:variable:`PROJECT`
+  The project that the config-file packages, if the default value of :cmake:variable:`PROJECT_NAME`
+  is not correct.
+
+:cmake:variable:`COMPONENT`
+  Specifies the component that the file will describe. A :cmake:variable:`COMPONENT` that matches
+  :cmake:variable:`PROJECT_NAME` or :cmake:variable:`PROJECT` will be ignored.
+
+:cmake:variable:`OUT_VAR`
+  The variable named will be set to the resultant file name
+
+Examples
+########
+
+.. code-block:: cmake
+
+  # PROJECT_NAME is libgarden
+  # file_name will be libgarden-config.cmake
+  jcm_package_config_file_name(OUT_VAR file_name)
+
+.. code-block:: cmake
+
+  # file_name will be libimage-core-config.cmake
+  jcm_package_config_file_name(
+    PROJECT libimage
+    COMPONENT core
+    OUT_VAR file_name
+  )
+
+--------------------------------------------------------------------------
+
+#]=======================================================================]
 function(jcm_package_config_file_name)
   _jcm_file_naming_arguments(TRUE "${ARGN}")
   _jcm_joined_file_name(
@@ -166,22 +228,49 @@ function(jcm_package_config_file_name)
   )
 endfunction()
 
-#
-# Constructs a consistent kebab-case package version file name based on the
-# PROJECT argument or the PROJECT_NAME variable. These files are optionally
-# installed alongside the package configuration file to provide version
-# information for 'config-file' packages. The resulting file name will be placed
-# in the variable specified by OUT_VAR. Result will be
-# <PROJECT_NAME>-config-version.cmake
-#
-# Arguments:
-#
-# PROJECT: one-value arg; override of PROJECT_NAME. Optional - if not provided,
-# PROJECT_NAME will be used, which is more common.
-#
-# OUT_VAR: one-value arg; the name of the output variable which will store the
-# resulting file name.
-#
+#[=======================================================================[.rst:
+
+jcm_package_version_file_name
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. cmake:command:: jcm_package_version_file_name
+
+  .. code-block:: cmake
+
+    jcm_package_version_file_name(
+      [PROJECT <project>]
+      OUT_VAR <out-var>
+    )
+
+Constructs a consistent kebab-case package version file name based on the :cmake:variable:`PROJECT`,
+which defaults to :cmake:variable:`PROJECT_NAME`. The resulting file name will be placed in the
+variable specified by :cmake:variable:`OUT_VAR`. Result will be `<PROJECT>-version.cmake`.
+
+Parameters
+##########
+
+One Value
+~~~~~~~~~
+
+:cmake:variable:`PROJECT`
+  The project that the version file represents, if the default value of
+  :cmake:variable:`PROJECT_NAME` is not correct.
+
+:cmake:variable:`OUT_VAR`
+  The variable named will be set to the resultant file name
+
+Examples
+########
+
+.. code-block:: cmake
+
+  # PROJECT_NAME is libgarden
+  # file_name will be libgarden-version.cmake
+  jcm_package_version_file_name(OUT_VAR file_name)
+
+--------------------------------------------------------------------------
+
+#]=======================================================================]
 function(jcm_package_version_file_name)
   _jcm_file_naming_arguments(FALSE "${ARGN}")
   _jcm_joined_file_name(
@@ -206,6 +295,66 @@ endfunction()
 # OUT_VAR: one-value arg; the name of the output variable which will store the
 # resulting file name.
 #
+
+#[=======================================================================[.rst:
+
+jcm_package_targets_file_name
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. cmake:command:: jcm_package_targets_file_name
+
+  .. code-block:: cmake
+
+    jcm_package_targets_file_name(
+      [PROJECT <project>]
+      [COMPONENT <component>]
+      OUT_VAR <out-var>
+    )
+
+Constructs a consistent kebab-case package targets file name based on the :cmake:variable:`PROJECT`,
+which defaults to :cmake:variable:`PROJECT_NAME`, and :cmake:variable:`COMPONENT`, if provided.  The
+resulting file name will be placed in the variable specified by :cmake:variable:`OUT_VAR`. Result
+will be `<PROJECT>-[COMPONENT-]targets.cmake`. The target's file naming scheme includes a component
+because JCM installs one targets file per target for simpler management.
+
+Parameters
+##########
+
+One Value
+~~~~~~~~~
+
+:cmake:variable:`PROJECT`
+  The project that the targets file contains targets for, if the default value of
+  :cmake:variable:`PROJECT_NAME` is not correct.
+
+:cmake:variable:`COMPONENT`
+  Specifies the component that the file will describe. A :cmake:variable:`COMPONENT` that matches
+  :cmake:variable:`PROJECT_NAME` or :cmake:variable:`PROJECT` will be ignored.
+
+:cmake:variable:`OUT_VAR`
+  The variable named will be set to the resultant file name
+
+Examples
+########
+
+.. code-block:: cmake
+
+  # PROJECT_NAME is libgarden
+  # file_name will be libgarden-targets.cmake
+  jcm_package_targets_file_name(OUT_VAR file_name)
+
+.. code-block:: cmake
+
+  # file_name will be libimage-core-targets.cmake
+  jcm_package_targets_file_name(
+    PROJECT libimage
+    COMPONENT core
+    OUT_VAR file_name
+  )
+
+--------------------------------------------------------------------------
+
+#]=======================================================================]
 function(jcm_package_targets_file_name)
   _jcm_file_naming_arguments(TRUE "${ARGN}")
   _jcm_joined_file_name(
