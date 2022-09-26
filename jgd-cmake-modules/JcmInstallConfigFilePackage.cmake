@@ -1,5 +1,12 @@
 include_guard()
 
+#[=======================================================================[.rst:
+
+JcmInstallConfigFilePackage
+---------------------------
+
+#]=======================================================================]
+
 include(JcmParseArguments)
 include(JcmFileNaming)
 include(JcmStandardDirs)
@@ -10,6 +17,86 @@ include(JcmListTransformations)
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
+#[=======================================================================[.rst:
+
+jcm_install_config_file_package
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. cmake:command:: jcm_install_config_file_package
+
+  .. code-block:: cmake
+
+    jcm_install_config_file_package(
+      [CONFIGURE_PACKAGE_CONFIG_FILES]
+      (TARGETS <target>... |
+       CMAKE_MODULES <path>... |
+       INSTALL_LICENSES)
+    )
+
+Provides ability to consistently and reliably install a project as a config-file package in one
+command.  All of the named :cmake:variable:`TARGETS`, :cmake:variable:`CMAKE_MODULES`, and licenses
+will be installed to paths provided by `GNUInstallDirs` with appropriate package config-files,
+version file, and targets files. Package config-files will be installed from
+:cmake:variable:`JCM_PROJECT_CMAKE_DIR` or :cmake:variable:`JCM_INSTALL_CMAKE_DESTINATION`, if they
+were configured.
+
+
+Each target will be installed with an associated targets file. The target will be exported within
+the namespace :cmake:`${PROJECT_NAME}::`, which includes the key "::" characters and follows common
+conventions. Executables and shared libraries will be installed under the install component
+:cmake:`${PROJECT_NAME}_runtime`, while static libraries and headers in the target's *INTERFACE* and
+*PUBLIC* header sets will be installed under the :cmake:`${PROJECT_NAME}_devel` install component.
+This supports separate runtime and development packages often distributed. Alias targets are
+supported (libsample::libsample)
+
+:cmake:variable:`CMAKE_MODULES` will be installed under the :cmake:`${PROJECT_NAME}_devel` install
+component. If any of the paths in this list name a directory, the directory will be expanded to all
+enclosed files ending in `.cmake`. Relative paths are converted to absolute paths with respect to
+:cmake:variable:`CMAKE_CURRENT_SOURCE_DIR`.
+
+Licenses are installed under :cmake:variable:`JCM_INSTALL_DOC_DIR`. Both a root `LICENSE.*` file and
+licenses within :cmake:variable:`JCM_PROJECT_LICENSES_DIR` will be installed. Symlinks are followed.
+
+Parameters
+##########
+
+Options
+~~~~~~~
+
+:cmake:variable:`CONFIGURE_PACKAGE_CONFIG_FILES`
+  When provided, the config-files will be configured using
+  :cmake:command:`jcm_configure_package_config_file`
+
+:cmake:variable:`INSTALL_LICENSES`
+  Causes this function to install licenses from the paths described above.
+
+Multi Value
+~~~~~~~~~~~
+
+:cmake:variable:`TARGETS`
+  A list of targets to install.
+
+:cmake:variable:`CMAKE_MODULES`
+  Relative or absolute paths to additional CMake modules, or directories containing CMake modules,
+  to install.
+
+Examples
+########
+
+.. code-block:: cmake
+
+  jcm_install_config_file_package(TARGETS libbbg::libbbq)
+
+.. code-block:: cmake
+
+  jcm_install_config_file_package(
+    CONFIGURE_PACKAGE_CONFIG_FILES
+    INSTALL_LICENSES
+    TARGETS libbbg::core libbbq::meat libbbg::veg
+    CMAKE_MODULES "${JCM_PROJECT_CMAKE_DIR}"
+  )
+
+#]=======================================================================]
 function(jcm_install_config_file_package)
   jcm_parse_arguments(
     OPTIONS "CONFIGURE_PACKAGE_CONFIG_FILES" "INSTALL_LICENSES"
@@ -62,8 +149,11 @@ function(jcm_install_config_file_package)
     if (DEFINED ARGS_CONFIGURE_PACKAGE_CONFIG_FILES)
       set(in_config_file "${config_file_name}${JCM_IN_FILE_EXTENSION}")
       string(PREPEND in_config_file "${JCM_PROJECT_CMAKE_DIR}/")
+
       if (EXISTS "${in_config_file}")
-        jcm_configure_package_config_file(${comp_arg})
+        jcm_configure_package_config_file(${comp_arg} OUT_FILE_VAR configured_out_file)
+        set(${out_var} "${configured_out_file}" PARENT_SCOPE)
+        return()
       else ()
         message(
           FATAL_ERROR "Cannot configure a package config file for ${comp_arg} of project "
@@ -72,20 +162,16 @@ function(jcm_install_config_file_package)
     endif ()
 
     # search for package config-file
-    set(config_pkg_file)
-    set(search_paths "${JCM_CMAKE_DESTINATION}/${config_file_name}"
-      "${JCM_PROJECT_CMAKE_DIR}/${config_file_name}")
-    foreach (search_path ${search_paths})
-      if (EXISTS "${search_path}")
-        set(${out_var} "${search_path}" PARENT_SCOPE)
-        return()
-      endif ()
-    endforeach ()
+    set(unconfigured_config_file "${JCM_PROJECT_CMAKE_DIR}/${config_file_name}")
+    if (EXISTS "${unconfigured_config_file}")
+      set(${out_var} "${unconfigured_config_file}" PARENT_SCOPE)
+      return()
+    endif ()
 
     message(
       FATAL_ERROR
       "Unable to install a config-file package without a config file. "
-      "Could not find the file ${config_file_name} in any of ${search_paths}."
+      "Could not find the file ${unconfigured_config_file}."
     )
   endfunction()
 
@@ -174,6 +260,7 @@ function(jcm_install_config_file_package)
       ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
       COMPONENT ${PROJECT_NAME}_devel
       ${file_set_args}
+      COMPONENT ${PROJECT_NAME}_devel
       INCLUDES DESTINATION "${JCM_INSTALL_INCLUDE_DIR}"
     )
 
@@ -187,7 +274,7 @@ function(jcm_install_config_file_package)
   # == Install project licenses ==
 
   function(install_licenses license_glob dest_suffix)
-    file(GLOB license_files LIST_DIRECTORIES false "${PROJECT_SOURCE_DIR}/${license_glob}")
+    file(GLOB license_files LIST_DIRECTORIES false "${license_glob}")
     foreach (license_file ${license_files})
       cmake_path(GET license_file FILENAME file_name)
       while (IS_SYMLINK "${license_file}")
@@ -207,7 +294,9 @@ function(jcm_install_config_file_package)
   endfunction()
 
   if(ARGS_INSTALL_LICENSES)
-    install_licenses("LICENSE*" "")
-    install_licenses("licenses/*" "licenses")
+    install_licenses("${PROJECT_SOURCE_DIR}/LICENSE*" "")
+
+    cmake_path(GET JCM_PROJECT_LICENSES_DIR FILENAME licenses_dir)
+    install_licenses("${JCM_PROJECT_LICENSES_DIR}/*" "${licenses_dir}")
   endif()
 endfunction()

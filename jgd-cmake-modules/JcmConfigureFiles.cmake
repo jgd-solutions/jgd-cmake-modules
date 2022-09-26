@@ -32,6 +32,7 @@ jcm_configure_package_config_file
 
     jcm_configure_package_config_file(
       [TARGET <target> | COMPONENT <component>]
+      [OUT_FILE_VAR <var>]
     )
 
 Configures the package config-file for the project or for a project component when either
@@ -61,6 +62,9 @@ One Value
   :cmake:variable:`PROJECT_NAME` to compute the appropriate config-file name. Use this if the
   respective target is unavailable.
 
+:cmake:variable:`OUT_FILE_VAR`
+  The named variable will be set to the absolute path of the output file.
+
 Examples
 ########
 
@@ -87,7 +91,7 @@ Examples
 #]=======================================================================]
 function(jcm_configure_package_config_file)
   jcm_parse_arguments(
-    ONE_VALUE_KEYWORDS "TARGET;COMPONENT"
+    ONE_VALUE_KEYWORDS "TARGET;COMPONENT;OUT_FILE_VAR"
     MUTUALLY_EXCLUSIVE "TARGET;COMPONENT"
     ARGUMENTS "${ARGN}"
   )
@@ -126,6 +130,11 @@ function(jcm_configure_package_config_file)
     "${config_file}"
     INSTALL_DESTINATION "${JCM_INSTALL_CMAKE_DESTINATION}"
   )
+
+  # output variable
+  if(DEFINED ARGS_OUT_FILE_VAR)
+    set(${ARGS_OUT_FILE_VAR} "${config_file}" PARENT_SCOPE)
+  endif()
 endfunction()
 
 #[=======================================================================[.rst:
