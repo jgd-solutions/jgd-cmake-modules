@@ -1,39 +1,150 @@
 include_guard()
 
+#[=======================================================================[.rst:
+
+JcmParseArguments
+-----------------
+
+#]=======================================================================]
+
 include(CMakeParseArguments)
 
-#
-# A wrapper around cmake_parse_arguments that provides a consistent prefix,
-# ARGS, to the parsed arguments, and argument validation.
-#
-# Arguments:
-#
-# ARGUMENTS: multi-value arg; all the caller's arguments to parse
-#
-# OPTIONS: multi-value arg; options for the calling function/macro
-#
-# ONE_VALUE_KEYWORDS: multi-value arg; keywords of one-value arguments of
-# calling function/macro
-#
-# MULTI_VALUE_KEYWORDS: multi-value arg; keywords of multi-value arguments of
-# calling function/macro
-#
-# REQUIRES_ALL: multi-value arg; the keywords of the calling function/macro's
-# arguments that must all be provided. A fatal error will be emitted if all of
-# these arguments weren't provided. Can include any desired subset of OPTIONS,
-# ONE_VALUE_KEYWORDS, and MULTI_VALUE_KEYWORDS.
-#
-# REQUIRES_ANY: multi-value arg; the keywords of the calling function/macro's
-# arguments that must have at least one provided. A fatal error will be emitted
-# if none of these arguments were provided. Can include any desired subset of
-# OPTIONS, ONE_VALUE_KEYWORDS, and MULTI_VALUE_KEYWORDS.
-#
-# WITHOUT_MISSING_VALUES_CHECK: option; when defined, arguments with missing
-# values will be ignored
-#
-# WITHOUT_UNPARSED_CHECK: option; when defined, unparsed arguments (those that
-# were provided but were not expected by the function) will be ignored
-#
+#[=======================================================================[.rst:
+
+jcm_parse_arguments
+^^^^^^^^^^^^^^^^^^^
+
+.. cmake:command:: jcm_parse_arguments
+
+  .. code-block:: cmake
+
+    jcm_parse_arguments(
+      [WITHOUT_MISSING_VALUES_CHECK]
+      [WITHOUT_UNPARSED_CHECK]
+      [PREFIX <prefix>]
+      (OPTIONS <keyword>...
+       ONE_VALUE_KEYWORDS <keyword>...
+       MULTI_VALUE_KEYWORDS <keyword>...)
+      [REQUIRES_ALL <keyword>...]
+      [REQUIRES_ANY <keyword>...]
+      [MUTUALLY_EXCLUSIVE <keyword>..]
+      ARGUMENTS <arg>...
+    )
+
+
+A wrapper around CMake's :cmake:command:`cmake_parse_arguments` that provides sensible defaults,
+named arguments, and handles argument validation. Errors will result in fatal errors being emitted.
+
+Parameters
+##########
+
+Options
+~~~~~~~
+
+:cmake:variable:`WITHOUT_MISSING_VALUES_CHECK`
+  When provided, this macro will *not* check for keywords with missing values in
+  :cmake:variable:`ARGUMENTS`
+
+:cmake:variable:`WITHOUT_UNPARSED_CHECK`
+  When provided, this macro will *not* check for unparsed keywords in :cmake:variable:`ARGUMENTS`.
+  That is keywords that were provided but not included in the following lists of keywords.
+
+One Value
+~~~~~~~~~
+
+:cmake:variable:`PREFIX`
+  The prefix for result variables from :cmake:command:`cmake_parse_arguments`, which includes parsed
+  arguments. Default is "ARGS", so parsed arguments will begin with "ARGS\_".
+
+Multi Value
+~~~~~~~~~~~
+
+:cmake:variable:`OPTIONS`
+  A list of keywords for arguments that operate as flags. Either they are provided, or they aren't,
+  but don't accept values. These argument variables will be defined as FALSE if they aren't
+  provided. Keyword list.
+
+:cmake:variable:`ONE_VALUE_KEYWORDS`
+  A list of keywords for arguments that require a single value. These argument variables will not be
+  defined if they aren't provided. Keywords list.
+
+:cmake:variable:`MULTI_VALUE_KEYWORDS`
+  A list of keywords for arguments that require one or more values. These argument variables will
+  not be defined if they aren't provided. Keyword list.
+
+:cmake:variable:`REQUIRES_ALL`
+  A list of keywords from any of the above keyword lists that are mandatory. If
+  :cmake:variable:`ARGUMENTS` does not include the keywords listed here, parsing will emit an error.
+
+:cmake:variable:`REQUIRES_ANY`
+  A list of keywords from any of the above keyword lists that must have at least one keyword
+  present. If :cmake:variable:`ARGUMENTS` does not include at least one of the keywords listed here,
+  parsing will emit an error.
+
+:cmake:variable:`MUTUALLY_EXCLUSIVE`
+  A list of keywords from any of the above keyword lists that must one one keyword present. If
+  :cmake:variable:`ARGUMENTS` includes more than one of the keywords listed here, parsing will emit
+  an error.
+
+Examples
+########
+
+.. code-block:: cmake
+
+
+  function(eparate_list)
+    jcm_parse_arguments(
+      OPTIONS "USE_PERL_REGEX" "USE_EXTENDED"
+      ONE_VALUE_KEYWORDS "REGEX;OUT_MATCHED;OUT_MISMATCHED"
+      MULTI_VALUE_KEYWORDS "INPUT"
+      REQUIRES_ALL "REGEX;INPUT"
+      REQUIRES_ANY "OUT_MATCHED;OUT_MISMATCHED"
+      MUTUALLY_EXCLUSIVE "USE_PERL_REGEX" "USE_EXTENDED"
+      ARGUMENTS "${ARGN}")
+
+    if(ARGS_USE_PERL_REGEX)
+      # example usage of option
+    endif()
+
+    if(DEFINED ARGS_OUT_MATCHED)
+      # example usage of one-value argument
+    endif()
+
+    foreach(input "${ARGS_INPUT}")
+      # example usage of multi-value argument
+    endforeach()
+
+    # ...
+  endfunction()
+
+  # Ok
+  separate_list(
+    INPUT "first" "second" "third"
+    REGEX ".*$d"
+    OUT_MATCHED ends_with_d
+  )
+
+  # Error, INPUT not provided
+  separate_list(
+    REGEX ".*$d"
+    OUT_MATCHED ends_with_d
+    OUT_MISMATCHED doesnt_end_with_d
+  )
+
+  # Error, OUT_MATCHED nor OUT_MISMATCHED provided
+  separate_list(
+    INPUT "first" "second" "third"
+    REGEX ".*$d"
+  )
+
+  # Error, USE_PERL_REGEX and USE_EXTENDED provided
+  separate_list(
+    USE_PERL_REGEX
+    USE_EXTENDED
+    INPUT "first" "second" "third"
+    REGEX ".*$d"
+  )
+#]=======================================================================]
 macro(JCM_PARSE_ARGUMENTS)
   # Arguments to jcm_parse_arguments
   set(options WITHOUT_MISSING_VALUES_CHECK WITHOUT_UNPARSED_CHECK)
