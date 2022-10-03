@@ -32,7 +32,7 @@ jcm_configure_package_config_file
 
     jcm_configure_package_config_file(
       [TARGET <target> | COMPONENT <component>]
-      [OUT_FILE_VAR <var>]
+      [OUT_FILE_VAR <out-var>]
     )
 
 Configures the package config-file for the project or for a project component when either

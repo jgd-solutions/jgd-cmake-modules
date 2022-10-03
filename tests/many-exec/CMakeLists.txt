@@ -8,6 +8,8 @@ include(JcmAllModules)
 jcm_setup_project()
 jcm_source_subdirectories(ADD_SUBDIRS WITH_TESTS_DIR)
 
+set(many_exec_targets many-exec::formatter)
+
 jcm_install_config_file_package(
   CONFIGURE_PACKAGE_CONFIG_FILES
   TARGETS

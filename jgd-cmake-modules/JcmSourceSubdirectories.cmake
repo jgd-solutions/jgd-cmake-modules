@@ -1,5 +1,12 @@
 include_guard()
 
+#[=======================================================================[.rst:
+
+JcmSourceSubdirectories
+-----------------
+
+#]=======================================================================]
+
 include(JcmParseArguments)
 include(JcmCanonicalStructure)
 include(JcmStandardDirs)
@@ -10,6 +17,8 @@ include(JcmStandardDirs)
 # adds the given SUBDIR as a subdirectory.
 #
 # Arguments:
+#
+# FATAL: indicates that errors are fatal
 #
 # ADD_SUBDIRS: option; specifies that SUBDIR should be added as a subdirectory.
 #
@@ -64,14 +73,48 @@ macro(_JCM_CHECK_ADD_SUBDIR out_added_subdirs)
   endif()
 endmacro()
 
+
+#[=======================================================================[.rst:
+
+jcm_source_subdirectories
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. cmake:command::jcm_source_subdirectories
+
+  .. code-block:: cmake
+
+    jcm_source_subdirectories(
+      [WITH_TESTS_DIR]
+      [WITH_DOCS_DIR]
+      (OUT_VAR <out-var> | ADD_SUBDIRS)
+      [LIB_COMPONENTS <component>...]
+      [EXEC_COMPONENTS <component>...]
+    )
+
+Computes and possibly adds subdirectories following JGD's project layout conventions, which includes
+the `Canonical Project Structure`_ source subdirectory structure. These canonical subdirectories are
+provided by functions in `JcmCanonicalStructure`, while project directories are provided by
+:cmake:variable:`JCM_PROJECT_TESTS_DIR` and :cmake:variable:`JCM_PROJECT_DOCS_DIR` from
+`JcmStandardDirs`.
+
+This is a function, which prevents added subdirectories from populating variables in the calling
+list-file's scope. This is an anti-pattern to be avoided, and is simply not supported by this
+function.
+
+The source subdirectories for the targets named in
+:cmake:variable:`${JCM_PROJECT_PREFIX_NAME}_OMIT_TARGETS` are computed and omitted from the output
+and/or addition to the project. Warnings will be emitted for targets in this list that are not
+connected to this project.
+
+That is, the executable, executable components,
+library, or library component subdirectories will be added, if they exist. The variable
+JCM_CURRENT_COMPONENT will be set to the component before adding each component's subdirectory.
+Options also exist to consider the standard tests and docs project directories as source
+subdirectories.
+
+#]=======================================================================]
+
 #
-# Provides subdirectories following JGD's project layout conventions, which are
-# the canonical project layout conventions. These canonical subdirectories are
-# provided by functions in  JcmCanonicalStructure. That is, the executable,
-# executable components, library, or library component subdirectories will be
-# added, if they exist. The variable JCM_CURRENT_COMPONENT will be set to the
-# component before adding each component's subdirectory. Options also exist to
-# consider the standard tests and docs project directories as source subdirectories.
 #
 # Arguments:
 #
@@ -99,15 +142,10 @@ endmacro()
 #
 function(jcm_source_subdirectories)
   jcm_parse_arguments(
-    OPTIONS
-    "ADD_SUBDIRS"
-    "WITH_TESTS_DIR"
-    "WITH_DOCS_DIR"
+    OPTIONS "ADD_SUBDIRS" "WITH_TESTS_DIR" "WITH_DOCS_DIR"
     ONE_VALUE_KEYWORDS "OUT_VAR"
-    MULTI_VALUE_KEYWORDS
-    "LIB_COMPONENTS"
-    "EXEC_COMPONENTS"
-    REQUIRES_ANY "ADD_SUBDIRS;OUT_VAR"
+    MULTI_VALUE_KEYWORDS "LIB_COMPONENTS" "EXEC_COMPONENTS"
+    REQUIRES_ANY "ADD_SUBDIRS" "OUT_VAR"
     ARGUMENTS "${ARGN}")
 
   # Setup
@@ -128,6 +166,7 @@ function(jcm_source_subdirectories)
       jcm_canonical_subdir(TARGET ${target} OUT_VAR subdir_omission)
       list(APPEND subdir_omissions ${subdir_omission})
     endforeach()
+
     set(unused_subdir_omissions "${subdir_omissions}")
   endif()
 

@@ -133,7 +133,9 @@ _add_use_project("single-exec")
 # == many-exec ==
 
 _build_and_ctest("many-exec"
-  BUILD_OPTIONS -DMANY_EXEC_BUILD_TESTS=ON
+  BUILD_OPTIONS
+    -DMANY_EXEC_BUILD_TESTS=ON
+    -DMANY_EXEC_OMIT_TARGETS=''
   NAME_SUFFIX -format
   BUILD_TARGET clang-format-check)
 
@@ -145,6 +147,12 @@ _find_use_project("many-exec")
 _find_use_project("many-exec" COMPONENTS formatter)
 _find_use_project("many-exec" COMPONENTS compiler formatter)
 _add_use_project("many-exec")
+
+# _build_and_ctest("many-exec"
+#   BUILD_OPTIONS
+#   -DMANY_EXEC_BUILD_TESTS=OFF
+#   -DMANY_EXEC_OMIT_TARGETS=many-exec::formatter
+#   NAME_SUFFIX -omit-formatter)
 
 
 # == libsingle ==

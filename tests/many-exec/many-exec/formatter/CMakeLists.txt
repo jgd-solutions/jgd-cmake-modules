@@ -1,3 +1,5 @@
+message(WARNING "in many exec :: formatter")
+
 jcm_add_executable(
   COMPONENT formatter
   OUT_TARGET formatter-target

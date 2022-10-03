@@ -191,14 +191,8 @@ endfunction()
 
 function(jcm_target_type_component_from_name)
   jcm_parse_arguments(
-    ONE_VALUE_KEYWORDS
-    "PROJECT"
-    "TARGET_NAME"
-    "OUT_TYPE"
-    "OUT_COMPONENT"
-    REQUIRES_ANY
-    "OUT_TYPE"
-    "OUT_COMPONENT"
+    ONE_VALUE_KEYWORDS "PROJECT" "TARGET_NAME" "OUT_TYPE" "OUT_COMPONENT"
+    REQUIRES_ANY "OUT_TYPE" "OUT_COMPONENT"
     ARGUMENTS "${ARGN}")
 
   # Resolve project name
@@ -229,7 +223,7 @@ function(jcm_target_type_component_from_name)
 
   string(REGEX REPLACE "^${JCM_LIB_PREFIX}" "" proj_no_lib "${project_name}")
   string(REGEX REPLACE "^${JCM_LIB_PREFIX}" "" name_no_lib "${base_name}")
-  string(REGEX REPLACE ".*-" "" name_ending "${base_name}")
+  string(REGEX REPLACE ".*-" "" name_ending "${base_name}") # possibly the component name
 
   set(type)
   set(component)
@@ -238,7 +232,7 @@ function(jcm_target_type_component_from_name)
   if(proj_no_lib STREQUAL project_name)
     if(name_no_lib STREQUAL base_name)    # executable target
       set(type "EXECUTABLE")
-      if(base_name STREQUAL project_name) # executable component target
+      if(NOT base_name STREQUAL project_name) # executable component target
         set(component "${base_name}")
       endif()
     else()                                   # library target
@@ -264,6 +258,11 @@ function(jcm_target_type_component_from_name)
   endif()
 
   # Set output variables
-  set(${ARGS_OUT_TYPE} ${type} PARENT_SCOPE)
-  set(${ARGS_OUT_COMPONENT} "${component}" PARENT_SCOPE)
+  if(DEFINED ARGS_OUT_TYPE)
+    set(${ARGS_OUT_TYPE} ${type} PARENT_SCOPE)
+  endif()
+
+  if(DEFINED ARGS_OUT_COMPONENT)
+    set(${ARGS_OUT_COMPONENT} "${component}" PARENT_SCOPE)
+  endif()
 endfunction()

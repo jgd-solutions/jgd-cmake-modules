@@ -219,8 +219,7 @@ function(jcm_create_clang_format_targets)
 
   if (NOT files_to_format)
     message(
-      AUTHOR_WARNING "No source files in project ${PROJECT_NAME} will be provided to clang-format."
-    )
+      AUTHOR_WARNING "No source files in project ${PROJECT_NAME} will be provided to clang-format.")
   endif ()
 
   set(verbose_flag)
