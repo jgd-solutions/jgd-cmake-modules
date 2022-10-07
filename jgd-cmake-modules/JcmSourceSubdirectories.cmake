@@ -41,35 +41,28 @@ macro(_JCM_CHECK_ADD_SUBDIR out_added_subdirs)
     endif()
   endmacro()
 
-  if (ARGS_SUBDIR IN_LIST subdir_omissions)
-    # skip subdirectory all together
-    message(STATUS "Omitting subdirectory from project ${PROJECT_NAME}: ${ARGS_SUBDIR}")
-    list(REMOVE_ITEM unused_subdir_omissions "${ARGS_SUBDIR}")
+  if (NOT IS_DIRECTORY "${ARGS_SUBDIR}")
+    on_fatal_message(
+      "${CMAKE_CURRENT_FUNCTION} could not add subdirectory ${subdir_path} for project "
+      "${PROJECT_NAME}. The directory does not exist."
+    )
+  elseif (NOT EXISTS "${ARGS_SUBDIR}/CMakeLists.txt")
+    on_fatal_message(
+      "${CMAKE_CURRENT_FUNCTION} could not add subdirectory ${subdir_path} for project "
+      "${PROJECT_NAME}. The directory does not contain a CMakeLists.txt file."
+    )
+  elseif (CMAKE_CURRENT_SOURCE_DIR STREQUAL ARGS_SUBDIR)
+    on_fatal_message(
+      "${CMAKE_CURRENT_SOURCE_DIR} tries to add itself as a subdirectory."
+    )
   else()
-    if (NOT IS_DIRECTORY "${ARGS_SUBDIR}")
-      on_fatal_message(
-        "${CMAKE_CURRENT_FUNCTION} could not add subdirectory ${subdir_path} for project "
-        "${PROJECT_NAME}. The directory does not exist."
-      )
-    elseif (NOT EXISTS "${ARGS_SUBDIR}/CMakeLists.txt")
-      on_fatal_message(
-        "${CMAKE_CURRENT_FUNCTION} could not add subdirectory ${subdir_path} for project "
-        "${PROJECT_NAME}. The directory does not contain a CMakeLists.txt file."
-      )
-    elseif (CMAKE_CURRENT_SOURCE_DIR STREQUAL ARGS_SUBDIR)
-      on_fatal_message(
-        "${CMAKE_CURRENT_SOURCE_DIR} tries to add itself as a subdirectory."
-      )
-    else()
-      # directory and file exist, deal with subdirectory
-      list(APPEND ${out_added_subdirs} "${ARGS_SUBDIR}")
-      if (ARGS_ADD_SUBDIRS)
-        message(VERBOSE "${CMAKE_CURRENT_FUNCTION}: Adding directory ${ARGS_SUBDIR} to project "
-          "${PROJECT_NAME}")
-        add_subdirectory("${ARGS_SUBDIR}")
-      endif()
+    # directory and file exist, deal with subdirectory
+    list(APPEND ${out_added_subdirs} "${ARGS_SUBDIR}")
+    if (ARGS_ADD_SUBDIRS)
+      message(VERBOSE "${CMAKE_CURRENT_FUNCTION}: Adding directory ${ARGS_SUBDIR} to project "
+        "${PROJECT_NAME}")
+      add_subdirectory("${ARGS_SUBDIR}")
     endif()
-
   endif()
 endmacro()
 
@@ -100,11 +93,6 @@ provided by functions in `JcmCanonicalStructure`, while project directories are 
 This is a function, which prevents added subdirectories from populating variables in the calling
 list-file's scope. This is an anti-pattern to be avoided, and is simply not supported by this
 function.
-
-The source subdirectories for the targets named in
-:cmake:variable:`${JCM_PROJECT_PREFIX_NAME}_OMIT_TARGETS` are computed and omitted from the output
-and/or addition to the project. Warnings will be emitted for targets in this list that are not
-connected to this project.
 
 That is, the executable, executable components,
 library, or library component subdirectories will be added, if they exist. The variable
@@ -158,18 +146,6 @@ function(jcm_source_subdirectories)
     unset(add_subdirs_arg)
   endif ()
 
-  # Subdirectory Omissions
-  set(subdir_omissions)
-  set(unused_subdir_omissions)
-  if(ARGS_ADD_SUBDIRS)
-    foreach(target IN LISTS ${JCM_PROJECT_PREFIX_NAME}_OMIT_TARGETS)
-      jcm_canonical_subdir(TARGET ${target} OUT_VAR subdir_omission)
-      list(APPEND subdir_omissions ${subdir_omission})
-    endforeach()
-
-    set(unused_subdir_omissions "${subdir_omissions}")
-  endif()
-
   # Add Subdirs
 
   # add single library subdirectory, if it exists
@@ -220,14 +196,6 @@ function(jcm_source_subdirectories)
   if (ARGS_WITH_DOCS_DIR AND ${JCM_PROJECT_PREFIX_NAME}_BUILD_DOCS)
     _jcm_check_add_subdir(subdirs_added FATAL ${add_subdirs_arg} SUBDIR "${JCM_PROJECT_DOCS_DIR}")
   endif ()
-
-  # Check for accidental entries in omissions option
-  if(unused_subdir_omissions)
-    message(WARNING "The following subdirectories are omitted based on the targets specified in "
-                    "${JCM_PROJECT_PREFIX_NAME}_OMIT_TARGETS, but these subdirectories aren't "
-                    "added by the project: ${unused_subdir_omissions}"
-    )
-  endif()
 
   # Set result variable
   if (DEFINED ARGS_OUT_VAR)

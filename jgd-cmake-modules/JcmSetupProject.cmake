@@ -78,9 +78,6 @@ This function will:
         Enables/disables building project documentation for this specific project. Default:
         *OFF*
 
-      ${JCM_PROJECT_PREFIX_NAME}_OMIT_TARGETS
-        List of project alias targets (${PROJECT_NAME}:: ...) to omit during CMake configuration
-
   - set default values for CMake variables controlling the build when the current project is the
     top-level project
 
@@ -209,18 +206,6 @@ macro(JCM_SETUP_PROJECT)
   unset(default_enable_tests)
 
   option(${JCM_PROJECT_PREFIX_NAME}_BUILD_DOCS "Build all documentation for ${PROJECT_NAME}" OFF)
-
-  set(${JCM_PROJECT_PREFIX_NAME}_OMIT_TARGETS "" CACHE STRING
-    "List of project alias targets (${PROJECT_NAME}:: ...) to omit during CMake configuring")
-
-  foreach(target IN LISTS "${JCM_PROJECT_PREFIX_NAME}_OMIT_TARGETS")
-    if(NOT target MATCHES "^${PROJECT_NAME}::|^${PROJECT_NAME}_")
-      message(FATAL_ERROR
-        "${JCM_PROJECT_PREFIX_NAME}_OMIT_TARGETS contains improperly formatted target. Target "
-        "'${target}' does not start with '${PROJECT_NAME}::' or '${PROJECT_NAME}_ and therefore "
-        "definitely differs from JCM's target naming scheme.")
-    endif()
-  endforeach()
 
   # == Variables Setting Default Target Properties ==
 
