@@ -42,7 +42,7 @@ respective `*INCLUDE_DIRECTORIES` properties, based on the `scope`, and are wrap
 :cmake:$<BUILD_INTERFACE:...> generator expression.
 
 :cmake:command:`jcm_add_library` uses this function, and it is often not necessary to use directly,
-unless supplementary headers sets are to be created.
+unless supplementary headers sets are to be added to a target, like in a nested directory.
 
 .. note::
   Use a target's `HEADER_SETS` and `INTERFACE_HEADER_SETS` `properties
@@ -76,7 +76,8 @@ Examples
 
 .. code-block:: cmake
 
-  jcm_header_file_set(PUBLIC
+  jcm_header_file_set(
+    PUBLIC
     TARGET libimage_libimage
     HEADERS image.hpp
   )
@@ -92,6 +93,14 @@ Examples
 
 #]=======================================================================]
 function(jcm_header_file_set scope)
+  # Positional Usage Guards
+  set(supported_scopes "INTERFACE|PUBLIC|PRIVATE")
+  if (NOT scope MATCHES "${supported_scopes}")
+    message(FATAL_ERROR
+      "One of ${supported_scopes} must be provided as the scope to ${CMAKE_CURRENT_FUNCTION}")
+  endif ()
+
+  # Parse named arguments
   jcm_parse_arguments(
     ONE_VALUE_KEYWORDS "TARGET"
     MULTI_VALUE_KEYWORDS "HEADERS"
@@ -100,16 +109,10 @@ function(jcm_header_file_set scope)
   )
 
   # Usage Guards
-
   if (NOT TARGET ${ARGS_TARGET})
     message(FATAL_ERROR
       "${ARGS_TARGET} is not a target and must be created before calling"
       "${CMAKE_CURRENT_FUNCTION}")
-  endif ()
-
-  set(supported_scopes "INTERFACE|PUBLIC|PRIVATE")
-  if (NOT scope MATCHES "${supported_scopes}")
-    message(FATAL_ERROR "One of ${supported_scopes} must be provided as the scope to ${CMAKE_CURRENT_FUNCTION}")
   endif ()
 
   # Transform headers to normalized absolute paths

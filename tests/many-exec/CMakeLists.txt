@@ -11,8 +11,7 @@ jcm_setup_project()
 include(manyExecBuildTargetOptions)
 many_exec_get_enabled_targets(
   OUT_BUILD_TARGETS  "MANY_EXEC_BUILD_TARGETS"
-  OUT_FORMAT_TARGETS "MANY_EXEC_CLANG_FORMAT_TARGETS"
-)
+  OUT_FORMAT_TARGETS "MANY_EXEC_CLANG_FORMAT_TARGETS")
 
 jcm_source_subdirectories(ADD_SUBDIRS WITH_TESTS_DIR)
 
@@ -21,5 +20,4 @@ jcm_install_config_file_package(
   TARGETS ${MANY_EXEC_BUILD_TARGETS})
 
 jcm_create_clang_format_targets(
-  SOURCE_TARGETS ${MANY_EXEC_CLANG_FORMAT_TARGETS}
-)
+  SOURCE_TARGETS ${MANY_EXEC_CLANG_FORMAT_TARGETS})
