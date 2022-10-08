@@ -55,6 +55,7 @@ endforeach ()
 # Create cumulative regexes for all currently enabled languages
 get_property(_jcm_languages GLOBAL PROPERTY ENABLED_LANGUAGES)
 if(_jcm_languages)
+  message(STATUS "enabled languages ${_jcm_languages}")
   list(REMOVE_ITEM _jcm_languages ${_jcm_already_enabled_languages} NONE)
 endif()
 
@@ -66,6 +67,8 @@ if(_jcm_languages)
           "The associated REGEX variables will not be created")
       continue()
     endif()
+
+  message(STATUS "language ${lang}")
 
     list(APPEND JCM_HEADER_REGEX "${JCM_${lang}_HEADER_REGEX}")
     list(APPEND JCM_SOURCE_REGEX "${JCM_${lang}_SOURCE_REGEX}")
@@ -80,6 +83,9 @@ if(_jcm_languages)
   list(JOIN JCM_SOURCE_REGEX "|" JCM_SOURCE_REGEX)
   list(JOIN JCM_TEST_SOURCE_REGEX "|" JCM_TEST_SOURCE_REGEX)
 endif()
+
+message(STATUS "JCM_HEADER_REGEX ${JCM_HEADER_REGEX}")
+message(STATUS "JCM_SOURCE_REGEX ${JCM_SOURCE_REGEX}")
 
 unset(_jcm_languages)
 
