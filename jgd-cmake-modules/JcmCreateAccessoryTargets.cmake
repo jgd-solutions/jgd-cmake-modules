@@ -65,6 +65,9 @@ using this function.  However, `clang::format` need not be available to use this
 situtation, the generated "clang-format" and "clang-format-check" targets will emit errors when
 invoked, but CMake configuration will not be hindered.
 
+This function has no effect when it is not called in the top-level project, unless
+:cmake:variable:`WITHOUT_TOP_LEVEL_CHECK` is provided.
+
 Parameters
 ##########
 
@@ -73,6 +76,9 @@ Options
 
 :cmake:variable:`QUIET`
   Omits the --verbose option to the underlying clang-format executable.
+
+:cmake:variable:`WITHOUT_TOP_LEVEL_CHECK`
+  Causes this function not check if it's being called in the top-level project.
 
 One Value
 ~~~~~~~~~
@@ -122,12 +128,16 @@ Examples
 #]=======================================================================]
 function(jcm_create_clang_format_targets)
   jcm_parse_arguments(
-    OPTIONS "QUIET"
+    OPTIONS "QUIET" "WITHOUT_TOP_LEVEL_CHECK"
     MULTI_VALUE_KEYWORDS "ADDITIONAL_PATHS;SOURCE_TARGETS"
     ONE_VALUE_KEYWORD "EXCLUDE_REGEX" "COMMAND"
     REQUIRES_ALL "SOURCE_TARGETS"
     ARGUMENTS "${ARGN}"
   )
+
+  if(PROJECT_IS_TOP_LEVEL AND NOT ARGS_WITHOUT_TOP_LEVEL_CHECK)
+    return()
+  endif()
 
   unset(clang_format_err)
 
