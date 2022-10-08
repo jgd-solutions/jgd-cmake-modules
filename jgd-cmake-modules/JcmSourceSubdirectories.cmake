@@ -3,7 +3,7 @@ include_guard()
 #[=======================================================================[.rst:
 
 JcmSourceSubdirectories
------------------
+-----------------------
 
 #]=======================================================================]
 
@@ -72,7 +72,7 @@ endmacro()
 jcm_source_subdirectories
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. cmake:command::jcm_source_subdirectories
+.. cmake:command:: jcm_source_subdirectories
 
   .. code-block:: cmake
 
@@ -84,50 +84,79 @@ jcm_source_subdirectories
       [EXEC_COMPONENTS <component>...]
     )
 
-Computes and possibly adds subdirectories following JGD's project layout conventions, which includes
-the `Canonical Project Structure`_ source subdirectory structure. These canonical subdirectories are
-provided by functions in `JcmCanonicalStructure`, while project directories are provided by
-:cmake:variable:`JCM_PROJECT_TESTS_DIR` and :cmake:variable:`JCM_PROJECT_DOCS_DIR` from
+Computes and optionally adds subdirectories following JGD's project structure, which includes the
+`Canonical Project Structure`_, which pertains to source subdirectories. These canonical
+subdirectories are provided by functions in `JcmCanonicalStructure`, while project directories are
+provided by :cmake:variable:`JCM_PROJECT_TESTS_DIR` and :cmake:variable:`JCM_PROJECT_DOCS_DIR` from
 `JcmStandardDirs`.
 
-This is a function, which prevents added subdirectories from populating variables in the calling
-list-file's scope. This is an anti-pattern to be avoided, and is simply not supported by this
-function.
+Executable and library subdirectories for non-components will be added first, if they exist. Then,
+source subdirectories for library and executable components will be added for the components
+specified, with errors if they don't exist. Then, the standard *tests* and *docs* directory will be
+optionally added - see Options
 
-That is, the executable, executable components,
-library, or library component subdirectories will be added, if they exist. The variable
-JCM_CURRENT_COMPONENT will be set to the component before adding each component's subdirectory.
-Options also exist to consider the standard tests and docs project directories as source
-subdirectories.
+This is a function, which prevents added subdirectories from populating variables in the calling
+list-file's scope. Bubbling up variables from subdirectories is an anti-pattern to be avoided, and
+is simply not supported by this function.
+
+Parameters
+##########
+
+Options
+~~~~~~~
+
+:cmake:variable:`WITH_TESTS_DIR`
+  Causes the :cmake:variable:`JCM_PROJECT_TESTS_DIR` directory to be added when the
+  :cmake:variable:`${JCM_PROJECT_PREFIX_NAME}_BUILD_TESTS` option is set.
+
+:cmake:variable:`WITH_DOCS_DIR`
+  Causes the :cmake:variable:`JCM_PROJECT_DOCS_DIR` directory to be added when the
+  :cmake:variable:`${JCM_PROJECT_PREFIX_NAME}_BUILD_DOCS` option is set.
+
+:cmake:variable:`ADD_SUBDIRS`
+  Causes this function to add each subdirectory to the project using CMake's
+  :cmake:command:`add_subdirectory`
+
+
+One Value
+~~~~~~~~~
+
+:cmake:variable:`OUT_VAR`
+  The named variable will be set to the list of resultant subdirectories
+
+Multi Value
+~~~~~~~~~~~
+
+:cmake:variable:`LIB_COMPONENTS`
+  A list of library components for which subdirectories will be computed. Components matching
+  :cmake:variable:`PROJECT_NAME` will be ignored.
+
+:cmake:variable:`EXEC_COMPONENTS`
+  A list of executable components for which subdirectories will be computed. Components matching
+  :cmake:variable:`PROJECT_NAME` will be ignored.
+
+Examples
+########
+
+.. code-block:: cmake
+
+  jcm_source_subdirectories(
+    WITH_TESTS_DIR
+    WITH_DOCS_DIR
+    OUT_VAR mylib_subdirectories
+  )
+
+.. code-block:: cmake
+
+  jcm_source_subdirectories(
+    WITH_TESTS_DIR
+    WITH_DOCS_DIR
+    OUT_VAR mylib_subdirectories
+    ADD_SUBDIRS
+    LIB_COMPONENTS core extra more
+  )
 
 #]=======================================================================]
-
-#
-#
-# Arguments:
-#
-# LIB_COMPONENTS: multi-value arg; list of library components that the PROJECT
-# encapsulates.  Optional and shouldn't be used if the project doesn't contain
-# any library components. Components that match the PROJECT_NAME will be
-# ignored.
-#
-# OUT_VAR: one-value arg; the name of the list that will contain the added
-# subdirectories. This list will be populated regardless of if the ADD_SUBDIRS
-# was provided, or not.
-#
-# ADD_SUBDIRS: option; when defined, will cause the function to add the
-# source subdirectories as project subdirectories with CMake's
-# add_subdirectory() command, in addition to adding them to the variable
-# specified by OUT_VAR.
-#
-# WITH_TESTS_DIR: option; when defined, will cause JCM_PROJECT_TESTS_DIR to be
-# considered as a source subdirectory when the
-# <JCM_PROJECT_PREFIX_NAME>_BUILD_TESTS option is set.
-#
-# WITH_DOCS_DIR: option; when defined, will cause JCM_PROJECT_DOCS_DIR to be
-# considered as a source subdirectory when the
-# <JCM_PROJECT_PREFIX_NAME>_BUILD_DOCS option is set.
-#
 function(jcm_source_subdirectories)
   jcm_parse_arguments(
     OPTIONS "ADD_SUBDIRS" "WITH_TESTS_DIR" "WITH_DOCS_DIR"

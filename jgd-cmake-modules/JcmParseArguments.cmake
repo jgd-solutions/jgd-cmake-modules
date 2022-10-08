@@ -92,7 +92,7 @@ Examples
 .. code-block:: cmake
 
 
-  function(eparate_list)
+  function(separate_list)
     jcm_parse_arguments(
       OPTIONS "USE_PERL_REGEX" "USE_EXTENDED"
       ONE_VALUE_KEYWORDS "REGEX;OUT_MATCHED;OUT_MISMATCHED"
@@ -144,6 +144,7 @@ Examples
     INPUT "first" "second" "third"
     REGEX ".*$d"
   )
+
 #]=======================================================================]
 macro(JCM_PARSE_ARGUMENTS)
   # Arguments to jcm_parse_arguments
@@ -196,17 +197,8 @@ macro(JCM_PARSE_ARGUMENTS)
   cmake_parse_arguments(${INS_PREFIX} "${INS_OPTIONS}" "${INS_ONE_VALUE_KEYWORDS}"
     "${INS_MULTI_VALUE_KEYWORDS}" "${INS_ARGUMENTS}")
 
-  if(PROJECT_NAME STREQUAL "libcomponents" AND CMAKE_CURRENT_FUNCTION STREQUAL "jcm_header_file_set")
-    message(STATUS "here is the provided arguments ${INS_ARGUMENTS}")
-    message(STATUS "here is ARGS_TARGET ${ARGS_TARGET}")
-  endif()
-
   # validate keywords that must all be present
   foreach (keyword ${INS_REQUIRES_ALL})
-    if(PROJECT_NAME STREQUAL "libcomponents")
-      message(STATUS "here is the keyword ${INS_PREFIX}_${keyword}")
-      message(STATUS "here is the keyword's value ${${INS_PREFIX}_${keyword}}")
-    endif()
     if (NOT DEFINED ${INS_PREFIX}_${keyword})
       message(FATAL_ERROR "${keyword} was not provided or may be missing its value(s).")
     endif ()
