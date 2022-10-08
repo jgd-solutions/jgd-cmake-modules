@@ -136,7 +136,7 @@ function(jcm_create_clang_format_targets)
     ARGUMENTS "${ARGN}"
   )
 
-  if(PROJECT_IS_TOP_LEVEL AND NOT ARGS_WITHOUT_TOP_LEVEL_CHECK)
+  if(NOT PROJECT_IS_TOP_LEVEL AND NOT ARGS_WITHOUT_TOP_LEVEL_CHECK)
     return()
   endif()
 
