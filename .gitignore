@@ -1,0 +1,29 @@
+# C++
+build/
+build*/
+cmake-build-*/
+compile_commands.json
+.[Cc]ache/
+vcpkg_installed/
+CMakeUserPresets.json
+install*/
+
+# Python
+venv/
+.venv/
+pyenv/
+.pyenv/
+__pycache__/
+*.py[cod]
+
+# Editors
+.idea/
+.vscode/
+.vs/
+.settings/
+
+# MacOS
+.DS_Store/
+
+# Generic
+*.log
