@@ -6,7 +6,7 @@ JcmConfigureFiles
 -----------------
 
 Use-case specific configure functions, like CMake's :cmake:command:`configure_file`
-(`link<https://cmake.org/cmake/help/latest/command/configure_file.html>`_), but with features for
+(`link <https://cmake.org/cmake/help/latest/command/configure_file.html>`_), but with features for
 their respective use-case.
 
 All input file names are simply the output file name with :cmake:variable:`JCM_IN_FILE_EXTENSION`

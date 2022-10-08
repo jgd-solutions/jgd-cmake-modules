@@ -33,7 +33,7 @@ For each header file-path, the closest canonical include directory, one of those
 matched, a new header file-set will be created on the :cmake:variable:`TARGET` using the provided
 `scope` if it doesn't already exist. The original header file will be added to that file-set.
 
-Header file-sets <https://cmake.org/cmake/help/latest/command/target_sources.html#file-sets>`_ are
+Header `file-sets <https://cmake.org/cmake/help/latest/command/target_sources.html#file-sets>`_ are
 an excellent way to manage header files for libraries because they support installing INTERFACE and
 HEADER files when the target is installed and support modifying the target's respective
 `*INCLUDE_DIRECTORIES` properties, as is done by this function.  The subset of canonical include

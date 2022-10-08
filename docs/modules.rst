@@ -11,8 +11,10 @@ Modules
 .. cmake-module:: ../jgd-cmake-modules/JcmBasicPackageConfig.cmake
 .. cmake-module:: ../jgd-cmake-modules/JcmInstallConfigFilePackage.cmake
 .. cmake-module:: ../jgd-cmake-modules/JcmDefaultCompileOptions.cmake
+.. cmake-module:: ../jgd-cmake-modules/JcmTargetNaming.cmake
 .. cmake-module:: ../jgd-cmake-modules/JcmFileNaming.cmake
 .. cmake-module:: ../jgd-cmake-modules/JcmCanonicalStructure.cmake
+.. cmake-module:: ../jgd-cmake-modules/JcmConfigureFiles.cmake
 .. cmake-module:: ../jgd-cmake-modules/JcmStandardDirs.cmake
 .. cmake-module:: ../jgd-cmake-modules/JcmHeaderFileSet.cmake
 .. cmake-module:: ../jgd-cmake-modules/JcmParseArguments.cmake

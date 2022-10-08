@@ -1,42 +1,65 @@
 include_guard()
 
+#[=======================================================================[.rst:
+
+JcmTargetNaming
+---------------
+
+#]=======================================================================]
+
 include(JcmParseArguments)
 include(JcmCanonicalStructure)
 
-#
-# Sets the output variable specified by the OUT_* arguments to default,
-# consistent, unique library names that libraries can use to initialize their
-# properties.
-#
-# OUT_TARGET's variable specifies the library target name to use within
-# CMake commands; it will be <PROJECT_NAME>_<JCM_LIB_PREFIX><name>[-COMPONENT].
-# OUT_EXPORT_NAME's variable specifies the exported target name that consumers
-# will use; it will be <JCM_LIB_PREFIX><name>, or <COMPONENT> if COMPONENT is
-# provided and PROJECT_NAME already starts with JCM_LIB_PREFIX.
-# OUT_OUTPUT_NAME's variable specifies the name of the built library on disk,
-# which will be <JCM_LIB_PREFIX><name>[-COMPONENT]. For each library name,
-# 'name' is the PROJECT_NAME with any leading JCM_LIB_PREFIX stripped.
-#
-# The target name is prefixed with the project name to avoid conflicts with
-# other projects when dependencies are added as subdirectories, for all target
-# names in a CMake build must be unique. The exported name doesn't have this, as
-# the target should be exported with the namespace prefix '<PROJECT_NAME>::'.
-#
-# Arguments:
-#
-# COMPONENT: one-value arg; the component of the project that the library of the
-# generated name constitutes. A COMPONENT that matches the PROJECT_NAME will be
-# ignored. Optional.
-#
-# OUT_TARGET: one-value arg; the name of the variable that will store the
-# library target name. Add a library with this name.
-#
-# OUT_EXPORT_NAME: one-value arg; the name of the variable that will store the
-# library's export name. Associated to the library's EXPORT_NAME property.
-#
-# OUT_OUTPUT_NAME: one-value arg; the name of the variable that will store the
-# library's output name. Associated to the library's OUTPUT_NAME property.
-#
+#[=======================================================================[.rst:
+
+jcm_library_naming
+^^^^^^^^^^^^^^^^^^
+
+.. cmake:command:: jcm_library_naming
+
+  .. code-block:: cmake
+
+    jcm_library_naming(
+      [PROJECT <project-name>]
+      [COMPONENT <component>]
+      (OUT_TARGET <target> |
+       OUT_EXPORT_NAME <out-var>
+       OUT_OUTPUT_NAME <out-var>)
+    )
+
+
+Sets the output variable specified by the *OUT_** arguments to default,
+consistent, unique library names that libraries can use to initialize their
+naming properties.
+
+Parameters
+##########
+
+One Value
+~~~~~~~~~
+
+:cmake:variable:`PROJECT`
+  The project to which the library belongs. The project name is used in the library names to ensure
+  uniqueness in super-builds. :cmake:variable:`PROJECT_NAME` will be used by default.
+
+:cmake:variable:`COMPONENT`
+  The project component that this library represents. The component is used in the library names.
+
+:cmake:variable:`OUT_TARGET`
+  The variable named will be set to the resultant target name for a library of the specified project
+  that provides the specified component.
+
+:cmake:variable:`OUT_EXPORT_NAME`
+  The variable named will be set to the resultant export name for the library, that should be used
+  to initialize the *EXPORT_NAME* target property.
+
+:cmake:variable:`OUT_OUTPUT_NAME`
+  The variable named will be set to the resultant export name for the library, that should be used
+  to initialize the *OUTPUT_NAME* target property.
+
+--------------------------------------------------------------------------
+
+#]=======================================================================]
 function(jcm_library_naming)
   jcm_parse_arguments(
     ONE_VALUE_KEYWORDS
@@ -95,41 +118,57 @@ function(jcm_library_naming)
   endif ()
 endfunction()
 
-#
-# Sets the output variable specified by the OUT_* arguments to default,
-# consistent, unique executable names that executables can use to initialize
-# their properties. As a note, it's rare for an executable to be a component or
-# be exported.
-#
-# OUT_TARGET's variable specifies the executable target name to use within
-# CMake commands; it will be <PROJECT_NAME>_<name>[-COMPONENT].
-# OUT_EXPORT_NAME's variable specifies the exported target name that consumers
-# will use; it will be <name>[-COMPONENT], or <COMPONENT> if COMPONENT is
-# provided and PROJECT_NAME doesn't start with JCM_LIB_PREFIX. OUT_OUTPUT_NAME's
-# variable specifies the name of the built executable on disk, which will be
-# <name>[-COMPONENT]. For each executable name, 'name' is the PROJECT_NAME with
-# any leading JCM_LIB_PREFIX stripped.
-#
-# The target name is prefixed with the project name to avoid conflicts with
-# other projects when dependencies are added as subdirectories, for all target
-# names in a CMake build must be unique. The exported name doesn't have this, as
-# the target should be exported with the namespace prefix '<PROJECT_NAME>::'.
-#
-# Arguments:
-#
-# COMPONENT: one-value arg; the component of the project that the executable of
-# the generated name constitutes. A COMPONENT that matches the PROJECT_NAME will
-# be ignored. Optional.
-#
-# OUT_TARGET: one-value arg; the name of the variable that will store the
-# executable target name. Add a executable with this name.
-#
-# OUT_EXPORT_NAME: one-value arg; the name of the variable that will store the
-# executable's export name. Associated to the executable's EXPORT_NAME property.
-#
-# OUT_OUTPUT_NAME: one-value arg; the name of the variable that will store the
-# executable's output name. Associated to the executable's OUTPUT_NAME property.
-#
+
+#[=======================================================================[.rst:
+
+jcm_executable_naming
+^^^^^^^^^^^^^^^^^^^^^
+
+.. cmake:command:: jcm_executable_naming
+
+  .. code-block:: cmake
+
+    jcm_executable_naming(
+      [PROJECT <project-name>]
+      [COMPONENT <component>]
+      (OUT_TARGET <target> |
+       OUT_EXPORT_NAME <out-var>
+       OUT_OUTPUT_NAME <out-var>)
+    )
+
+
+Sets the output variable specified by the *OUT_** arguments to default, consistent, unique
+executables names that executables can use to initialize their naming properties.
+
+Parameters
+##########
+
+One Value
+~~~~~~~~~
+
+:cmake:variable:`PROJECT`
+  The project to which the executable belongs. The project name is used in the executable names to
+  ensure uniqueness in super-builds. :cmake:variable:`PROJECT_NAME` will be used by default.
+
+:cmake:variable:`COMPONENT`
+  The project component that this executable represents. The component is used in the executable
+  names.
+
+:cmake:variable:`OUT_TARGET`
+  The variable named will be set to the resultant target name for an executable of the specified
+  project that provides the specified component.
+
+:cmake:variable:`OUT_EXPORT_NAME`
+  The variable named will be set to the resultant export name for the executable, that should be
+  used to initialize the *EXPORT_NAME* target property.
+
+:cmake:variable:`OUT_OUTPUT_NAME`
+  The variable named will be set to the resultant export name for the executable, that should be used
+  to initialize the *OUTPUT_NAME* target property.
+
+--------------------------------------------------------------------------
+
+#]=======================================================================]
 function(jcm_executable_naming)
   jcm_parse_arguments(
     ONE_VALUE_KEYWORDS
@@ -189,9 +228,66 @@ function(jcm_executable_naming)
 endfunction()
 
 
+#[=======================================================================[.rst:
+
+jcm_target_type_component_from_name
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. cmake:command:: jcm_target_type_component_from_name
+
+  .. code-block:: cmake
+
+    jcm_target_type_component_from_name(
+      [PROJECT <project-name>]
+      TARGET_NAME <target>
+      (OUT_TYPE <target> |
+       OUT_COMPONENT <out-var>)
+    )
+
+JCM's target naming conventions denote both the the target's type and component within the naming
+structure. This function will, considering the project name, compute the target type and component
+from a given target name. The named target doesn't have to exist.
+
+Parameters
+##########
+
+One Value
+~~~~~~~~~
+
+:cmake:variable:`PROJECT`
+  The project to which the target belongs. Since project names are embedded within target names, it
+  must be known in deduction. :cmake:variable:`PROJECT_NAME` will be used by default.
+
+:cmake:variable:`TARGET_NAME`
+  A target name following JCM's target naming conventions that the target type and component will be
+  computed from.
+
+:cmake:variable:`OUT_TYPE`
+  The variable named will store the computed target type
+
+:cmake:variable:`OUT_COMPONENT`
+  The variable named will store the computed component or an empty string if the target is not a
+  project component.
+
+Examples
+########
+
+.. code-block:: cmake
+
+  jcm_target_type_component_from_name(
+    PROJECT libssh
+    TARGET_NAME libssh::libssh
+    TARGET_TYPE type
+    TARGET_COMPONENT component
+  )
+
+--------------------------------------------------------------------------
+
+#]=======================================================================]
 function(jcm_target_type_component_from_name)
   jcm_parse_arguments(
     ONE_VALUE_KEYWORDS "PROJECT" "TARGET_NAME" "OUT_TYPE" "OUT_COMPONENT"
+    REQUIRES_ALL "TARGET_NAME"
     REQUIRES_ANY "OUT_TYPE" "OUT_COMPONENT"
     ARGUMENTS "${ARGN}")
 

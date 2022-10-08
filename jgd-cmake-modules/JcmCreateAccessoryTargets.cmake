@@ -21,6 +21,7 @@ include(JcmListTransformations)
 include(JcmCanonicalStructure)
 include(JcmStandardDirs)
 
+# private function to build targets that emit error messages instead of their intended purpose
 function(_jcm_build_error_targets err_msg targets)
     set(exit_failure "${CMAKE_COMMAND}" -E false)
     set(print_err "${CMAKE_COMMAND}" -E echo "${err_msg}")
