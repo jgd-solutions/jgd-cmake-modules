@@ -55,20 +55,20 @@ endforeach ()
 # Create cumulative regexes for all currently enabled languages
 get_property(_jcm_languages GLOBAL PROPERTY ENABLED_LANGUAGES)
 if(_jcm_languages)
-  message(STATUS "enabled languages ${_jcm_languages}")
   list(REMOVE_ITEM _jcm_languages ${_jcm_already_enabled_languages} NONE)
 endif()
 
 if(_jcm_languages)
   foreach(lang IN LISTS _jcm_languages)
-    if(NOT "${lang}" MATCHES "CXX|C|CUDA|OBJC|OBJCXX|HIP")
-      message(AUTHOR_WARNING
-          "The enabled languages '${lang}' is not currently supported by JCM."
-          "The associated REGEX variables will not be created")
+    if(lang STREQUAL "RC")
       continue()
     endif()
-
-  message(STATUS "language ${lang}")
+    if(NOT "${lang}" MATCHES "^(CXX|C|CUDA|OBJC|OBJCXX|HIP)$")
+      message(AUTHOR_WARNING
+          "The enabled languages '${lang}' is not currently supported by JCM."
+          "The regexes for file names of ${lang} will not be considered.")
+      continue()
+    endif()
 
     list(APPEND JCM_HEADER_REGEX "${JCM_${lang}_HEADER_REGEX}")
     list(APPEND JCM_SOURCE_REGEX "${JCM_${lang}_SOURCE_REGEX}")
@@ -83,9 +83,6 @@ if(_jcm_languages)
   list(JOIN JCM_SOURCE_REGEX "|" JCM_SOURCE_REGEX)
   list(JOIN JCM_TEST_SOURCE_REGEX "|" JCM_TEST_SOURCE_REGEX)
 endif()
-
-message(STATUS "JCM_HEADER_REGEX ${JCM_HEADER_REGEX}")
-message(STATUS "JCM_SOURCE_REGEX ${JCM_SOURCE_REGEX}")
 
 unset(_jcm_languages)
 
