@@ -216,18 +216,20 @@ function(jcm_add_library)
     endif ()
   endif()
 
-  jcm_separate_list(
-    INPUT "${ARGS_INTERFACE_HEADERS}" "${ARGS_PUBLIC_HEADERS}" "${ARGS_PRIVATE_HEADERS}"
-    REGEX "${JCM_HEADER_REGEX}"
-    TRANSFORM "FILENAME"
-    OUT_MISMATCHED incorrectly_named
-  )
-  if (incorrectly_named)
-    message(
-      FATAL_ERROR
-      "Provided header files do not match the regex for library headers, "
-      "${regex}: ${incorrectly_named}.")
-  endif ()
+  if(ARGS_INTERFACE_HEADERS OR ARGS_PUBLIC_HEADERS OR ARGS_PRIVATE_HEADERS)
+    jcm_separate_list(
+      INPUT "${ARGS_INTERFACE_HEADERS}" "${ARGS_PUBLIC_HEADERS}" "${ARGS_PRIVATE_HEADERS}"
+      REGEX "${JCM_HEADER_REGEX}"
+      TRANSFORM "FILENAME"
+      OUT_MISMATCHED incorrectly_named
+    )
+    if (incorrectly_named)
+      message(
+        FATAL_ERROR
+        "Provided header files do not match the regex for library headers, "
+        "${regex}: ${incorrectly_named}.")
+    endif ()
+  endif()
 
   # verify file locations
   _jcm_verify_source_locations(SOURCES "${all_input_files}")

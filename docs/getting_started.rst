@@ -10,7 +10,7 @@ Getting Started
 
   .. code-block:: bash
 
-    git clone https://gitlab.com/jgd-solutions/jgd-cmake-modules.git
+    git clone https://github.com/jgd-solutions/jgd-cmake-modules.git
     cd jgd-cmake-modules
 
   Configure, build, and install
@@ -31,7 +31,7 @@ Getting Started
       "jgd-cmake-modules"
     ]
 
-  Add `vcpkg-registry <https://gitlab.com/jgd-solutions/vcpkg-registry>`_ as a registry in your
+  Add `vcpkg-registry <https://github.com/jgd-solutions/vcpkg-registry>`_ as a registry in your
   `vcpkg-configurations.json`
 
   .. code-block:: json
