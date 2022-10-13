@@ -35,21 +35,21 @@ macro(_JCM_CHECK_ADD_SUBDIR out_added_subdirs)
     ARGUMENTS "${ARGN}"
   )
 
-  macro(on_fatal_message msg)
+  function(on_fatal_message msg)
     if(ARGS_FATAL)
       message(FATAL_ERROR "${msg}")
     endif()
-  endmacro()
+  endfunction()
 
   if (NOT IS_DIRECTORY "${ARGS_SUBDIR}")
     on_fatal_message(
-      "${CMAKE_CURRENT_FUNCTION} could not add subdirectory ${subdir_path} for project "
-      "${PROJECT_NAME}. The directory does not exist."
+      "${CMAKE_CURRENT_FUNCTION} could not add subdirectory '${ARGS_SUBDIR}' for project\
+       '${PROJECT_NAME}'. The directory does not exist."
     )
   elseif (NOT EXISTS "${ARGS_SUBDIR}/CMakeLists.txt")
     on_fatal_message(
-      "${CMAKE_CURRENT_FUNCTION} could not add subdirectory ${subdir_path} for project "
-      "${PROJECT_NAME}. The directory does not contain a CMakeLists.txt file."
+		"${CMAKE_CURRENT_FUNCTION} could not add subdirectory ${ARGS_SUBDIR} for project\
+       ${PROJECT_NAME}. The directory does not contain a CMakeLists.txt file."
     )
   elseif (CMAKE_CURRENT_SOURCE_DIR STREQUAL ARGS_SUBDIR)
     on_fatal_message(
@@ -59,8 +59,8 @@ macro(_JCM_CHECK_ADD_SUBDIR out_added_subdirs)
     # directory and file exist, deal with subdirectory
     list(APPEND ${out_added_subdirs} "${ARGS_SUBDIR}")
     if (ARGS_ADD_SUBDIRS)
-      message(VERBOSE "${CMAKE_CURRENT_FUNCTION}: Adding directory ${ARGS_SUBDIR} to project "
-        "${PROJECT_NAME}")
+      message(VERBOSE "${CMAKE_CURRENT_FUNCTION}: Adding directory '${ARGS_SUBDIR}' to project\
+                       '${PROJECT_NAME}'")
       add_subdirectory("${ARGS_SUBDIR}")
     endif()
   endif()
