@@ -57,7 +57,7 @@ jcm_setup_project
 
   .. code-block:: cmake
 
-    jcm_setup_project([PREFIX_NAME] <project-prefix>)
+    jcm_setup_project([PREFIX_NAME <project-prefix>])
 
 Sets up a CMake project in the top-level `CMakeLists.txt`.
 
