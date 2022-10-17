@@ -32,10 +32,10 @@ macro(_JCM_WARN_SET variable value)
     if (DEFINED ${variable} AND NOT DEFINED CACHE{${variable}})
       message(
         AUTHOR_WARNING
-        "The variable ${variable} was set for project ${PROJECT_NAME} prior to calling \
-         jcm_setup_project. This variable will by overridden to the default value of ${value} in \
-		 the project setup. If you wish to override the default value, set ${variable} after \
-		 calling jcm_setup_project or in the CMake cache, such as through the command-line.")
+        "The variable ${variable} was set for project ${PROJECT_NAME} prior to calling "
+        "jcm_setup_project. This variable will by overridden to the default value of ${value} in "
+		    "the project setup. If you wish to override the default value, set ${variable} after "
+		    "calling jcm_setup_project or in the CMake cache, such as through the command-line.")
     endif ()
 
     set(${variable} "${value}" ${ARGN})
