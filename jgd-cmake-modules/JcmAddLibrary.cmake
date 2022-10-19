@@ -211,7 +211,7 @@ function(jcm_add_library)
     if (incorrectly_named)
       message(
         FATAL_ERROR
-        "Provided source files do not match the regex for library sources, ${regex}: "
+        "Provided source files do not match the regex for library sources, ${JCM_SOURCE_REGEX}: "
         "${incorrectly_named}.")
     endif ()
   endif()
