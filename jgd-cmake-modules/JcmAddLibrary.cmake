@@ -84,6 +84,10 @@ Options
   When provided, will forgo the default check that the function is called within an executable
   source subdirectory, as defined by the `Canonical Project Structure`_.
 
+:cmake:variable:`WITHOUT_FILE_NAMING_CHECK`
+  When provided, will forgo the default check that provided header and source files conform to JCM's
+  file naming conventions
+
 One Value
 ~~~~~~~~~~
 
@@ -201,34 +205,38 @@ function(jcm_add_library)
   endif()
 
   # verify file naming
-  if(DEFINED ARGS_SOURCES)
-    jcm_separate_list(
-      INPUT "${ARGS_SOURCES}"
-      REGEX "${JCM_SOURCE_REGEX}"
-      TRANSFORM "FILENAME"
-      OUT_MISMATCHED incorrectly_named
-    )
-    if (incorrectly_named)
-      message(
-        FATAL_ERROR
-        "Provided source files do not match the regex for library sources, ${JCM_SOURCE_REGEX}: "
-        "${incorrectly_named}.")
-    endif ()
-  endif()
+  if(NOT ARGS_WITHOUT_FILE_NAMING_CHECK)
 
-  if(ARGS_INTERFACE_HEADERS OR ARGS_PUBLIC_HEADERS OR ARGS_PRIVATE_HEADERS)
-    jcm_separate_list(
-      INPUT "${ARGS_INTERFACE_HEADERS}" "${ARGS_PUBLIC_HEADERS}" "${ARGS_PRIVATE_HEADERS}"
-      REGEX "${JCM_HEADER_REGEX}"
-      TRANSFORM "FILENAME"
-      OUT_MISMATCHED incorrectly_named
-    )
-    if (incorrectly_named)
-      message(
-        FATAL_ERROR
-        "Provided header files do not match the regex for library headers, "
-        "${regex}: ${incorrectly_named}.")
-    endif ()
+    if(DEFINED ARGS_SOURCES)
+      jcm_separate_list(
+        INPUT "${ARGS_SOURCES}"
+        REGEX "${JCM_SOURCE_REGEX}"
+        TRANSFORM "FILENAME"
+        OUT_MISMATCHED incorrectly_named
+      )
+      if (incorrectly_named)
+        message(
+          FATAL_ERROR
+          "Provided source files do not match the regex for library sources, ${JCM_SOURCE_REGEX}: "
+          "${incorrectly_named}.")
+      endif ()
+    endif()
+
+    if(ARGS_INTERFACE_HEADERS OR ARGS_PUBLIC_HEADERS OR ARGS_PRIVATE_HEADERS)
+      jcm_separate_list(
+        INPUT "${ARGS_INTERFACE_HEADERS}" "${ARGS_PUBLIC_HEADERS}" "${ARGS_PRIVATE_HEADERS}"
+        REGEX "${JCM_HEADER_REGEX}"
+        TRANSFORM "FILENAME"
+        OUT_MISMATCHED incorrectly_named
+      )
+      if (incorrectly_named)
+        message(
+          FATAL_ERROR
+          "Provided header files do not match the regex for library headers, "
+          "${JCM_HEADER_REGEX}: ${incorrectly_named}.")
+      endif ()
+    endif()
+
   endif()
 
   # verify file locations
