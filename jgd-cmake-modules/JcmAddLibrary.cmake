@@ -103,8 +103,8 @@ One Value
   The variable named will be set to the created target's name
 
 :cmake:variable:`TYPE`
-  Overrides the library type from the default value, either STATIC or SHARED, as specified by the
-  the *\*_BUILD_SHARED_LIBS*. When specified, this call will not create any of the
+  Overrides the library type from the default value of either STATIC or SHARED, dictated by the
+  the *\*_BUILD_SHARED_LIBS* options. When specified, this call will not create any of the
   *\*_BUILD_SHARED_LIBS* options.
 
 Multi Value
@@ -273,7 +273,7 @@ function(jcm_add_library)
   set(lib_type STATIC)
   if (DEFINED ARGS_TYPE)
     set(lib_type ${ARGS_TYPE})
-    set(supported_types STATIC SHARED MODULE INTERFACE)
+    set(supported_types STATIC SHARED MODULE INTERFACE OBJECT)
     list(FIND supported_types "${ARGS_TYPE}" supported)
     if (supported EQUAL -1)
       message(
