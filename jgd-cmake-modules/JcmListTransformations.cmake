@@ -292,6 +292,9 @@ One Value
 :cmake:variable:`OUT_IDX`
   The variable named will be set to the found index or -1 if no element could be found.
 
+:cmake:variable:`OUT_ELEMENT`
+  The variable named will be set to the found element or NOTFOUND if no element could be found.
+
 Multi Value
 ~~~~~~~~~~~
 
@@ -323,9 +326,10 @@ Examples
 function(jcm_regex_find_list)
   jcm_parse_arguments(
     OPTIONS "MISMATCH"
-    ONE_VALUE_KEYWORDS "OUT_IDX;REGEX"
+    ONE_VALUE_KEYWORDS "OUT_IDX;OUT_ELEMENT;REGEX"
     MULTI_VALUE_KEYWORDS "INPUT"
-    REQUIRES_ALL "OUT_IDX;REGEX;INPUT"
+    REQUIRES_ANY "OUT_IDX" "OUT_ELEMENT"
+    REQUIRES_ALL "REGEX" "INPUT"
     ARGUMENTS "${ARGN}"
   )
 
@@ -337,15 +341,24 @@ function(jcm_regex_find_list)
 
   set(found_idx -1)
   set(current_idx 0)
+  set(found_element NOTFOUND)
 
-  foreach(${mismatch_not} input ${ARGS_INPUT})
-    if(input MATCHES "${ARGS_REGEX}")
+  foreach(input ${ARGS_INPUT})
+    if(${mismatch_not} input MATCHES "${ARGS_REGEX}")
       set(found_idx ${current_idx})
+      list(GET ARGS_INPUT ${found_idx} found_element)
       break()
     endif()
 
     math(EXPR current_idx "${current_idx}+1")
   endforeach()
 
-  set(${ARGS_OUT_IDX} "${found_idx}" PARENT_SCOPE)
+  # Result variables
+  if(DEFINED ARGS_OUT_IDX)
+    set(${ARGS_OUT_IDX} "${found_idx}" PARENT_SCOPE)
+  endif()
+
+  if(DEFINED ARGS_OUT_VALUE)
+    set(${ARGS_OUT_ELEMENT "${found_element}" PARENT_SCOPE)
+  endif()
 endfunction()

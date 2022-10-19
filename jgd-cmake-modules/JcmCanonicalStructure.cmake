@@ -527,11 +527,10 @@ function(_jcm_verify_source_locations)
     jcm_regex_find_list(
       MISMATCH
       REGEX "^${root_dir}"
-      OUT_IDX misplaced_file_idx
+      OUT_ELEMENT misplaced_file
       INPUT  "${ARGS_SOURCES}")
 
-    if(misplaced_file_idx GREATER -1)
-      list(GET ARGS_SOURCES ${misplaced_file_idx} misplaced_file)
+    if(misplaced_file)
       message(FATAL_ERROR
         "The following file is not an acceptable input file for the library at ${CMAKE_CURRENT_SOURCE_DIR}. "
         "The file must be located within one of ${root_dirs}. "
