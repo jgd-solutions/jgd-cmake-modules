@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.23)
 project(
   jgd-cmake-modules
-  VERSION 1.0.1
+  VERSION 1.1.0
   DESCRIPTION "CMake library for standardized CMake projects for JGD"
   HOMEPAGE_URL "https://gitlab.com/jgd-solutions/jgd-cmake-modules"
   LANGUAGES NONE)
