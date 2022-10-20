@@ -163,4 +163,10 @@ function(jcm_header_file_set scope)
       FILES "${header_path}"
     )
   endforeach ()
+
+  foreach(property INCLUDE_DIRECTORIES INTERFACE_INCLUDE_DIRECTORIES)
+    get_target_property(property_value ${ARGS_TARGET} ${property})
+    list(REMOVE_DUPLICATES property_value)
+    set_target_properties(${ARGS_TARGET} PROPERTIES ${property} "${property_value}")
+  endforeach()
 endfunction()
