@@ -1,6 +1,6 @@
 {
   "name": "jgd-cmake-modules",
-  "version": "1.3.0",
+  "version": "2.0.0",
   "description": "CMake library for standardized CMake projects for JGD",
   "homepage": "https://gitlab.com/jgd-solutions/jgd-cmake-modules",
   "dependencies": []

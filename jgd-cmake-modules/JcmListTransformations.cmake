@@ -359,6 +359,6 @@ function(jcm_regex_find_list)
   endif()
 
   if(DEFINED ARGS_OUT_VALUE)
-    set(${ARGS_OUT_ELEMENT "${found_element}" PARENT_SCOPE)
+    set(${ARGS_OUT_ELEMENT} "${found_element}" PARENT_SCOPE)
   endif()
 endfunction()

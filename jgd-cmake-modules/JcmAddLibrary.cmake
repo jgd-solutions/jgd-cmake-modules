@@ -48,7 +48,7 @@ This function will:
 - create a library target with :cmake:command:`add_library`, including an associated alias
   (<PROJECT_NAME>::<EXPORT_NAME>) - both following JCM's target naming conventions
 - create PRIVATE, PUBLIC, and INTERFACE header sets with :cmake:command:`jcm_header_file_set` using
-  the respective *\*_HEADERS* parameters
+  the respective *\*_HEADERS* parameters. This is what sets the *\*INCLUDE_DIRECTORIES* properties
 - Generate a header file, `${CMAKE_CURRENT_BINARY_DIR}/export_macros.hpp`, with
   :cmake:command:`generate_export_header`
 - create project options to control building the library shared. The precedence of the options
@@ -159,13 +159,13 @@ function(jcm_add_library)
   )
 
   # transform arguments to normalized absolute paths
-  foreach(source_type "INTERFACE_HEADERS" "PUBLIC_HEADERS" "PRIVATE_HEADERS" "SOURCES")
+  foreach (source_type "INTERFACE_HEADERS" "PUBLIC_HEADERS" "PRIVATE_HEADERS" "SOURCES")
     set(arg_name ARGS_${source_type})
-    if(DEFINED ${arg_name})
+    if (DEFINED ${arg_name})
       jcm_transform_list(ABSOLUTE_PATH INPUT "${${arg_name}}" OUT_VAR ${arg_name})
       jcm_transform_list(NORMALIZE_PATH INPUT "${${arg_name}}" OUT_VAR ${arg_name})
-    endif()
-  endforeach()
+    endif ()
+  endforeach ()
 
   set(all_input_files
     "${ARGS_INTERFACE_HEADERS}"
@@ -177,7 +177,7 @@ function(jcm_add_library)
   if (DEFINED ARGS_COMPONENT AND NOT ARGS_COMPONENT STREQUAL PROJECT_NAME)
     set(comp_arg COMPONENT ${ARGS_COMPONENT})
     set(comp_err_msg "component (${ARGS_COMPONENT}) ")
-  else()
+  else ()
     unset(comp_arg)
     unset(comp_err_msg)
   endif ()
@@ -194,20 +194,20 @@ function(jcm_add_library)
   endif ()
 
   # ensure library is created in the appropriate canonical directory
-  if(NOT ARGS_WITHOUT_CANONICAL_PROJECT_CHECK)
+  if (NOT ARGS_WITHOUT_CANONICAL_PROJECT_CHECK)
     jcm_canonical_lib_subdir(${comp_arg} OUT_VAR canonical_dir)
     if (NOT CMAKE_CURRENT_SOURCE_DIR STREQUAL canonical_dir)
       message(
         FATAL_ERROR
         "Creating a ${comp_err_msg}library for project ${PROJECT_NAME} must be "
         "done in the canonical directory ${canonical_dir}.")
-    endif()
-  endif()
+    endif ()
+  endif ()
 
   # verify file naming
-  if(NOT ARGS_WITHOUT_FILE_NAMING_CHECK)
+  if (NOT ARGS_WITHOUT_FILE_NAMING_CHECK)
 
-    if(DEFINED ARGS_SOURCES)
+    if (DEFINED ARGS_SOURCES)
       jcm_separate_list(
         INPUT "${ARGS_SOURCES}"
         REGEX "${JCM_SOURCE_REGEX}"
@@ -220,9 +220,9 @@ function(jcm_add_library)
           "Provided source files do not match the regex for library sources, ${JCM_SOURCE_REGEX}: "
           "${incorrectly_named}.")
       endif ()
-    endif()
+    endif ()
 
-    if(ARGS_INTERFACE_HEADERS OR ARGS_PUBLIC_HEADERS OR ARGS_PRIVATE_HEADERS)
+    if (ARGS_INTERFACE_HEADERS OR ARGS_PUBLIC_HEADERS OR ARGS_PRIVATE_HEADERS)
       jcm_separate_list(
         INPUT "${ARGS_INTERFACE_HEADERS}" "${ARGS_PUBLIC_HEADERS}" "${ARGS_PRIVATE_HEADERS}"
         REGEX "${JCM_HEADER_REGEX}"
@@ -235,9 +235,9 @@ function(jcm_add_library)
           "Provided header files do not match the regex for library headers, "
           "${JCM_HEADER_REGEX}: ${incorrectly_named}.")
       endif ()
-    endif()
+    endif ()
 
-  endif()
+  endif ()
 
   # verify file locations
   _jcm_verify_source_locations(SOURCES "${all_input_files}")
@@ -309,12 +309,12 @@ function(jcm_add_library)
     "${ARGS_PUBLIC_HEADERS}"
     "${ARGS_PRIVATE_HEADERS}"
     "${ARGS_SOURCES}"
-  )
+    )
   add_library(${PROJECT_NAME}::${export_name} ALIAS ${target_name})
 
   # == Generate an export header ==
 
-  if(NOT ARGS_TYPE STREQUAL "INTERFACE")
+  if (NOT ARGS_TYPE STREQUAL "INTERFACE")
     set(base_name ${JCM_PROJECT_PREFIX_NAME})
     if (DEFINED comp_arg)
       string(APPEND base_name "_${comp_upper}")
@@ -325,7 +325,7 @@ function(jcm_add_library)
       BASE_NAME ${base_name}
       EXPORT_FILE_NAME "export_macros.hpp"
     )
-  endif()
+  endif ()
 
   # == Set Target Properties ==
 
@@ -341,13 +341,13 @@ function(jcm_add_library)
     jcm_header_file_set(PRIVATE TARGET ${target_name} HEADERS "${ARGS_PRIVATE_HEADERS}")
   endif ()
 
-  if(NOT ARGS_TYPE STREQUAL "INTERFACE")
+  if (NOT ARGS_TYPE STREQUAL "INTERFACE")
     jcm_header_file_set(
       PUBLIC
       TARGET ${target_name}
       HEADERS "${ARGS_PUBLIC_HEADERS}" "${CMAKE_CURRENT_BINARY_DIR}/export_macros.hpp"
     )
-  endif()
+  endif ()
 
   # common properties
   set_target_properties(${target_name}
@@ -356,7 +356,7 @@ function(jcm_add_library)
     PREFIX ""
     EXPORT_NAME ${export_name}
     COMPILE_OPTIONS "${JCM_DEFAULT_COMPILE_OPTIONS}"
-  )
+    )
 
   # shared library versioning
   if (PROJECT_VERSION AND lib_type STREQUAL "SHARED")
@@ -364,6 +364,6 @@ function(jcm_add_library)
       PROPERTIES
       VERSION ${PROJECT_VERSION}
       SOVERSION ${PROJECT_VERSION_MAJOR}
-    )
+      )
   endif ()
 endfunction()

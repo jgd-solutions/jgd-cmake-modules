@@ -2,5 +2,8 @@
 
 #include <filesystem>
 
-namespace headers {
+namespace single {
+// clang-format off
 inline const std::filesystem::path data_dir{"@JCM_PROJECT_DATA_DIR@"};
+// clang-format on
+}  // namespace single

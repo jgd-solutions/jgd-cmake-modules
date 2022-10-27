@@ -105,8 +105,7 @@ function(jcm_header_file_set scope)
     ONE_VALUE_KEYWORDS "TARGET"
     MULTI_VALUE_KEYWORDS "HEADERS"
     REQUIRES_ALL "TARGET" "HEADERS"
-    ARGUMENTS "${ARGN}"
-  )
+    ARGUMENTS "${ARGN}")
 
   # Usage Guards
   if (NOT TARGET ${ARGS_TARGET})
@@ -160,13 +159,15 @@ function(jcm_header_file_set scope)
       FILE_SET "${file_set_name}"
       TYPE HEADERS
       BASE_DIRS "${chosen_include_dir}"
-      FILES "${header_path}"
-    )
+      FILES "${header_path}")
   endforeach ()
 
-  foreach(property INCLUDE_DIRECTORIES INTERFACE_INCLUDE_DIRECTORIES)
+  foreach (property INCLUDE_DIRECTORIES INTERFACE_INCLUDE_DIRECTORIES)
     get_target_property(property_value ${ARGS_TARGET} ${property})
+    if (NOT "${property_value}")
+      continue()
+    endif ()
     list(REMOVE_DUPLICATES property_value)
     set_target_properties(${ARGS_TARGET} PROPERTIES ${property} "${property_value}")
-  endforeach()
+  endforeach ()
 endfunction()

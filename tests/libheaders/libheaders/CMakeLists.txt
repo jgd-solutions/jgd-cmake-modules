@@ -1,5 +1,3 @@
-jcm_configure_file(IN_FILE libheaders_config.hpp.in)
-
 jcm_add_library(TYPE INTERFACE INTERFACE_HEADERS equality.hpp sum.hpp)
 target_compile_features(libheaders_libheaders INTERFACE cxx_std_20)
 

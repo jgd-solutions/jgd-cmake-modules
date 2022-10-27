@@ -11,7 +11,7 @@ include(JcmParseArguments)
 include(JcmFileNaming)
 include(JcmTargetNaming)
 include(JcmListTransformations)
-include(JcmCanonicalStructure)
+include(JcmHeaderFileSet)
 include(JcmDefaultCompileOptions)
 
 
@@ -43,6 +43,11 @@ This function will:
 - ensure it's called within a canonical source subdirectory, verify the naming conventions and
   locations of the input source files, and transform :cmake:variable:`SOURCES` and
   :cmake:variable:`LIB_SOURCES` to normalized absolute paths.
+- create header sets with :cmake:command:`jcm_header_file_set` for both the main executable target,
+  and the optional library target. PRIVATE header sets will be added to the executable using header
+  files found in :cmake:variable:`SOURCES`, while PUBLIC or INTERFACE header sets will be added to
+  the object/interface library using header files found in :cmake:variable:`LIB_SOURCES`.
+  This is what sets the *\*INCLUDE_DIRECTORIES* properties.
 - create an executable target with :cmake:command:`add_executable`, including an associated alias
   (<PROJECT_NAME>::<EXPORT_NAME>) - both following JCM's target naming conventions
 - set target properties:
@@ -52,13 +57,6 @@ This function will:
   - COMPILE_OPTIONS
   - INCLUDE_DIRECTORIES
   - COMPONENT (custom property to JCM)
-
-.. note::
-  Unlike libraries, executables are not linked against, so there is less of a need to be restrictive
-  with their include directories. Instead of building header file-sets for only the provided header
-  files and their scopes, like :cmake:command:`jcm_add_library`, all of the include directories from
-  :cmake:command:`jcm_canonical_include_directories` for the created target are used when setting
-  `\*INCLUDE_DIRECTORIES` target properties.
 
 Parameters
 ##########
@@ -143,13 +141,13 @@ function(jcm_add_executable)
     ARGUMENTS "${ARGN}")
 
   # transform arguments to normalized absolute paths
-  foreach(source_type "" "_LIB")
+  foreach (source_type "" "_LIB")
     set(arg_name ARGS${source_type}_SOURCES)
-    if(DEFINED ${arg_name})
+    if (DEFINED ${arg_name})
       jcm_transform_list(ABSOLUTE_PATH INPUT "${${arg_name}}" OUT_VAR ${arg_name})
       jcm_transform_list(NORMALIZE_PATH INPUT "${${arg_name}}" OUT_VAR ${arg_name})
-    endif()
-  endforeach()
+    endif ()
+  endforeach ()
 
   set(all_input_files "${ARGS_SOURCES}" "${ARGS_LIB_SOURCES}")
 
@@ -158,7 +156,7 @@ function(jcm_add_executable)
     set(comp_arg COMPONENT ${ARGS_COMPONENT})
     set(comp_err_msg "n component (${ARGS_COMPONENT})")
     set(add_parent_arg ADD_PARENT)
-  else()
+  else ()
     unset(comp_arg)
     unset(comp_err_msg)
     unset(add_parent_arg)
@@ -168,7 +166,7 @@ function(jcm_add_executable)
 
   # ensure executable is created in the appropriate canonical directory
   # defining executable components within root executable directory is allowed
-  if(NOT ARGS_WITHOUT_CANONICAL_PROJECT_CHECK)
+  if (NOT ARGS_WITHOUT_CANONICAL_PROJECT_CHECK)
     jcm_canonical_exec_subdir(${comp_arg} OUT_VAR canonical_dir)
     if (NOT CMAKE_CURRENT_SOURCE_DIR STREQUAL canonical_dir)
       message(
@@ -176,7 +174,7 @@ function(jcm_add_executable)
         "Creating a${comp_err_msg} executable for project ${PROJECT_NAME} must "
         "be done in the canonical directory ${canonical_dir}.")
     endif ()
-  endif()
+  endif ()
 
   # verify source naming
   set(regex "${JCM_HEADER_REGEX}|${JCM_SOURCE_REGEX}")
@@ -222,20 +220,23 @@ function(jcm_add_executable)
 
   # == Set Target Properties ==
 
-  jcm_canonical_include_dirs(
-    WITH_BINARY_INCLUDE_DIRS
-    TARGET ${target_name}
-    OUT_VAR include_dirs)
-
   # basic properties
   set_target_properties(${target_name}
     PROPERTIES OUTPUT_NAME ${output_name}
     EXPORT_NAME ${export_name}
     COMPILE_OPTIONS "${JCM_DEFAULT_COMPILE_OPTIONS}")
 
-  # include directories, if no library will be created to provide them
-  if (NOT DEFINED ARGS_LIB_SOURCES)
-    target_include_directories(${target_name} PRIVATE "$<BUILD_INTERFACE:${include_dirs}>")
+  # include directories on the executable
+  jcm_separate_list(
+    REGEX "${JCM_HEADER_REGEX}"
+    INPUT "${ARGS_SOURCES}"
+    TRANSFORM "FILENAME"
+    OUT_MATCHED executable_header_files)
+
+  if (executable_header_files)
+    jcm_header_file_set(PRIVATE
+      TARGET ${target_name}
+      HEADERS "${executable_header_files}")
   endif ()
 
   # custom component property
@@ -247,27 +248,26 @@ function(jcm_add_executable)
 
   # create library of exec's sources, allowing unit testing of exec's sources
   if (DEFINED ARGS_LIB_SOURCES)
-    # check for actual source files
-    jcm_transform_list(FILENAME
-        INPUT "${ARGS_LIB_SOURCES}"
-        OUT_VAR lib_sources_filenames)
-    jcm_regex_find_list(
-      REGEX "${JCM_SOURCE_REGEX}"
-      INPUT "${lib_sources_filenames}"
-      OUT_IDX found_source_idx)
+    jcm_separate_list(
+      REGEX "${JCM_HEADER_REGEX}"
+      INPUT "${ARGS_LIB_SOURCES}"
+      TRANSFORM "FILENAME"
+      OUT_MATCHED library_header_files
+      OUT_MISMATCHED library_source_files)
 
-    # create interface or object library
-    if(found_source_idx EQUAL -1)
-      add_library(${target_name}-library INTERFACE)
-      target_include_directories(
-        ${target_name}-library
-        INTERFACE
-        "$<BUILD_INTERFACE:${include_dirs}>")
-    else()
+    # create object or interface library
+    if (library_source_files)
+      set(include_dirs_scope PUBLIC)
       add_library(${target_name}-library OBJECT "${ARGS_LIB_SOURCES}")
       target_compile_options(${target_name}-library PRIVATE "${JCM_DEFAULT_COMPILE_OPTIONS}")
-      target_include_directories(${target_name}-library PUBLIC "$<BUILD_INTERFACE:${include_dirs}>")
-    endif()
+    else ()
+      set(include_dirs_scope INTERFACE)
+      add_library(${target_name}-library INTERFACE)
+    endif ()
+
+    jcm_header_file_set(${include_dirs_scope}
+      TARGET ${target_name}-library
+      HEADERS "${library_header_files}")
 
     # link target to associated object files &/or usage requirements
     target_link_libraries(${target_name} PRIVATE ${target_name}-library)

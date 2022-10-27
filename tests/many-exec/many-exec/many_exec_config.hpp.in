@@ -1,0 +1,5 @@
+#pragma once
+
+namespace many {
+inline static constexpr const char* version = "@PROJECT_VERSION@";
+}

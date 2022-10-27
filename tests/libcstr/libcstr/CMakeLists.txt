@@ -13,5 +13,4 @@ endif()
 jcm_add_test_executable(
     NAME libcstr_ut
     LIBS libcstr::libcstr
-    SOURCES cstr.test.c
-)
+    SOURCES cstr.test.c)

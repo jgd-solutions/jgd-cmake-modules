@@ -1,4 +1,4 @@
-jcm_configure_file(IN_FILE many-exec_config.hpp.in)
+jcm_configure_file(IN_FILE many_exec_config.hpp.in OUT_FILE_VAR many-exec_config_file)
 
 # again, example of omitting targets from configuration process
 set(exec_components)
