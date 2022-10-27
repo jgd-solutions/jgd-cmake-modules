@@ -66,13 +66,13 @@ Examples
 
 include(FindPackageHandleStandardArgs)
 
+# these version variables are introduced by the find_package call which loaded this find-module
 if(ClangFormat_FIND_VERSION)
   set(_ClangFormat_versioned_names
      "clang-format-${ClangFormat_FIND_VERSION}"
      "clang-format-${ClangFormat_FIND_VERSION_MAJOR}.${ClangFormat_FIND_VERSION_MINOR}"
-    "clang-format-${ClangFormat_FIND_VERSION_MAJOR}")
+     "clang-format-${ClangFormat_FIND_VERSION_MAJOR}")
 endif()
-
 
 find_program(
   ClangFormat_EXECUTABLE
@@ -119,8 +119,7 @@ endif()
 find_package_handle_standard_args(ClangFormat
   FOUND_VAR ClangFormat_FOUND
   REQUIRED_VARS ClangFormat_EXECUTABLE
-  VERSION_VAR ClangFormat_VERSION
-)
+  VERSION_VAR ClangFormat_VERSION)
 
 if (ClangFormat_FOUND AND NOT TARGET clang::format)
   add_executable(clang::format IMPORTED)

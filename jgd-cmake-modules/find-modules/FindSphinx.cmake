@@ -52,21 +52,22 @@ include(FindPackageHandleStandardArgs)
 # use python interpreter path as a base of search
 find_package(Python COMPONENTS Interpreter)
 if(Python_Interpreter_FOUND)
-  get_filename_component(_Python_interp_dir "${Python_EXECUTABLE}" DIRECTORY)
-  set(_Sphinx_hints
-    "${_Python_interp_dir}"
-    "${_Python_interp_dir}/bin"
-    "${_Python_interp_dir}/Scripts")
+  cmake_path(GET Python_EXECUTABLE PARENT_PATH _Python_interp_dir)
+  set(_Sphinx_bin_hint "${_Python_interp_dir}")
+  set(_Sphinx_scripts_hint "${_Python_interp_dir}/../Scripts")
   unset(_Python_interp_dir)
+else()
+  unset(_Sphinx_bin_hint)
+  unset(_Sphinx_scripts_hint)
 endif()
 
 find_program(
   Sphinx_EXECUTABLE
   NAMES sphinx-build sphinx-build2 sphinx-build3
-  HINTS "${_Sphinx_hints}"
-  DOC "Path to Sphinx documentation builder executable"
-)
-unset(_Sphinx_hints)
+  HINTS "${_Sphinx_bin_hint}" "${_Sphinx_scripts_hint}"
+  DOC "Path to Sphinx documentation builder executable")
+unset(_Sphinx_bin_hint)
+unset(_Sphinx_scripts_hint)
 mark_as_advanced(Sphinx_EXECUTABLE)
 
 # executable version
