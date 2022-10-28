@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.23)
 project(
   jgd-cmake-modules
-  VERSION 2.1.0
+  VERSION 2.2.0
   DESCRIPTION "CMake library for standardized CMake projects for JGD"
   HOMEPAGE_URL "https://gitlab.com/jgd-solutions/jgd-cmake-modules"
   LANGUAGES NONE)
@@ -34,4 +34,5 @@ jcm_install_config_file_package(
   INSTALL_LICENSES
   CONFIGURE_PACKAGE_CONFIG_FILES
   CMAKE_MODULES "${PROJECT_NAME}")
+
 jcm_configure_vcpkg_manifest_file()

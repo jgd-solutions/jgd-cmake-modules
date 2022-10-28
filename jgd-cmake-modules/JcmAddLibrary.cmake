@@ -47,7 +47,7 @@ This function will:
   absolute paths
 - create a library target with :cmake:command:`add_library`, including an associated alias
   (<PROJECT_NAME>::<EXPORT_NAME>) - both following JCM's target naming conventions
-- create PRIVATE, PUBLIC, and INTERFACE header sets with :cmake:command:`jcm_header_file_set` using
+- create PRIVATE, PUBLIC, and INTERFACE header sets with :cmake:command:`jcm_header_file_sets` using
   the respective *\*_HEADERS* parameters. This is what sets the *\*INCLUDE_DIRECTORIES* properties
 - Generate a header file, `${CMAKE_CURRENT_BINARY_DIR}/export_macros.hpp`, with
   :cmake:command:`generate_export_header`
@@ -336,13 +336,13 @@ function(jcm_add_library)
 
   # header properties
   if (DEFINED ARGS_INTERFACE_HEADERS)
-    jcm_header_file_set(INTERFACE TARGET ${target_name} HEADERS "${ARGS_INTERFACE_HEADERS}")
+    jcm_header_file_sets(INTERFACE TARGET ${target_name} HEADERS "${ARGS_INTERFACE_HEADERS}")
   elseif (DEFINED ARGS_PRIVATE_HEADERS)
-    jcm_header_file_set(PRIVATE TARGET ${target_name} HEADERS "${ARGS_PRIVATE_HEADERS}")
+    jcm_header_file_sets(PRIVATE TARGET ${target_name} HEADERS "${ARGS_PRIVATE_HEADERS}")
   endif ()
 
   if (NOT ARGS_TYPE STREQUAL "INTERFACE")
-    jcm_header_file_set(
+    jcm_header_file_sets(
       PUBLIC
       TARGET ${target_name}
       HEADERS "${ARGS_PUBLIC_HEADERS}" "${CMAKE_CURRENT_BINARY_DIR}/export_macros.hpp"

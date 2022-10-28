@@ -44,7 +44,7 @@ This function will:
 - ensure it's called within a canonical source subdirectory, verify the naming conventions and
   locations of the input source files, and transform :cmake:variable:`SOURCES` and
   :cmake:variable:`LIB_SOURCES` to normalized absolute paths.
-- create header sets with :cmake:command:`jcm_header_file_set` for both the main executable target,
+- create header sets with :cmake:command:`jcm_header_file_sets` for both the main executable target,
   and the optional library target. PRIVATE header sets will be added to the executable using header
   files found in :cmake:variable:`SOURCES`, while PUBLIC or INTERFACE header sets will be added to
   the object/interface library using header files found in :cmake:variable:`LIB_SOURCES`.
@@ -235,7 +235,7 @@ function(jcm_add_executable)
     OUT_MATCHED executable_header_files)
 
   if (executable_header_files)
-    jcm_header_file_set(PRIVATE
+    jcm_header_file_sets(PRIVATE
       TARGET ${target_name}
       HEADERS "${executable_header_files}")
   endif ()
@@ -266,11 +266,11 @@ function(jcm_add_executable)
       add_library(${target_name}-library INTERFACE)
     endif ()
 
-    if(library_header_files)
-      jcm_header_file_set(${include_dirs_scope}
+    if (library_header_files)
+      jcm_header_file_sets(${include_dirs_scope}
         TARGET ${target_name}-library
         HEADERS "${library_header_files}")
-    endif()
+    endif ()
 
     # link target to associated object files &/or usage requirements
     target_link_libraries(${target_name} PRIVATE ${target_name}-library)

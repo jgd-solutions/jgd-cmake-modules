@@ -12,14 +12,14 @@ include(JcmCanonicalStructure)
 
 #[=======================================================================[.rst:
 
-jcm_header_file_set
+jcm_header_file_sets
 ^^^^^^^^^^^^^^^^^^^
 
-.. cmake:command:: jcm_header_file_set
+.. cmake:command:: jcm_header_file_sets
 
   .. code-block:: cmake
 
-    jcm_header_file_set(
+    jcm_header_file_sets(
       [TARGET <target>]
       [HEADERS <file-path>...]
     )
@@ -76,7 +76,7 @@ Examples
 
 .. code-block:: cmake
 
-  jcm_header_file_set(
+  jcm_header_file_sets(
     PUBLIC
     TARGET libimage_libimage
     HEADERS image.hpp
@@ -92,7 +92,7 @@ Examples
   )
 
 #]=======================================================================]
-function(jcm_header_file_set scope)
+function(jcm_header_file_sets scope)
   # Positional Usage Guards
   set(supported_scopes "INTERFACE|PUBLIC|PRIVATE")
   if (NOT scope MATCHES "${supported_scopes}")
