@@ -113,13 +113,13 @@ function(jcm_install_config_file_package)
       "consumption and all versions will be installed into the same directory")
   endif ()
 
-  foreach(target ${ARGS_TARGETS})
-    if(NOT TARGET ${target})
+  foreach (target ${ARGS_TARGETS})
+    if (NOT TARGET ${target})
       message(
         FATAL_ERROR
         "Cannot install target ${target}. The target does not exist!")
-    endif()
-  endforeach()
+    endif ()
+  endforeach ()
 
   set(install_cmake_files) # list of cmake files to install at end
 
@@ -141,7 +141,7 @@ function(jcm_install_config_file_package)
   function(_jcm_get_package_config_file provided_component out_var)
     if (provided_component)
       set(comp_arg COMPONENT ${provided_component})
-    else()
+    else ()
       unset(comp_arg)
     endif ()
     jcm_package_config_file_name(${comp_arg} OUT_VAR config_file_name)
@@ -243,11 +243,11 @@ function(jcm_install_config_file_package)
 
     get_target_property(interface_header_sets ${target} INTERFACE_HEADER_SETS)
     set(file_set_args)
-    if(interface_header_sets)
+    if (interface_header_sets)
       foreach (interface_header_set ${interface_header_sets})
         set(file_set_args ${file_set_args} FILE_SET ${interface_header_set} DESTINATION "${JCM_INSTALL_INCLUDE_DIR}")
       endforeach ()
-    endif()
+    endif ()
 
     install(
       TARGETS ${target}
@@ -275,28 +275,29 @@ function(jcm_install_config_file_package)
 
   function(install_licenses license_glob dest_suffix)
     file(GLOB license_files LIST_DIRECTORIES false "${license_glob}")
+    jcm_transform_list(ABSOLUTE_PATH INPUT "${license_files}" OUT_VAR license_files)
+    jcm_transform_list(NORMALIZE_PATH INPUT "${license_files}" OUT_VAR license_files)
+
     foreach (license_file ${license_files})
-      cmake_path(GET license_file FILENAME file_name)
       while (IS_SYMLINK "${license_file}")
         file(READ_SYMLINK "${license_file}" license_file)
       endwhile ()
 
-      if (NOT IS_ABSOLUTE "${license_file}")
-        string(PREPEND license_file "${PROJECT_SOURCE_DIR}/")
-      endif ()
-
       if (EXISTS "${license_file}")
-        install(FILES "${license_file}" DESTINATION "${JCM_INSTALL_DOC_DIR}/${dest_suffix}" RENAME "${file_name}")
+        install(
+          FILES "${license_file}"
+          DESTINATION "${JCM_INSTALL_DOC_DIR}/${dest_suffix}"
+          RENAME "${file_name}")
       else ()
         message(WARNING "The license ${file_name} links to a file that doesn't exist: ${license_file}")
       endif ()
     endforeach ()
   endfunction()
 
-  if(ARGS_INSTALL_LICENSES)
+  if (ARGS_INSTALL_LICENSES)
     install_licenses("${PROJECT_SOURCE_DIR}/LICENSE*" "")
 
     cmake_path(GET JCM_PROJECT_LICENSES_DIR FILENAME licenses_dir)
     install_licenses("${JCM_PROJECT_LICENSES_DIR}/*" "${licenses_dir}")
-  endif()
+  endif ()
 endfunction()
