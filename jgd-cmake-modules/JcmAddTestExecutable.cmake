@@ -45,6 +45,7 @@ This function will:
   - OUTPUT_NAME
   - COMPILE_OPTIONS
   - LINK_LIBRARIES
+  - INCLUDE_DIRECTORIES
 
 Parameters
 ##########
@@ -135,7 +136,7 @@ function(jcm_add_test_executable)
   # Default test name
   if (DEFINED ARGS_TEST_NAME)
     set(test_name "${ARGS_TEST_NAME}")
-  else()
+  else ()
     set(test_name "${ARGS_NAME}")
   endif ()
 

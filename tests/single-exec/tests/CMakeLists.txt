@@ -9,5 +9,4 @@ add_test(NAME ${exec-target} COMMAND ${exec-target})
 jcm_add_test_executable(
   NAME ${PROJECT_NAME}-integration
   SOURCES integration.cpp
-  LIBS ${exec-target}-library
-)
+  LIBS ${exec-target}-library)

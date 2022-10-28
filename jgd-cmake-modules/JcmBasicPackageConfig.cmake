@@ -105,24 +105,24 @@ macro(JCM_BASIC_PACKAGE_CONFIG project)
   unset(ARGS_NO_TARGETS)
 
   # Include package components' config file
-  if(${project}_FIND_COMPONENTS)
+  if (${project}_FIND_COMPONENTS)
     # include specified components
     foreach (jcm_find_component ${${project}_FIND_COMPONENTS})
-      if(jcm_find_component STREQUAL project)
+      if (jcm_find_component STREQUAL project)
         continue()
-      endif()
+      endif ()
 
       jcm_package_config_file_name(
         PROJECT ${project}
         COMPONENT ${jcm_find_component}
         OUT_VAR jcm_component_config
       )
-      if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/${jcm_component_config}")
+      if (EXISTS "${CMAKE_CURRENT_LIST_DIR}/${jcm_component_config}")
         include("${CMAKE_CURRENT_LIST_DIR}/${jcm_component_config}")
         list(APPEND jcm_config_package_files "${jcm_component_config}")
-      elseif(${project}_FIND_REQUIRED_${jcm_find_component})
+      elseif (${project}_FIND_REQUIRED_${jcm_find_component})
         set(${project}_${jcm_find_component}_FOUND FALSE)
-      endif()
+      endif ()
 
       # add component's targets file to collection of package modules
       jcm_package_targets_file_name(
@@ -135,7 +135,7 @@ macro(JCM_BASIC_PACKAGE_CONFIG project)
 
     unset(jcm_component_config)
     unset(jcm_component_targets)
-  else()
+  else ()
     # include all components' config files
     file(
       GLOB
@@ -156,7 +156,7 @@ macro(JCM_BASIC_PACKAGE_CONFIG project)
 
     unset(jcm_components_configs)
     unset(jcm_components_targets)
-  endif()
+  endif ()
 
   # Add config package's version file to collection of package modules
   jcm_package_version_file_name(PROJECT ${project} OUT_VAR jcm_version_file)
@@ -300,13 +300,12 @@ macro(JCM_BASIC_COMPONENT_CONFIG project component)
     unset(${project}_${component}_stored_req_components)
     unset(${project}_${component}_stored_no_targets)
 
-    if(NOT ARGS_NO_TARGETS)
+    if (NOT ARGS_NO_TARGETS)
       # include associated targets file
       jcm_package_targets_file_name(
         PROJECT ${project}
         COMPONENT ${component}
-        OUT_VAR jcm_component_targets
-      )
+        OUT_VAR jcm_component_targets)
       include("${CMAKE_CURRENT_LIST_DIR}/${jcm_component_targets}")
       unset(jcm_component_targets)
 
@@ -314,24 +313,23 @@ macro(JCM_BASIC_COMPONENT_CONFIG project component)
       jcm_executable_naming(
         PROJECT ${project}
         COMPONENT ${component}
-        OUT_EXPORT_NAME jcm_executable_component_export_name
-      )
+        OUT_EXPORT_NAME jcm_executable_component_export_name)
+
       jcm_library_naming(
         PROJECT ${project}
         COMPONENT ${component}
-        OUT_EXPORT_NAME jcm_library_component_export_name
-      )
+        OUT_EXPORT_NAME jcm_library_component_export_name)
 
-      if(TARGET ${project}::${jcm_executable_component_export_name} OR
-         TARGET ${project}::${jcm_library_component_export_name})
+      if (TARGET ${project}::${jcm_executable_component_export_name} OR
+        TARGET ${project}::${jcm_library_component_export_name})
         set(${project}_${component}_FOUND TRUE)
-      else()
+      else ()
         set(${project}_${component}_FOUND FALSE)
-      endif()
+      endif ()
 
-    else()
+    else ()
       set(${project}_${component}_FOUND TRUE)
-    endif()
+    endif ()
 
   endif ()
 

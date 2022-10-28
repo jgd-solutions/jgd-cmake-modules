@@ -162,12 +162,15 @@ function(jcm_header_file_set scope)
       FILES "${header_path}")
   endforeach ()
 
+  # remove duplicated include directories added by multiple calls to target_sources with same base
   foreach (property INCLUDE_DIRECTORIES INTERFACE_INCLUDE_DIRECTORIES)
     get_target_property(property_value ${ARGS_TARGET} ${property})
     if (NOT "${property_value}")
       continue()
     endif ()
+
     list(REMOVE_DUPLICATES property_value)
     set_target_properties(${ARGS_TARGET} PROPERTIES ${property} "${property_value}")
   endforeach ()
+
 endfunction()

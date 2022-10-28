@@ -1,9 +1,7 @@
 #pragma once
 
-#include <filesystem>
+#include <string_view>
 
 namespace single {
-// clang-format off
-inline const std::filesystem::path data_dir{"@JCM_PROJECT_DATA_DIR@"};
-// clang-format on
+inline constexpr std::string_view version = "@PROJECT_VERSION@";
 }  // namespace single

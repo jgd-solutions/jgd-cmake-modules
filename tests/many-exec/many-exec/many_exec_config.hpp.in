@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string_view>
+
 namespace many {
-inline static constexpr const char* version = "@PROJECT_VERSION@";
+inline constexpr std::string_view version = "@PROJECT_VERSION@";
 }

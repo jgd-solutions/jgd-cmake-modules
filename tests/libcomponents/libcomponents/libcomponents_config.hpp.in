@@ -1,7 +1,7 @@
 #pragma once
 
-#include <filesystem>
+#include <string_view>
 
 namespace components {
-inline const std::filesystem::path data_dir{"@JCM_PROJECT_DATA_DIR@"};
+inline constexpr std::string_view version = "@PROJECT_VERSION@";
 }

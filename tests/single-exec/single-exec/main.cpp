@@ -4,5 +4,5 @@
 int main()
 {
   using namespace single;
-  return exec() || data_dir.empty();
+  return exec() || version.empty();
 }

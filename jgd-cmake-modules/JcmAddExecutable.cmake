@@ -12,6 +12,7 @@ include(JcmFileNaming)
 include(JcmTargetNaming)
 include(JcmListTransformations)
 include(JcmHeaderFileSet)
+include(JcmCanonicalStructure)
 include(JcmDefaultCompileOptions)
 
 
@@ -47,7 +48,7 @@ This function will:
   and the optional library target. PRIVATE header sets will be added to the executable using header
   files found in :cmake:variable:`SOURCES`, while PUBLIC or INTERFACE header sets will be added to
   the object/interface library using header files found in :cmake:variable:`LIB_SOURCES`.
-  This is what sets the *\*INCLUDE_DIRECTORIES* properties.
+  This is what sets the *INCLUDE_DIRECTORIES* properties.
 - create an executable target with :cmake:command:`add_executable`, including an associated alias
   (<PROJECT_NAME>::<EXPORT_NAME>) - both following JCM's target naming conventions
 - set target properties:
@@ -265,9 +266,11 @@ function(jcm_add_executable)
       add_library(${target_name}-library INTERFACE)
     endif ()
 
-    jcm_header_file_set(${include_dirs_scope}
-      TARGET ${target_name}-library
-      HEADERS "${library_header_files}")
+    if(library_header_files)
+      jcm_header_file_set(${include_dirs_scope}
+        TARGET ${target_name}-library
+        HEADERS "${library_header_files}")
+    endif()
 
     # link target to associated object files &/or usage requirements
     target_link_libraries(${target_name} PRIVATE ${target_name}-library)
