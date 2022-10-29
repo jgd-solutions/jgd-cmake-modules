@@ -55,7 +55,9 @@ enclosed files ending in `.cmake`. Relative paths are converted to absolute path
 :cmake:variable:`CMAKE_CURRENT_SOURCE_DIR`.
 
 Licenses are installed under :cmake:variable:`JCM_INSTALL_DOC_DIR`. Both a root `LICENSE.*` file and
-licenses within :cmake:variable:`JCM_PROJECT_LICENSES_DIR` will be installed. Symlinks are followed.
+licenses within :cmake:variable:`JCM_PROJECT_LICENSES_DIR` will be installed. Symlinks are followed
+until a file is reached, ensuring to install the license file with the original name of the symlink.
+Intermediate symlinks are not installed.
 
 Parameters
 ##########
@@ -220,8 +222,7 @@ function(jcm_install_config_file_package)
   install(
     FILES ${install_cmake_files}
     DESTINATION "${JCM_INSTALL_CMAKE_DESTINATION}"
-    COMPONENT ${PROJECT_NAME}_devel
-  )
+    COMPONENT ${PROJECT_NAME}_devel)
 
   # == Install targets via export sets ==
 
@@ -279,25 +280,39 @@ function(jcm_install_config_file_package)
     jcm_transform_list(NORMALIZE_PATH INPUT "${license_files}" OUT_VAR license_files)
 
     foreach (license_file ${license_files})
+      cmake_path(GET license_file FILENAME original_file_name)
+      set(non_existant_error
+        "The license file in project ${PROJECT_NAME}, '${license_file}', points to a non-existent "
+        "path: ")
+
       while (IS_SYMLINK "${license_file}")
+        if (NOT EXISTS "${license_file}")
+          message(FATAL_ERROR "${non_existant_error}" "${license_file}")
+        endif ()
+
+        cmake_path(GET license_file PARENT_PATH relative_symlink_base)
         file(READ_SYMLINK "${license_file}" license_file)
+        if (NOT IS_ABSOLUTE "${license_file}")
+          set(license_file "${relative_symlink_base}/${license_file}")
+        endif ()
+        jcm_transform_list(NORMALIZE_PATH INPUT "${license_file}" OUT_VAR license_file)
       endwhile ()
 
       if (EXISTS "${license_file}")
         install(
           FILES "${license_file}"
           DESTINATION "${JCM_INSTALL_DOC_DIR}/${dest_suffix}"
-          RENAME "${file_name}")
+          RENAME "${original_file_name}")
       else ()
-        message(WARNING "The license ${file_name} links to a file that doesn't exist: ${license_file}")
+        # only can be non-existent is if it was linked to, since glob was used
+        message(WARNING "${non_existant_error}" "${license_file}")
       endif ()
     endforeach ()
   endfunction()
 
   if (ARGS_INSTALL_LICENSES)
-    install_licenses("${PROJECT_SOURCE_DIR}/LICENSE*" "")
-
     cmake_path(GET JCM_PROJECT_LICENSES_DIR FILENAME licenses_dir)
+    install_licenses("${PROJECT_SOURCE_DIR}/LICENSE*" "")
     install_licenses("${JCM_PROJECT_LICENSES_DIR}/*" "${licenses_dir}")
   endif ()
 endfunction()

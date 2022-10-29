@@ -6,13 +6,13 @@ option(
   LIBCOMPONENTS_BUILD_EXTRA
   "Allows omitting configuring & building libcomponents::extra target" ON)
 
-if(LIBCOMPONENTS_BUILD_EXTRA)
+if (LIBCOMPONENTS_BUILD_EXTRA)
   set(libcomponents_components core extra)
   set(libcomponents_targets libcomponents::core libcomponents::extra)
-else()
+else ()
   set(libcomponents_components core)
   set(libcomponents_targets libcomponents::core)
-endif()
+endif ()
 
 
 find_package(jgd-cmake-modules CONFIG REQUIRED)
@@ -31,5 +31,6 @@ jcm_create_clang_format_targets(
   SOURCE_TARGETS ${libcomponents_targets})
 
 jcm_install_config_file_package(
+  INSTALL_LICENSES
   CONFIGURE_PACKAGE_CONFIG_FILES
   TARGETS ${libcomponents_targets})

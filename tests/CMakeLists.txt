@@ -33,8 +33,8 @@ _build_and_ctest("many-exec"
   NAME_SUFFIX -format
   BUILD_TARGET clang-format-check
   BUILD_OPTIONS
-    -DMANY_EXEC_BUILD_FORMATTER=ON # reset to ON from last test
-    -DMANY_EXEC_BUILD_TESTS=ON)
+  -DMANY_EXEC_BUILD_FORMATTER=ON # reset to ON from last test
+  -DMANY_EXEC_BUILD_TESTS=ON)
 
 _build_and_ctest("many-exec"
   BUILD_OPTIONS -DMANY_EXEC_BUILD_TESTS=ON)
@@ -48,8 +48,8 @@ _add_use_project("many-exec")
 _build_and_ctest("many-exec"
   NAME_SUFFIX -omit-formatter
   BUILD_OPTIONS
-    -DMANY_EXEC_BUILD_TESTS=OFF
-    -DMANY_EXEC_BUILD_FORMATTER=OFF)
+  -DMANY_EXEC_BUILD_TESTS=OFF
+  -DMANY_EXEC_BUILD_FORMATTER=OFF)
 
 
 # == libsingle ==
@@ -65,15 +65,15 @@ _build_and_ctest("libsingle"
 _build_and_ctest("libsingle"
   NAME_SUFFIX -shared
   BUILD_OPTIONS
-    -DLIBSINGLE_BUILD_TESTS=ON
-    -DLIBSINGLE_BUILD_SHARED_LIBS=ON)
+  -DLIBSINGLE_BUILD_TESTS=ON
+  -DLIBSINGLE_BUILD_SHARED_LIBS=ON)
 
 _build_and_ctest("libsingle"
   NAME_SUFFIX -docs
   BUILD_TARGET doxygen-docs
   BUILD_OPTIONS
-    -DLIBSINGLE_BUILD_TESTS=ON
-    -DLIBSINGLE_BUILD_DOCS=ON)
+  -DLIBSINGLE_BUILD_TESTS=ON
+  -DLIBSINGLE_BUILD_DOCS=ON)
 
 _install_project("libsingle")
 _find_use_project("libsingle")
@@ -86,8 +86,8 @@ _build_and_ctest("libcomponents"
   NAME_SUFFIX -format
   BUILD_TARGET clang-format-check
   BUILD_OPTIONS
-    -DLIBCOMPONENTS_BUILD_EXTRA=ON # reset to ON from last test
-    -DLIBCOMPONENTS_BUILD_TESTS=ON)
+  -DLIBCOMPONENTS_BUILD_EXTRA=ON # reset to ON from last test
+  -DLIBCOMPONENTS_BUILD_TESTS=ON)
 
 _build_and_ctest("libcomponents"
   BUILD_OPTIONS -DLIBCOMPONENTS_BUILD_TESTS=ON)
@@ -95,8 +95,8 @@ _build_and_ctest("libcomponents"
 _build_and_ctest("libcomponents"
   NAME_SUFFIX -shared
   BUILD_OPTIONS
-    -DLIBCOMPONENTS_BUILD_TESTS=ON
-    -DLIBCOMPONENTS_CORE_BUILD_SHARED=ON)
+  -DLIBCOMPONENTS_BUILD_TESTS=ON
+  -DLIBCOMPONENTS_CORE_BUILD_SHARED=ON)
 
 _install_project("libcomponents")
 _find_use_project("libcomponents")
@@ -108,8 +108,8 @@ _add_use_project("libcomponents")
 _build_and_ctest("libcomponents"
   NAME_SUFFIX -omit-extra
   BUILD_OPTIONS
-    -DLIBCOMPONENTS_BUILD_TESTS=OFF
-    -DLIBCOMPONENTS_BUILD_EXTRA=OFF)
+  -DLIBCOMPONENTS_BUILD_TESTS=OFF
+  -DLIBCOMPONENTS_BUILD_EXTRA=OFF)
 
 
 # == libheaders ==
@@ -126,6 +126,9 @@ _install_project("libheaders")
 _find_use_project("libheaders")
 _add_use_project("libheaders")
 
+_file_exists("libheaders" -license-exists
+  "${libheaders_ROOT}/share/doc/libheaders-0.0.0/LICENSE.md")
+
 
 # == libcstr ==
 
@@ -140,3 +143,7 @@ _build_and_ctest("libcstr"
 _install_project("libcstr")
 _find_use_project("libcstr")
 _add_use_project("libcstr")
+
+set(licenses_dir "${libcstr_ROOT}/share/doc/libcstr-0.0.0/licenses")
+_file_exists("libcstr" -license1-exists "${licenses_dir}/license1.txt")
+_file_exists("libcstr" -license2-exists "${licenses_dir}/license2.txt")

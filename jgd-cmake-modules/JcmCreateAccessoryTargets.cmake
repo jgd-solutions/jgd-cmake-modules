@@ -22,17 +22,20 @@ include(JcmCanonicalStructure)
 include(JcmStandardDirs)
 
 # private function to build targets that emit error messages instead of their intended purpose
-function(_jcm_build_error_targets err_msg targets)
-    set(exit_failure "${CMAKE_COMMAND}" -E false)
-    set(print_err "${CMAKE_COMMAND}" -E echo "${err_msg}")
+function(_jcm_build_error_targets targets err_msg)
+  string(CONCAT target_err_msgs "${err_msg}" "${ARGN}")
+  string(REPLACE ";" "" target_err_msgs "${target_err_msgs}")
 
-    foreach(target IN LISTS targets)
-      add_custom_target(
-        ${target}
-        COMMAND "${print_err}"
-        COMMAND "${exit_failure}"
-      )
-    endforeach()
+  set(exit_failure "${CMAKE_COMMAND}" -E false)
+  set(print_err "${CMAKE_COMMAND}" -E echo "${err_msg}")
+
+  foreach (target IN LISTS targets)
+    add_custom_target(
+      ${target}
+      COMMAND "${print_err}"
+      COMMAND "${exit_failure}"
+    )
+  endforeach ()
 endfunction()
 
 #[=======================================================================[.rst:
@@ -46,25 +49,28 @@ jcm_create_clang_format_targets
 
     jcm_create_clang_format_targets(
       [QUIET]
+      [STYLE_FILE <path>]
       [EXCLUDE_REGEX <regex>]
       [COMMAND <command|target>]
       [ADDITIONAL_PATHS <path>...]
       SOURCE_TARGETS <target>...
     )
 
-Creates custom targets "clang-format" and "clang-format-check" for use with a `.clang-format` file
-in the project's root. Both invoke the `clang::format` target, or the provided
-:cmake:variable:`COMMAND`, on all the sources for the provided :cmake:variable:`SOURCE_TARGETS` and
-any additional files within :cmake:variable:`ADDITIONAL_PATHS`, using a `.clang-format` file in the
-project's root. The created "clang-format" target will format the files in-place, while
+Creates custom targets "clang-format" and "clang-format-check" that invoke the `clang::format`
+target, or the provided :cmake:variable:`COMMAND`, on all the sources for the provided
+:cmake:variable:`SOURCE_TARGETS` and any additional files within :cmake:variable:`ADDITIONAL_PATHS`.
+All styling is provided by the file :cmake:variable:`STYLE_FILE`, which must exist, whether the
+default value or an explicit value is used.
+
+The created "clang-format" target will format the files in-place, while
 "clang-format-check" will report any formatting errors to the console and exit with an error.
 :cmake:variable:`EXCLUDE_REGEX` can filter out unwanted source files of targets
 :cmake:variable:`SOURCE_TARGETS`, and will be applied to the files' absolute paths.
 
 Call :cmake:`find_package(ClangFormat)` in order to introduce the `clang::format` target before
 using this function.  However, `clang::format` need not be available to use this function. In this
-situtation, the generated "clang-format" and "clang-format-check" targets will emit errors when
-invoked, but CMake configuration will not be hindered.
+situation, the generated "clang-format" and "clang-format-check" targets will emit errors when
+built, but CMake configuration will not be hindered.
 
 This function has no effect when it is not called in the top-level project, unless
 :cmake:variable:`WITHOUT_TOP_LEVEL_CHECK` is provided.
@@ -84,9 +90,16 @@ Options
 One Value
 ~~~~~~~~~
 
+:cmake:variable:`STYLE_FILE`
+  An optional path to clang-format style file containing the rules used to format the files in the
+  created targets. By default, :cmake:`${PROJECT_SOURCE_DIR}/.clang-format` will be used. The named
+  path will be converted to an absolute, normalized path, and any symlinks will be resolved before
+  providing it to the underlying clang-format command.
+
 :cmake:variable:`EXCLUDE_REGEX`
   A regular expression used to filter out the sources extracted from the targets named in
   :cmake:variable:`SOURCE_TARGETS`. Paths matching this regex are *not* provided to clang-format.
+  The regular expression is applied to the absolute, normalized version of the source file paths.
 
 :cmake:variable:`COMMAND`
   An alternative target or command for clang-format that will be used to format the files.
@@ -116,6 +129,7 @@ Examples
 
   jcm_create_clang_format_targets(
     QUIET
+    STYLE_FILE .clang-format-14
     COMMAND libbbq::customClangFormat
     SOURCE_TARGETS libbbq:libbbq
     EXCLUDE_REGEX "libbbq_config.hpp$"
@@ -131,79 +145,100 @@ function(jcm_create_clang_format_targets)
   jcm_parse_arguments(
     OPTIONS "QUIET" "WITHOUT_TOP_LEVEL_CHECK"
     MULTI_VALUE_KEYWORDS "ADDITIONAL_PATHS;SOURCE_TARGETS"
-    ONE_VALUE_KEYWORD "EXCLUDE_REGEX" "COMMAND"
+    ONE_VALUE_KEYWORD "EXCLUDE_REGEX" "COMMAND" "STYLE_FILE"
     REQUIRES_ALL "SOURCE_TARGETS"
     ARGUMENTS "${ARGN}"
   )
 
-  if(NOT PROJECT_IS_TOP_LEVEL AND NOT ARGS_WITHOUT_TOP_LEVEL_CHECK)
+  if (NOT PROJECT_IS_TOP_LEVEL AND NOT ARGS_WITHOUT_TOP_LEVEL_CHECK)
     return()
-  endif()
+  endif ()
 
-  unset(clang_format_err)
+  # Default arguments
+  if (ARGS_STYLE_FILE)
+    set(format_style_file "${ARGS_STYLE_FILE}")
+  else ()
+    set(format_style_file "${PROJECT_SOURCE_DIR}/.clang-format")
+  endif ()
 
-  if(DEFINED ARGS_COMMAND)
+  if (DEFINED ARGS_COMMAND)
     set(clang_format_cmd "${ARGS_COMMAND}")
-  else()
+  else ()
     set(clang_format_cmd clang::format)
-    if(NOT TARGET clang::format)
-      string(CONCAT clang_format_err
+    if (NOT TARGET clang::format)
+      _jcm_build_error_targets("clang-format;clang-format-check"
         "The clang-format executable could not be found!\n"
         "Maybe you forgot to call 'find_package(ClangFormat)'")
-    endif()
-  endif()
+      return()
+    endif ()
+  endif ()
 
   # Warn about targets already being created to prevent less expressive warning later
   set(target_existed FALSE)
-  foreach(target clang-format clang-format-check)
-    if(TARGET ${target})
+  foreach (target clang-format clang-format-check)
+    if (TARGET ${target})
       message(WARNING "The target '${target}' already exists. ${CMAKE_CURRENT_FUNCTION} will not "
-                      "create this target")
+        "create this target")
       set(target_existed TRUE)
-    endif()
-  endforeach()
+    endif ()
+  endforeach ()
 
-  if(target_existed)
+  if (target_existed)
     return()
-  endif()
+  endif ()
 
-  # Create targets to instead emit clang-format usage errors
-  if (NOT clang_format_err AND NOT EXISTS "${PROJECT_SOURCE_DIR}/.clang-format")
-    set(clang_format_err
+  # clean style file path - absolute, normalized, symlinks traced (mostly for Windows)
+  jcm_transform_list(ABSOLUTE_PATH INPUT "${format_style_file}" OUT_VAR format_style_file)
+  jcm_transform_list(NORMALIZE_PATH INPUT "${format_style_file}" OUT_VAR format_style_file)
+  set(original_style_file "${format_style_file}")
+
+  while (IS_SYMLINK "${format_style_file}")
+    if (NOT EXISTS "${format_style_file}")
+      _jcm_build_error_targets("clang-format;clang-format-check"
+        "The clang-format style file in project ${PROJECT_NAME}, '${original_style_file}', points "
+        "to a non-existent path: ${format_style_file}")
+      return()
+    endif ()
+
+    cmake_path(GET format_style_file PARENT_PATH relative_symlink_base)
+    file(READ_SYMLINK "${format_style_file}" format_style_file)
+    if (NOT IS_ABSOLUTE "${format_style_file}")
+      set(format_style_file "${relative_symlink_base}/${format_style_file}")
+    endif ()
+    jcm_transform_list(NORMALIZE_PATH INPUT "${format_style_file}" OUT_VAR format_style_file)
+  endwhile ()
+
+  # Ensure style file exists
+  if (NOT EXISTS "${format_style_file}")
+    _jcm_build_error_targets("clang-format;clang-format-check"
       "The expected clang-format configuration file is not present for project ${PROJECT_NAME}: "
-      "${PROJECT_SOURCE_DIR}/.clang-format"
-    )
-  endif ()
-
-  if (clang_format_err)
-    _jcm_build_error_targets("${clang_format_err}" "clang-format;clang-format-check")
+      "${format_style_file}")
     return()
   endif ()
-
 
   # Collect all sources from input targets
 
   set(files_to_format)
   foreach (target ${ARGS_SOURCE_TARGETS})
-    get_target_property(interface_sources ${target} INTERFACE_SOURCES)
     get_target_property(source_dir ${target} SOURCE_DIR)
+    get_target_property(interface_sources ${target} INTERFACE_SOURCES)
     get_target_property(sources ${target} SOURCES)
 
-    if(NOT interface_sources)
-      set(interface_sources)
-    endif()
-
-    foreach (source_file ${sources} ${interface_sources})
-      if (NOT source_file)
+    foreach (sources_variable interface_sources sources)
+      set(sources_variable "${${sources_variable}}")
+      if (NOT sources_variable)
         continue()
-      endif()
-
-      if (IS_ABSOLUTE "${source_file}")
-        set(abs_source_path "${source_file}")
-      else ()
-        set(abs_source_path "${source_dir}/${source_file}")
       endif ()
-      list(APPEND files_to_format "${abs_source_path}")
+
+      jcm_transform_list(ABSOLUTE_PATH
+        BASE "${source_dir}"
+        INPUT "${sources_variable}"
+        OUT_VAR absolute_source_paths)
+      jcm_transform_list(NORMALIZE_PATH
+        INPUT "${absolute_source_paths}"
+        OUT_VAR absolute_source_paths)
+
+      list(APPEND files_to_format "${absolute_source_paths}")
     endforeach ()
   endforeach ()
 
@@ -223,14 +258,15 @@ function(jcm_create_clang_format_targets)
   # Add additional files
   if (DEFINED ARGS_ADDITIONAL_PATHS)
     jcm_expand_directories(PATHS "${ARGS_ADDITIONAL_PATHS}" GLOB "*" OUT_VAR globbed_files)
+    jcm_transform_list(NORMALIZE_PATH INPUT "${globbed_files}" OUT_VAR globbed_files)
     list(APPEND files_to_format "${globbed_files}")
   endif ()
 
   # Create targets to run clang-format
 
   if (NOT files_to_format)
-    message(
-      AUTHOR_WARNING "No source files in project ${PROJECT_NAME} will be provided to clang-format.")
+    message(AUTHOR_WARNING
+      "No source files in project ${PROJECT_NAME} will be provided to clang-format.")
   endif ()
 
   set(verbose_flag)
@@ -238,15 +274,12 @@ function(jcm_create_clang_format_targets)
     set(verbose_flag ";--verbose")
   endif ()
 
-  set(base_cmd "${clang_format_cmd}" -style=file ${verbose_flag})
+  set(base_cmd "${clang_format_cmd}" -style=file:\"${format_style_file}\" ${verbose_flag})
   add_custom_target(
-    clang-format COMMAND ${base_cmd} -i ${files_to_format}
-  )
+    clang-format COMMAND ${base_cmd} -i ${files_to_format})
   add_custom_target(
-    clang-format-check COMMAND ${base_cmd} --dry-run --Werror ${files_to_format}
-  )
-  set_target_properties(clang-format PROPERTIES EXCLUDE_FROM_ALL TRUE)
-  set_target_properties(clang-format-check PROPERTIES EXCLUDE_FROM_ALL TRUE)
+    clang-format-check COMMAND ${base_cmd} --dry-run --Werror ${files_to_format})
+  set_target_properties(clang-format clang-format-check PROPERTIES EXCLUDE_FROM_ALL TRUE)
 endfunction()
 
 
@@ -355,37 +388,37 @@ function(jcm_create_doxygen_target)
   endif ()
 
   # Usage Guards
-  if(NOT CMAKE_CURRENT_SOURCE_DIR STREQUAL JCM_PROJECT_DOCS_DIR)
+  if (NOT CMAKE_CURRENT_SOURCE_DIR STREQUAL JCM_PROJECT_DOCS_DIR)
     message(AUTHOR_WARNING
       "${CMAKE_CURRENT_FUNCTION} should be invoked in ${JCM_PROJECT_DOCS_DIR}/CMakeLists.txt")
-  endif()
+  endif ()
 
 
-  if(NOT TARGET Doxygen::doxygen)
-    _jcm_build_error_targets(
-      "The doxygen executable could not be found!\nMaybe you forgot to call 'find_package(Doxygen)'"
-      doxygen-docs)
+  if (NOT TARGET Doxygen::doxygen)
+    _jcm_build_error_targets("doxygen-docs"
+      "The doxygen executable could not be found!\n"
+      "Maybe you forgot to call 'find_package(Doxygen)'")
     return()
-  endif()
+  endif ()
 
   # Default Arguments
-  if(NOT DEFINED ARGS_OUTPUT_DIRECTORY)
+  if (NOT DEFINED ARGS_OUTPUT_DIRECTORY)
     set(ARGS_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/doxygen")
-  endif()
+  endif ()
 
   # Extract all include directories from targets
   set(include_dirs)
   set(doxygen_input_files)
-  foreach(target ${ARGS_SOURCE_TARGETS})
+  foreach (target ${ARGS_SOURCE_TARGETS})
     get_target_property(interface_include_dirs ${target} INTERFACE_INCLUDE_DIRECTORIES)
     string(REGEX REPLACE "\\$<[A-Z_]*:|>" "" interface_include_dirs "${interface_include_dirs}")
     list(APPEND include_dirs ${interface_include_dirs})
 
     get_target_property(interface_header_sets ${target} INTERFACE_HEADER_SETS)
-    foreach(header_set_name IN LISTS interface_header_sets)
+    foreach (header_set_name IN LISTS interface_header_sets)
       get_target_property(files_in_header_set ${target} HEADER_SET_${header_set_name})
       list(APPEND doxygen_input_files ${files_in_header_set})
-    endforeach()
+    endforeach ()
   endforeach ()
 
   list(REMOVE_DUPLICATES include_dirs)
@@ -394,7 +427,7 @@ function(jcm_create_doxygen_target)
   # Apply exclude regex
   if (DEFINED ARGS_EXCLUDE_REGEX)
     list(FILTER doxygen_input_files EXCLUDE REGEX "${ARGS_EXCLUDE_REGEX}")
-  endif()
+  endif ()
 
   # Append any additional paths to Doxygen's input
   if (ARGS_ADDITIONAL_PATHS)
@@ -412,16 +445,16 @@ function(jcm_create_doxygen_target)
   endif ()
 
   # Check for valuable input files
-  if(NOT doxygen_input_files)
+  if (NOT doxygen_input_files)
     message(AUTHOR_WARNING "No header files or additional paths will be provided to Doxygen.")
-  endif()
+  endif ()
 
   # Set README.md as main page
   if (ARGS_README_MAIN_PAGE)
     set(readme "${PROJECT_SOURCE_DIR}/README.md")
     if (NOT EXISTS "${readme}")
       message(WARNING "The README_MAIN_PAGE option was specified but the "
-        " README file doesn't exist: ${readme}")
+        "README file doesn't exist: ${readme}")
     endif ()
 
     set(DOXYGEN_USE_MDFILE_AS_MAINPAGE "${readme}")
@@ -460,7 +493,7 @@ then be provided as configuration directory path to the sphinx command with its 
 
 Call :cmake:`find_package(Sphinx)` in order to introduce the `Sphinx::build` target before using
 this function.  However, `Sphinx::build` need not be available to use this function. In this
-situation, the generated "sphinx-docs" target will emit errors when invoked, but CMake configuration
+situation, the generated "sphinx-docs" target will emit errors when built, but CMake configuration
 will not be hindered.
 
 This function has no effect when :cmake:variable:`<JCM_PROJECT_PREFIX>_BUILD_DOCS` is not set.
@@ -528,64 +561,64 @@ function(jcm_create_sphinx_target)
   endif ()
 
   # Usage Guards
-  if(NOT CMAKE_CURRENT_SOURCE_DIR STREQUAL JCM_PROJECT_DOCS_DIR)
+  if (NOT CMAKE_CURRENT_SOURCE_DIR STREQUAL JCM_PROJECT_DOCS_DIR)
     message(AUTHOR_WARNING
       "${CMAKE_CURRENT_FUNCTION} should be invoked in ${JCM_PROJECT_DOCS_DIR}/CMakeLists.txt")
-  endif()
+  endif ()
 
   # Default Arguments
-  if(DEFINED ARGS_COMMAND)
+  if (DEFINED ARGS_COMMAND)
     set(sphinx_cmd "${ARGS_COMMAND}")
-  else()
+  else ()
     set(sphinx_cmd Sphinx::build)
-    if(NOT TARGET Sphinx::build)
-      _jcm_build_error_targets(
-        "The sphinx build executable could not be found!\nMaybe you forgot to call 'find_package(Sphinx)'"
-        sphinx-docs)
+    if (NOT TARGET Sphinx::build)
+      _jcm_build_error_targets("sphinx-docs"
+        "The sphinx build executable could not be found!\n"
+        "Maybe you forgot to call 'find_package(Sphinx)'")
       return()
-    endif()
-  endif()
+    endif ()
+  endif ()
 
-  if(NOT DEFINED ARGS_SOURCE_DIRECTORY)
+  if (NOT DEFINED ARGS_SOURCE_DIRECTORY)
     set(sphinx_source_dir "${CMAKE_CURRENT_SOURCE_DIR}")
-  elseif(ABSOLUTE "${ARGS_SOURCE_DIRECTORY}")
+  elseif (ABSOLUTE "${ARGS_SOURCE_DIRECTORY}")
     set(sphinx_source_dir "${ARGS_SOURCE_DIRECTORY}")
-  else()
+  else ()
     set(sphinx_source_dir "${CMAKE_CURRENT_SOURCE_DIR}/${ARGS_SOURCE_DIRECTORY}")
-  endif()
+  endif ()
 
-  if(NOT DEFINED ARGS_BUILD_DIRECTORY)
+  if (NOT DEFINED ARGS_BUILD_DIRECTORY)
     set(sphinx_build_dir "${CMAKE_CURRENT_BINARY_DIR}/sphinx")
-  elseif(ABSOLUTE "${ARGS_BUILD_DIRECTORY}")
+  elseif (ABSOLUTE "${ARGS_BUILD_DIRECTORY}")
     set(sphinx_build_dir "${ARGS_BUILD_DIRECTORY}")
-  else()
+  else ()
     set(sphinx_build_dir "${CMAKE_CURRENT_BINARY_DIR}/${ARGS_BUILD_DIRECTORY}")
-  endif()
+  endif ()
 
-  if(ARGS_CONFIGURE_CONF_PY)
+  if (ARGS_CONFIGURE_CONF_PY)
     configure_file("${sphinx_source_dir}/conf.py.in" "conf.py")
     set(sphinx_config_dir "${CMAKE_CURRENT_BINARY_DIR}")
-  else()
+  else ()
     set(sphinx_config_dir "${sphinx_source_dir}")
-  endif()
+  endif ()
 
-  if(NOT ARGS_BUILDER)
+  if (NOT ARGS_BUILDER)
     set(ARGS_BUILDER "html")
-  endif()
+  endif ()
 
   # Verify locations
 
-  if(NOT EXISTS "${sphinx_source_dir}")
-    _jcm_build_error_targets(
-      "Sphinx source directory does not exist: ${sphinx_source_dir}" sphinx-docs)
-  endif()
+  if (NOT EXISTS "${sphinx_source_dir}")
+    _jcm_build_error_targets("sphinx-docs"
+      "Sphinx source directory does not exist: ${sphinx_source_dir}")
+  endif ()
 
   # Build Target
   add_custom_target(sphinx-docs
     COMMAND
-      ${sphinx_cmd}
-      -c ${sphinx_config_dir}
-      -b ${ARGS_BUILDER}
-      "${sphinx_source_dir}"
-      "${sphinx_build_dir}")
+    ${sphinx_cmd}
+    -c ${sphinx_config_dir}
+    -b ${ARGS_BUILDER}
+    "${sphinx_source_dir}"
+    "${sphinx_build_dir}")
 endfunction()
