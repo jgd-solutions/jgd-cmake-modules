@@ -9,7 +9,7 @@ jcm_check_symlinks_cloned(
   OUT_ERROR_MESSAGE symlink_message)
 
 if (broken_symlink)
-  message(WARNING "Will not create any clang-format tests for project ${PROJECT_NAME} due to the "
+  message(WARNING "Project ${PROJECT_NAME} will not create any clang-format tests due to the "
     "following error:\n" ${symlink_message})
 endif ()
 
