@@ -30,6 +30,59 @@ jcm_check_symlinks_available
       [USE_CACHE | SUCCESS_CACHE]
     )
 
+Checks if the current build environment has symbolic links available to it by attempting to create
+a temporary symbolic link in :cmake:variable:`CMAKE_CURRENT_BINARY_DIR`. The resultant error message
+ contains a helpful error message with a suggestion for resolving the issue on Windows OSs.
+
+Additionally, the function can use various levels of caching to avoid trying to build the symbolic
+link upon each invocation.
+
+Parameters
+##########
+
+Options
+~~~~~~~
+
+:cmake:variable:`USE_CACHE`
+  When provided, will cause the function to store the result of the test in the cache variable
+  :cmake:variable:`JCM_SYMLINKS_AVAILABLE`. Subsequent invocations of this function will use the
+  cached result.
+
+:cmake:variable:`SUCCESS_CACHE`
+  When provided, will cause the function to store the result of the test in the cache variable
+  :cmake:variable:`JCM_SYMLINKS_AVAILABLE`, once the test succeeds. The test will be performed for
+  each subsequent invocation of this function, until the symbolic link can be created, at which
+  point the cached result will be used for further invocations.
+
+One Value
+~~~~~~~~~
+
+:cmake:variable:`OUT_VAR`
+  The variable named will be set to a boolean value, indicating if the symbolic link could be
+  created (TRUE), or if the test failed (FALSE)
+
+:cmake:variable:`OUT_ERROR_MESSAGE`
+  When the test fails, the variable named will be set to helpful error message with a suggestion for
+  resolving the issue on Windows OSs. Otherwise, it will contain an empty string.
+
+
+Examples
+########
+
+.. code-block:: cmake
+
+  jcm_check_symlinks_available(
+    SUCCESS_CACHE
+    OUT_ERROR_MESSAGE symlink_err_message)
+
+  if(symlink_err_message)
+    message(WARNING "${symlink_err_message}")
+  else()
+    message(STATUS "yay!")
+  endif()
+
+--------------------------------------------------------------------------
+
 #]=======================================================================]
 function(jcm_check_symlinks_available)
   jcm_parse_arguments(
@@ -39,8 +92,13 @@ function(jcm_check_symlinks_available)
     MUTUALLY_EXCLUSIVE "USE_CACHE" "SUCCESS_CACHE"
     ARGUMENTS "${ARGN}")
 
-  set(success)
-  set(error_message)
+  set(success FALSE)
+  string(CONCAT error_message
+    "Failed to create a test symbolic link, indicating that symbolic links are not currently "
+    "available in the present build environment. On a Windows OS, you may need to turn on "
+    "'Developer Mode' to allows users to create symbolic links without elevated permissions. "
+    " Alternatively, specific users can be granted the 'Create symbolic links' privilege.")
+
   macro(_set_results)
     if (DEFINED ARGS_OUT_VAR)
       set(${ARGS_OUT_VAR} ${success} PARENT_SCOPE)
@@ -51,14 +109,16 @@ function(jcm_check_symlinks_available)
   endmacro()
 
   # Handle caching of result
-  if (DEFINED JCM_SYMLINKS_AVAILABLE)
-    set(success ${JCM_SYMLINKS_AVAILABLE})
-
-    if ((ARGS_SUCCESS_CACHE AND JCM_SYMLINKS_AVAILABLE) OR # used cached success
-    (ARGS_USE_CACHE AND NOT ARGS_SUCCESS_CACHE))           # used any cached result
-      _set_results()
-      return()
+  if (DEFINED JCM_SYMLINKS_AVAILABLE AND              # previously set cache
+  ((ARGS_SUCCESS_CACHE AND JCM_SYMLINKS_AVAILABLE) OR # should use cached success
+  (ARGS_USE_CACHE AND NOT ARGS_SUCCESS_CACHE)))       # should use any cached result
+    if (JCM_SYMLINKS_AVAILABLE)
+      set(success TRUE)
+      set(error_message)
     endif ()
+
+    _set_results()
+    return()
   endif ()
 
   macro(_store_availability value)
@@ -83,19 +143,11 @@ function(jcm_check_symlinks_available)
   set(error_message)
 
   if (test_symlink_result EQUAL "0")
-    _store_availability(TRUE)
     set(success TRUE)
     unset(error_message)
-  else ()
-    _store_availability(FALSE)
-    set(success FALSE)
-    string(CONCAT error_message
-      "Failed to create a test symbolic link, indicating that symbolic links are not currently "
-      "available in the present build environment. On a Windows OS, you may need to turn on "
-      "'Developer Mode' to allows users to create symbolic links without elevated permissions. "
-      " Alternatively, specific users can be granted the 'Create symbolic links' privilege.")
   endif ()
 
+  _store_availability(${success})
   _set_results()
 endfunction()
 
