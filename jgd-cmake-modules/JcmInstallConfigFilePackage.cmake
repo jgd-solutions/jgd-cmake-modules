@@ -14,6 +14,7 @@ include(JcmCanonicalStructure)
 include(JcmConfigureFiles)
 include(JcmExpandDirectories)
 include(JcmListTransformations)
+include(JcmSymlinks)
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
@@ -276,36 +277,25 @@ function(jcm_install_config_file_package)
 
   function(install_licenses license_glob dest_suffix)
     file(GLOB license_files LIST_DIRECTORIES false "${license_glob}")
-    jcm_transform_list(ABSOLUTE_PATH INPUT "${license_files}" OUT_VAR license_files)
-    jcm_transform_list(NORMALIZE_PATH INPUT "${license_files}" OUT_VAR license_files)
+    if (NOT license_files)
+      return()
+    endif ()
 
-    foreach (license_file ${license_files})
-      cmake_path(GET license_file FILENAME original_file_name)
-      set(non_existant_error
-        "The license file in project ${PROJECT_NAME}, '${license_file}', points to a non-existent "
-        "path: ")
+    jcm_follow_symlinks(PATHS "${license_files}" OUT_VAR followed_license_files)
 
-      while (IS_SYMLINK "${license_file}")
-        if (NOT EXISTS "${license_file}")
-          message(FATAL_ERROR "${non_existant_error}" "${license_file}")
-        endif ()
+    foreach (target_file original_file IN ZIP_LISTS followed_license_files license_files)
+      cmake_path(GET original_file FILENAME original_file_name)
 
-        cmake_path(GET license_file PARENT_PATH relative_symlink_base)
-        file(READ_SYMLINK "${license_file}" license_file)
-        if (NOT IS_ABSOLUTE "${license_file}")
-          set(license_file "${relative_symlink_base}/${license_file}")
-        endif ()
-        jcm_transform_list(NORMALIZE_PATH INPUT "${license_file}" OUT_VAR license_file)
-      endwhile ()
-
-      if (EXISTS "${license_file}")
+      if (target_file)
         install(
-          FILES "${license_file}"
+          FILES "${target_file}"
           DESTINATION "${JCM_INSTALL_DOC_DIR}/${dest_suffix}"
           RENAME "${original_file_name}")
       else ()
         # only can be non-existent is if it was linked to, since glob was used
-        message(WARNING "${non_existant_error}" "${license_file}")
+        string(REPLACE "-NOTFOUND" "" non_existent_file "${target_file}")
+        message(WARNING "The license file in project ${PROJECT_NAME}, '${original_file}', points "
+          "to a non-existent path: ${target_file}")
       endif ()
     endforeach ()
   endfunction()
