@@ -26,13 +26,13 @@ jcm_check_symlinks_available
 
     jcm_check_symlinks_available(
       <[OUT_VAR <out-var>]
-       [OUT_ERROR_MESSAGE]>
+       [OUT_ERROR_MESSAGE <out-var>]>
       [USE_CACHE | SUCCESS_CACHE]
     )
 
 Checks if the current build environment has symbolic links available to it by attempting to create
 a temporary symbolic link in :cmake:variable:`CMAKE_CURRENT_BINARY_DIR`. The resultant error message
- contains a helpful error message with a suggestion for resolving the issue on Windows OSs.
+contains a helpful error message with a suggestion for resolving the issue on Windows OSs.
 
 Additionally, the function can use various levels of caching to avoid trying to build the symbolic
 link upon each invocation.
@@ -152,6 +152,71 @@ function(jcm_check_symlinks_available)
 endfunction()
 
 
+#[=======================================================================[.rst:
+
+jcm_check_symlinks_cloned
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. cmake:command:: jcm_check_symlinks_cloned
+
+  .. code-block:: cmake
+
+    jcm_check_symlinks_cloned(
+      PATHS <path>...
+      <[OUT_BROKEN_SYMLINK <out-var>]
+       [OUT_ERROR_MESSAGE <out-var>]>
+    )
+
+Checks if all of the :cmake:variable:`PATHS` refer to symbolic links. All of the paths must exist, or
+the function will emit a fatal error. All relative paths will be converted to full-paths, based off
+:cmake:variable:`CMAKE_CURRENT_SOURCE_DIR`, which is necessary for the internal :cmake:`IS_SYMLINK`
+check.
+
+As opposed to just using CMake's :cmake:`IS_SYMLINK` check, this function provides a helpful error
+message with a suggestion to fix the issue when using git. This function should primarily be used
+when a project includes symbolic links checked into SCM, and you would like to check if the symbolic
+links were properly cloned, which isn't the default case with Windows+Git.
+
+Parameters
+##########
+
+One Value
+~~~~~~~~~
+
+:cmake:variable:`OUT_BROKEN_SYMLINK`
+  When a broken symlink exists, the variable named will be set to the absolute path of the broken
+  symlink. Otherwise, the variable named will be set to an empty string
+
+:cmake:variable:`OUT_ERROR_MESSAGE`
+  When a broken symlink exists, the variable named will be set to a helpful error message with a
+  suggestion to fix the issue when using git. Otherwise, the variable named will be set to an empty
+  string. The error message contains the path to the broken symlink, on failure.
+
+Multi Value
+~~~~~~~~~~~
+
+:cmake:variable:`PATHS`
+  A list of relative or absolute paths to files or directories that will be checked to be symbolic
+  links
+
+Examples
+########
+
+.. code-block:: cmake
+
+  jcm_check_symlinks_cloned(
+    OUT_BROKEN_SYMLINK broken_symlink
+    OUT_ERROR_MESSAGE warning_message
+    PATHS "data/image_to_read.png")
+
+  if(broken_symlink)
+    message(WARNING "Will not build 'test-image' test:\n" ${warning_message})
+    list(APPEND exclude_tests "test-image")
+  endif()
+
+--------------------------------------------------------------------------
+
+#]=======================================================================]
 function(jcm_check_symlinks_cloned)
   jcm_parse_arguments(
     ONE_VALUE_KEYWORDS "OUT_BROKEN_SYMLINK" "OUT_ERROR_MESSAGE"

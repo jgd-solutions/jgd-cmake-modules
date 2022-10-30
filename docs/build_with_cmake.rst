@@ -1,5 +1,5 @@
-Building with CMake
-===================
+Tutorial: Building with CMake
+=============================
 
 `CMake <https://cmake.org/>`_ is a meta-buildsystem, meaning it generates buildsystem files from its
 standardized, cross-platform scripting language. With this comes additional features, like

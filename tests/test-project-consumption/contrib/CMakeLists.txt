@@ -10,7 +10,7 @@ set(contrib_destination "${CMAKE_CURRENT_BINARY_DIR}/src")
 set(contrib_bin_dir "${CMAKE_CURRENT_BINARY_DIR}")
 
 include(JcmSymlinks)
-jcm_check_symlinks_available(CACHE OUT_VAR symlinks_available)
+jcm_check_symlinks_available(SUCCESS_CACHE OUT_VAR symlinks_available)
 
 if (symlinks_available)
   file(MAKE_DIRECTORY "${contrib_destination}")

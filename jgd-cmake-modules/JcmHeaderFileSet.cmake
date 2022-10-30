@@ -13,7 +13,7 @@ include(JcmCanonicalStructure)
 #[=======================================================================[.rst:
 
 jcm_header_file_sets
-^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^
 
 .. cmake:command:: jcm_header_file_sets
 
