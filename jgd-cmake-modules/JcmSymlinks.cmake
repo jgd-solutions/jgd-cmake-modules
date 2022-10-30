@@ -260,9 +260,82 @@ function(jcm_check_symlinks_cloned)
 endfunction()
 
 
+#[=======================================================================[.rst:
+
+jcm_follow_symlinks
+^^^^^^^^^^^^^^^^^^^
+
+.. cmake:command:: jcm_follow_symlinks
+
+  .. code-block:: cmake
+
+    jcm_follow_symlinks(
+      PATHS <path>...
+      <[OUT_VAR <out-var>
+       [OUT_NON_EXISTENT_INDICES <out-var>]>
+    )
+
+Converts the provided list of paths, :cmake:variable:`PATHS`, into a list of absolute, normalized
+paths with all symbolic link chains traced to their final files/directories. Care is taken for
+multiple platforms, where symbolic links may contain paths with different path separators; all
+symbolic links are converted to CMake paths (\*nix separators). The target paths will be placed in
+the variable named by :cmake:variable:`OUT_VAR`, and will be in the same order as the paths provided
+via :cmake:variable:`PATHS`. When a non-symlink is provided, it will directly be placed in the
+result.
+
+The function checks for non-existent paths, including the provided path, intermediate symbolic links
+, and the final target path. When one is reached, the associated result element is set to the
+non-existent path, followed by `-NOTFOUND` (/home/test.js -> /home/test.js-NOTFOUND). These can
+directly be placed in a CMake :cmake:`if` statement to check for existence. Furthermore, the
+variable named by :cmake:variable:`OUT_NON_EXISTENT_INDICES` will contain the indices of all
+non-existent paths in :cmake:variable:`PATHS`, and therefore the variable named by
+:cmake:variable:`OUT_VAR`.
+
+Parameters
+##########
+
+One Value
+~~~~~~~~~
+
+:cmake:variable:`OUT_VAR`
+  The variable named will be set to all the paths in :cmake:variable:`PATHS`, after being converted
+  to normalized, absolute paths, with all symbolic link chains traced to their final
+  files/directories. Paths are in the in the same order as they're provided. See above for results
+  for non-existent paths.
+
+:cmake:variable:`OUT_NON_EXISTENT_INDICES`
+  The variable named will be set to the indices of paths in :cmake:variable:`PATHS` which introduced
+  a non-existent path.
+
+Multi Value
+~~~~~~~~~~~
+
+:cmake:variable:`PATHS`
+  A list of relative or absolute paths, where any paths to symbolic link chains will be followed.
+  All paths will be internally converted to absolute, normalized paths.
+
+Examples
+########
+
+.. code-block:: cmake
+
+  # real_file.txt exists, fake_file.txt does not
+  file(CREATE_LINK real_file.txt new_link.txt SYMBOLIC)
+
+  jcm_follow_symlinks(
+    PATHS real_file.txt new_link.txt fake_file.txt
+    OUT_VAR followed_links)
+
+  message(STATUS
+    "${followed_links} == "
+    "/home/here/real_file.txt;/home/here/real_file.txt;/home/here/fake_file.txt-NOTFOUND")
+
+--------------------------------------------------------------------------
+
+#]=======================================================================]
 function(jcm_follow_symlinks)
   jcm_parse_arguments(
-    ONE_VALUE_KEYWORDS "OUT_VAR" "OUT_NON_EXISTENT_INDICES" "OUT_NUM_PATHS"
+    ONE_VALUE_KEYWORDS "OUT_VAR" "OUT_NON_EXISTENT_INDICES"
     MULTI_VALUE_KEYWORDS "PATHS"
     REQUIRES_ALL "PATHS"
     REQUIRES_ANY "OUT_VAR" "OUT_NON_EXISTENT_INDICES"
@@ -314,9 +387,5 @@ function(jcm_follow_symlinks)
 
   if (DEFINED ARGS_OUT_NON_EXISTENT_INDICES)
     set(${ARGS_OUT_NON_EXISTENT_INDICES} "${non_existent_indices}" PARENT_SCOPE)
-  endif ()
-
-  if (DEFINED ARGS_OUT_NUM_PATHS)
-    set(${ARGS_OUT_NUM_PATHS} "${current_index}" PARENT_SCOPE)
   endif ()
 endfunction()
