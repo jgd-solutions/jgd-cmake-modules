@@ -5,10 +5,10 @@ include(JcmListTransformations)
 
 function(jcm_check_symlinks_available)
   jcm_parse_arguments(
-    OPTIONS "CACHE" "SUCCESS_CACHE"
+    OPTIONS "USE_CACHE" "SUCCESS_CACHE"
     ONE_VALUE_KEYWORDS "OUT_VAR" "OUT_ERROR_MESSAGE"
     REQUIRES_ANY "OUT_VAR" "OUT_ERROR_MESSAGE"
-    MUTUALLY_EXCLUSIVE "CACHE" "SUCCESS_CACHE"
+    MUTUALLY_EXCLUSIVE "USE_CACHE" "SUCCESS_CACHE"
     ARGUMENTS "${ARGN}")
 
   set(success)
@@ -27,14 +27,14 @@ function(jcm_check_symlinks_available)
     set(success ${JCM_SYMLINKS_AVAILABLE})
 
     if ((ARGS_SUCCESS_CACHE AND JCM_SYMLINKS_AVAILABLE) OR # used cached success
-    (ARGS_CACHE AND NOT ARGS_SUCCESS_CACHE))           # used any cached result
+    (ARGS_USE_CACHE AND NOT ARGS_SUCCESS_CACHE))           # used any cached result
       _set_results()
       return()
     endif ()
   endif ()
 
   macro(_store_availability value)
-    if (ARGS_CACHE OR (ARGS_SUCCESS_CACHE AND ${value}))
+    if (ARGS_USE_CACHE OR (ARGS_SUCCESS_CACHE AND ${value}))
       set(JCM_SYMLINKS_AVAILABLE ${value} CACHE BOOL
         "Stores whether build environment has symlink capabilities" FORCE)
       mark_as_advanced(JCM_SYMLINKS_AVAILABLE)

@@ -30,6 +30,7 @@ if (consumption_type STREQUAL FIND_PACKAGE)
 
   find_package(${package_name} CONFIG REQUIRED ${comp_arg})
 else ()
+  find_package(jgd-cmake-modules CONFIG REQUIRED)
   add_subdirectory(contrib) # uses package_name
   set(components ${components}) # use components variable
 endif ()
