@@ -132,53 +132,53 @@ Examples
 #]=======================================================================]
 function(jcm_canonical_subdir)
   jcm_parse_arguments(
-      ONE_VALUE_KEYWORDS "TARGET;OUT_VAR"
-      REQUIRES_ALL "TARGET;OUT_VAR"
-      ARGUMENTS "${ARGN}")
+    ONE_VALUE_KEYWORDS "TARGET;OUT_VAR"
+    REQUIRES_ALL "TARGET;OUT_VAR"
+    ARGUMENTS "${ARGN}")
 
   # Usage Guards
-  if(NOT ARGS_TARGET MATCHES "^${PROJECT_NAME}(::|_)")
+  if (NOT ARGS_TARGET MATCHES "^${PROJECT_NAME}(::|_)")
     set(mismatched_target_message
       "TARGET '${ARGS_TARGET}' provided to ${CMAKE_CURRENT_FUNCTION} does not "
       "start with '${PROJECT_NAME}::' or '${PROJECT_NAME}_' and is therefore not a target of "
       "project ${PROJECT_NAME} or does not follow the target naming structure."
-    )
-  else()
+      )
+  else ()
     unset(mismatched_target_message)
-  endif()
+  endif ()
 
   if (TARGET ${ARGS_TARGET})
     get_target_property(target_type ${ARGS_TARGET} TYPE)
     get_target_property(component ${ARGS_TARGET} COMPONENT)
 
-    if(mismatched_target_message)
+    if (mismatched_target_message)
       message(NOTICE "${mismatched_target_message}")
-    endif()
+    endif ()
 
-  else()
-    if(mismatched_target_message)
+  else ()
+    if (mismatched_target_message)
       message(FATAL_ERROR "${mismatched_target_message}")
-    endif()
+    endif ()
 
     jcm_target_type_component_from_name(
       TARGET_NAME ${ARGS_TARGET}
       OUT_TYPE target_type
       OUT_COMPONENT component
     )
-  endif()
+  endif ()
 
   # Resolve subdir based on type
-  if(component)
+  if (component)
     set(comp_arg COMPONENT ${component})
-  else()
+  else ()
     unset(comp_arg)
-  endif()
+  endif ()
 
-  if(target_type STREQUAL "EXECUTABLE")
+  if (target_type STREQUAL "EXECUTABLE")
     jcm_canonical_exec_subdir(${comp_arg} OUT_VAR canonical_subdir)
-  else()
+  else ()
     jcm_canonical_lib_subdir(${comp_arg} OUT_VAR canonical_subdir)
-  endif()
+  endif ()
 
   set(${ARGS_OUT_VAR} ${canonical_subdir} PARENT_SCOPE)
 endfunction()
@@ -396,8 +396,7 @@ Examples
 
   jcm_canonical_include_dirs(
     TARGET libcup::libcup
-    OUT_VAR source_include_dirs
-  )
+    OUT_VAR source_include_dirs)
 
   message(STATUS "${source_include_dirs} == ${PROJECT_SOURCE_DIR}")
 
@@ -405,8 +404,7 @@ Examples
 
   jcm_canonical_include_dirs(
     TARGET libcup::mug
-    OUT_VAR source_include_dirs
-  )
+    OUT_VAR source_include_dirs)
 
   message(STATUS "${source_include_dirs} == ${PROJECT_SOURCE_DIR}/libcup-mug")
 
@@ -415,14 +413,12 @@ Examples
   jcm_canonical_include_dirs(
     WITH_BINARY_INCLUDE_DIRS
     TARGET libcup::mug
-    OUT_VAR include_dirs
-  )
+    OUT_VAR include_dirs)
 
   message(STATUS
     "${include_dirs} MATCHES ${PROJECT_SOURCE_DIR}/libcup-mug"
     "${include_dirs} MATCHES ${PROJECT_BINARY_DIR}/libcup-mug"
-    "${include_dirs} MATCHES ${PROJECT_BINARY_DIR}"
-  )
+    "${include_dirs} MATCHES ${PROJECT_BINARY_DIR}")
 
 --------------------------------------------------------------------------
 
@@ -474,12 +470,12 @@ function(jcm_canonical_include_dirs)
   # Add appropriate binary dir for generated headers
   set(include_dirs "${include_directory}")
 
-  if(ARGS_WITH_BINARY_INCLUDE_DIRS)
+  if (ARGS_WITH_BINARY_INCLUDE_DIRS)
     list(APPEND include_dirs "${PROJECT_BINARY_DIR}")
     if (component)
       list(APPEND include_dirs "${PROJECT_BINARY_DIR}/${PROJECT_NAME}-${component}")
     endif ()
-  endif()
+  endif ()
 
   set(${ARGS_OUT_VAR} "${include_dirs}" PARENT_SCOPE)
 endfunction()
@@ -501,40 +497,38 @@ function(_jcm_verify_source_locations)
     OPTIONS "ADD_PARENT"
     MULTI_VALUE_KEYWORDS "SOURCES" "ROOT_DIRS"
     REQUIRES_ALL "SOURCES"
-    MUTUALLY_EXCLUSIVE "ADD_PARENT"
-    ARGUMENTS "${ARGN}"
-  )
+    ARGUMENTS "${ARGN}")
 
-  if(DEFINED ARGS_ROOT_DIRS)
+  if (DEFINED ARGS_ROOT_DIRS)
     set(root_dirs "${ARGS_ROOT_DIRS}")
-  else()
+  else ()
     set(root_source_dirs "${CMAKE_CURRENT_SOURCE_DIR}")
     set(root_binary_dirs "${CMAKE_CURRENT_BINARY_DIR};${PROJECT_BINARY_DIR}")
 
-    if(ARGS_ADD_PARENT)
+    if (ARGS_ADD_PARENT)
       cmake_path(GET CMAKE_CURRENT_SOURCE_DIR PARENT_PATH non_component_source_dir)
       cmake_path(GET CMAKE_CURRENT_BINARY_DIR PARENT_PATH non_component_binary_dir)
       list(APPEND root_source_dirs "${non_component_source_dir}")
       list(APPEND root_binary_dirs "${non_component_binary_dir}")
-    endif()
+    endif ()
 
     set(root_dirs "${root_source_dirs}" "${root_binary_dirs}")
-  endif()
+  endif ()
 
   list(REMOVE_DUPLICATES root_dirs)
 
-  foreach(root_dir IN LISTS root_dirs)
+  foreach (root_dir IN LISTS root_dirs)
     jcm_regex_find_list(
       MISMATCH
       REGEX "^${root_dir}"
       OUT_ELEMENT misplaced_file
-      INPUT  "${ARGS_SOURCES}")
+      INPUT "${ARGS_SOURCES}")
 
-    if(misplaced_file)
+    if (misplaced_file)
       message(FATAL_ERROR
         "The following file is not an acceptable input file for the library at ${CMAKE_CURRENT_SOURCE_DIR}. "
         "The file must be located within one of ${root_dirs}. "
         "Misplaced file: ${misplaced_file}")
-    endif()
-  endforeach()
+    endif ()
+  endforeach ()
 endfunction()

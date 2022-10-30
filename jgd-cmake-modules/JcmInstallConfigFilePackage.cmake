@@ -29,9 +29,9 @@ jcm_install_config_file_package
 
     jcm_install_config_file_package(
       [CONFIGURE_PACKAGE_CONFIG_FILES]
-      (TARGETS <target>... |
-       CMAKE_MODULES <path>... |
-       INSTALL_LICENSES)
+      <[TARGETS <target>...]
+       [CMAKE_MODULES <path>...]
+       INSTALL_LICENSES>
     )
 
 Provides ability to consistently and reliably install a project as a config-file package in one

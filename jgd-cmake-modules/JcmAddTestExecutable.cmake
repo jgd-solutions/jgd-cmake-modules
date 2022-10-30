@@ -83,14 +83,12 @@ Examples
   jcm_add_executable(
     OUT_TARGET target
     SOURCES main.cpp
-    LIB_SOURCES engine.cpp
-  )
+    LIB_SOURCES engine.cpp)
 
   jcm_add_test_executable(
     NAME test_engine
     SOURCES test_engine.cpp
-    LIBS ${target}-library Boost::ut
-  )
+    LIBS ${target}-library Boost::ut)
 
 #]=======================================================================]
 function(jcm_add_test_executable)

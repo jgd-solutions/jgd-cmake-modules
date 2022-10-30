@@ -31,10 +31,10 @@ jcm_add_library
       [NAME <name>]
       [OUT_TARGET <out-var>]
       [TYPE <type>]
-      ([INTERFACE_HEADERS <header>...]
-      [PUBLIC_HEADERS <header>...]
-      [PRIVATE_HEADERS <header>...]
-      [SOURCES <source>...])
+      <[INTERFACE_HEADERS <header>...]
+       [PUBLIC_HEADERS <header>...]
+       [PRIVATE_HEADERS <header>...]
+       [SOURCES <source>...]>
     )
 
 

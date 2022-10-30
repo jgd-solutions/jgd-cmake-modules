@@ -22,8 +22,8 @@ jcm_separate_list
       REGEX <regex>
       INPUT <item>...
       [TRANSFORM <transform>]
-      (OUT_MATCHED <out-var> |
-       OUT_MISMATCHED <out-var>)
+      <[OUT_MATCHED <out-var>]
+       [OUT_MISMATCHED <out-var>]>
     )
 
 Separates the :cmake:variable:`INPUT` into two groups: :cmake:variable:`OUT_MATCHED`, if the element
@@ -125,7 +125,7 @@ jcm_transform_list
   .. code-block:: cmake
 
     jcm_transform_list(
-      (ABSOLUTE_PATH [BASE <path>] | NORMALIZE_PATH | FILENAME)
+      <ABSOLUTE_PATH [BASE <path>] | NORMALIZE_PATH | FILENAME>
       INPUT <item>...
       OUT_VAR <out-var>
     )
@@ -264,14 +264,13 @@ jcm_regex_find_list
     jcm_regex_find_list(
       [MISMATCH]
       REGEX <regex>
-      OUT_IDX <out-var>
+      <[OUT_IDX <out-var>
+       [OUT_ELEMENT <out-var>]>
       INPUT <item>...
     )
 
 Searches :cmake:variable:`INPUT` for an item that either matches or mismatches
-(:cmake:variable:`MISMATCH` is provided) the regular expression :cmake:variable:`REGEX`.  The result
-will be placed in the variable named by :cmake:variable:`OUT_IDX` and will be the index of the found
-element, or -1 if no element could be found.
+(:cmake:variable:`MISMATCH` is provided) the regular expression :cmake:variable:`REGEX`.
 
 Parameters
 ##########
@@ -310,15 +309,13 @@ Examples
     GLOB private_dir_files
     LIST_DIRECTORIES false
     RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/private"
-    "${CMAKE_CURRENT_SOURCE_DIR}/private/*"
-  )
+    "${CMAKE_CURRENT_SOURCE_DIR}/private/*")
 
   jcm_regex_find_list(
     MISMATCH
     REGEX ".*(${JCM_CXX_HEADER_EXTENSION}|${JCM_CXX_SOURCE_EXTENSION})$"
     OUT_IDX misextensioned_idx
-    INPUT "${private_dir_files}"
-  )
+    INPUT "${private_dir_files}")
 
 --------------------------------------------------------------------------
 

@@ -1,8 +1,36 @@
 include_guard()
 
+#[=======================================================================[.rst:
+
+JcmSymlinks
+-----------
+
+Provides functions for working with symbolic links, including those to inspect their availability
+and to trace a symbolic link chain.
+
+--------------------------------------------------------------------------
+
+#]=======================================================================]
+
 include(JcmParseArguments)
 include(JcmListTransformations)
 
+#[=======================================================================[.rst:
+
+jcm_check_symlinks_available
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. cmake:command:: jcm_check_symlinks_available
+
+  .. code-block:: cmake
+
+    jcm_check_symlinks_available(
+      <[OUT_VAR <out-var>]
+       [OUT_ERROR_MESSAGE]>
+      [USE_CACHE | SUCCESS_CACHE]
+    )
+
+#]=======================================================================]
 function(jcm_check_symlinks_available)
   jcm_parse_arguments(
     OPTIONS "USE_CACHE" "SUCCESS_CACHE"

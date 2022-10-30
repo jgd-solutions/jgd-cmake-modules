@@ -283,8 +283,8 @@ jcm_create_doxygen_target
       [README_MAIN_PAGE]
       [EXCLUDE_REGEX <regex>]
       [OUTPUT_DIRECTORY <dir>]
-      (SOURCE_TARGETS <target>... |
-       ADDITIONAL_PATHS <path>...)
+      <[SOURCE_TARGETS <target>...]
+       [ADDITIONAL_PATHS <path>...]>
     )
 
 Creates a target, "doxygen-docs", that generates documentation of the provided

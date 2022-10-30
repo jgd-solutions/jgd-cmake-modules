@@ -36,9 +36,9 @@ macro(_JCM_CHECK_ADD_SUBDIR out_added_subdirs)
   )
 
   function(on_fatal_message msg)
-    if(ARGS_FATAL)
+    if (ARGS_FATAL)
       message(FATAL_ERROR "${msg}")
-    endif()
+    endif ()
   endfunction()
 
   if (NOT IS_DIRECTORY "${ARGS_SUBDIR}")
@@ -48,22 +48,22 @@ macro(_JCM_CHECK_ADD_SUBDIR out_added_subdirs)
     )
   elseif (NOT EXISTS "${ARGS_SUBDIR}/CMakeLists.txt")
     on_fatal_message(
-		"${CMAKE_CURRENT_FUNCTION} could not add subdirectory ${ARGS_SUBDIR} for project\
+      "${CMAKE_CURRENT_FUNCTION} could not add subdirectory ${ARGS_SUBDIR} for project\
        ${PROJECT_NAME}. The directory does not contain a CMakeLists.txt file."
     )
   elseif (CMAKE_CURRENT_SOURCE_DIR STREQUAL ARGS_SUBDIR)
     on_fatal_message(
       "${CMAKE_CURRENT_SOURCE_DIR} tries to add itself as a subdirectory."
     )
-  else()
+  else ()
     # directory and file exist, deal with subdirectory
     list(APPEND ${out_added_subdirs} "${ARGS_SUBDIR}")
     if (ARGS_ADD_SUBDIRS)
       message(VERBOSE "${CMAKE_CURRENT_FUNCTION}: Adding directory '${ARGS_SUBDIR}' to project\
                        '${PROJECT_NAME}'")
       add_subdirectory("${ARGS_SUBDIR}")
-    endif()
-  endif()
+    endif ()
+  endif ()
 endmacro()
 
 
@@ -79,7 +79,8 @@ jcm_source_subdirectories
     jcm_source_subdirectories(
       [WITH_TESTS_DIR]
       [WITH_DOCS_DIR]
-      (OUT_VAR <out-var> | ADD_SUBDIRS)
+      <[OUT_VAR <out-var>] |
+       [ADD_SUBDIRS]>
       [LIB_COMPONENTS <component>...]
       [EXEC_COMPONENTS <component>...]
     )
@@ -171,7 +172,7 @@ function(jcm_source_subdirectories)
 
   if (ARGS_ADD_SUBDIRS)
     set(add_subdirs_arg ADD_SUBDIRS)
-  else()
+  else ()
     unset(add_subdirs_arg)
   endif ()
 
