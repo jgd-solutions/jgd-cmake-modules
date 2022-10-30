@@ -1,5 +1,19 @@
 include("${CMAKE_CURRENT_SOURCE_DIR}/testingFunctions.cmake")
 
+# First, check for issues with symlinks so tests don't mysteriously fail on Windows
+jcm_check_symlinks_cloned(
+  PATHS
+  "libcomponents/.clang-format" "libcstr/.clang-format" "libheaders/.clang-format"
+  "libsingle/.clang-format" "many-exec/.clang-format" "single-exec/.clang-format"
+  OUT_BROKEN_SYMLINK broken_symlink
+  OUT_ERROR_MESSAGE symlink_message)
+
+if (broken_symlink)
+  message(WARNING "Will not create any clang-format tests for project ${PROJECT_NAME} due to the "
+    "following error:\n" ${symlink_message})
+endif ()
+
+
 # Install jgd-cmake-modules to test its installation and for following test projects to find
 add_test(
   NAME ${PROJECT_NAME}-install
@@ -12,11 +26,13 @@ add_test(
 
 # == single-exec ==
 
-_build_and_ctest("single-exec"
-  NAME_SUFFIX -format
-  BUILD_TARGET clang-format-check
-  BUILD_OPTIONS -DSINGLE_EXEC_BUILD_TESTS=ON
-  DEPENDS ${PROJECT_NAME}-install)
+if (NOT broken_symlink)
+  _build_and_ctest("single-exec"
+    NAME_SUFFIX -format
+    BUILD_TARGET clang-format-check
+    BUILD_OPTIONS -DSINGLE_EXEC_BUILD_TESTS=ON
+    DEPENDS ${PROJECT_NAME}-install)
+endif ()
 
 _build_and_ctest("single-exec"
   BUILD_OPTIONS -DSINGLE_EXEC_BUILD_TESTS=ON
@@ -29,11 +45,13 @@ _add_use_project("single-exec")
 
 # == many-exec ==
 
-_build_and_ctest("many-exec"
-  NAME_SUFFIX -format
-  BUILD_TARGET clang-format-check
-  BUILD_OPTIONS -DMANY_EXEC_BUILD_TESTS=ON
-  DEPENDS ${PROJECT_NAME}-install)
+if (NOT broken_symlink)
+  _build_and_ctest("many-exec"
+    NAME_SUFFIX -format
+    BUILD_TARGET clang-format-check
+    BUILD_OPTIONS -DMANY_EXEC_BUILD_TESTS=ON
+    DEPENDS ${PROJECT_NAME}-install)
+endif ()
 
 _build_and_ctest("many-exec"
   NAME_SUFFIX -omit-formatter
@@ -57,11 +75,13 @@ _add_use_project("many-exec")
 
 # == libsingle ==
 
-_build_and_ctest("libsingle"
-  NAME_SUFFIX -format
-  BUILD_TARGET clang-format-check
-  BUILD_OPTIONS -DLIBSINGLE_BUILD_TESTS=ON
-  DEPENDS ${PROJECT_NAME}-install)
+if (NOT broken_symlink)
+  _build_and_ctest("libsingle"
+    NAME_SUFFIX -format
+    BUILD_TARGET clang-format-check
+    BUILD_OPTIONS -DLIBSINGLE_BUILD_TESTS=ON
+    DEPENDS ${PROJECT_NAME}-install)
+endif ()
 
 _build_and_ctest("libsingle"
   BUILD_OPTIONS -DLIBSINGLE_BUILD_TESTS=ON
@@ -89,11 +109,13 @@ _add_use_project("libsingle")
 
 # == libcomponents ==
 
-_build_and_ctest("libcomponents"
-  NAME_SUFFIX -format
-  BUILD_TARGET clang-format-check
-  BUILD_OPTIONS -DLIBCOMPONENTS_BUILD_TESTS=ON
-  DEPENDS ${PROJECT_NAME}-install)
+if (NOT broken_symlink)
+  _build_and_ctest("libcomponents"
+    NAME_SUFFIX -format
+    BUILD_TARGET clang-format-check
+    BUILD_OPTIONS -DLIBCOMPONENTS_BUILD_TESTS=ON
+    DEPENDS ${PROJECT_NAME}-install)
+endif ()
 
 _build_and_ctest("libcomponents"
   NAME_SUFFIX -omit-extra
@@ -125,11 +147,13 @@ _add_use_project("libcomponents")
 
 # == libheaders ==
 
-_build_and_ctest("libheaders"
-  NAME_SUFFIX -format
-  BUILD_TARGET clang-format-check
-  BUILD_OPTIONS -DLIBHEADERS_BUILD_TESTS=ON
-  DEPENDS ${PROJECT_NAME}-install)
+if (NOT broken_symlink)
+  _build_and_ctest("libheaders"
+    NAME_SUFFIX -format
+    BUILD_TARGET clang-format-check
+    BUILD_OPTIONS -DLIBHEADERS_BUILD_TESTS=ON
+    DEPENDS ${PROJECT_NAME}-install)
+endif ()
 
 _build_and_ctest("libheaders"
   BUILD_OPTIONS -DLIBHEADERS_BUILD_TESTS=ON
@@ -146,11 +170,13 @@ _file_exists("libheaders" -license-exists
 
 # == libcstr ==
 
-_build_and_ctest("libcstr"
-  NAME_SUFFIX -format
-  BUILD_TARGET clang-format-check
-  BUILD_OPTIONS -DLIBCSTR_BUILD_TESTS=ON
-  DEPENDS ${PROJECT_NAME}-install)
+if (NOT broken_symlink)
+  _build_and_ctest("libcstr"
+    NAME_SUFFIX -format
+    BUILD_TARGET clang-format-check
+    BUILD_OPTIONS -DLIBCSTR_BUILD_TESTS=ON
+    DEPENDS ${PROJECT_NAME}-install)
+endif ()
 
 _build_and_ctest("libcstr"
   BUILD_OPTIONS -DLIBCSTR_BUILD_TESTS=ON

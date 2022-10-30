@@ -72,29 +72,45 @@ function(jcm_check_symlinks_available)
 endfunction()
 
 
-function(jcm_ensure_symlink_cloned)
+function(jcm_check_symlinks_cloned)
   jcm_parse_arguments(
-    ONE_VALUE_KEYWORDS "SYMLINK_PATH" "LEVEL"
-    REQUIRES_ALL "SYMLINK_PATH"
+    ONE_VALUE_KEYWORDS "OUT_BROKEN_SYMLINK" "OUT_ERROR_MESSAGE"
+    MULTI_VALUE_KEYWORDS "PATHS"
+    REQUIRES_ALL "PATHS"
+    REQUIRES_ANY "OUT_BROKEN_SYMLINK" "OUT_ERROR_MESSAGE"
     ARGUMENTS "${ARGN}")
 
-  if (NOT EXISTS "${ARGS_SYMLINK_PATH}")
-    message(FATAL_ERROR
-      "The provided path to ${CMAKE_CURRENT_FUNCTION} does not exist. Cannot identify if this is a "
-      "symbolic link or not")
+  jcm_transform_list(ABSOLUTE_PATH INPUT "${ARGS_PATHS}" OUT_VAR ARGS_PATHS)
+
+  set(broken_symlink)
+  set(error_message)
+
+  foreach (symlink_path IN LISTS ARGS_PATHS)
+    if (NOT EXISTS "${symlink_path}")
+      message(FATAL_ERROR
+        "The provided path to ${CMAKE_CURRENT_FUNCTION} does not exist. Cannot identify if this is "
+        "a symbolic link or not")
+    endif ()
+
+    if (NOT IS_SYMLINK "${symlink_path}")
+      set(broken_symlink "${symlink_path}")
+      string(CONCAT error_message
+        "The following path in project ${PROJECT_NAME} is expected to be a symbolic link but is "
+        "not. This is likely caused by improperly acquiring the project from source control, "
+        "especially on Windows. With git, symbolic links can be enabled globally with "
+        "`git config --global core.symlinks true`. Once enabled, Re-cloning the project will "
+        "preserve symbolic links. Broken symbolic link: ${broken_symlink}")
+      break()
+    endif ()
+  endforeach ()
+
+  # Result variables
+  if (DEFINED ARGS_OUT_BROKEN_SYMLINK)
+    set(${ARGS_OUT_BROKEN_SYMLINK} "${broken_symlink}" PARENT_SCOPE)
   endif ()
 
-  if (NOT DEFINED ARGS_LEVEL)
-    set(ARGS_LEVEL "FATAL")
-  endif ()
-
-  if (NOT IS_SYMLINK)
-    message(${ARGS_LEVEL}
-      "The following path in project ${PROJECT_NAME} is expected to be a symbolic link but is not. "
-      "This is likely caused by improperly acquiring the project from source control, especially on"
-      " Windows. With git, symbolic links can be enabled globally with "
-      "`git config --global core.symlinks true`. Once enabled, Re-cloning the project will preserve"
-      " symbolic links.")
+  if (DEFINED ARGS_OUT_ERROR_MESSAGE)
+    set(${ARGS_OUT_ERROR_MESSAGE} "${error_message}" PARENT_SCOPE)
   endif ()
 endfunction()
 
@@ -103,7 +119,8 @@ function(jcm_follow_symlinks)
   jcm_parse_arguments(
     ONE_VALUE_KEYWORDS "OUT_VAR" "OUT_NON_EXISTENT_INDICES" "OUT_NUM_PATHS"
     MULTI_VALUE_KEYWORDS "PATHS"
-    REQUIRES_ALL "OUT_VAR" "PATHS"
+    REQUIRES_ALL "PATHS"
+    REQUIRES_ANY "OUT_VAR" "OUT_NON_EXISTENT_INDICES"
     ARGUMENTS "${ARGN}")
 
   jcm_transform_list(ABSOLUTE_PATH INPUT "${ARGS_PATHS}" OUT_VAR input_paths)
@@ -146,7 +163,9 @@ function(jcm_follow_symlinks)
   endforeach ()
 
   # Result variables
-  set(${ARGS_OUT_VAR} "${target_files}" PARENT_SCOPE)
+  if (DEFINED ARGS_OUT_VAR)
+    set(${ARGS_OUT_VAR} "${target_files}" PARENT_SCOPE)
+  endif ()
 
   if (DEFINED ARGS_OUT_NON_EXISTENT_INDICES)
     set(${ARGS_OUT_NON_EXISTENT_INDICES} "${non_existent_indices}" PARENT_SCOPE)
