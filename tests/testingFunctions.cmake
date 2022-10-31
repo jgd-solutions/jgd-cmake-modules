@@ -9,11 +9,12 @@ function(_build_and_ctest project_name)
     MULTI_VALUE_KEYWORDS "BUILD_OPTIONS" "DEPENDS"
     ARGUMENTS "${ARGN}")
 
-  if (NOT ARGS_BUILD_TARGET)
-    set(ARGS_BUILD_TARGET all)
-    set(test_arg --test-command "${CMAKE_CTEST_COMMAND}")
-  else ()
+  if (ARGS_BUILD_TARGET)
+    set(build_target_arg --build-target ${ARGS_BUILD_TARGET})
     unset(test_arg)
+  else ()
+    # not running ctest when target specified only specific to JCM's tests
+    set(test_arg --test-command "${CMAKE_CTEST_COMMAND}")
   endif ()
 
   set(test_name "${project_name}${ARGS_NAME_SUFFIX}")
@@ -26,9 +27,9 @@ function(_build_and_ctest project_name)
     --output-on-failure
     --build-noclean
     --build-generator "${CMAKE_GENERATOR}"
-    --build-target ${ARGS_BUILD_TARGET}
     --build-and-test "${CMAKE_CURRENT_SOURCE_DIR}/${project_name}" "${CMAKE_CURRENT_BINARY_DIR}/${project_name}"
     --build-options "-Djgd-cmake-modules_ROOT:PATH=${jgd-cmake-modules_ROOT}" "-DCMAKE_VERBOSE_MAKEFILE=ON" ${ARGS_BUILD_OPTIONS}
+    ${build_target_arg}
     ${test_arg})
 
   set_tests_properties(${test_name} PROPERTIES RESOURCE_LOCK "build-${project_name}")
