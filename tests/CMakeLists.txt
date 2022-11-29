@@ -1,10 +1,9 @@
 include("${CMAKE_CURRENT_SOURCE_DIR}/testingFunctions.cmake")
 
 # First, check for issues with symlinks so tests don't mysteriously fail on Windows
+file(GLOB_RECURSE format_files RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "*/.clang-format")
 jcm_check_symlinks_cloned(
-  PATHS
-  "libcomponents/.clang-format" "libcstr/.clang-format" "libheaders/.clang-format"
-  "libsingle/.clang-format" "many-exec/.clang-format" "single-exec/.clang-format"
+  PATHS "${format_files}"
   OUT_BROKEN_SYMLINK broken_symlink
   OUT_ERROR_MESSAGE symlink_message)
 

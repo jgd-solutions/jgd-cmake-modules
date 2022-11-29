@@ -39,6 +39,16 @@
         "tests-ninja",
         "docs-ninja"
       ]
+    },
+    {
+      "name": "all-ninja-multi",
+      "displayName": "All with Ninja Multi-Config",
+      "description": "CMake options to configure all targets w/ multi-config",
+      "generator": "Ninja Multi-Config",
+      "binaryDir": "${sourceDir}/build-multi",
+      "inherits": [
+        "all-ninja"
+      ]
     }
   ],
   "buildPresets": [
