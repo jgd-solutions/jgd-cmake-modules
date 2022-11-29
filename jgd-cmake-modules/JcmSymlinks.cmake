@@ -99,12 +99,12 @@ function(jcm_check_symlinks_available)
     "'Developer Mode' to allows users to create symbolic links without elevated permissions. "
     " Alternatively, specific users can be granted the 'Create symbolic links' privilege.")
 
-  macro(_set_results)
+  macro(_set_out_args success_ error_message_)
     if (DEFINED ARGS_OUT_VAR)
-      set(${ARGS_OUT_VAR} ${success} PARENT_SCOPE)
+      set(${ARGS_OUT_VAR} ${success_} PARENT_SCOPE)
     endif ()
     if (DEFINED ARGS_OUT_ERROR_MESSAGE)
-      set(${ARGS_OUT_ERROR_MESSAGE} "${error_message}" PARENT_SCOPE)
+      set(${ARGS_OUT_ERROR_MESSAGE} "${error_message_}" PARENT_SCOPE)
     endif ()
   endmacro()
 
@@ -117,7 +117,7 @@ function(jcm_check_symlinks_available)
       set(error_message)
     endif ()
 
-    _set_results()
+    _set_out_args(${success} "${error_message}")
     return()
   endif ()
 
@@ -138,17 +138,15 @@ function(jcm_check_symlinks_available)
     RESULT test_symlink_result)
   file(REMOVE "${test_symlink}")
 
-
-  set(success)
-  set(error_message)
-
   if (test_symlink_result EQUAL "0")
     set(success TRUE)
-    unset(error_message)
+    set(error_message)
+  else()
+    set(success FALSE)
   endif ()
 
   _store_availability(${success})
-  _set_results()
+  _set_out_args(${success} "${error_message}")
 endfunction()
 
 
