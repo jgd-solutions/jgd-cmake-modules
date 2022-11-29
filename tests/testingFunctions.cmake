@@ -12,7 +12,10 @@ function(_create_ctest_test test_name)
     ARGUMENTS "${ARGN}")
 
   if (DEFINED ARGS_RUN_INNER_CTEST)
-    set(ctest_argument --test-command "${CMAKE_CTEST_COMMAND}" --build-config ${CMAKE_BUILD_TYPE})
+    set(ctest_argument
+      --test-command "${CMAKE_CTEST_COMMAND}"
+      --build-config ${CMAKE_BUILD_TYPE}
+      --output-on-failure)
   else ()
     unset(ctest_argument)
   endif ()
