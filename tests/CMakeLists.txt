@@ -163,7 +163,7 @@ _find_use_project("libheaders" DEPENDS libheaders-install)
 _add_use_project("libheaders")
 
 _file_exists("libheaders" -license-exists
-  "${libheaders_ROOT}/share/doc/libheaders-0.0.0/LICENSE.md"
+  "${test_install_dir}/share/doc/libheaders-0.0.0/LICENSE.md"
   DEPENDS libheaders-install)
 
 
@@ -185,6 +185,6 @@ _install_project("libcstr" DEPENDS libcstr)
 _find_use_project("libcstr" DEPENDS libcstr-install)
 _add_use_project("libcstr")
 
-set(licenses_dir "${libcstr_ROOT}/share/doc/libcstr-0.0.0/licenses")
+set(licenses_dir "${test_install_dir}/share/doc/libcstr-0.0.0/licenses")
 _file_exists("libcstr" -license1-exists "${licenses_dir}/license1.txt" DEPENDS libcstr-install)
 _file_exists("libcstr" -license2-exists "${licenses_dir}/license2.txt" DEPENDS libcstr-install)

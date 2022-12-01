@@ -35,6 +35,29 @@ else ()
   set(components ${components}) # use components variable
 endif ()
 
+# == For Windows, since tests run from build tree, not install tree  ==
+
+function(__copy_dependency_dlls test_exec_target)
+  if(NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    return()
+  endif()
+
+  get_target_property(runtime_dest ${test_exec_target} RUNTIME_OUTPUT_DIRECTORY)
+
+  foreach(test_dependency IN LISTS ARGN)
+    get_target_property(is_imported ${test_dependency} IMPORTED)
+    if(NOT is_imported)
+      continue()
+    endif()
+
+    get_target_property(dll_loc ${test_dependency} LOCATION)
+    if(dll_loc)
+      file(COPY_FILE "${dll_loc}" "${runtime_dest}")
+    endif()
+  endforeach()
+endfunction()
+
+
 # == Create Tests to Use Package ==
 
 if (test_name MATCHES "single-exec")
@@ -53,6 +76,7 @@ elseif (test_name MATCHES "many-exec")
 elseif (test_name MATCHES "libsingle")
   add_executable(${test_name} use_libsingle.cpp)
   target_link_libraries(${test_name} PRIVATE libsingle::libsingle)
+  __copy_dependency_dlls(${test_name} libsingle::libsingle)
 
 elseif (test_name MATCHES "libcomponents")
   if (NOT components OR components MATCHES "extra")
@@ -64,8 +88,7 @@ elseif (test_name MATCHES "libcomponents")
   elseif ()
     message(
       FATAL_ERROR
-      "No recognized components specified for testing libcomponents: ${components}"
-    )
+      "No recognized components specified for testing libcomponents: ${components}")
   endif ()
 
 elseif (test_name MATCHES "libheaders")

@@ -252,8 +252,8 @@ function(jcm_add_library)
     option(
       ${JCM_PROJECT_PREFIX_NAME}_BUILD_SHARED_LIBS
       "Build libraries of project ${PROJECT_NAME} with unspecified types shared."
-      ${BUILD_SHARED_LIBS}
-    )
+      ${BUILD_SHARED_LIBS})
+    set(build_project_shared ${${JCM_PROJECT_PREFIX_NAME}_BUILD_SHARED})
 
     # component specific build shared option
     if (DEFINED comp_arg)
@@ -262,8 +262,8 @@ function(jcm_add_library)
       option(
         ${JCM_PROJECT_PREFIX_NAME}_${comp_upper}_BUILD_SHARED
         "Build library component ${ARGS_COMPONENT} of project ${PROJECT_NAME} shared."
-        ${${JCM_PROJECT_PREFIX_NAME}_BUILD_SHARED_LIBS}
-      )
+        ${${JCM_PROJECT_PREFIX_NAME}_BUILD_SHARED_LIBS})
+      set(build_component_shared ${${JCM_PROJECT_PREFIX_NAME}_${comp_upper}_BUILD_SHARED})
     endif ()
   endif ()
 
@@ -281,7 +281,7 @@ function(jcm_add_library)
         "Unsupported type ${ARGS_TYPE}. ${CMAKE_CURRENT_FUNCTION} must be "
         "called with no type or one of: ${supported_types}")
     endif ()
-  elseif (${JCM_PROJECT_PREFIX_NAME}_BUILD_SHARED_LIBS OR ${JCM_PROJECT_PREFIX_NAME}_${comp_upper}_BUILD_SHARED_LIBS)
+  elseif (build_project_shared OR build_component_shared)
     set(lib_type SHARED)
   endif ()
 

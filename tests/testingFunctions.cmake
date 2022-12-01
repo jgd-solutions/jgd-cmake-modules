@@ -1,7 +1,9 @@
 include(JcmParseArguments)
 include(JcmStandardDirs)
 
-set(jgd-cmake-modules_ROOT "${CMAKE_CURRENT_BINARY_DIR}/install")
+set(test_install_dir "${CMAKE_CURRENT_BINARY_DIR}/install")
+set(jgd-cmake-modules_ROOT "${test_install_dir}")
+set(multi_config_build_type "${CMAKE_BUILD_TYPE}")
 
 function(_create_ctest_test test_name)
   jcm_parse_arguments(
@@ -31,7 +33,7 @@ function(_create_ctest_test test_name)
     --output-on-failure
     --build-noclean
     --build-generator "${CMAKE_GENERATOR}"
-    --build-config ${CMAKE_BUILD_TYPE}
+    --build-config ${multi_config_build_type}
     --build-and-test
     "${CMAKE_CURRENT_SOURCE_DIR}/${ARGS_PROJECT_NAME}"
     "${CMAKE_CURRENT_BINARY_DIR}/${ARGS_PROJECT_NAME}"
@@ -72,9 +74,6 @@ endfunction()
 
 function(_install_project project_name)
   jcm_parse_arguments(MULTI_VALUE_KEYWORDS "DEPENDS" ARGUMENTS "${ARGN}")
-
-  set(${project_name}_ROOT "${CMAKE_CURRENT_BINARY_DIR}/${project_name}/install")
-  set(${project_name}_ROOT "${${project_name}_ROOT}" PARENT_SCOPE)
   set(test_name ${project_name}-install)
 
   add_test(
@@ -83,7 +82,7 @@ function(_install_project project_name)
     "${CMAKE_COMMAND}"
     --install "${CMAKE_CURRENT_BINARY_DIR}/${project_name}"
     --verbose
-    --prefix "${${project_name}_ROOT}")
+    --prefix "${test_install_dir}")
 
   if (DEFINED ARGS_DEPENDS)
     set_tests_properties(${test_name} PROPERTIES DEPENDS "${ARGS_DEPENDS}")
@@ -106,7 +105,6 @@ function(_find_use_project project_name)
     unset(test_name_suffix)
   endif ()
 
-  set(${project_name}_ROOT "${CMAKE_CURRENT_BINARY_DIR}/${project_name}/install")
   set(test_name "${project_name}-find-use${test_name_suffix}")
 
   _create_ctest_test(${test_name}
@@ -114,7 +112,7 @@ function(_find_use_project project_name)
     PROJECT_NAME test-project-consumption
     BUILD_OPTIONS
     "-D consumption_type=FIND_PACKAGE"
-    "-D ${project_name}_ROOT:PATH=${${project_name}_ROOT}"
+    "-D ${project_name}_ROOT:PATH=${test_install_dir}"
     "-D test_name=find-use-${project_name}"
     "-D components=${specified_components}")
 
