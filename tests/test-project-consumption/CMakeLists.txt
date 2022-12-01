@@ -85,6 +85,7 @@ elseif (test_name MATCHES "libcomponents")
   elseif (components MATCHES "core")
     add_executable(${test_name} use_libcomponents_core.cpp)
     target_link_libraries(${test_name} PRIVATE libcomponents::core)
+    __copy_dependency_dlls(${test_name} libcomponents::core)
   elseif ()
     message(
       FATAL_ERROR

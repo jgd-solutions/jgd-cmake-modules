@@ -135,6 +135,7 @@ _build_and_ctest("libcomponents"
   -DLIBCOMPONENTS_BUILD_TESTS=ON
   -DLIBCOMPONENTS_CORE_BUILD_SHARED=ON
   DEPENDS libcomponents)
+# TODO: ensure shared libraries were actually produced
 
 _install_project("libcomponents" DEPENDS libcomponents-shared)
 _find_use_project("libcomponents" DEPENDS libcomponents-install)
