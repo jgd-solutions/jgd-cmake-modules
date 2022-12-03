@@ -1,10 +1,6 @@
 name: jgd-cmake-modules
 
-on:
-  pull_request:
-    branches: ["main"]
-  push:
-    branches: ["main"]
+on: [pull_request, push]
 
 jobs:
   # build-test-ubuntu:
