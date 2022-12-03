@@ -3,7 +3,6 @@ include(JcmStandardDirs)
 
 set(test_install_dir "${CMAKE_CURRENT_BINARY_DIR}/install")
 set(jgd-cmake-modules_ROOT "${test_install_dir}")
-set(multi_config_build_type "${CMAKE_BUILD_TYPE}")
 
 function(_create_ctest_test test_name)
   jcm_parse_arguments(
@@ -14,7 +13,7 @@ function(_create_ctest_test test_name)
     ARGUMENTS "${ARGN}")
 
   if (DEFINED ARGS_RUN_INNER_CTEST)
-    set(ctest_argument --test-command "${CMAKE_CTEST_COMMAND}")
+    set(ctest_argument --test-command "${CMAKE_CTEST_COMMAND}" --verbose --output-on-failure)
   else ()
     unset(ctest_argument)
   endif ()
@@ -33,13 +32,13 @@ function(_create_ctest_test test_name)
     --output-on-failure
     --build-noclean
     --build-generator "${CMAKE_GENERATOR}"
-    --build-config ${multi_config_build_type}
+    --build-config $<CONFIG>
     --build-and-test
     "${CMAKE_CURRENT_SOURCE_DIR}/${ARGS_PROJECT_NAME}"
     "${CMAKE_CURRENT_BINARY_DIR}/${ARGS_PROJECT_NAME}"
     --build-options
     "-Djgd-cmake-modules_ROOT:PATH=${jgd-cmake-modules_ROOT}"
-    ${ARGS_BUILD_OPTIONS}
+    "${ARGS_BUILD_OPTIONS}"
     ${ctest_argument})
 endfunction()
 
