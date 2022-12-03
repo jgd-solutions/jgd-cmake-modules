@@ -11,7 +11,10 @@
       "displayName": "Default with Ninja",
       "description": "Default CMake options configures the project",
       "binaryDir": "${sourceDir}/build",
-      "generator": "Ninja"
+      "generator": "Ninja",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
     },
     {
       "name": "tests-ninja",
@@ -66,8 +69,12 @@
       "displayName": "Tests",
       "description": "Run all automated tests",
       "configurePreset": "tests-ninja",
+      "configuration": "Debug",
       "output": {
         "outputOnFailure": true
+      },
+      "execution": {
+        "jobs": 3
       }
     },
     {
@@ -76,7 +83,8 @@
       "description": "Run automated tests until failure",
       "inherits": "tests",
       "execution": {
-        "stopOnFailure": true
+        "stopOnFailure": true,
+        "jobs": 3
       }
     }
   ]

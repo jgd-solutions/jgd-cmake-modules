@@ -38,6 +38,7 @@ function(_create_ctest_test test_name)
     "${CMAKE_CURRENT_BINARY_DIR}/${ARGS_PROJECT_NAME}"
     --build-options
     "-Djgd-cmake-modules_ROOT:PATH=${jgd-cmake-modules_ROOT}"
+    "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
     ${ARGS_BUILD_OPTIONS}
     ${ctest_argument})
 endfunction()
@@ -80,8 +81,9 @@ function(_install_project project_name)
     COMMAND
     "${CMAKE_COMMAND}"
     --install "${CMAKE_CURRENT_BINARY_DIR}/${project_name}"
-    --verbose
-    --prefix "${test_install_dir}")
+    --prefix "${test_install_dir}"
+    --config $<CONFIG>
+    --verbose)
 
   if (DEFINED ARGS_DEPENDS)
     set_tests_properties(${test_name} PROPERTIES DEPENDS "${ARGS_DEPENDS}")

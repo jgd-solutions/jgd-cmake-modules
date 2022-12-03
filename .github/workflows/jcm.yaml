@@ -6,63 +6,75 @@ on:
     branch: main
 
 jobs:
-  build-test-ubuntu:
-    runs-on: ubuntu-22.04
+#  build-test-ubuntu:
+#    runs-on: ubuntu-22.04
+#    strategy:
+#      matrix:
+#        generator: [ "Ninja", "Unix Makefiles" ]
+#    steps:
+#      - name: Checkout
+#        uses: actions/checkout@v3
+#      - name: Install ninja-build
+#        if: ${{ matrix.generator }} == "Ninja"
+#        uses: seanmiddleditch/gha-setup-ninja@master
+#        with:
+#          version: 1.11.1
+#      - name: Install Doxygen for tests
+#        run: |
+#          sudo apt-get update
+#          sudo apt-get install doxygen
+#      - name: Configure tests target
+#        run: cmake -G "${{ matrix.generator }}" --preset tests-ninja
+#      - name: Run all automated tests
+#        run: ctest --preset test-to-fail
+
+#  build-test-windows:
+#    runs-on: windows-2022
+#    strategy:
+#      matrix:
+#        generator: [ "Ninja", "Visual Studio 17 2022" ]
+#    steps:
+#      - name: Checkout
+#        uses: actions/checkout@v3
+#      - name: Install ninja-build
+#        if: ${{ matrix.generator }} == "Ninja"
+#        uses: seanmiddleditch/gha-setup-ninja@master
+#        with:
+#          version: 1.11.1
+#      - name: Install Doxygen for tests
+#        run: choco install doxygen.install || choco install doxygen.install # 2 attempts
+#      - name: Configure tests target
+#        run: cmake -G "${{ matrix.generator }}" --preset tests-ninja
+#      - name: Run all automated tests
+#        run: ctest --preset test-to-fail
+
+  build-test-mac:
+    runs-on: macos-12
+    strategy:
+      matrix:
+        #generator: [ "Ninja", "Xcode" ]
+        generator: [ "Xcode" ]
+    # apple-clang doesn't support one-ranges proposal, which
+    # is used in automated tests. Not concerned with test C/C++ code, just CMake.
+    env:
+      CC: /usr/local/bin/gcc
+      CXX: /usr/local/bin/g++-11
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-        with:
-          submodules: true
       - name: Install ninja-build
+        if: ${{ matrix.generator }} == "Ninja"
         uses: seanmiddleditch/gha-setup-ninja@master
         with:
           version: 1.11.1
-      - name: Install Doxygen for tests
-        run: |
-          sudo apt-get update
-          sudo apt-get install doxygen
+      - name: Install Doxygen & clang-format for tests
+        run: brew install doxygen clang-format
+      - name: Prepare Xcode
+        if: ${{ matrix.generator}} == "Xcode"
+        run: sudo xcode-select --reset
       - name: Configure tests target
-        run: cmake --preset tests-ninja
+        run: cmake -G "${{ matrix.generator }}" --preset tests-ninja
+      - name: Build
+        run: cmake --build build
       - name: Run all automated tests
-        run: ctest --preset tests
-
-  build-test-windows:
-    runs-on: windows-2022
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          submodules: true
-      - name: Install ninja-build
-        uses: seanmiddleditch/gha-setup-ninja@master
-        with:
-          version: 1.11.1
-      - name: Install Doxygen for tests
-        run: choco install doxygen.install
-      - name: Configure tests target
-        run: cmake --preset tests-ninja
-      - name: Run all automated tests
-        run: ctest --preset tests
-
-    build-test-mac:
-      runs-on: macos-12
-      # apple-clang doesn't support one-ranges proposal, which
-      # is used in automated tests
-      env:
-        CC: gcc-11
-        CXX: g++-11
-      steps:
-        - name: Checkout
-          uses: actions/checkout@v3
-          with:
-            submodules: true
-        - name: Install ninja-build
-          uses: seanmiddleditch/gha-setup-ninja@master
-          with:
-            version: 1.11.1
-        - name: Install Doxygen & clang-format for tests
-          run: brew install doxygen clang-format
-        - name: Configure tests target
-          run: cmake --preset tests-ninja
-        - name: Run all automated tests
-          run: ctest --preset tests
+        run: ctest --preset test-to-fail

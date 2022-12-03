@@ -19,9 +19,9 @@ add_test(
   COMMAND
   "${CMAKE_COMMAND}"
   --install "${PROJECT_BINARY_DIR}"
-  --verbose
-  --prefix "${jgd-cmake-modules_ROOT}")
-
+  --prefix "${jgd-cmake-modules_ROOT}"
+  --config $<CONFIG>
+  --verbose)
 
 # == single-exec ==
 

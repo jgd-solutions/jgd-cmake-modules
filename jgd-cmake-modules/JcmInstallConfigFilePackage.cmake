@@ -263,8 +263,7 @@ function(jcm_install_config_file_package)
       COMPONENT ${PROJECT_NAME}_devel
       ${file_set_args}
       COMPONENT ${PROJECT_NAME}_devel
-      INCLUDES DESTINATION "${JCM_INSTALL_INCLUDE_DIR}"
-    )
+      INCLUDES DESTINATION "${JCM_INSTALL_INCLUDE_DIR}")
 
     install(
       EXPORT ${export_set_name}
