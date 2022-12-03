@@ -87,21 +87,21 @@ _build_and_ctest("libsingle"
   DEPENDS libsingle-format)
 
 _build_and_ctest("libsingle"
-  NAME_SUFFIX -shared
-  BUILD_OPTIONS
-  -DLIBSINGLE_BUILD_TESTS=ON
-  -DLIBSINGLE_BUILD_SHARED_LIBS=ON
-  DEPENDS libsingle)
-
-_build_and_ctest("libsingle"
   NAME_SUFFIX -docs
   BUILD_TARGET doxygen-docs
   BUILD_OPTIONS
   -DLIBSINGLE_BUILD_TESTS=ON
   -DLIBSINGLE_BUILD_DOCS=ON
-  DEPENDS libsingle-shared)
+  DEPENDS libsingle)
 
-_install_project("libsingle" DEPENDS libsingle-docs)
+_build_and_ctest("libsingle"
+  NAME_SUFFIX -shared
+  BUILD_OPTIONS
+  -DLIBSINGLE_BUILD_TESTS=ON
+  -DLIBSINGLE_BUILD_SHARED_LIBS=ON
+  DEPENDS libsingle-docs)
+
+_install_project("libsingle" DEPENDS libsingle-shared)
 _find_use_project("libsingle" OUT_TEST_NAME libsingle_find DEPENDS libsingle-install)
 _add_use_project("libsingle")
 
@@ -135,7 +135,6 @@ _build_and_ctest("libcomponents"
   -DLIBCOMPONENTS_BUILD_TESTS=ON
   -DLIBCOMPONENTS_CORE_BUILD_SHARED=ON
   DEPENDS libcomponents)
-# TODO: ensure shared libraries were actually produced
 
 _install_project("libcomponents" DEPENDS libcomponents-shared)
 _find_use_project("libcomponents" DEPENDS libcomponents-install)
