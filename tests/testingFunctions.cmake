@@ -38,7 +38,7 @@ function(_create_ctest_test test_name)
     "${CMAKE_CURRENT_BINARY_DIR}/${ARGS_PROJECT_NAME}"
     --build-options
     "-Djgd-cmake-modules_ROOT:PATH=${jgd-cmake-modules_ROOT}"
-    "${ARGS_BUILD_OPTIONS}"
+    ${ARGS_BUILD_OPTIONS}
     ${ctest_argument})
 endfunction()
 
