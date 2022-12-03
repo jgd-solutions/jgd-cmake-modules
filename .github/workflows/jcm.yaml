@@ -1,27 +1,30 @@
 name: jgd-cmake-modules
 
-on: [pull_request, push]
+on:
+  push:
+  pull_request:
+    branch: main
 
 jobs:
-  # build-test-ubuntu:
-  #   runs-on: ubuntu-22.04
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v3
-  #       with:
-  #         submodules: true
-  #     - name: Install ninja-build
-  #       uses: seanmiddleditch/gha-setup-ninja@master
-  #       with:
-  #         version: 1.11.1
-  #     - name: Install Doxygen for tests
-  #       run: |
-  #         sudo apt-get update
-  #         sudo apt-get install doxygen
-  #     - name: Configure tests target
-  #       run: cmake --preset tests-ninja
-  #     - name: Run all automated tests
-  #       run: ctest --preset tests
+  build-test-ubuntu:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: true
+      - name: Install ninja-build
+        uses: seanmiddleditch/gha-setup-ninja@master
+        with:
+          version: 1.11.1
+      - name: Install Doxygen for tests
+        run: |
+          sudo apt-get update
+          sudo apt-get install doxygen
+      - name: Configure tests target
+        run: cmake --preset tests-ninja
+      - name: Run all automated tests
+        run: ctest --preset tests
 
   build-test-windows:
     runs-on: windows-2022
@@ -40,32 +43,26 @@ jobs:
         run: cmake --preset tests-ninja
       - name: Run all automated tests
         run: ctest --preset tests
-      - name: Archive build results
-        uses: actions/upload-artifact@v3
-        if: always()
-        with:
-          name: build-artifacts
-          path: build
 
-  # build-test-mac:
-  #   runs-on: macos-12
-  #   # apple-clang doesn't support one-ranges proposal, which
-  #   # is used in automated tests
-  #   env:
-  #     CC: gcc-11
-  #     CXX: g++-11
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v3
-  #       with:
-  #         submodules: true
-  #     - name: Install ninja-build
-  #       uses: seanmiddleditch/gha-setup-ninja@master
-  #       with:
-  #         version: 1.11.1
-  #     - name: Install Doxygen & clang-format for tests
-  #       run: brew install doxygen clang-format
-  #     - name: Configure tests target
-  #       run: cmake --preset tests-ninja
-  #     - name: Run all automated tests
-  #       run: ctest --preset tests
+    build-test-mac:
+      runs-on: macos-12
+      # apple-clang doesn't support one-ranges proposal, which
+      # is used in automated tests
+      env:
+        CC: gcc-11
+        CXX: g++-11
+      steps:
+        - name: Checkout
+          uses: actions/checkout@v3
+          with:
+            submodules: true
+        - name: Install ninja-build
+          uses: seanmiddleditch/gha-setup-ninja@master
+          with:
+            version: 1.11.1
+        - name: Install Doxygen & clang-format for tests
+          run: brew install doxygen clang-format
+        - name: Configure tests target
+          run: cmake --preset tests-ninja
+        - name: Run all automated tests
+          run: ctest --preset tests
