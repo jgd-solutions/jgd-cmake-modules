@@ -22,9 +22,9 @@ jcm_parse_arguments
       [WITHOUT_MISSING_VALUES_CHECK]
       [WITHOUT_UNPARSED_CHECK]
       [PREFIX <prefix>]
-      (OPTIONS <keyword>...
-       ONE_VALUE_KEYWORDS <keyword>...
-       MULTI_VALUE_KEYWORDS <keyword>...)
+      <[OPTIONS <keyword>...]
+       [ONE_VALUE_KEYWORDS <keyword>...]
+       [MULTI_VALUE_KEYWORDS <keyword>...]>
       [REQUIRES_ALL <keyword>...]
       [REQUIRES_ANY <keyword>...]
       [MUTUALLY_EXCLUSIVE <keyword>..]
@@ -121,29 +121,25 @@ Examples
   separate_list(
     INPUT "first" "second" "third"
     REGEX ".*$d"
-    OUT_MATCHED ends_with_d
-  )
+    OUT_MATCHED ends_with_d)
 
   # Error, INPUT not provided
   separate_list(
     REGEX ".*$d"
     OUT_MATCHED ends_with_d
-    OUT_MISMATCHED doesnt_end_with_d
-  )
+    OUT_MISMATCHED doesnt_end_with_d)
 
   # Error, OUT_MATCHED nor OUT_MISMATCHED provided
   separate_list(
     INPUT "first" "second" "third"
-    REGEX ".*$d"
-  )
+    REGEX ".*$d")
 
   # Error, USE_PERL_REGEX and USE_EXTENDED provided
   separate_list(
     USE_PERL_REGEX
     USE_EXTENDED
     INPUT "first" "second" "third"
-    REGEX ".*$d"
-  )
+    REGEX ".*$d")
 
 #]=======================================================================]
 macro(JCM_PARSE_ARGUMENTS)
@@ -227,7 +223,7 @@ macro(JCM_PARSE_ARGUMENTS)
   unset(first_keyword)
   unset(second_keyword)
 
-  foreach(keyword IN LISTS INS_MUTUALLY_EXCLUSIVE)
+  foreach (keyword IN LISTS INS_MUTUALLY_EXCLUSIVE)
     list(FIND INS_ARGUMENTS ${keyword} idx)
     if (NOT idx EQUAL -1)
       if (DEFINED first_keyword)
@@ -237,7 +233,7 @@ macro(JCM_PARSE_ARGUMENTS)
         set(first_keyword ${keyword})
       endif ()
     endif ()
-  endforeach()
+  endforeach ()
 
   if (DEFINED second_keyword)
     message(FATAL_ERROR "The keywords ${first_keyword} and ${second_keyword} were both defined but are part of the "

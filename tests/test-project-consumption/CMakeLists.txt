@@ -30,11 +30,46 @@ if (consumption_type STREQUAL FIND_PACKAGE)
 
   find_package(${package_name} CONFIG REQUIRED ${comp_arg})
 else ()
+  find_package(jgd-cmake-modules CONFIG REQUIRED)
   add_subdirectory(contrib) # uses package_name
   set(components ${components}) # use components variable
 endif ()
 
-# == Create Tests to Use Package ==
+# == For Windows, since tests run from build tree, not install tree  ==
+
+function(__copy_dependency_dlls test_exec_target out_test_names)
+  if (NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    return()
+  endif ()
+
+  foreach (dependent_target IN LISTS ARGN)
+    get_target_property(is_imported ${dependent_target} IMPORTED)
+    get_target_property(target_type ${dependent_target} TYPE)
+    if (NOT is_imported OR NOT ${target_type} STREQUAL "SHARED_LIBRARY")
+      continue()
+    endif ()
+
+    get_target_property(dll_loc ${dependent_target} LOCATION)
+    if(NOT dll_loc)
+      continue()
+    endif()
+
+    set(copy_test_name "copy-${dependent_target}-dll-for-${test_exec_target}")
+    list(APPEND copy_test_names "${copy_test_name}")
+    add_test(NAME "${copy_test_name}"
+      COMMAND "${CMAKE_COMMAND}"
+      -E copy
+      "$<TARGET_FILE:${dependent_target}>"
+      "$<TARGET_FILE_DIR:${test_exec_target}>")
+  endforeach ()
+
+  set(${out_test_names} ${copy_test_names} PARENT_SCOPE)
+endfunction()
+
+
+# == Create Targets to Use Package ==
+
+unset(copy_dll_tests)
 
 if (test_name MATCHES "single-exec")
   add_test(NAME ${test_name} COMMAND single-exec::single-exec)
@@ -52,6 +87,7 @@ elseif (test_name MATCHES "many-exec")
 elseif (test_name MATCHES "libsingle")
   add_executable(${test_name} use_libsingle.cpp)
   target_link_libraries(${test_name} PRIVATE libsingle::libsingle)
+  __copy_dependency_dlls(${test_name} copy_dll_tests libsingle::libsingle)
 
 elseif (test_name MATCHES "libcomponents")
   if (NOT components OR components MATCHES "extra")
@@ -60,11 +96,11 @@ elseif (test_name MATCHES "libcomponents")
   elseif (components MATCHES "core")
     add_executable(${test_name} use_libcomponents_core.cpp)
     target_link_libraries(${test_name} PRIVATE libcomponents::core)
+    __copy_dependency_dlls(${test_name} copy_dll_tests libcomponents::core)
   elseif ()
     message(
       FATAL_ERROR
-      "No recognized components specified for testing libcomponents: ${components}"
-    )
+      "No recognized components specified for testing libcomponents: ${components}")
   endif ()
 
 elseif (test_name MATCHES "libheaders")
@@ -77,4 +113,11 @@ else ()
   message(FATAL_ERROR "${test_name} is not a recognized test name in ${PROJECT_NAME}")
 endif ()
 
+
+# == Create Tests from Created Library Target ==
+
 add_test(NAME ${test_name} COMMAND ${test_name})
+
+if (copy_dll_tests)
+  set_tests_properties(${test_name} PROPERTIES DEPENDS ${copy_dll_tests})
+endif ()

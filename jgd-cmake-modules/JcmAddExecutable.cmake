@@ -63,7 +63,7 @@ Parameters
 ##########
 
 Options
-~~~~~~~~~~
+~~~~~~~
 
 :cmake:variable:`WITHOUT_CANONICAL_PROJECT_CHECK`
   When provided, will forgo the default check that the function is called within an executable

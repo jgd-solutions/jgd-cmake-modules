@@ -28,8 +28,8 @@ define_property(
   "The name of a library or executable component that the target represents.")
 
 macro(_JCM_WARN_SET variable value)
-  if (PROJECT_IS_TOP_LEVEL)
-    if (DEFINED ${variable} AND NOT DEFINED CACHE{${variable}})
+  if (PROJECT_IS_TOP_LEVEL AND NOT DEFINED CACHE{${variable}})
+    if (DEFINED ${variable})
       message(
         AUTHOR_WARNING
         "The variable ${variable} was set for project ${PROJECT_NAME} prior to calling "
@@ -40,12 +40,6 @@ macro(_JCM_WARN_SET variable value)
 
     set(${variable} "${value}" ${ARGN})
   endif()
-endmacro()
-
-macro(_JCM_CHECK_SET variable value)
-  if (NOT DEFINED ${variable})
-    set(${variable} "${value}" ${ARGN})
-  endif ()
 endmacro()
 
 #[=======================================================================[.rst:
@@ -210,7 +204,7 @@ macro(JCM_SETUP_PROJECT)
   # == Variables Setting Default Target Properties ==
 
   # basic
-  _jcm_check_set(CMAKE_BUILD_TYPE "Release")
+  _jcm_warn_set(CMAKE_BUILD_TYPE "Release")
   _jcm_warn_set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
   _jcm_warn_set(CMAKE_OPTIMIZE_DEPENDENCIES ON)
   _jcm_warn_set(CMAKE_LINK_WHAT_YOU_USE ON)

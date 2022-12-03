@@ -60,10 +60,13 @@ endif()
 
 if(_jcm_languages)
   foreach(lang IN LISTS _jcm_languages)
-    if(NOT "${lang}" MATCHES "CXX|C|CUDA|OBJC|OBJCXX|HIP")
+    if(lang STREQUAL "RC")
+      continue()
+    endif()
+    if(NOT "${lang}" MATCHES "^(CXX|C|CUDA|OBJC|OBJCXX|HIP)$")
       message(AUTHOR_WARNING
           "The enabled languages '${lang}' is not currently supported by JCM."
-          "The associated REGEX variables will not be created")
+          "The regexes for file names of ${lang} will not be considered.")
       continue()
     endif()
 

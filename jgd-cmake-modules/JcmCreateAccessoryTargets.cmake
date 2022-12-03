@@ -20,6 +20,7 @@ include(JcmExpandDirectories)
 include(JcmListTransformations)
 include(JcmCanonicalStructure)
 include(JcmStandardDirs)
+include(JcmSymlinks)
 
 # private function to build targets that emit error messages instead of their intended purpose
 function(_jcm_build_error_targets targets err_msg)
@@ -187,34 +188,20 @@ function(jcm_create_clang_format_targets)
     return()
   endif ()
 
-  # clean style file path - absolute, normalized, symlinks traced (mostly for Windows)
-  jcm_transform_list(ABSOLUTE_PATH INPUT "${format_style_file}" OUT_VAR format_style_file)
-  jcm_transform_list(NORMALIZE_PATH INPUT "${format_style_file}" OUT_VAR format_style_file)
-  set(original_style_file "${format_style_file}")
-
-  while (IS_SYMLINK "${format_style_file}")
-    if (NOT EXISTS "${format_style_file}")
-      _jcm_build_error_targets("clang-format;clang-format-check"
-        "The clang-format style file in project ${PROJECT_NAME}, '${original_style_file}', points "
-        "to a non-existent path: ${format_style_file}")
-      return()
+  # follow symlinks (mostly for Windows) - will also clean path & check for existence
+  jcm_follow_symlinks(PATHS "${format_style_file}" OUT_VAR target_format_style_file)
+  if (NOT target_format_style_file)
+    if (NOT format_style_file STREQUAL target_format_style_file)
+      set(supplementary_symlink_msg " (pointed to by symlink '${format_style_file}')")
     endif ()
 
-    cmake_path(GET format_style_file PARENT_PATH relative_symlink_base)
-    file(READ_SYMLINK "${format_style_file}" format_style_file)
-    if (NOT IS_ABSOLUTE "${format_style_file}")
-      set(format_style_file "${relative_symlink_base}/${format_style_file}")
-    endif ()
-    jcm_transform_list(NORMALIZE_PATH INPUT "${format_style_file}" OUT_VAR format_style_file)
-  endwhile ()
-
-  # Ensure style file exists
-  if (NOT EXISTS "${format_style_file}")
     _jcm_build_error_targets("clang-format;clang-format-check"
-      "The expected clang-format configuration file is not present for project ${PROJECT_NAME}: "
-      "${format_style_file}")
+      "The expected clang-format configuration file is not present for project ${PROJECT_NAME}"
+      "${supplementary_symlink_msg}: ${target_format_style_file}")
     return()
   endif ()
+
+  set(format_style_file "${target_format_style_file}")
 
   # Collect all sources from input targets
 
@@ -296,8 +283,8 @@ jcm_create_doxygen_target
       [README_MAIN_PAGE]
       [EXCLUDE_REGEX <regex>]
       [OUTPUT_DIRECTORY <dir>]
-      (SOURCE_TARGETS <target>... |
-       ADDITIONAL_PATHS <path>...)
+      <[SOURCE_TARGETS <target>...]
+       [ADDITIONAL_PATHS <path>...]>
     )
 
 Creates a target, "doxygen-docs", that generates documentation of the provided
