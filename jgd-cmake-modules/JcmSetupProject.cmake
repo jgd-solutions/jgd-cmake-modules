@@ -28,8 +28,8 @@ define_property(
   "The name of a library or executable component that the target represents.")
 
 macro(_JCM_WARN_SET variable value)
-  if (PROJECT_IS_TOP_LEVEL OR DEFINED CACHE{${variable})
-    if (DEFINED ${variable} AND NOT DEFINED CACHE{${variable}})
+  if (PROJECT_IS_TOP_LEVEL AND NOT DEFINED CACHE{${variable}})
+    if (DEFINED ${variable})
       message(
         AUTHOR_WARNING
         "The variable ${variable} was set for project ${PROJECT_NAME} prior to calling "
