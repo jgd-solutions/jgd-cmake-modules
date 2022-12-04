@@ -1,5 +1,5 @@
-Tutorial: Building with CMake
-=============================
+How to Build CMake Projects
+===========================
 
 `CMake <https://cmake.org/>`_ is a meta-buildsystem, meaning it generates buildsystem files from its
 standardized, cross-platform scripting language. With this comes additional features, like
@@ -70,8 +70,8 @@ native build-system files, will be specified using :code:`-G`.
   cmake -B <build-dir> -G Xcode
 
 CMake variable definitions can be specified on the command line with :code:`-D`, which will override
-or introduce CMake variables as CMake interprets the script files. Command-line definitions are used
-to control custom features of a project, or to change CMake's behaviour.
+or introduce CMake cache variables before CMake interprets the script files. Command-line
+definitions are used to control custom features of a project, or to change CMake's behaviour.
 
 .. code-block:: bash
 
@@ -91,20 +91,21 @@ All default build targets from :ref:`configuring <configuringcmake>` can be buil
 
   cmake --build <build-dir>
 
-For multi-configuration generators (Ninja Multi-Config, MSVC), those that correspond to
-buildsystems which support multiple build-types in a single build-directory:
-
-.. code-block:: bash
-
-  cmake --build <build-dir> --config <config>
-  # Ex. cmake --build build --config Release
-
 Specific targets can be individually built with:
 
 .. code-block:: bash
 
   cmake --build <build-dir> --target <target>
   # Ex. cmake --build build-release --target json-parser
+
+For multi-configuration generators (Ninja Multi-Config, MSVC), those that correspond to
+build-systems which support multiple build-types in a single build-directory, add the
+:code:`--config flag` to build commands:
+
+.. code-block:: bash
+
+  cmake --build <build-dir> --config <config>
+  # Ex. cmake --build build --config Release
 
 .. note::
 
@@ -121,7 +122,7 @@ default on Unix, it's `/usr/local`.
 
   cmake --install <build-dir>
 
-The installation prefix can easily be changed:
+The installation prefix can easily be changed with the :code:`--prefix` flag:
 
 .. code-block:: bash
 
@@ -129,6 +130,14 @@ The installation prefix can easily be changed:
   # Ex. cmake --install build-release --prefix install
   # Ex. cmake --install build-release --prefix /opt/my-project
 
+Like the build step, on multi-configuration generators (Ninja Multi-Config, MSVC), add the
+:code:`--config flag` to install commands. When unspecified, CMake will choose the first
+configuration your buildsystem supports, which may or may not be the configuration built above:
+
+.. code-block:: bash
+
+  cmake --install <build-dir> --config <config>
+  # Ex. cmake --install build --config Release
 
 Uninstalling
 ~~~~~~~~~~~~
