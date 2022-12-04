@@ -1,14 +1,13 @@
 name: JCM CI (MacOS)
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
   pull_request:
     branches:
       - main
-  workflow_dispatch:
-
 jobs:
   build-test-mac:
     runs-on: macos-12
