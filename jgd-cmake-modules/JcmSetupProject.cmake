@@ -28,14 +28,13 @@ define_property(
   "The name of a library or executable component that the target represents.")
 
 macro(_JCM_WARN_SET variable value)
-  if (PROJECT_IS_TOP_LEVEL AND NOT DEFINED CACHE{${variable}})
-    if (DEFINED ${variable})
-      message(
-        AUTHOR_WARNING
+  if (PROJECT_IS_TOP_LEVEL AND ("${ARGN}" MATCHES "FORCE" OR NOT DEFINED CACHE{${variable}}))
+    if (DEFINED ${variable} AND NOT DEFINED CACHE{${variable}})
+      message(AUTHOR_WARNING
         "The variable ${variable} was set for project ${PROJECT_NAME} prior to calling "
         "jcm_setup_project. This variable will by overridden to the default value of ${value} in "
-		    "the project setup. If you wish to override the default value, set ${variable} after "
-		    "calling jcm_setup_project or in the CMake cache, such as through the command-line.")
+		    "the project setup. If you wish to override the default value, set ${variable} in the "
+        "CMake cache, either with CMake-GUI or through the command-line flag '-D'.")
     endif ()
 
     set(${variable} "${value}" ${ARGN})
@@ -130,24 +129,21 @@ macro(JCM_SETUP_PROJECT)
 
   # guard against running as script or forgetting project() command
   if (NOT PROJECT_NAME)
-    message(
-      FATAL_ERROR
+    message(FATAL_ERROR
       "A project must be defined to setup a default project. Call CMake's"
       "project() command prior to using ${CMAKE_CURRENT_FUNCTION}.")
   endif ()
 
   # ensure this function is called in the list file that defined the project
   if (NOT CMAKE_CURRENT_LIST_FILE STREQUAL "${PROJECT_SOURCE_DIR}/CMakeLists.txt")
-    message(
-      FATAL_ERROR
+    message(FATAL_ERROR
       "jcm_setup_project must be called in the same CMakeLists.txt file that "
       "the project was defined in, with CMake's project() command.")
   endif ()
 
   # guard against in-source builds
   if (PROJECT_SOURCE_DIR STREQUAL PROJECT_BINARY_DIR)
-    message(
-      FATAL_ERROR
+    message(FATAL_ERROR
       "In-source builds not allowed. Please make and use a build directory.")
   endif ()
 
@@ -155,8 +151,7 @@ macro(JCM_SETUP_PROJECT)
   set(project_name_regex "^[a-z][a-z-]*[a-z]$")
   string(REGEX MATCH "${project_name_regex}" name_correct "${PROJECT_NAME}")
   if (NOT name_correct)
-    message(
-      FATAL_ERROR
+    message(FATAL_ERROR
       "The project ${PROJECT_NAME} does not meet the required regex "
       "'${project_name_regex}'. This should be the same name as the project's "
       "root directory, and is required because it influences things like "
@@ -167,8 +162,7 @@ macro(JCM_SETUP_PROJECT)
 
   # no project version specified
   if (NOT DEFINED PROJECT_VERSION)
-    message(
-      AUTHOR_WARNING
+    message(AUTHOR_WARNING
       "The project ${PROJECT_NAME} does not have a version defined. It's "
       "recommended to provide the VERSION argument to CMake's project() "
       "command, as it affects package installation and shared library "
@@ -204,8 +198,12 @@ macro(JCM_SETUP_PROJECT)
   # == Variables Setting Default Target Properties ==
 
   # basic
-  _jcm_warn_set(CMAKE_BUILD_TYPE "Release")
-  _jcm_warn_set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+  if(NOT CMAKE_BUILD_TYPE)
+    _jcm_warn_set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Single-config build type" FORCE)
+  endif()
+  if(NOT CMAKE_EXPORT_COMPILE_COMMANDS)
+    _jcm_warn_set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE BOOL "Control compilation DB gen." FORCE)
+  endif()
   _jcm_warn_set(CMAKE_OPTIMIZE_DEPENDENCIES ON)
   _jcm_warn_set(CMAKE_LINK_WHAT_YOU_USE ON)
   _jcm_warn_set(CMAKE_COLOR_DIAGNOSTICS ON)
@@ -279,8 +277,7 @@ macro(JCM_SETUP_PROJECT)
       _jcm_warn_set(CMAKE_INTERPROCEDURAL_OPTIMIZATION $<IF:$<CONFIG:DEBUG>,OFF,ON>)
     else ()
       _jcm_warn_set(CMAKE_INTERPROCEDURAL_OPTIMIZATION OFF)
-      message(
-        NOTICE
+      message(NOTICE
         "Interprocedural linker optimization is not supported: ${err_msg}\n"
         "Continuing without it.")
     endif ()
