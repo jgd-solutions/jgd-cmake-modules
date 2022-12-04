@@ -1,0 +1,31 @@
+name: JCM CI (Windows)
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-test-windows:
+    runs-on: windows-2022
+    strategy:
+      matrix:
+        generator: [ "Ninja", "Visual Studio 17 2022" ]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Install ninja-build
+        if: ${{ matrix.generator }} == "Ninja"
+        uses: seanmiddleditch/gha-setup-ninja@master
+        with:
+          version: 1.11.1
+      - name: Install Doxygen for tests
+        run: choco install doxygen.install || choco install doxygen.install # 2 attempts
+      - name: Configure tests target
+        run: cmake -G "${{ matrix.generator }}" --preset tests-ninja
+      - name: Run all automated tests
+        run: ctest --preset test-to-fail

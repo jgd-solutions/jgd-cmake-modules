@@ -1,0 +1,33 @@
+name: JCM CI (Ubuntu)
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-test-ubuntu:
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        generator: [ "Ninja", "Ninja Multi-Config", "Unix Makefiles" ]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Install ninja-build
+        if: ${{ matrix.generator }} == "Ninja"
+        uses: seanmiddleditch/gha-setup-ninja@master
+        with:
+          version: 1.11.1
+      - name: Install Doxygen for tests
+        run: |
+          sudo apt-get update
+          sudo apt-get install doxygen
+      - name: Configure tests target
+        run: cmake -G "${{ matrix.generator }}" --preset tests-ninja
+      - name: Run all automated tests
+        run: ctest --preset test-to-fail
