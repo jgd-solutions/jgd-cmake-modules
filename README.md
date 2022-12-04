@@ -2,6 +2,11 @@
 
 A set of CMake modules to easily and consistently develop proper CMake based projects conforming to the [Canonical Project Structure](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p1204r0.html#:~:text=The%20canonical%20structure%20is%20primarily,specific%20and%20well%2Ddefined%20function.).
 
+[![Build & Test (MacOS)](https://github.com/jgd-solutions/jgd-cmake-modules/actions/workflows/macos.yaml/badge.svg)](https://github.com/jgd-solutions/jgd-cmake-modules/actions/workflows/macos.yaml)
+[![Build & Test (Ubuntu)](https://github.com/jgd-solutions/jgd-cmake-modules/actions/workflows/ubuntu.yaml/badge.svg)](https://github.com/jgd-solutions/jgd-cmake-modules/actions/workflows/ubuntu.yaml)
+[![Build & Test (Windows)](https://github.com/jgd-solutions/jgd-cmake-modules/actions/workflows/windows.yaml/badge.svg)](https://github.com/jgd-solutions/jgd-cmake-modules/actions/workflows/windows.yaml)
+[![Deploy to GH Pages](https://github.com/jgd-solutions/jgd-cmake-modules/actions/workflows/pages.yaml/badge.svg)](https://github.com/jgd-solutions/jgd-cmake-modules/actions/workflows/pages.yaml)
+
 Checkout the full [documentation](https://jgd-solutions.github.io/jgd-cmake-modules/).
 
 ## Sample
