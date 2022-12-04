@@ -2,9 +2,11 @@ name: JCM CI (Ubuntu)
 
 on:
   push:
-    branch: main
+    branches:
+      - main
   pull_request:
-    branch: main
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
