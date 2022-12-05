@@ -9,6 +9,7 @@ endif ()
 
 include(JcmAllModules)
 jcm_setup_project()
+
 jcm_source_subdirectories(
   ADD_SUBDIRS
   WITH_TESTS_DIR
