@@ -1,0 +1,7 @@
+#pragma once
+
+namespace single {
+
+inline constexpr const char* version = "@libsingle_VERSION@";
+
+}

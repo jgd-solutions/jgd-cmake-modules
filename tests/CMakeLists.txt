@@ -105,6 +105,8 @@ _install_project("libsingle" DEPENDS libsingle-shared)
 _find_use_project("libsingle" OUT_TEST_NAME libsingle_find DEPENDS libsingle-install)
 _add_use_project("libsingle")
 
+set(licenses_dir "${test_install_dir}/share/doc/libsingle-0.0.0")
+_file_exists("libsingle" -license-exists "${licenses_dir}/LICENSE.md" DEPENDS libsingle-install)
 
 # == libcomponents ==
 
