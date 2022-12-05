@@ -33,23 +33,21 @@ Indices
 Sample
 ------
 
-.. literalinclude:: ../tests/libsingle/CMakeLists.txt
-   :language: cmake
-   :caption: CMakeLists.txt
-   :align: center
+   .. literalinclude:: ../tests/libsingle/CMakeLists.txt
+      :language: cmake
+      :caption: CMakeLists.txt
 
-.. literalinclude:: ../tests/libsingle/libsingle/CMakeLists.txt
-   :language: cmake
-   :caption: libsingle/CMakeLists.txt
+   .. literalinclude:: ../tests/libsingle/libsingle/CMakeLists.txt
+      :language: cmake
+      :caption: libsingle/CMakeLists.txt
 
-.. literalinclude:: ../tests/libsingle/tests/CMakeLists.txt
-   :language: cmake
-   :caption: tests/CMakeLists.txt
+   .. literalinclude:: ../tests/libsingle/tests/CMakeLists.txt
+      :language: cmake
+      :caption: tests/CMakeLists.txt
 
-.. literalinclude:: ../tests/libsingle/docs/CMakeLists.txt
-   :language: cmake
-   :caption: docs/CMakeLists.txt
-
+   .. literalinclude:: ../tests/libsingle/docs/CMakeLists.txt
+      :language: cmake
+      :caption: docs/CMakeLists.txt
 
 Examples
 --------
