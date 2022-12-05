@@ -3,7 +3,7 @@ project(
   jgd-cmake-modules
   VERSION 2.3.2
   DESCRIPTION "CMake library for standardized CMake projects for JGD"
-  HOMEPAGE_URL "https://gitlab.com/jgd-solutions/jgd-cmake-modules"
+  HOMEPAGE_URL "https://jgd-solutions.github.io/jgd-cmake-modules/"
   LANGUAGES NONE)
 
 set(CMAKE_INSTALL_LIBDIR "lib") # not used - set to calm GNUInstallDirs
