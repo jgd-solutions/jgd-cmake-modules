@@ -288,8 +288,8 @@ jcm_create_doxygen_target
     )
 
 Creates a target, "doxygen-docs", that generates documentation of the provided
-:cmake:variable:`TARGETS`'s header files and any :cmake:variable:`ADDITIONAL_PATHS` using Doxygen.
-All of the header files in all of the interface header sets of the targets are gathered for
+:cmake:variable:`SOURCE_TARGETS`'s header files and any :cmake:variable:`ADDITIONAL_PATHS` using
+Doxygen. All of the header files in all of the interface header sets of the targets are gathered for
 Doxygen, with the exception of those that match :cmake:variable:`EXCLUDE_REGEX`, if provided.
 
 Doxygen will strip include directories from these paths such that the displayed include commands
@@ -450,7 +450,7 @@ function(jcm_create_doxygen_target)
   # Target to generate Doxygen documentation
   set(DOXYGEN_STRIP_FROM_INC_PATH "${include_dirs}")
   set(DOXYGEN_OUTPUT_DIRECTORY "${ARGS_OUTPUT_DIRECTORY}")
-  doxygen_add_docs(doxygen-docs "${header_files}" ALL WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
+  doxygen_add_docs(doxygen-docs "${header_files}" WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
 endfunction()
 
 

@@ -8,6 +8,7 @@
  */
 
 #include <libsingle/export_macros.hpp>
+#include <string>
 
 namespace single {
 
@@ -21,7 +22,7 @@ class LIBSINGLE_EXPORT Factory;
  *
  * In detail, widgets are the best
  */
-class Widget {
+class LIBSINGLE_EXPORT Widget {
 private:
   int value{0};
 
@@ -29,7 +30,7 @@ private:
    * Widget constructor with specified value. Widgets must be created through a
    * Factory.
    */
-  explicit Widget(const int value);
+  explicit Widget(int value);
 
   friend Factory;  //!< Factory has special privilege
 
@@ -40,6 +41,11 @@ public:
    * Simply returns the internal Widget#value
    */
   [[nodiscard]] constexpr int get_value() const noexcept { return this->value; }
+
+  /*!
+   * Builds the production stamp associated with this Widget
+   */
+  [[nodiscard]] std::string get_stamp() const;
 };
 
 }  // namespace single

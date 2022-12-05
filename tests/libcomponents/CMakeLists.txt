@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.24)
 project(libcomponents VERSION 0.0.0 LANGUAGES CXX)
 
 # a very large project may want to omit expensive configuration of a component

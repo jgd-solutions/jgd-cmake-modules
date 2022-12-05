@@ -11,6 +11,9 @@ Checkout the full [documentation](https://jgd-solutions.github.io/jgd-cmake-modu
 
 ## Sample
 
+<!-- Markdown doesn't support including files, and GH won't render RST literalinclude directive -->
+<!-- This was rendered from tests/libsingle/CMakeLists.txt -->
+
 <p align="center">
   <img
     src="docs/data/top_level_sample.svg"
