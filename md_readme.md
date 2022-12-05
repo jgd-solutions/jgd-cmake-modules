@@ -11,13 +11,9 @@ Checkout the full [documentation](https://jgd-solutions.github.io/jgd-cmake-modu
 
 ## Sample
 
-<p align="center">
-  <img
-    src="docs/data/top_level_sample.svg"
-    alt="Sample code of top-level cmake with jgd-cmake-modules"
-    width="50%"
-  />
-</p>
+```cmake:tests/libsingle/CMakeLists.txt
+
+```
 
 Examples
 --------

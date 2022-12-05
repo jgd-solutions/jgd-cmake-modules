@@ -33,19 +33,22 @@ Indices
 Sample
 ------
 
-.. figure:: data/top_level_sample.svg
-   :width: 60%
+.. literalinclude:: ../tests/libsingle/CMakeLists.txt
+   :language: cmake
+   :caption: CMakeLists.txt
    :align: center
-   :alt: Sample code of top-level cmake with jgd-cmake-modules
 
-   CMakeLists.txt
+.. literalinclude:: ../tests/libsingle/libsingle/CMakeLists.txt
+   :language: cmake
+   :caption: libsingle/CMakeLists.txt
 
-.. figure:: data/subdirectory_sample.svg
-   :width: 60%
-   :align: center
-   :alt: Sample code of subdirectory cmake with jgd-cmake-modules
+.. literalinclude:: ../tests/libsingle/tests/CMakeLists.txt
+   :language: cmake
+   :caption: tests/CMakeLists.txt
 
-   libsample/CMakeLists.txt
+.. literalinclude:: ../tests/libsingle/docs/CMakeLists.txt
+   :language: cmake
+   :caption: docs/CMakeLists.txt
 
 
 Examples
