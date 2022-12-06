@@ -22,13 +22,15 @@ include(JcmCanonicalStructure)
 include(JcmStandardDirs)
 include(JcmSymlinks)
 
-# private function to build targets that emit error messages instead of their intended purpose
+# Private function to build targets that emit error messages instead of their intended purpose
+# Escape sequences (\n) in the message may cause havoc in the generated build files if not properly
+# escaped themeselves (\\n).
 function(_jcm_build_error_targets targets err_msg)
   string(CONCAT target_err_msgs "${err_msg}" "${ARGN}")
   string(REPLACE ";" "" target_err_msgs "${target_err_msgs}")
 
   set(exit_failure "${CMAKE_COMMAND}" -E false)
-  set(print_err "${CMAKE_COMMAND}" -E echo "${err_msg}")
+  set(print_err "${CMAKE_COMMAND}" -E echo "${target_err_msgs}")
 
   foreach (target IN LISTS targets)
     add_custom_target(
@@ -168,7 +170,7 @@ function(jcm_create_clang_format_targets)
     set(clang_format_cmd clang::format)
     if (NOT TARGET clang::format)
       _jcm_build_error_targets("clang-format;clang-format-check"
-        "The clang-format executable could not be found!\n"
+        "The clang-format executable could not be found! "
         "Maybe you forgot to call 'find_package(ClangFormat)'")
       return()
     endif ()
@@ -383,7 +385,7 @@ function(jcm_create_doxygen_target)
 
   if (NOT TARGET Doxygen::doxygen)
     _jcm_build_error_targets("doxygen-docs"
-      "The doxygen executable could not be found!\n"
+      "The doxygen executable could not be found! "
       "Maybe you forgot to call 'find_package(Doxygen)'")
     return()
   endif ()
@@ -560,7 +562,7 @@ function(jcm_create_sphinx_target)
     set(sphinx_cmd Sphinx::build)
     if (NOT TARGET Sphinx::build)
       _jcm_build_error_targets("sphinx-docs"
-        "The sphinx build executable could not be found!\n"
+        "The sphinx build executable could not be found! "
         "Maybe you forgot to call 'find_package(Sphinx)'")
       return()
     endif ()
