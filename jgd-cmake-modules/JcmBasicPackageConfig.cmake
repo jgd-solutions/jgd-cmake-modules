@@ -28,7 +28,8 @@ jcm_basic_package_config
 
   .. code-block:: cmake
 
-    jcm_basic_package_config(<project>)
+    jcm_basic_package_config(<project>
+      [NO_TARGETS])
 
 
 Provides all CMake commands that are required in a package config-files to create relocatable,
@@ -37,12 +38,13 @@ config-file packages. Call this macro at the *end* of your package config-file t
 
 This macro will:
 
-- include the associated targets file from the current list directory, if it exists
-- include the components's config files and targets files for the components requested by the
-  consumer's :cmake:command:`find_package` call, or all of those installed, if no components are
+- include the associated targets file from the current list directory, if
+  :cmake:variable:`NO_TARGETS` is omitted
+- include the config files for the components requested by the consumer's
+  :cmake:command:`find_package` call, or all of those installed, if no components are
   explicitly requested. Requested components of `${project}` are ignored.
-- if any CMake modules not corresponding to config-file packages (config files, targets files,
-  version files...) exist in :cmake:variable:`CMAKE_CURRENT_LIST_DIR`, the directory will be
+- if any CMake modules not corresponding to config-file packages (not config files, targets files,
+  or version files...) exist in :cmake:variable:`CMAKE_CURRENT_LIST_DIR`, the directory will be
   appended to :cmake:variable:`CMAKE_MODULE_PATH` so consumers have access to these additional
   modules.
 - call :cmake:command:`check_required_components`, as `KitWare recommends
@@ -92,8 +94,7 @@ Most package config files will take this form.
 macro(JCM_BASIC_PACKAGE_CONFIG project)
   jcm_parse_arguments(
     OPTIONS "NO_TARGETS"
-    ARGUMENTS "${ARGN}"
-  )
+    ARGUMENTS "${ARGN}")
 
   # Include main targets file
   if (NOT ARGS_NO_TARGETS)
@@ -115,8 +116,8 @@ macro(JCM_BASIC_PACKAGE_CONFIG project)
       jcm_package_config_file_name(
         PROJECT ${project}
         COMPONENT ${jcm_find_component}
-        OUT_VAR jcm_component_config
-      )
+        OUT_VAR jcm_component_config)
+
       if (EXISTS "${CMAKE_CURRENT_LIST_DIR}/${jcm_component_config}")
         include("${CMAKE_CURRENT_LIST_DIR}/${jcm_component_config}")
         list(APPEND jcm_config_package_files "${jcm_component_config}")
@@ -128,8 +129,7 @@ macro(JCM_BASIC_PACKAGE_CONFIG project)
       jcm_package_targets_file_name(
         PROJECT ${project}
         COMPONENT ${jcm_find_component}
-        OUT_VAR jcm_component_targets
-      )
+        OUT_VAR jcm_component_targets)
       list(APPEND jcm_config_package_files "${jcm_component_targets}")
     endforeach ()
 
@@ -141,8 +141,8 @@ macro(JCM_BASIC_PACKAGE_CONFIG project)
       GLOB
       jcm_components_configs
       LIST_DIRECTORIES false
-      "${CMAKE_CURRENT_LIST_DIR}/*-config.cmake"
-    )
+      "${CMAKE_CURRENT_LIST_DIR}/*-config.cmake")
+
     list(REMOVE_ITEM jcm_components_configs "${CMAKE_CURRENT_LIST_FILE}")
 
     foreach (jcm_component_config IN LISTS jcm_components_configs)
@@ -173,8 +173,7 @@ macro(JCM_BASIC_PACKAGE_CONFIG project)
       jcm_additional_modules
       LIST_DIRECTORIES false
       RELATIVE "${CMAKE_CURRENT_LIST_DIR}"
-      "*.cmake"
-    )
+      "*.cmake")
     list(REMOVE_ITEM jcm_additional_modules ${jcm_config_package_files})
     unset(jcm_config_package_files)
 
@@ -203,16 +202,16 @@ jcm_basic_component_config
 
     jcm_basic_component_config(<project> <component>
       [REQUIRED_COMPONENTS <component>...]
-    )
+      [NO_TARGETS])
 
 
-Provides all CMake commands that are required in a package config-files of individual project
-components. This macro is expected to be in a file
+Provides all CMake commands that are required in a package config-file of an individual project
+component (<project>-<component>-config.cmake).
 
 This macro will:
 
 - include the config-files of any dependent components
-- include the associated targets file from the current list directory
+- include the current component's associated targets file from the current list directory
 - set the component's associated :cmake:variable:`<project>_<component>_FOUND` variables that
   :cmake:command:`check_required_components` uses.
 
@@ -275,8 +274,7 @@ macro(JCM_BASIC_COMPONENT_CONFIG project component)
   jcm_parse_arguments(
     OPTIONS "NO_TARGETS"
     MULTI_VALUE_KEYWORDS "REQUIRED_COMPONENTS"
-    ARGUMENTS "${ARGN}"
-  )
+    ARGUMENTS "${ARGN}")
 
   if (NOT ${project}_${component}_FOUND)
     # store arguments in case included config file overwrites it
@@ -288,8 +286,8 @@ macro(JCM_BASIC_COMPONENT_CONFIG project component)
       jcm_package_config_file_name(
         PROJECT ${project}
         COMPONENT ${jcm_required_component}
-        OUT_VAR jcm_required_component_config_file
-      )
+        OUT_VAR jcm_required_component_config_file)
+
       include("${CMAKE_CURRENT_LIST_DIR}/${jcm_required_component_config_file}")
     endforeach ()
     unset(jcm_required_component_config_file)
