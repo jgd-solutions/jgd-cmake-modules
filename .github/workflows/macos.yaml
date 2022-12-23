@@ -34,6 +34,6 @@ jobs:
       - name: Format all test code
         run: >
           clang-format --style=file -i
-            $(find tests -name "*.hpp" -o -name "*.cpp" -o -name "*.h" -o -name "*.c")
+          $(find tests -name "*.hpp" -o -name "*.cpp" -o -name "*.h" -o -name "*.c")
       - name: Run all automated tests
         run: ctest --preset test-to-fail
