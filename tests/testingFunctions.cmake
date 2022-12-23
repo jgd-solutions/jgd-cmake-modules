@@ -183,6 +183,9 @@ function(_file_exists project_name test_suffix file_path)
     NAME ${test_name}
     COMMAND "${CMAKE_COMMAND}" -E rename "${file_path}" "${file_path}")
 
+  set_tests_properties(${test_name} PROPERTIES
+    FIXTURES_REQUIRED ${project_name}-install-fixture)
+
   if(DEFINED ARGS_DEPENDS)
     set_tests_properties(${test_name} PROPERTIES DEPENDS "${ARGS_DEPENDS}")
   endif()

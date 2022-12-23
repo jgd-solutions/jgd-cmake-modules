@@ -104,7 +104,7 @@ _find_use_project("libsingle")
 _add_use_project("libsingle")
 
 set(licenses_dir "${test_install_dir}/share/doc/libsingle-0.0.0")
-_file_exists("libsingle" -license-exists "${licenses_dir}/LICENSE.md" DEPENDS libsingle-install)
+_file_exists("libsingle" -license-exists "${licenses_dir}/LICENSE.md")
 
 
 # == libcomponents ==
@@ -162,8 +162,7 @@ _find_use_project("libheaders")
 _add_use_project("libheaders")
 
 _file_exists("libheaders" -license-exists
-  "${test_install_dir}/share/doc/libheaders-0.0.0/LICENSE.md"
-  DEPENDS libheaders-install)
+  "${test_install_dir}/share/doc/libheaders-0.0.0/LICENSE.md")
 
 
 # == libcstr ==
