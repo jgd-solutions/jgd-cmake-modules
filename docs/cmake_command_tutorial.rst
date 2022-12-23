@@ -158,6 +158,19 @@ configuration your buildsystem supports, which may or may not be the configurati
   # Ex. cmake --install build --config Release
 
 
+The installation can be limited to a specific subsection of a project's installation, called an
+*install component* with the :code:`--component` option. Install components are often used to
+separate installations by their release and development artifacts, or  by license variants. An
+install component may also not necessarily be installed by default (above), therefore requiring a
+component-specific explicit.
+
+.. code-block:: bash
+
+  cmake --install <build-dir> --component <component>
+  # Ex. cmake --install build --component libimage_Release
+  # Ex. cmake --install build --component libimage_free
+
+
 Uninstalling
 ~~~~~~~~~~~~
 
