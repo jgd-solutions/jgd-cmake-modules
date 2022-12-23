@@ -7,10 +7,10 @@ jcm_check_symlinks_cloned(
   OUT_BROKEN_SYMLINK broken_symlink
   OUT_ERROR_MESSAGE symlink_message)
 
-if (broken_symlink)
+if(broken_symlink)
   message(WARNING "Project ${PROJECT_NAME} will not create any clang-format tests due to the "
     "following error:\n" ${symlink_message})
-endif ()
+endif()
 
 
 # Install jgd-cmake-modules to test its installation and for following test projects to find
@@ -28,12 +28,12 @@ set_tests_properties(${PROJECT_NAME}-install PROPERTIES
 
 # == single-exec ==
 
-if (NOT broken_symlink)
+if(NOT broken_symlink)
   _build_and_ctest("single-exec"
     NAME_SUFFIX -format
     BUILD_TARGET clang-format-check
     DEPENDS ${PROJECT_NAME}-install)
-endif ()
+endif()
 
 _build_and_ctest("single-exec"
   FIXTURES_SETUP "single-exec-fixture"
@@ -46,12 +46,12 @@ _add_use_project("single-exec")
 
 # == many-exec ==
 
-if (NOT broken_symlink)
+if(NOT broken_symlink)
   _build_and_ctest("many-exec"
     NAME_SUFFIX -format
     BUILD_TARGET clang-format-check
     DEPENDS ${PROJECT_NAME}-install)
-endif ()
+endif()
 
 _build_and_ctest("many-exec"
   NAME_SUFFIX -omit-formatter
@@ -113,12 +113,12 @@ _file_exists("libsingle" -license-exists "${licenses_dir}/LICENSE.md" DEPENDS li
 
 # == libcomponents ==
 
-if (NOT broken_symlink)
+if(NOT broken_symlink)
   _build_and_ctest("libcomponents"
     NAME_SUFFIX -format
     BUILD_TARGET clang-format-check
     DEPENDS ${PROJECT_NAME}-install)
-endif ()
+endif()
 
 _build_and_ctest("libcomponents"
   NAME_SUFFIX -omit-extra
@@ -151,12 +151,12 @@ _add_use_project("libcomponents")
 
 # == libheaders ==
 
-if (NOT broken_symlink)
+if(NOT broken_symlink)
   _build_and_ctest("libheaders"
     NAME_SUFFIX -format
     BUILD_TARGET clang-format-check
     DEPENDS ${PROJECT_NAME}-install)
-endif ()
+endif()
 
 _build_and_ctest("libheaders"
   FIXTURES_SETUP "libheaders-fixture"
@@ -174,12 +174,12 @@ _file_exists("libheaders" -license-exists
 
 # == libcstr ==
 
-if (NOT broken_symlink)
+if(NOT broken_symlink)
   _build_and_ctest("libcstr"
     NAME_SUFFIX -format
     BUILD_TARGET clang-format-check
     DEPENDS ${PROJECT_NAME}-install)
-endif ()
+endif()
 
 _build_and_ctest("libcstr"
   FIXTURES_SETUP "libcstr-fixture"

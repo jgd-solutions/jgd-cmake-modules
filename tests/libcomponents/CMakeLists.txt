@@ -6,13 +6,13 @@ option(
   LIBCOMPONENTS_BUILD_EXTRA
   "Allows omitting configuring & building libcomponents::extra target" ON)
 
-if (LIBCOMPONENTS_BUILD_EXTRA)
+if(LIBCOMPONENTS_BUILD_EXTRA)
   set(libcomponents_components core extra)
   set(libcomponents_targets libcomponents::core libcomponents::extra)
-else ()
+else()
   set(libcomponents_components core)
   set(libcomponents_targets libcomponents::core)
-endif ()
+endif()
 
 
 find_package(jgd-cmake-modules CONFIG REQUIRED)

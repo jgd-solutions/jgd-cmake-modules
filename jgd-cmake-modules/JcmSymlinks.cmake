@@ -100,33 +100,33 @@ function(jcm_check_symlinks_available)
     " Alternatively, specific users can be granted the 'Create symbolic links' privilege.")
 
   macro(_set_out_args success_ error_message_)
-    if (DEFINED ARGS_OUT_VAR)
+    if(DEFINED ARGS_OUT_VAR)
       set(${ARGS_OUT_VAR} ${success_} PARENT_SCOPE)
-    endif ()
-    if (DEFINED ARGS_OUT_ERROR_MESSAGE)
+    endif()
+    if(DEFINED ARGS_OUT_ERROR_MESSAGE)
       set(${ARGS_OUT_ERROR_MESSAGE} "${error_message_}" PARENT_SCOPE)
-    endif ()
+    endif()
   endmacro()
 
   # Handle caching of result
-  if (DEFINED JCM_SYMLINKS_AVAILABLE AND              # previously set cache
+  if(DEFINED JCM_SYMLINKS_AVAILABLE AND              # previously set cache
   ((ARGS_SUCCESS_CACHE AND JCM_SYMLINKS_AVAILABLE) OR # should use cached success
   (ARGS_USE_CACHE AND NOT ARGS_SUCCESS_CACHE)))       # should use any cached result
-    if (JCM_SYMLINKS_AVAILABLE)
+    if(JCM_SYMLINKS_AVAILABLE)
       set(success TRUE)
       set(error_message)
-    endif ()
+    endif()
 
     _set_out_args(${success} "${error_message}")
     return()
-  endif ()
+  endif()
 
   macro(_store_availability value)
-    if (ARGS_USE_CACHE OR (ARGS_SUCCESS_CACHE AND ${value}))
+    if(ARGS_USE_CACHE OR (ARGS_SUCCESS_CACHE AND ${value}))
       set(JCM_SYMLINKS_AVAILABLE ${value} CACHE BOOL
         "Stores whether build environment has symlink capabilities" FORCE)
       mark_as_advanced(JCM_SYMLINKS_AVAILABLE)
-    endif ()
+    endif()
   endmacro()
 
   # Test for symlink availability
@@ -138,12 +138,12 @@ function(jcm_check_symlinks_available)
     RESULT test_symlink_result)
   file(REMOVE "${test_symlink}")
 
-  if (test_symlink_result EQUAL "0")
+  if(test_symlink_result EQUAL "0")
     set(success TRUE)
     set(error_message)
   else()
     set(success FALSE)
-  endif ()
+  endif()
 
   _store_availability(${success})
   _set_out_args(${success} "${error_message}")
@@ -228,14 +228,14 @@ function(jcm_check_symlinks_cloned)
   set(broken_symlink)
   set(error_message)
 
-  foreach (symlink_path IN LISTS ARGS_PATHS)
-    if (NOT EXISTS "${symlink_path}")
+  foreach(symlink_path IN LISTS ARGS_PATHS)
+    if(NOT EXISTS "${symlink_path}")
       message(FATAL_ERROR
         "The provided path to ${CMAKE_CURRENT_FUNCTION} does not exist. Cannot identify if this is "
         "a symbolic link or not")
-    endif ()
+    endif()
 
-    if (NOT IS_SYMLINK "${symlink_path}")
+    if(NOT IS_SYMLINK "${symlink_path}")
       set(broken_symlink "${symlink_path}")
       string(CONCAT error_message
         "The following path in project ${PROJECT_NAME} is expected to be a symbolic link but is "
@@ -244,17 +244,17 @@ function(jcm_check_symlinks_cloned)
         "`git config --global core.symlinks true`. Once enabled, Re-cloning the project will "
         "preserve symbolic links. Broken symbolic link: ${broken_symlink}")
       break()
-    endif ()
-  endforeach ()
+    endif()
+  endforeach()
 
   # Result variables
-  if (DEFINED ARGS_OUT_BROKEN_SYMLINK)
+  if(DEFINED ARGS_OUT_BROKEN_SYMLINK)
     set(${ARGS_OUT_BROKEN_SYMLINK} "${broken_symlink}" PARENT_SCOPE)
-  endif ()
+  endif()
 
-  if (DEFINED ARGS_OUT_ERROR_MESSAGE)
+  if(DEFINED ARGS_OUT_ERROR_MESSAGE)
     set(${ARGS_OUT_ERROR_MESSAGE} "${error_message}" PARENT_SCOPE)
-  endif ()
+  endif()
 endfunction()
 
 
@@ -351,39 +351,39 @@ function(jcm_follow_symlinks)
     file(READ_SYMLINK "${symlink_path}" symlink_path)
     cmake_path(CONVERT "${symlink_path}" TO_CMAKE_PATH_LIST symlink_path)
 
-    if (NOT IS_ABSOLUTE "${symlink_path}")
+    if(NOT IS_ABSOLUTE "${symlink_path}")
       set(symlink_path "${relative_symlink_base}/${symlink_path}")
-    endif ()
+    endif()
 
     cmake_path(SET symlink_path NORMALIZE "${symlink_path}")
     set(${out_var} "${symlink_path}" PARENT_SCOPE)
   endfunction()
 
-  foreach (input_path IN LISTS input_paths)
+  foreach(input_path IN LISTS input_paths)
     while (TRUE)
-      if (EXISTS "${input_path}")
-        if (IS_SYMLINK "${input_path}")
+      if(EXISTS "${input_path}")
+        if(IS_SYMLINK "${input_path}")
           _extract_symlink("${input_path}" input_path)
-        else ()
+        else()
           break()
-        endif ()
-      else ()
+        endif()
+      else()
         set(input_path "${input_path}-NOTFOUND")
         list(APPEND non_existent_indices ${current_index})
         break()
-      endif ()
+      endif()
     endwhile ()
 
     list(APPEND target_files "${input_path}")
     math(EXPR current_index "${current_index}+1")
-  endforeach ()
+  endforeach()
 
   # Result variables
-  if (DEFINED ARGS_OUT_VAR)
+  if(DEFINED ARGS_OUT_VAR)
     set(${ARGS_OUT_VAR} "${target_files}" PARENT_SCOPE)
-  endif ()
+  endif()
 
-  if (DEFINED ARGS_OUT_NON_EXISTENT_INDICES)
+  if(DEFINED ARGS_OUT_NON_EXISTENT_INDICES)
     set(${ARGS_OUT_NON_EXISTENT_INDICES} "${non_existent_indices}" PARENT_SCOPE)
-  endif ()
+  endif()
 endfunction()

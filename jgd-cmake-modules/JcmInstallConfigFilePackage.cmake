@@ -108,26 +108,26 @@ function(jcm_install_config_file_package)
     ARGUMENTS "${ARGN}")
 
   # Usage guards
-  if (NOT DEFINED ${PROJECT_NAME}_VERSION)
+  if(NOT DEFINED ${PROJECT_NAME}_VERSION)
     message(
       AUTHOR_WARNING
       "It's not recommended to install a config file package without a "
       "project version, as consumers won't be able to version their "
       "consumption and all versions will be installed into the same directory")
-  endif ()
+  endif()
 
-  foreach (target ${ARGS_TARGETS})
-    if (NOT TARGET ${target})
+  foreach(target ${ARGS_TARGETS})
+    if(NOT TARGET ${target})
       message(
         FATAL_ERROR
         "Cannot install target ${target}. The target does not exist!")
-    endif ()
-  endforeach ()
+    endif()
+  endforeach()
 
   set(install_cmake_files) # list of cmake files to install at end
 
   # Package version file
-  if (DEFINED ${PROJECT_NAME}_VERSION)
+  if(DEFINED ${PROJECT_NAME}_VERSION)
     jcm_package_version_file_name(OUT_VAR config_version_file)
     set(config_version_file "${JCM_CMAKE_DESTINATION}/${config_version_file}")
 
@@ -136,40 +136,40 @@ function(jcm_install_config_file_package)
       VERSION ${PROJECT_VERSION}
       COMPATIBILITY SameMajorVersion)
     list(APPEND install_cmake_files "${config_version_file}")
-  endif ()
+  endif()
 
   # == Install CMake Files==
 
   # Function to configure and find package config file for components or project
   function(_jcm_get_package_config_file provided_component out_var)
-    if (provided_component)
+    if(provided_component)
       set(comp_arg COMPONENT ${provided_component})
-    else ()
+    else()
       unset(comp_arg)
-    endif ()
+    endif()
     jcm_package_config_file_name(${comp_arg} OUT_VAR config_file_name)
 
-    if (DEFINED ARGS_CONFIGURE_PACKAGE_CONFIG_FILES)
+    if(DEFINED ARGS_CONFIGURE_PACKAGE_CONFIG_FILES)
       set(in_config_file "${config_file_name}${JCM_IN_FILE_EXTENSION}")
       string(PREPEND in_config_file "${JCM_PROJECT_CMAKE_DIR}/")
 
-      if (EXISTS "${in_config_file}")
+      if(EXISTS "${in_config_file}")
         jcm_configure_package_config_file(${comp_arg} OUT_FILE_VAR configured_out_file)
         set(${out_var} "${configured_out_file}" PARENT_SCOPE)
         return()
-      else ()
+      else()
         message(
           FATAL_ERROR "Cannot configure a package config file for ${comp_arg} of project "
           "${PROJECT_NAME}. Could not find file ${in_config_file}.")
-      endif ()
-    endif ()
+      endif()
+    endif()
 
     # search for package config-file
     set(unconfigured_config_file "${JCM_PROJECT_CMAKE_DIR}/${config_file_name}")
-    if (EXISTS "${unconfigured_config_file}")
+    if(EXISTS "${unconfigured_config_file}")
       set(${out_var} "${unconfigured_config_file}" PARENT_SCOPE)
       return()
-    endif ()
+    endif()
 
     message(
       FATAL_ERROR
@@ -179,26 +179,26 @@ function(jcm_install_config_file_package)
   endfunction()
 
   # Resolve components' package config files, append to cmake files to be installed
-  foreach (target ${ARGS_TARGETS})
+  foreach(target ${ARGS_TARGETS})
     get_target_property(component ${target} COMPONENT)
-    if (NOT component)
+    if(NOT component)
       continue()
-    endif ()
+    endif()
 
     _jcm_get_package_config_file(${component} component_config_file)
     list(APPEND install_cmake_files "${component_config_file}")
-  endforeach ()
+  endforeach()
 
   # Append project's main package config file to cmake files to be installed
   _jcm_get_package_config_file("" component_config_file)
   list(APPEND install_cmake_files "${component_config_file}")
 
   # Additional cmake modules for project
-  if (DEFINED ARGS_CMAKE_MODULES)
+  if(DEFINED ARGS_CMAKE_MODULES)
     jcm_expand_directories(PATHS "${ARGS_CMAKE_MODULES}" OUT_VAR module_files GLOB "*.cmake")
     list(REMOVE_ITEM module_files ${install_cmake_files}) # ignore config package files
 
-    if (module_files)
+    if(module_files)
       jcm_separate_list(
         INPUT "${module_files}"
         REGEX "${JCM_CMAKE_MODULE_REGEX}"
@@ -206,18 +206,18 @@ function(jcm_install_config_file_package)
         OUT_MATCHED correct_files
         OUT_MISMATCHED incorrect_files
       )
-      if (incorrect_files)
+      if(incorrect_files)
         message(
           AUTHOR_WARNING
           "The function ${CMAKE_CURRENT_FUNCTION} will not install the "
           "following CMake modules, as they don't meet the regex "
           "'${JCM_CMAKE_MODULE_REGEX}'. CMake modules: ${incorrect_files}")
-      endif ()
+      endif()
 
       # add only correctly named files to be installed
       list(APPEND install_cmake_files "${correct_files}")
-    endif ()
-  endif ()
+    endif()
+  endif()
 
   # Install all CMake files
   install(
@@ -227,29 +227,29 @@ function(jcm_install_config_file_package)
 
   # == Install targets via export sets ==
 
-  foreach (target ${ARGS_TARGETS})
+  foreach(target ${ARGS_TARGETS})
     unset(target_component)
     unset(comp_arg)
     get_target_property(target_component ${target} COMPONENT)
-    if (target_component)
+    if(target_component)
       set(comp_arg COMPONENT ${target_component})
-    endif ()
+    endif()
 
     get_target_property(aliased ${target} ALIASED_TARGET)
-    if (aliased)
+    if(aliased)
       set(target ${aliased})
-    endif ()
+    endif()
 
     jcm_package_targets_file_name(${comp_arg} OUT_VAR targets_file)
     cmake_path(GET targets_file STEM export_set_name)
 
     get_target_property(interface_header_sets ${target} INTERFACE_HEADER_SETS)
     set(file_set_args)
-    if (interface_header_sets)
-      foreach (interface_header_set ${interface_header_sets})
+    if(interface_header_sets)
+      foreach(interface_header_set ${interface_header_sets})
         set(file_set_args ${file_set_args} FILE_SET ${interface_header_set} DESTINATION "${JCM_INSTALL_INCLUDE_DIR}")
-      endforeach ()
-    endif ()
+      endforeach()
+    endif()
 
     install(
       TARGETS ${target}
@@ -270,38 +270,38 @@ function(jcm_install_config_file_package)
       NAMESPACE ${PROJECT_NAME}::
       DESTINATION "${JCM_INSTALL_CMAKE_DESTINATION}"
       COMPONENT ${PROJECT_NAME}_devel)
-  endforeach ()
+  endforeach()
 
   # == Install project licenses ==
 
   function(install_licenses license_glob dest_suffix)
     file(GLOB license_files LIST_DIRECTORIES false "${license_glob}")
-    if (NOT license_files)
+    if(NOT license_files)
       return()
-    endif ()
+    endif()
 
     jcm_follow_symlinks(PATHS "${license_files}" OUT_VAR followed_license_files)
 
-    foreach (target_file original_file IN ZIP_LISTS followed_license_files license_files)
+    foreach(target_file original_file IN ZIP_LISTS followed_license_files license_files)
       cmake_path(GET original_file FILENAME original_file_name)
 
-      if (target_file)
+      if(target_file)
         install(
           FILES "${target_file}"
           DESTINATION "${JCM_INSTALL_DOC_DIR}/${dest_suffix}"
           RENAME "${original_file_name}")
-      else ()
+      else()
         # only can be non-existent is if it was linked to, since glob was used
         string(REPLACE "-NOTFOUND" "" non_existent_file "${target_file}")
         message(WARNING "The license file in project ${PROJECT_NAME}, '${original_file}', points "
           "to a non-existent path: ${target_file}")
-      endif ()
-    endforeach ()
+      endif()
+    endforeach()
   endfunction()
 
-  if (ARGS_INSTALL_LICENSES)
+  if(ARGS_INSTALL_LICENSES)
     cmake_path(GET JCM_PROJECT_LICENSES_DIR FILENAME licenses_dir)
     install_licenses("${PROJECT_SOURCE_DIR}/LICENSE*" "")
     install_licenses("${JCM_PROJECT_LICENSES_DIR}/*" "${licenses_dir}")
-  endif ()
+  endif()
 endfunction()

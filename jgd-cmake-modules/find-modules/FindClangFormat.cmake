@@ -121,7 +121,7 @@ find_package_handle_standard_args(ClangFormat
   REQUIRED_VARS ClangFormat_EXECUTABLE
   VERSION_VAR ClangFormat_VERSION)
 
-if (ClangFormat_FOUND AND NOT TARGET clang::format)
+if(ClangFormat_FOUND AND NOT TARGET clang::format)
   add_executable(clang::format IMPORTED)
   set_target_properties(clang::format PROPERTIES IMPORTED_LOCATION "${ClangFormat_EXECUTABLE}")
 endif()

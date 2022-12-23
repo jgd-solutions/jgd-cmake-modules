@@ -51,15 +51,15 @@ include(FindPackageHandleStandardArgs)
 
 # use python interpreter path as a base of search
 find_package(Python COMPONENTS Interpreter)
-if (Python_Interpreter_FOUND)
+if(Python_Interpreter_FOUND)
   cmake_path(GET Python_EXECUTABLE PARENT_PATH _Python_interp_dir)
   set(_Sphinx_bin_hint "${_Python_interp_dir}")
   set(_Sphinx_scripts_hint "${_Python_interp_dir}/Scripts")
   unset(_Python_interp_dir)
-else ()
+else()
   unset(_Sphinx_bin_hint)
   unset(_Sphinx_scripts_hint)
-endif ()
+endif()
 
 find_program(
   Sphinx_EXECUTABLE
@@ -71,33 +71,33 @@ unset(_Sphinx_scripts_hint)
 mark_as_advanced(Sphinx_EXECUTABLE)
 
 # executable version
-if (Sphinx_EXECUTABLE)
+if(Sphinx_EXECUTABLE)
   execute_process(
     COMMAND "${Sphinx_EXECUTABLE}" --version
     OUTPUT_VARIABLE _Sphinx_version_stdout
     ERROR_VARIABLE _Sphinx_version_stderr
     OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-  if (_Sphinx_version_stderr)
+  if(_Sphinx_version_stderr)
     message(WARNING
       "Failed to determine version of sphinx build executable (${Sphinx_EXECUTABLE})! Error:\n"
       "${_Sphinx_version_stderr}")
-  elseif (NOT _Sphinx_version_stdout MATCHES "sphinx-build[23]? [0-9]+\\.[0-9]+\\.[0-9]+")
+  elseif(NOT _Sphinx_version_stdout MATCHES "sphinx-build[23]? [0-9]+\\.[0-9]+\\.[0-9]+")
     message(WARNING
       "Sphinx's version output is not recognized by this find module (${_Sphinx_version_stdout})!)")
-  else ()
+  else()
     # extract version from stdout
     string(REGEX REPLACE ".*sphinx-build[23]? " "" Sphinx_VERSION "${_Sphinx_version_stdout}")
     string(REPLACE "." ";" _Sphinx_version_components "${Sphinx_VERSION}")
     list(GET _Sphinx_version_components 0 Sphinx_VERSION_MAJOR)
     list(GET _Sphinx_version_components 1 Sphinx_VERSION_MINOR)
     list(GET _Sphinx_version_components 2 Sphinx_VERSION_PATCH)
-  endif ()
+  endif()
 
   unset(_Sphinx_version_components)
   unset(_Sphinx_version_stderr)
   unset(_Sphinx_version_stdout)
-endif ()
+endif()
 
 string(CONCAT _Sphinx_failure_message
   "Sphinx is not installed or a Python virtual environment may not have been activated.\n"
@@ -112,7 +112,7 @@ find_package_handle_standard_args(Sphinx
   )
 unset(_Sphinx_failure_message)
 
-if (Sphinx_FOUND AND NOT TARGET Sphinx::build)
+if(Sphinx_FOUND AND NOT TARGET Sphinx::build)
   add_executable(Sphinx::build IMPORTED)
   set_target_properties(Sphinx::build PROPERTIES IMPORTED_LOCATION "${Sphinx_EXECUTABLE}")
-endif ()
+endif()

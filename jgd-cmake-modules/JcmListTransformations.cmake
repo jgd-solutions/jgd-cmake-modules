@@ -85,29 +85,29 @@ function(jcm_separate_list)
     ARGUMENTS "${ARGN}")
 
   set(supported_transforms "FILENAME")
-  if (DEFINED ARGS_TRANSFORM AND NOT ARGS_TRANSFORM MATCHES "${supported_transforms}")
+  if(DEFINED ARGS_TRANSFORM AND NOT ARGS_TRANSFORM MATCHES "${supported_transforms}")
     message(FATAL_ERROR "The TRANSFORM of ${ARGS_TRANSFORM} is not supported. "
       "It must be one of ${supported_transforms}.")
-  endif ()
+  endif()
 
   # Split input into two lists
   set(matched_elements)
   set(mismatched_elements)
-  foreach (element ${ARGS_INPUT})
+  foreach(element ${ARGS_INPUT})
     # transform element to be matched
     set(transformed_element "${element}")
-    if (ARGS_TRANSFORM STREQUAL "FILENAME")
+    if(ARGS_TRANSFORM STREQUAL "FILENAME")
       cmake_path(GET element FILENAME transformed_element)
-    endif ()
+    endif()
 
     # compare element against regex
     string(REGEX MATCH "${ARGS_REGEX}" matched "${transformed_element}")
-    if (matched)
+    if(matched)
       list(APPEND matched_elements "${element}")
-    else ()
+    else()
       list(APPEND mismatched_elements "${element}")
-    endif ()
-  endforeach ()
+    endif()
+  endforeach()
 
   # Set out variables
   set(${ARGS_OUT_MATCHED} "${matched_elements}" PARENT_SCOPE)
@@ -201,27 +201,27 @@ function(jcm_transform_list)
   )
 
   # check for missing values on other variables, besides INPUT
-  if (ARGS_KEYWORDS_MISSING_VALUES)
+  if(ARGS_KEYWORDS_MISSING_VALUES)
     set(missing_required_keywords "${ARGS_KEYWORDS_MISSING_VAL}")
     list(FILTER missing_required_keywords EXCLUDE REGEX "INPUT")
-    if (missing_required_keywords)
+    if(missing_required_keywords)
       message(FATAL_ERROR "Keywords provided without any values: ${missing_required_keywords}")
-    endif ()
-  endif ()
+    endif()
+  endif()
 
   # usage guard
-  if (DEFINED ARGS_BASE AND NOT ARGS_ABSOLUTE_PATH)
+  if(DEFINED ARGS_BASE AND NOT ARGS_ABSOLUTE_PATH)
     message(FATAL_ERROR
       "'BASE' may only be provided to ${CMAKE_CURRENT_FUNCTION} with the 'ABSOLUTE_PATH' transformation")
-  endif ()
+  endif()
 
   # Set transformation code based on selected transformation argument
-  if (ARGS_ABSOLUTE_PATH)
-    if (NOT DEFINED ARGS_BASE)
+  if(ARGS_ABSOLUTE_PATH)
+    if(NOT DEFINED ARGS_BASE)
       set(absolute_base_path "${CMAKE_CURRENT_SOURCE_DIR}")
-    else ()
+    else()
       set(absolute_base_path "${ARGS_BASE}")
-    endif ()
+    endif()
 
     set(selected_transformation [=[
       if(IS_ABSOLUTE "${input}")
@@ -230,23 +230,23 @@ function(jcm_transform_list)
         set(transformed_result "${absolute_base_path}/${input}")
       endif()
     ]=])
-  elseif (ARGS_NORMALIZE_PATH)
+  elseif(ARGS_NORMALIZE_PATH)
     set(selected_transformation [=[
       cmake_path(SET transformed_result NORMALIZE "${input}")
     ]=])
-  elseif (ARGS_FILENAME)
+  elseif(ARGS_FILENAME)
     set(selected_transformation [=[
       cmake_path(GET input FILENAME transformed_result)
     ]=])
-  endif ()
+  endif()
 
   # Transform list
   set(transformed_results)
-  foreach (input IN LISTS ARGS_INPUT)
+  foreach(input IN LISTS ARGS_INPUT)
     set(transformed_result)
     cmake_language(EVAL CODE "${selected_transformation}")
     list(APPEND transformed_results "${transformed_result}")
-  endforeach ()
+  endforeach()
 
   set(${ARGS_OUT_VAR} "${transformed_results}" PARENT_SCOPE)
 endfunction()
@@ -330,32 +330,32 @@ function(jcm_regex_find_list)
     ARGUMENTS "${ARGN}"
   )
 
-  if (ARGS_MISMATCH)
+  if(ARGS_MISMATCH)
     set(mismatch_not NOT)
-  else ()
+  else()
     unset(mismatch_not)
-  endif ()
+  endif()
 
   set(found_idx -1)
   set(current_idx 0)
   set(found_element NOTFOUND)
 
-  foreach (input ${ARGS_INPUT})
-    if (${mismatch_not} input MATCHES "${ARGS_REGEX}")
+  foreach(input ${ARGS_INPUT})
+    if(${mismatch_not} input MATCHES "${ARGS_REGEX}")
       set(found_idx ${current_idx})
       list(GET ARGS_INPUT ${found_idx} found_element)
       break()
-    endif ()
+    endif()
 
     math(EXPR current_idx "${current_idx}+1")
-  endforeach ()
+  endforeach()
 
   # Result variables
-  if (DEFINED ARGS_OUT_IDX)
+  if(DEFINED ARGS_OUT_IDX)
     set(${ARGS_OUT_IDX} "${found_idx}" PARENT_SCOPE)
-  endif ()
+  endif()
 
-  if (DEFINED ARGS_OUT_VALUE)
+  if(DEFINED ARGS_OUT_VALUE)
     set(${ARGS_OUT_ELEMENT} "${found_element}" PARENT_SCOPE)
-  endif ()
+  endif()
 endfunction()

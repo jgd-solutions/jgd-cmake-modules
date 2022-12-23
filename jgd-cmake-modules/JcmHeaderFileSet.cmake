@@ -95,10 +95,10 @@ Examples
 function(jcm_header_file_sets scope)
   # Positional Usage Guards
   set(supported_scopes "INTERFACE|PUBLIC|PRIVATE")
-  if (NOT scope MATCHES "${supported_scopes}")
+  if(NOT scope MATCHES "${supported_scopes}")
     message(FATAL_ERROR
       "One of ${supported_scopes} must be provided as the scope to ${CMAKE_CURRENT_FUNCTION}")
-  endif ()
+  endif()
 
   # Parse named arguments
   jcm_parse_arguments(
@@ -108,11 +108,11 @@ function(jcm_header_file_sets scope)
     ARGUMENTS "${ARGN}")
 
   # Usage Guards
-  if (NOT TARGET ${ARGS_TARGET})
+  if(NOT TARGET ${ARGS_TARGET})
     message(FATAL_ERROR
       "${ARGS_TARGET} is not a target and must be created before calling"
       "${CMAKE_CURRENT_FUNCTION}")
-  endif ()
+  endif()
 
   # Transform headers to normalized absolute paths
   jcm_transform_list(ABSOLUTE_PATH INPUT "${ARGS_HEADERS}" OUT_VAR ARGS_HEADERS)
@@ -125,30 +125,30 @@ function(jcm_header_file_sets scope)
     OUT_VAR available_include_dirs
   )
 
-  foreach (header_path ${ARGS_HEADERS})
+  foreach(header_path ${ARGS_HEADERS})
     set(shortest_distance_from_include_dir 65000)
     unset(chosen_include_dir)
-    foreach (include_dir ${available_include_dirs})
-      if (NOT header_path MATCHES "^${include_dir}")
+    foreach(include_dir ${available_include_dirs})
+      if(NOT header_path MATCHES "^${include_dir}")
         continue()
-      endif ()
+      endif()
 
       string(REPLACE "${include_dir}" "" relative_to_include "${header_path}")
       string(LENGTH "${relative_to_include}" distance_from_include)
 
-      if (distance_from_include LESS shortest_distance_from_include_dir)
+      if(distance_from_include LESS shortest_distance_from_include_dir)
         set(shortest_distance_from_include_dir ${distance_from_include})
         set(chosen_include_dir "${include_dir}")
-      elseif (distance_from_include EQUAL shortest_distance_from_include_dir)
+      elseif(distance_from_include EQUAL shortest_distance_from_include_dir)
         message(AUTHOR_WARNING
           "Multiple canonical include directories refer to the same path: "
           "${include_dir} & ${chosen_include_dir}")
-      endif ()
-    endforeach ()
+      endif()
+    endforeach()
 
-    if (NOT DEFINED chosen_include_dir)
+    if(NOT DEFINED chosen_include_dir)
       message(FATAL_ERROR "Could not resolve the canonical include directory for ${header_path}")
-    endif ()
+    endif()
 
     # add the header to the header file set for its belonging include directory
     string(MD5 include_dir_hash "${chosen_include_dir}")
@@ -160,17 +160,17 @@ function(jcm_header_file_sets scope)
       TYPE HEADERS
       BASE_DIRS "${chosen_include_dir}"
       FILES "${header_path}")
-  endforeach ()
+  endforeach()
 
   # remove duplicated include directories added by multiple calls to target_sources with same base
-  foreach (property INCLUDE_DIRECTORIES INTERFACE_INCLUDE_DIRECTORIES)
+  foreach(property INCLUDE_DIRECTORIES INTERFACE_INCLUDE_DIRECTORIES)
     get_target_property(property_value ${ARGS_TARGET} ${property})
-    if (NOT property_value)
+    if(NOT property_value)
       continue()
-    endif ()
+    endif()
 
     list(REMOVE_DUPLICATES property_value)
     set_target_properties(${ARGS_TARGET} PROPERTIES ${property} "${property_value}")
-  endforeach ()
+  endforeach()
 
 endfunction()

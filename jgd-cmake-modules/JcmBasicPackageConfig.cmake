@@ -97,33 +97,33 @@ macro(JCM_BASIC_PACKAGE_CONFIG project)
     ARGUMENTS "${ARGN}")
 
   # Include main targets file
-  if (NOT ARGS_NO_TARGETS)
+  if(NOT ARGS_NO_TARGETS)
     jcm_package_targets_file_name(PROJECT ${project} OUT_VAR jcm_targets_file_name)
     list(APPEND jcm_config_package_files "${jcm_targets_file_name}")
     include("${CMAKE_CURRENT_LIST_DIR}/${jcm_targets_file_name}")
     unset(jcm_targets_file_name)
-  endif ()
+  endif()
   unset(ARGS_NO_TARGETS)
 
   # Include package components' config file
-  if (${project}_FIND_COMPONENTS)
+  if(${project}_FIND_COMPONENTS)
     # include specified components
-    foreach (jcm_find_component ${${project}_FIND_COMPONENTS})
-      if (jcm_find_component STREQUAL project)
+    foreach(jcm_find_component ${${project}_FIND_COMPONENTS})
+      if(jcm_find_component STREQUAL project)
         continue()
-      endif ()
+      endif()
 
       jcm_package_config_file_name(
         PROJECT ${project}
         COMPONENT ${jcm_find_component}
         OUT_VAR jcm_component_config)
 
-      if (EXISTS "${CMAKE_CURRENT_LIST_DIR}/${jcm_component_config}")
+      if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/${jcm_component_config}")
         include("${CMAKE_CURRENT_LIST_DIR}/${jcm_component_config}")
         list(APPEND jcm_config_package_files "${jcm_component_config}")
-      elseif (${project}_FIND_REQUIRED_${jcm_find_component})
+      elseif(${project}_FIND_REQUIRED_${jcm_find_component})
         set(${project}_${jcm_find_component}_FOUND FALSE)
-      endif ()
+      endif()
 
       # add component's targets file to collection of package modules
       jcm_package_targets_file_name(
@@ -131,11 +131,11 @@ macro(JCM_BASIC_PACKAGE_CONFIG project)
         COMPONENT ${jcm_find_component}
         OUT_VAR jcm_component_targets)
       list(APPEND jcm_config_package_files "${jcm_component_targets}")
-    endforeach ()
+    endforeach()
 
     unset(jcm_component_config)
     unset(jcm_component_targets)
-  else ()
+  else()
     # include all components' config files
     file(
       GLOB
@@ -145,9 +145,9 @@ macro(JCM_BASIC_PACKAGE_CONFIG project)
 
     list(REMOVE_ITEM jcm_components_configs "${CMAKE_CURRENT_LIST_FILE}")
 
-    foreach (jcm_component_config IN LISTS jcm_components_configs)
+    foreach(jcm_component_config IN LISTS jcm_components_configs)
       include("${jcm_component_config}")
-    endforeach ()
+    endforeach()
 
     # add component's config and targets file to collection of package modules
     set(jcm_components_targets "${jcm_components_configs}")
@@ -156,18 +156,18 @@ macro(JCM_BASIC_PACKAGE_CONFIG project)
 
     unset(jcm_components_configs)
     unset(jcm_components_targets)
-  endif ()
+  endif()
 
   # Add config package's version file to collection of package modules
   jcm_package_version_file_name(PROJECT ${project} OUT_VAR jcm_version_file)
-  if (EXISTS ${jcm_version_file})
+  if(EXISTS ${jcm_version_file})
     list(APPEND jcm_config_package_files ${jcm_version_file})
-  endif ()
+  endif()
   unset(jcm_version_file)
 
   # Append module path for any additional (non-package) CMake modules
   list(FIND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}" jcm_current_dir_idx)
-  if (jcm_current_dir_idx EQUAL -1)
+  if(jcm_current_dir_idx EQUAL -1)
     file(
       GLOB_RECURSE
       jcm_additional_modules
@@ -177,10 +177,10 @@ macro(JCM_BASIC_PACKAGE_CONFIG project)
     list(REMOVE_ITEM jcm_additional_modules ${jcm_config_package_files})
     unset(jcm_config_package_files)
 
-    if (jcm_additional_modules)
+    if(jcm_additional_modules)
       list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")
-    endif ()
-  endif ()
+    endif()
+  endif()
 
   unset(jcm_current_dir_idx)
   unset(jcm_additional_modules)
@@ -276,20 +276,20 @@ macro(JCM_BASIC_COMPONENT_CONFIG project component)
     MULTI_VALUE_KEYWORDS "REQUIRED_COMPONENTS"
     ARGUMENTS "${ARGN}")
 
-  if (NOT ${project}_${component}_FOUND)
+  if(NOT ${project}_${component}_FOUND)
     # store arguments in case included config file overwrites it
     set(${project}_${component}_stored_req_components ${ARGS_REQUIRED_COMPONENTS})
     set(${project}_${component}_stored_no_targets ${ARGS_NO_TARGETS})
 
     # include required components' config files
-    foreach (jcm_required_component ${ARGS_REQUIRED_COMPONENTS})
+    foreach(jcm_required_component ${ARGS_REQUIRED_COMPONENTS})
       jcm_package_config_file_name(
         PROJECT ${project}
         COMPONENT ${jcm_required_component}
         OUT_VAR jcm_required_component_config_file)
 
       include("${CMAKE_CURRENT_LIST_DIR}/${jcm_required_component_config_file}")
-    endforeach ()
+    endforeach()
     unset(jcm_required_component_config_file)
 
     # restore arguments
@@ -298,7 +298,7 @@ macro(JCM_BASIC_COMPONENT_CONFIG project component)
     unset(${project}_${component}_stored_req_components)
     unset(${project}_${component}_stored_no_targets)
 
-    if (NOT ARGS_NO_TARGETS)
+    if(NOT ARGS_NO_TARGETS)
       # include associated targets file
       jcm_package_targets_file_name(
         PROJECT ${project}
@@ -318,18 +318,18 @@ macro(JCM_BASIC_COMPONENT_CONFIG project component)
         COMPONENT ${component}
         OUT_EXPORT_NAME jcm_library_component_export_name)
 
-      if (TARGET ${project}::${jcm_executable_component_export_name} OR
+      if(TARGET ${project}::${jcm_executable_component_export_name} OR
         TARGET ${project}::${jcm_library_component_export_name})
         set(${project}_${component}_FOUND TRUE)
-      else ()
+      else()
         set(${project}_${component}_FOUND FALSE)
-      endif ()
+      endif()
 
-    else ()
+    else()
       set(${project}_${component}_FOUND TRUE)
-    endif ()
+    endif()
 
-  endif ()
+  endif()
 
   unset(ARGS_REQUIRED_COMPONENTS)
   unset(ARGS_NO_TARGETS)

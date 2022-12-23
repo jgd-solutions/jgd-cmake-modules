@@ -39,7 +39,7 @@ set(JCM_IN_FILE_REGEX "\\${JCM_IN_FILE_EXTENSION}$")
 
 # Create regexs of file names based on file extensions from JcmCanonicalStructure.
 # Variables of the same name, but with _EXTENSION replaced with _REGEX
-foreach (ext_var
+foreach(ext_var
     JCM_CXX_HEADER_EXTENSION JCM_CXX_SOURCE_EXTENSION JCM_CXX_TEST_SOURCE_EXTENSION JCM_CXX_MODULE_EXTENSION
     JCM_C_HEADER_EXTENSION JCM_C_SOURCE_EXTENSION JCM_C_TEST_SOURCE_EXTENSION
     JCM_CUDA_HEADER_EXTENSION JCM_CUDA_SOURCE_EXTENSION JCM_CUDA_TEST_SOURCE_EXTENSION
@@ -50,7 +50,7 @@ foreach (ext_var
   string(REPLACE "_EXTENSION" "_REGEX" regex_var "${ext_var}")
   string(REPLACE "." "\\." ${regex_var} "${${ext_var}}")
   set(${regex_var} "^[a-z][a-z0-9_]*${${regex_var}}$")
-endforeach ()
+endforeach()
 
 # Create cumulative regexes for all currently enabled languages
 get_property(_jcm_languages GLOBAL PROPERTY ENABLED_LANGUAGES)
@@ -105,31 +105,31 @@ macro(_JCM_JOINED_FILE_NAME)
     ARGUMENTS "${ARGN}")
 
   # project name
-  if (DEFINED ARGS_PROJECT)
+  if(DEFINED ARGS_PROJECT)
     set(project ${ARGS_PROJECT})
-  else ()
+  else()
     set(project ${PROJECT_NAME})
-  endif ()
+  endif()
 
-  if (DEFINED ARGS_DELIMITER)
+  if(DEFINED ARGS_DELIMITER)
     set(delim ${ARGS_DELIMITER})
-  else ()
+  else()
     set(delim "-")
-  endif ()
+  endif()
 
   # remove leading delimiters from suffix
   string(REGEX REPLACE "^${delim}" "" suffix "${ARGS_SUFFIX}")
 
   # compose file name
-  if (NOT ARGS_COMPONENT OR (ARGS_COMPONENT STREQUAL project))
+  if(NOT ARGS_COMPONENT OR (ARGS_COMPONENT STREQUAL project))
     set(${ARGS_OUT_VAR} "${project}${delim}${suffix}" PARENT_SCOPE)
-  else ()
+  else()
     set(
       ${ARGS_OUT_VAR}
       "${project}${delim}${ARGS_COMPONENT}${delim}${suffix}"
       PARENT_SCOPE
     )
-  endif ()
+  endif()
 
   unset(suffix)
   unset(delim)
@@ -139,28 +139,28 @@ endmacro()
 # handles parsing arguments for the following *_file_name commands, as they all accept similar
 # arguments.
 macro(_JCM_FILE_NAMING_ARGUMENTS with_component args)
-  if (${with_component})
+  if(${with_component})
     set(comp_keyword COMPONENT)
   else()
     unset(comp_keyword)
-  endif ()
+  endif()
 
   jcm_parse_arguments(
     ONE_VALUE_KEYWORDS "${comp_keyword};PROJECT;OUT_VAR"
     REQUIRES_ALL "OUT_VAR"
     ARGUMENTS "${args}"
   )
-  if (DEFINED ARGS_PROJECT)
+  if(DEFINED ARGS_PROJECT)
     set(proj_arg PROJECT ${ARGS_PROJECT})
   else()
     unset(proj_arg)
-  endif ()
+  endif()
 
-  if (DEFINED ARGS_COMPONENT)
+  if(DEFINED ARGS_COMPONENT)
     set(comp_arg COMPONENT ${ARGS_COMPONENT})
   else()
     unset(comp_arg)
-  endif ()
+  endif()
 endmacro()
 
 #[=======================================================================[.rst:

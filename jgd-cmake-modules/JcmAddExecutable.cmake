@@ -142,40 +142,40 @@ function(jcm_add_executable)
     ARGUMENTS "${ARGN}")
 
   # transform arguments to normalized absolute paths
-  foreach (source_type "" "_LIB")
+  foreach(source_type "" "_LIB")
     set(arg_name ARGS${source_type}_SOURCES)
-    if (DEFINED ${arg_name})
+    if(DEFINED ${arg_name})
       jcm_transform_list(ABSOLUTE_PATH INPUT "${${arg_name}}" OUT_VAR ${arg_name})
       jcm_transform_list(NORMALIZE_PATH INPUT "${${arg_name}}" OUT_VAR ${arg_name})
-    endif ()
-  endforeach ()
+    endif()
+  endforeach()
 
   set(all_input_files "${ARGS_SOURCES}" "${ARGS_LIB_SOURCES}")
 
   # Set executable component
-  if (DEFINED ARGS_COMPONENT AND NOT ARGS_COMPONENT STREQUAL PROJECT_NAME)
+  if(DEFINED ARGS_COMPONENT AND NOT ARGS_COMPONENT STREQUAL PROJECT_NAME)
     set(comp_arg COMPONENT ${ARGS_COMPONENT})
     set(comp_err_msg "n component (${ARGS_COMPONENT})")
     set(add_parent_arg ADD_PARENT)
-  else ()
+  else()
     unset(comp_arg)
     unset(comp_err_msg)
     unset(add_parent_arg)
-  endif ()
+  endif()
 
   # == Usage Guards ==
 
   # ensure executable is created in the appropriate canonical directory
   # defining executable components within root executable directory is allowed
-  if (NOT ARGS_WITHOUT_CANONICAL_PROJECT_CHECK)
+  if(NOT ARGS_WITHOUT_CANONICAL_PROJECT_CHECK)
     jcm_canonical_exec_subdir(${comp_arg} OUT_VAR canonical_dir)
-    if (NOT CMAKE_CURRENT_SOURCE_DIR STREQUAL canonical_dir)
+    if(NOT CMAKE_CURRENT_SOURCE_DIR STREQUAL canonical_dir)
       message(
         FATAL_ERROR
         "Creating a${comp_err_msg} executable for project ${PROJECT_NAME} must "
         "be done in the canonical directory ${canonical_dir}.")
-    endif ()
-  endif ()
+    endif()
+  endif()
 
   # verify source naming
   set(regex "${JCM_HEADER_REGEX}|${JCM_SOURCE_REGEX}")
@@ -185,13 +185,13 @@ function(jcm_add_executable)
     TRANSFORM "FILENAME"
     OUT_MISMATCHED incorrectly_named
   )
-  if (incorrectly_named)
+  if(incorrectly_named)
     message(
       FATAL_ERROR
       "Provided source files do not match the regex for executable sources, ${regex}: "
       "${incorrectly_named}."
     )
-  endif ()
+  endif()
 
   # verify file locations
   _jcm_verify_source_locations(${add_parent_arg} SOURCES "${all_input_files}")
@@ -199,21 +199,21 @@ function(jcm_add_executable)
   # == Create Executable ==
 
   # resolve executable names
-  if (DEFINED ARGS_NAME)
+  if(DEFINED ARGS_NAME)
     set(target_name ${ARGS_NAME})
     set(export_name ${ARGS_NAME})
     set(output_name ${ARGS_NAME})
-  else ()
+  else()
     jcm_executable_naming(
       ${comp_arg}
       OUT_TARGET target_name
       OUT_EXPORT_NAME export_name
       OUT_OUTPUT_NAME output_name)
-  endif ()
+  endif()
 
-  if (DEFINED ARGS_OUT_TARGET)
+  if(DEFINED ARGS_OUT_TARGET)
     set(${ARGS_OUT_TARGET} ${target_name} PARENT_SCOPE)
-  endif ()
+  endif()
 
   # create executable target
   add_executable(${target_name} "${ARGS_SOURCES}")
@@ -234,21 +234,21 @@ function(jcm_add_executable)
     TRANSFORM "FILENAME"
     OUT_MATCHED executable_header_files)
 
-  if (executable_header_files)
+  if(executable_header_files)
     jcm_header_file_sets(PRIVATE
       TARGET ${target_name}
       HEADERS "${executable_header_files}")
-  endif ()
+  endif()
 
   # custom component property
-  if (DEFINED comp_arg)
+  if(DEFINED comp_arg)
     set_target_properties(${target_name} PROPERTIES ${comp_arg})
-  endif ()
+  endif()
 
   # == Associated Library ==
 
   # create library of exec's sources, allowing unit testing of exec's sources
-  if (DEFINED ARGS_LIB_SOURCES)
+  if(DEFINED ARGS_LIB_SOURCES)
     jcm_separate_list(
       REGEX "${JCM_HEADER_REGEX}"
       INPUT "${ARGS_LIB_SOURCES}"
@@ -257,22 +257,22 @@ function(jcm_add_executable)
       OUT_MISMATCHED library_source_files)
 
     # create object or interface library
-    if (library_source_files)
+    if(library_source_files)
       set(include_dirs_scope PUBLIC)
       add_library(${target_name}-library OBJECT "${ARGS_LIB_SOURCES}")
       target_compile_options(${target_name}-library PRIVATE "${JCM_DEFAULT_COMPILE_OPTIONS}")
-    else ()
+    else()
       set(include_dirs_scope INTERFACE)
       add_library(${target_name}-library INTERFACE)
-    endif ()
+    endif()
 
-    if (library_header_files)
+    if(library_header_files)
       jcm_header_file_sets(${include_dirs_scope}
         TARGET ${target_name}-library
         HEADERS "${library_header_files}")
-    endif ()
+    endif()
 
     # link target to associated object files &/or usage requirements
     target_link_libraries(${target_name} PRIVATE ${target_name}-library)
-  endif ()
+  endif()
 endfunction()

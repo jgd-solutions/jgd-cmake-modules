@@ -47,11 +47,11 @@ set(JCM_CMAKE_DESTINATION "${PROJECT_BINARY_DIR}/cmake")
 set(JCM_HEADER_DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
 
 # Install Directories
-if (DEFINED PROJECT_VERSION)
+if(DEFINED PROJECT_VERSION)
   set(_jcm_name_version "${PROJECT_NAME}-${PROJECT_VERSION}")
-else ()
+else()
   set(_jcm_name_version "${PROJECT_NAME}")
-endif ()
+endif()
 
 # location to install cmake modules
 set(JCM_INSTALL_CMAKE_DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/cmake/${_jcm_name_version}")

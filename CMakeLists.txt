@@ -19,16 +19,16 @@ include(JcmConfigureFiles)
 
 jcm_setup_project(PREFIX_NAME "JCM")
 
-if (JCM_BUILD_TESTS)
+if(JCM_BUILD_TESTS)
   # Unnecessarily finding ClangFormat here to see what ClangFormat test projects will use
   find_package(ClangFormat)
   add_subdirectory("${JCM_PROJECT_TESTS_DIR}")
-endif ()
+endif()
 
-if (JCM_BUILD_DOCS)
+if(JCM_BUILD_DOCS)
   find_package(Sphinx REQUIRED)
   add_subdirectory("${JCM_PROJECT_DOCS_DIR}")
-endif ()
+endif()
 
 jcm_install_config_file_package(
   INSTALL_LICENSES

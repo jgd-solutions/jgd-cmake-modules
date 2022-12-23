@@ -54,7 +54,7 @@ function(_build_and_ctest project_name)
   if(ARGS_BUILD_TARGET)
     set(build_target_arg BUILD_TARGET ${ARGS_BUILD_TARGET})
     unset(run_inner_ctest)
-  else ()
+  else()
     unset(build_target_arg)
     set(run_inner_ctest RUN_INNER_CTEST)
   endif()
@@ -122,14 +122,14 @@ function(_find_use_project project_name)
     MULTI_VALUE_KEYWORDS "COMPONENTS" "DEPENDS"
     ARGUMENTS "${ARGN}")
 
-  if (ARGS_COMPONENTS)
+  if(ARGS_COMPONENTS)
     set(specified_components "${ARGS_COMPONENTS}")
     string(REPLACE ";" "-" test_name_suffix "${specified_components}")
     set(test_name_suffix "-${test_name_suffix}")
-  else ()
+  else()
     unset(specified_components)
     unset(test_name_suffix)
-  endif ()
+  endif()
 
   set(test_name "${project_name}-find-use${test_name_suffix}")
 
@@ -146,13 +146,13 @@ function(_find_use_project project_name)
     RESOURCE_LOCK "test-project-consumption"
     FIXTURES_REQUIRED ${project_name}-install-fixture)
 
-  if (DEFINED ARGS_OUT_TEST_NAME)
+  if(DEFINED ARGS_OUT_TEST_NAME)
     set(${ARGS_OUT_TEST_NAME} ${test_name} PARENT_SCOPE)
-  endif ()
+  endif()
 
-  if (DEFINED ARGS_DEPENDS)
+  if(DEFINED ARGS_DEPENDS)
     set_tests_properties(${test_name} PROPERTIES DEPENDS "${ARGS_DEPENDS}")
-  endif ()
+  endif()
 endfunction()
 
 
@@ -170,9 +170,9 @@ function(_add_use_project project_name)
 
   set_tests_properties(${test_name} PROPERTIES RESOURCE_LOCK "test-project-consumption")
 
-  if (DEFINED ARGS_DEPENDS)
+  if(DEFINED ARGS_DEPENDS)
     set_tests_properties(${test_name} PROPERTIES DEPENDS "${ARGS_DEPENDS}")
-  endif ()
+  endif()
 endfunction()
 
 function(_file_exists project_name test_suffix file_path)
@@ -183,7 +183,7 @@ function(_file_exists project_name test_suffix file_path)
     NAME ${test_name}
     COMMAND "${CMAKE_COMMAND}" -E rename "${file_path}" "${file_path}")
 
-  if (DEFINED ARGS_DEPENDS)
+  if(DEFINED ARGS_DEPENDS)
     set_tests_properties(${test_name} PROPERTIES DEPENDS "${ARGS_DEPENDS}")
-  endif ()
+  endif()
 endfunction()

@@ -158,34 +158,34 @@ macro(JCM_PARSE_ARGUMENTS)
   # == Argument Validation of jcm_parse_arguments ==
 
   # no missing values or unnecessary keywords when arguments were provided
-  if (INS_KEYWORDS_MISSING_VALUES AND DEFINED INS_ARGUMENTS)
+  if(INS_KEYWORDS_MISSING_VALUES AND DEFINED INS_ARGUMENTS)
     message(FATAL_ERROR "Keywords provided to jcm_parse_arguments without any "
       "values: ${INS_KEYWORDS_MISSING_VALUES}")
-  endif ()
-  if (INS_UNPARSED_ARGUMENTS)
+  endif()
+  if(INS_UNPARSED_ARGUMENTS)
     message(WARNING "Unparsed arguments provided to jcm_parse_arguments: "
       "${INS_UNPARSED_ARGUMENTS}")
-  endif ()
+  endif()
 
   # ensure required keywords are a subset of the function's parsed keywords
   set(parsed_keywords ${INS_OPTIONS} ${INS_ONE_VALUE_KEYWORDS} ${INS_MULTI_VALUE_KEYWORDS})
 
-  foreach (req_keyword IN LISTS INS_REQUIRES_ALL INS_REQUIRES_ANY)
+  foreach(req_keyword IN LISTS INS_REQUIRES_ALL INS_REQUIRES_ANY)
     list(FIND parsed_keywords ${req_keyword} idx)
-    if (idx EQUAL -1)
+    if(idx EQUAL -1)
       message(
         FATAL_ERROR
         "The required keyword ${req_keyword} is not in the list of function "
         "keywords ${parsed_keywords}. This keyword cannot be required if it "
         "is not parsed by the function.")
-    endif ()
-  endforeach ()
+    endif()
+  endforeach()
 
   unset(parsed_keywords)
 
-  if (NOT DEFINED INS_PREFIX)
+  if(NOT DEFINED INS_PREFIX)
     set(INS_PREFIX "ARGS")
-  endif ()
+  endif()
 
   # == Parse and Validate Caller's Arguments ==
 
@@ -194,63 +194,63 @@ macro(JCM_PARSE_ARGUMENTS)
     "${INS_MULTI_VALUE_KEYWORDS}" "${INS_ARGUMENTS}")
 
   # validate keywords that must all be present
-  foreach (keyword ${INS_REQUIRES_ALL})
-    if (NOT DEFINED ${INS_PREFIX}_${keyword})
+  foreach(keyword ${INS_REQUIRES_ALL})
+    if(NOT DEFINED ${INS_PREFIX}_${keyword})
       message(FATAL_ERROR "${keyword} was not provided or may be missing its value(s).")
-    endif ()
-  endforeach ()
+    endif()
+  endforeach()
 
   # validate keywords that must have one present
-  if (INS_REQUIRES_ANY)
+  if(INS_REQUIRES_ANY)
     set(at_least_one_defined FALSE)
-    foreach (keyword IN LISTS INS_REQUIRES_ANY)
-      if (DEFINED ${INS_PREFIX}_${keyword})
+    foreach(keyword IN LISTS INS_REQUIRES_ANY)
+      if(DEFINED ${INS_PREFIX}_${keyword})
         set(at_least_one_defined TRUE)
         break()
-      endif ()
-    endforeach ()
+      endif()
+    endforeach()
 
-    if (NOT at_least_one_defined)
+    if(NOT at_least_one_defined)
       message(
         FATAL_ERROR
         "None of the following keywords were provided or may be missing their values: ${INS_REQUIRES_ANY}")
-    endif ()
+    endif()
     unset(at_least_one_defined)
-  endif ()
+  endif()
 
 
   # validate keywords that are mutually exclusive
   unset(first_keyword)
   unset(second_keyword)
 
-  foreach (keyword IN LISTS INS_MUTUALLY_EXCLUSIVE)
+  foreach(keyword IN LISTS INS_MUTUALLY_EXCLUSIVE)
     list(FIND INS_ARGUMENTS ${keyword} idx)
-    if (NOT idx EQUAL -1)
-      if (DEFINED first_keyword)
+    if(NOT idx EQUAL -1)
+      if(DEFINED first_keyword)
         set(second_keyword ${keyword})
         break()
-      else ()
+      else()
         set(first_keyword ${keyword})
-      endif ()
-    endif ()
-  endforeach ()
+      endif()
+    endif()
+  endforeach()
 
-  if (DEFINED second_keyword)
+  if(DEFINED second_keyword)
     message(FATAL_ERROR "The keywords ${first_keyword} and ${second_keyword} were both defined but are part of the "
       "mutually exclusive list of function arguments: ${INS_MUTUALLY_EXCLUSIVE}")
-  endif ()
+  endif()
 
   unset(idx)
   unset(second_keyword)
   unset(first_keyword)
 
   # validate caller's argument format
-  if (NOT INS_WITHOUT_MISSING_VALUES_CHECK AND ${INS_PREFIX}_KEYWORDS_MISSING_VALUES)
+  if(NOT INS_WITHOUT_MISSING_VALUES_CHECK AND ${INS_PREFIX}_KEYWORDS_MISSING_VALUES)
     message(FATAL_ERROR "Keywords provided without any values: "
       "${${INS_PREFIX}_KEYWORDS_MISSING_VALUES}")
-  endif ()
+  endif()
 
-  if (NOT INS_WITHOUT_UNPARSED_CHECK AND ${INS_PREFIX}_UNPARSED_ARGUMENTS)
+  if(NOT INS_WITHOUT_UNPARSED_CHECK AND ${INS_PREFIX}_UNPARSED_ARGUMENTS)
     message(WARNING "Unparsed arguments provided: ${${INS_PREFIX}_UNPARSED_ARGUMENTS} ")
-  endif ()
+  endif()
 endmacro()

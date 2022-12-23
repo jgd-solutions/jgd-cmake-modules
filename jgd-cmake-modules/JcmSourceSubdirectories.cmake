@@ -36,34 +36,34 @@ macro(_JCM_CHECK_ADD_SUBDIR out_added_subdirs)
   )
 
   function(on_fatal_message msg)
-    if (ARGS_FATAL)
+    if(ARGS_FATAL)
       message(FATAL_ERROR "${msg}")
-    endif ()
+    endif()
   endfunction()
 
-  if (NOT IS_DIRECTORY "${ARGS_SUBDIR}")
+  if(NOT IS_DIRECTORY "${ARGS_SUBDIR}")
     on_fatal_message(
       "${CMAKE_CURRENT_FUNCTION} could not add subdirectory '${ARGS_SUBDIR}' for project\
        '${PROJECT_NAME}'. The directory does not exist."
     )
-  elseif (NOT EXISTS "${ARGS_SUBDIR}/CMakeLists.txt")
+  elseif(NOT EXISTS "${ARGS_SUBDIR}/CMakeLists.txt")
     on_fatal_message(
       "${CMAKE_CURRENT_FUNCTION} could not add subdirectory ${ARGS_SUBDIR} for project\
        ${PROJECT_NAME}. The directory does not contain a CMakeLists.txt file."
     )
-  elseif (CMAKE_CURRENT_SOURCE_DIR STREQUAL ARGS_SUBDIR)
+  elseif(CMAKE_CURRENT_SOURCE_DIR STREQUAL ARGS_SUBDIR)
     on_fatal_message(
       "${CMAKE_CURRENT_SOURCE_DIR} tries to add itself as a subdirectory."
     )
-  else ()
+  else()
     # directory and file exist, deal with subdirectory
     list(APPEND ${out_added_subdirs} "${ARGS_SUBDIR}")
-    if (ARGS_ADD_SUBDIRS)
+    if(ARGS_ADD_SUBDIRS)
       message(VERBOSE "${CMAKE_CURRENT_FUNCTION}: Adding directory '${ARGS_SUBDIR}' to project\
                        '${PROJECT_NAME}'")
       add_subdirectory("${ARGS_SUBDIR}")
-    endif ()
-  endif ()
+    endif()
+  endif()
 endmacro()
 
 
@@ -170,11 +170,11 @@ function(jcm_source_subdirectories)
   set(subdirs_added)
   list(REMOVE_ITEM ARGS_LIB_COMPONENTS "${PROJECT_NAME}")
 
-  if (ARGS_ADD_SUBDIRS)
+  if(ARGS_ADD_SUBDIRS)
     set(add_subdirs_arg ADD_SUBDIRS)
-  else ()
+  else()
     unset(add_subdirs_arg)
-  endif ()
+  endif()
 
   # Add Subdirs
 
@@ -183,52 +183,52 @@ function(jcm_source_subdirectories)
   _jcm_check_add_subdir(subdirs_added ${add_subdirs_arg} SUBDIR "${lib_subdir}")
 
   # library component subdirectories
-  if (DEFINED ARGS_LIB_COMPONENTS)
+  if(DEFINED ARGS_LIB_COMPONENTS)
     # add all library components' subdirectories
-    foreach (component ${ARGS_LIB_COMPONENTS})
+    foreach(component ${ARGS_LIB_COMPONENTS})
       jcm_canonical_lib_subdir(COMPONENT ${component} OUT_VAR subdir_path)
 
       set(JCM_CURRENT_COMPONENT ${component})
       _jcm_check_add_subdir(subdirs_added FATAL ${add_subdirs_arg} SUBDIR "${subdir_path}")
       unset(JCM_CURRENT_COMPONENT)
-    endforeach ()
-  endif ()
+    endforeach()
+  endif()
 
   # add single executable subdirectory, if it exists
   jcm_canonical_exec_subdir(OUT_VAR exec_subdir)
   _jcm_check_add_subdir(subdirs_added ${add_subdirs_arg} SUBDIR "${exec_subdir}")
 
   # executable component subdirectories
-  if (DEFINED ARGS_EXEC_COMPONENTS)
+  if(DEFINED ARGS_EXEC_COMPONENTS)
     # add all executable components' subdirectories
-    foreach (component ${ARGS_EXEC_COMPONENTS})
+    foreach(component ${ARGS_EXEC_COMPONENTS})
       jcm_canonical_exec_subdir(COMPONENT ${component} OUT_VAR subdir_path)
 
       set(JCM_CURRENT_COMPONENT ${component})
       _jcm_check_add_subdir(subdirs_added FATAL ${add_subdirs_arg} SUBDIR "${subdir_path}")
       unset(JCM_CURRENT_COMPONENT)
-    endforeach ()
-  endif ()
+    endforeach()
+  endif()
 
   # Ensure at least one subdirectory was added
-  if (NOT subdirs_added)
+  if(NOT subdirs_added)
     message(
       FATAL_ERROR
       "${CMAKE_CURRENT_FUNCTION} could not add any subdirectories for "
       "project ${PROJECT_NAME}. The canonical subdirectories do not exist")
-  endif ()
+  endif()
 
   # Add supplementary source subdirectories
-  if (ARGS_WITH_TESTS_DIR AND ${JCM_PROJECT_PREFIX_NAME}_BUILD_TESTS)
+  if(ARGS_WITH_TESTS_DIR AND ${JCM_PROJECT_PREFIX_NAME}_BUILD_TESTS)
     _jcm_check_add_subdir(subdirs_added FATAL ${add_subdirs_arg} SUBDIR "${JCM_PROJECT_TESTS_DIR}")
-  endif ()
+  endif()
 
-  if (ARGS_WITH_DOCS_DIR AND ${JCM_PROJECT_PREFIX_NAME}_BUILD_DOCS)
+  if(ARGS_WITH_DOCS_DIR AND ${JCM_PROJECT_PREFIX_NAME}_BUILD_DOCS)
     _jcm_check_add_subdir(subdirs_added FATAL ${add_subdirs_arg} SUBDIR "${JCM_PROJECT_DOCS_DIR}")
-  endif ()
+  endif()
 
   # Set result variable
-  if (DEFINED ARGS_OUT_VAR)
+  if(DEFINED ARGS_OUT_VAR)
     set(${ARGS_OUT_VAR} "${subdirs_added}" PARENT_SCOPE)
-  endif ()
+  endif()
 endfunction()

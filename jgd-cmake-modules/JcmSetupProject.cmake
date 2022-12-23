@@ -28,14 +28,14 @@ define_property(
   "The name of a library or executable component that the target represents.")
 
 macro(_JCM_WARN_SET variable value)
-  if (PROJECT_IS_TOP_LEVEL AND ("${ARGN}" MATCHES "FORCE" OR NOT DEFINED CACHE{${variable}}))
-    if (DEFINED ${variable} AND NOT DEFINED CACHE{${variable}})
+  if(PROJECT_IS_TOP_LEVEL AND ("${ARGN}" MATCHES "FORCE" OR NOT DEFINED CACHE{${variable}}))
+    if(DEFINED ${variable} AND NOT DEFINED CACHE{${variable}})
       message(AUTHOR_WARNING
         "The variable ${variable} was set for project ${PROJECT_NAME} prior to calling "
         "jcm_setup_project. This variable will by overridden to the default value of ${value} in "
 		    "the project setup. If you wish to override the default value, set ${variable} in the "
         "CMake cache, either with CMake-GUI or through the command-line flag '-D'.")
-    endif ()
+    endif()
 
     set(${variable} "${value}" ${ARGN})
   endif()
@@ -128,59 +128,59 @@ macro(JCM_SETUP_PROJECT)
   # == Usage Guards ==
 
   # guard against running as script or forgetting project() command
-  if (NOT PROJECT_NAME)
+  if(NOT PROJECT_NAME)
     message(FATAL_ERROR
       "A project must be defined to setup a default project. Call CMake's"
       "project() command prior to using ${CMAKE_CURRENT_FUNCTION}.")
-  endif ()
+  endif()
 
   # ensure this function is called in the list file that defined the project
-  if (NOT CMAKE_CURRENT_LIST_FILE STREQUAL "${PROJECT_SOURCE_DIR}/CMakeLists.txt")
+  if(NOT CMAKE_CURRENT_LIST_FILE STREQUAL "${PROJECT_SOURCE_DIR}/CMakeLists.txt")
     message(FATAL_ERROR
       "jcm_setup_project must be called in the same CMakeLists.txt file that "
       "the project was defined in, with CMake's project() command.")
-  endif ()
+  endif()
 
   # guard against in-source builds
-  if (PROJECT_SOURCE_DIR STREQUAL PROJECT_BINARY_DIR)
+  if(PROJECT_SOURCE_DIR STREQUAL PROJECT_BINARY_DIR)
     message(FATAL_ERROR
       "In-source builds not allowed. Please make and use a build directory.")
-  endif ()
+  endif()
 
   # malformed project name
   set(project_name_regex "^[a-z][a-z-]*[a-z]$")
   string(REGEX MATCH "${project_name_regex}" name_correct "${PROJECT_NAME}")
-  if (NOT name_correct)
+  if(NOT name_correct)
     message(FATAL_ERROR
       "The project ${PROJECT_NAME} does not meet the required regex "
       "'${project_name_regex}'. This should be the same name as the project's "
       "root directory, and is required because it influences things like "
       "target names and artifact output names.")
-  endif ()
+  endif()
   unset(name_correct)
   unset(project_name_regex)
 
   # no project version specified
-  if (NOT DEFINED PROJECT_VERSION)
+  if(NOT DEFINED PROJECT_VERSION)
     message(AUTHOR_WARNING
       "The project ${PROJECT_NAME} does not have a version defined. It's "
       "recommended to provide the VERSION argument to CMake's project() "
       "command, as it affects package installation and shared library "
       "versioning")
-  endif ()
+  endif()
 
   # == Function Arguments Project Configuration  ==
 
   jcm_parse_arguments(ONE_VALUE_KEYWORDS "PREFIX_NAME" ARGUMENTS "${ARGN}")
 
   # project prefix name
-  if (DEFINED ARGS_PREFIX_NAME)
+  if(DEFINED ARGS_PREFIX_NAME)
     set(JCM_PROJECT_PREFIX_NAME ${ARGS_PREFIX_NAME})
-  else ()
+  else()
     string(TOUPPER ${PROJECT_NAME} prefix_temp)
     string(REPLACE "-" "_" JCM_PROJECT_PREFIX_NAME ${prefix_temp})
     unset(prefix_temp)
-  endif ()
+  endif()
 
   # == Invariable Project Options ==
 
@@ -211,9 +211,9 @@ macro(JCM_SETUP_PROJECT)
 
   # add project's cmake modules to path
   list(FIND CMAKE_MODULE_PATH "${JCM_PROJECT_CMAKE_DIR}" cmake_dir_idx)
-  if (cmake_dir_idx EQUAL -1 AND EXISTS "${JCM_PROJECT_CMAKE_DIR}")
+  if(cmake_dir_idx EQUAL -1 AND EXISTS "${JCM_PROJECT_CMAKE_DIR}")
     list(APPEND CMAKE_MODULE_PATH "${JCM_PROJECT_CMAKE_DIR}")
-  endif ()
+  endif()
   unset(cmake_dir_idx)
 
   # build artifact destinations
@@ -223,37 +223,37 @@ macro(JCM_SETUP_PROJECT)
 
   # language standard requirements
   get_property(languages GLOBAL PROPERTY ENABLED_LANGUAGES)
-  foreach (lang ${languages})
-    if (lang STREQUAL "CXX")
+  foreach(lang ${languages})
+    if(lang STREQUAL "CXX")
       _jcm_warn_set(CMAKE_CXX_STANDARD 20)
-    elseif (lang STREQUAL "C")
+    elseif(lang STREQUAL "C")
       _jcm_warn_set(CMAKE_C_STANDARD 17)
-    elseif (lang STREQUAL "CUDA")
+    elseif(lang STREQUAL "CUDA")
       _jcm_warn_set(CMAKE_CUDA_STANDARD 20)
-    elseif (lang STREQUAL "OBJC")
+    elseif(lang STREQUAL "OBJC")
       _jcm_warn_set(CMAKE_OBJC_STANDARD 11)
-    elseif (lang STREQUAL "OBJCXX")
+    elseif(lang STREQUAL "OBJCXX")
       _jcm_warn_set(CMAKE_OBJCXX_STANDARD 20)
-    elseif (lang STREQUAL "HIP")
+    elseif(lang STREQUAL "HIP")
       _jcm_warn_set(CMAKE_HIP_STANDARD 20)
-    endif ()
+    endif()
     _jcm_warn_set(CMAKE_${lang}_STANDARD_REQUIRED ON)
     _jcm_warn_set(CMAKE_${lang}_EXTENSIONS OFF)
-  endforeach ()
+  endforeach()
 
   # export visibility for shared & module libraries
   _jcm_warn_set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
-  foreach (lang ${languages})
+  foreach(lang ${languages})
     _jcm_warn_set(CMAKE_${lang}_VISIBILITY_PRESET hidden)
-  endforeach ()
+  endforeach()
 
   # default transitive runtime search path (RPATH) for shared libraries
-  if ((NOT languages STREQUAL "NONE") AND (NOT CMAKE_SYSTEM_NAME STREQUAL "Windows"))
-    if (CMAKE_SYSTEM_NAME STREQUAL "Apple")
+  if((NOT languages STREQUAL "NONE") AND (NOT CMAKE_SYSTEM_NAME STREQUAL "Windows"))
+    if(CMAKE_SYSTEM_NAME STREQUAL "Apple")
       set(rpath_base @loader_path)
-    else ()
+    else()
       set(rpath_base $ORIGIN)
-    endif ()
+    endif()
     file(RELATIVE_PATH rel_path
       "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}"
       "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}")
@@ -262,45 +262,45 @@ macro(JCM_SETUP_PROJECT)
 
     unset(rel_path)
     unset(rpath_base)
-  endif ()
+  endif()
 
   # CMake default sets CMAKE_MACOSX_RPATH, so only warn about setting if it's been set to OFF
-  if (NOT CMAKE_MACOSX_RPATH)
+  if(NOT CMAKE_MACOSX_RPATH)
     _jcm_warn_set(CMAKE_MACOSX_RPATH ON)
   endif()
 
   # interprocedural/link-time optimization
 
-  if ((NOT languages STREQUAL "NONE") AND (CMAKE_BUILD_TYPE MATCHES "Release|RelWithDepInfo"))
+  if((NOT languages STREQUAL "NONE") AND (CMAKE_BUILD_TYPE MATCHES "Release|RelWithDepInfo"))
     check_ipo_supported(RESULT ipo_supported OUTPUT err_msg)
-    if (ipo_supported)
+    if(ipo_supported)
       _jcm_warn_set(CMAKE_INTERPROCEDURAL_OPTIMIZATION $<IF:$<CONFIG:DEBUG>,OFF,ON>)
-    else ()
+    else()
       _jcm_warn_set(CMAKE_INTERPROCEDURAL_OPTIMIZATION OFF)
       message(NOTICE
         "Interprocedural linker optimization is not supported: ${err_msg}\n"
         "Continuing without it.")
-    endif ()
+    endif()
     unset(ipo_supported)
     unset(err_msg)
-  endif ()
+  endif()
 
   unset(languages)
 
   # == Variables Controlling CMake ==
 
   # keep object file paths within Windows' path length limit
-  if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+  if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     _jcm_warn_set(CMAKE_OBJECT_PATH_MAX 260)
     message(STATUS "Windows: setting CMAKE_OBJECT_PATH_MAX to ${CMAKE_OBJECT_PATH_MAX}")
-  endif ()
+  endif()
 
   # default install prefix to Filesystem Hierarchy Standard's "add-on" path
-  if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT AND NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
+  if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT AND NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
     # can follow opt/ with provider, once registered with LANANA
     _jcm_warn_set(
       CMAKE_INSTALL_PREFIX "/opt/${PROJECT_NAME}" CACHE PATH "Base installation location. " FORCE)
-  endif ()
+  endif()
 
   # enable testing by default so invoking ctest always succeeds
   enable_testing()

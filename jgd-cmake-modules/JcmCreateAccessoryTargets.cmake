@@ -32,13 +32,13 @@ function(_jcm_build_error_targets targets err_msg)
   set(exit_failure "${CMAKE_COMMAND}" -E false)
   set(print_err "${CMAKE_COMMAND}" -E echo "${target_err_msgs}")
 
-  foreach (target IN LISTS targets)
+  foreach(target IN LISTS targets)
     add_custom_target(
       ${target}
       COMMAND "${print_err}"
       COMMAND "${exit_failure}"
     )
-  endforeach ()
+  endforeach()
 endfunction()
 
 #[=======================================================================[.rst:
@@ -153,71 +153,71 @@ function(jcm_create_clang_format_targets)
     ARGUMENTS "${ARGN}"
   )
 
-  if (NOT PROJECT_IS_TOP_LEVEL AND NOT ARGS_WITHOUT_TOP_LEVEL_CHECK)
+  if(NOT PROJECT_IS_TOP_LEVEL AND NOT ARGS_WITHOUT_TOP_LEVEL_CHECK)
     return()
-  endif ()
+  endif()
 
   # Default arguments
-  if (ARGS_STYLE_FILE)
+  if(ARGS_STYLE_FILE)
     set(format_style_file "${ARGS_STYLE_FILE}")
-  else ()
+  else()
     set(format_style_file "${PROJECT_SOURCE_DIR}/.clang-format")
-  endif ()
+  endif()
 
-  if (DEFINED ARGS_COMMAND)
+  if(DEFINED ARGS_COMMAND)
     set(clang_format_cmd "${ARGS_COMMAND}")
-  else ()
+  else()
     set(clang_format_cmd clang::format)
-    if (NOT TARGET clang::format)
+    if(NOT TARGET clang::format)
       _jcm_build_error_targets("clang-format;clang-format-check"
         "The clang-format executable could not be found! "
         "Maybe you forgot to call 'find_package(ClangFormat)'")
       return()
-    endif ()
-  endif ()
+    endif()
+  endif()
 
   # Warn about targets already being created to prevent less expressive warning later
   set(target_existed FALSE)
-  foreach (target clang-format clang-format-check)
-    if (TARGET ${target})
+  foreach(target clang-format clang-format-check)
+    if(TARGET ${target})
       message(WARNING "The target '${target}' already exists. ${CMAKE_CURRENT_FUNCTION} will not "
         "create this target")
       set(target_existed TRUE)
-    endif ()
-  endforeach ()
+    endif()
+  endforeach()
 
-  if (target_existed)
+  if(target_existed)
     return()
-  endif ()
+  endif()
 
   # follow symlinks (mostly for Windows) - will also clean path & check for existence
   jcm_follow_symlinks(PATHS "${format_style_file}" OUT_VAR target_format_style_file)
-  if (NOT target_format_style_file)
-    if (NOT format_style_file STREQUAL target_format_style_file)
+  if(NOT target_format_style_file)
+    if(NOT format_style_file STREQUAL target_format_style_file)
       set(supplementary_symlink_msg " (pointed to by symlink '${format_style_file}')")
-    endif ()
+    endif()
 
     _jcm_build_error_targets("clang-format;clang-format-check"
       "The expected clang-format configuration file is not present for project ${PROJECT_NAME}"
       "${supplementary_symlink_msg}: ${target_format_style_file}")
     return()
-  endif ()
+  endif()
 
   set(format_style_file "${target_format_style_file}")
 
   # Collect all sources from input targets
 
   set(files_to_format)
-  foreach (target ${ARGS_SOURCE_TARGETS})
+  foreach(target ${ARGS_SOURCE_TARGETS})
     get_target_property(source_dir ${target} SOURCE_DIR)
     get_target_property(interface_sources ${target} INTERFACE_SOURCES)
     get_target_property(sources ${target} SOURCES)
 
-    foreach (sources_variable interface_sources sources)
+    foreach(sources_variable interface_sources sources)
       set(sources_variable "${${sources_variable}}")
-      if (NOT sources_variable)
+      if(NOT sources_variable)
         continue()
-      endif ()
+      endif()
 
       jcm_transform_list(ABSOLUTE_PATH
         BASE "${source_dir}"
@@ -228,40 +228,40 @@ function(jcm_create_clang_format_targets)
         OUT_VAR absolute_source_paths)
 
       list(APPEND files_to_format "${absolute_source_paths}")
-    endforeach ()
-  endforeach ()
+    endforeach()
+  endforeach()
 
   list(REMOVE_DUPLICATES files_to_format)
 
   # Filter out unwanted source files
-  if (DEFINED ARGS_EXCLUDE_REGEX AND files_to_format)
+  if(DEFINED ARGS_EXCLUDE_REGEX AND files_to_format)
     list(FILTER files_to_format EXCLUDE REGEX "${ARGS_EXCLUDE_REGEX}")
-    if (NOT files_to_format)
+    if(NOT files_to_format)
       message(
         AUTHOR_WARNING
         "All of the sources for targets ${ARGS_SOURCE_TARGETS} were excluded by the EXCLUDE_REGEX: "
         "${ARGS_EXCLUDE_REGEX}")
-    endif ()
-  endif ()
+    endif()
+  endif()
 
   # Add additional files
-  if (DEFINED ARGS_ADDITIONAL_PATHS)
+  if(DEFINED ARGS_ADDITIONAL_PATHS)
     jcm_expand_directories(PATHS "${ARGS_ADDITIONAL_PATHS}" GLOB "*" OUT_VAR globbed_files)
     jcm_transform_list(NORMALIZE_PATH INPUT "${globbed_files}" OUT_VAR globbed_files)
     list(APPEND files_to_format "${globbed_files}")
-  endif ()
+  endif()
 
   # Create targets to run clang-format
 
-  if (NOT files_to_format)
+  if(NOT files_to_format)
     message(AUTHOR_WARNING
       "No source files in project ${PROJECT_NAME} will be provided to clang-format.")
-  endif ()
+  endif()
 
   set(verbose_flag)
-  if (NOT ARGS_QUIET)
+  if(NOT ARGS_QUIET)
     set(verbose_flag ";--verbose")
-  endif ()
+  endif()
 
   set(base_cmd "${clang_format_cmd}" -style=file:\"${format_style_file}\" ${verbose_flag})
   add_custom_target(
@@ -372,54 +372,54 @@ function(jcm_create_doxygen_target)
     REQUIRES_ANY "SOURCE_TARGETS;ADDITIONAL_PATHS"
     ARGUMENTS "${ARGN}")
 
-  if (NOT ${JCM_PROJECT_PREFIX_NAME}_BUILD_DOCS)
+  if(NOT ${JCM_PROJECT_PREFIX_NAME}_BUILD_DOCS)
     return()
-  endif ()
+  endif()
 
   # Usage Guards
-  if (NOT CMAKE_CURRENT_SOURCE_DIR STREQUAL JCM_PROJECT_DOCS_DIR)
+  if(NOT CMAKE_CURRENT_SOURCE_DIR STREQUAL JCM_PROJECT_DOCS_DIR)
     message(AUTHOR_WARNING
       "${CMAKE_CURRENT_FUNCTION} should be invoked in ${JCM_PROJECT_DOCS_DIR}/CMakeLists.txt")
-  endif ()
+  endif()
 
 
-  if (NOT TARGET Doxygen::doxygen)
+  if(NOT TARGET Doxygen::doxygen)
     _jcm_build_error_targets("doxygen-docs"
       "The doxygen executable could not be found! "
       "Maybe you forgot to call 'find_package(Doxygen)'")
     return()
-  endif ()
+  endif()
 
   # Default Arguments
-  if (NOT DEFINED ARGS_OUTPUT_DIRECTORY)
+  if(NOT DEFINED ARGS_OUTPUT_DIRECTORY)
     set(ARGS_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/doxygen")
-  endif ()
+  endif()
 
   # Extract all include directories from targets
   set(include_dirs)
   set(doxygen_input_files)
-  foreach (target ${ARGS_SOURCE_TARGETS})
+  foreach(target ${ARGS_SOURCE_TARGETS})
     get_target_property(interface_include_dirs ${target} INTERFACE_INCLUDE_DIRECTORIES)
     string(REGEX REPLACE "\\$<[A-Z_]*:|>" "" interface_include_dirs "${interface_include_dirs}")
     list(APPEND include_dirs ${interface_include_dirs})
 
     get_target_property(interface_header_sets ${target} INTERFACE_HEADER_SETS)
-    foreach (header_set_name IN LISTS interface_header_sets)
+    foreach(header_set_name IN LISTS interface_header_sets)
       get_target_property(files_in_header_set ${target} HEADER_SET_${header_set_name})
       list(APPEND doxygen_input_files ${files_in_header_set})
-    endforeach ()
-  endforeach ()
+    endforeach()
+  endforeach()
 
   list(REMOVE_DUPLICATES include_dirs)
   list(REMOVE_DUPLICATES doxygen_input_files)
 
   # Apply exclude regex
-  if (DEFINED ARGS_EXCLUDE_REGEX)
+  if(DEFINED ARGS_EXCLUDE_REGEX)
     list(FILTER doxygen_input_files EXCLUDE REGEX "${ARGS_EXCLUDE_REGEX}")
-  endif ()
+  endif()
 
   # Append any additional paths to Doxygen's input
-  if (ARGS_ADDITIONAL_PATHS)
+  if(ARGS_ADDITIONAL_PATHS)
     jcm_transform_list(
       ABSOLUTE_PATH
       INPUT "${ARGS_ADDITIONAL_PATHS}"
@@ -431,23 +431,23 @@ function(jcm_create_doxygen_target)
       OUT_VAR ARGS_ADDITIONAL_PATHS)
 
     list(APPEND doxygen_input_files "${ARGS_ADDITIONAL_PATHS}")
-  endif ()
+  endif()
 
   # Check for valuable input files
-  if (NOT doxygen_input_files)
+  if(NOT doxygen_input_files)
     message(AUTHOR_WARNING "No header files or additional paths will be provided to Doxygen.")
-  endif ()
+  endif()
 
   # Set README.md as main page
-  if (ARGS_README_MAIN_PAGE)
+  if(ARGS_README_MAIN_PAGE)
     set(readme "${PROJECT_SOURCE_DIR}/README.md")
-    if (NOT EXISTS "${readme}")
+    if(NOT EXISTS "${readme}")
       message(WARNING "The README_MAIN_PAGE option was specified but the "
         "README file doesn't exist: ${readme}")
-    endif ()
+    endif()
 
     set(DOXYGEN_USE_MDFILE_AS_MAINPAGE "${readme}")
-  endif ()
+  endif()
 
   # Target to generate Doxygen documentation
   set(DOXYGEN_STRIP_FROM_INC_PATH "${include_dirs}")
@@ -545,62 +545,62 @@ function(jcm_create_sphinx_target)
     ONE_VALUE_KEYWORDS "COMMAND" "SOURCE_DIRECTORY" "BUILD_DIRECTORY"
     ARGUMENTS "${ARGN}")
 
-  if (NOT ${JCM_PROJECT_PREFIX_NAME}_BUILD_DOCS)
+  if(NOT ${JCM_PROJECT_PREFIX_NAME}_BUILD_DOCS)
     return()
-  endif ()
+  endif()
 
   # Usage Guards
-  if (NOT CMAKE_CURRENT_SOURCE_DIR STREQUAL JCM_PROJECT_DOCS_DIR)
+  if(NOT CMAKE_CURRENT_SOURCE_DIR STREQUAL JCM_PROJECT_DOCS_DIR)
     message(AUTHOR_WARNING
       "${CMAKE_CURRENT_FUNCTION} should be invoked in ${JCM_PROJECT_DOCS_DIR}/CMakeLists.txt")
-  endif ()
+  endif()
 
   # Default Arguments
-  if (DEFINED ARGS_COMMAND)
+  if(DEFINED ARGS_COMMAND)
     set(sphinx_cmd "${ARGS_COMMAND}")
-  else ()
+  else()
     set(sphinx_cmd Sphinx::build)
-    if (NOT TARGET Sphinx::build)
+    if(NOT TARGET Sphinx::build)
       _jcm_build_error_targets("sphinx-docs"
         "The sphinx build executable could not be found! "
         "Maybe you forgot to call 'find_package(Sphinx)'")
       return()
-    endif ()
-  endif ()
+    endif()
+  endif()
 
-  if (NOT DEFINED ARGS_SOURCE_DIRECTORY)
+  if(NOT DEFINED ARGS_SOURCE_DIRECTORY)
     set(sphinx_source_dir "${CMAKE_CURRENT_SOURCE_DIR}")
-  elseif (ABSOLUTE "${ARGS_SOURCE_DIRECTORY}")
+  elseif(ABSOLUTE "${ARGS_SOURCE_DIRECTORY}")
     set(sphinx_source_dir "${ARGS_SOURCE_DIRECTORY}")
-  else ()
+  else()
     set(sphinx_source_dir "${CMAKE_CURRENT_SOURCE_DIR}/${ARGS_SOURCE_DIRECTORY}")
-  endif ()
+  endif()
 
-  if (NOT DEFINED ARGS_BUILD_DIRECTORY)
+  if(NOT DEFINED ARGS_BUILD_DIRECTORY)
     set(sphinx_build_dir "${CMAKE_CURRENT_BINARY_DIR}/sphinx")
-  elseif (ABSOLUTE "${ARGS_BUILD_DIRECTORY}")
+  elseif(ABSOLUTE "${ARGS_BUILD_DIRECTORY}")
     set(sphinx_build_dir "${ARGS_BUILD_DIRECTORY}")
-  else ()
+  else()
     set(sphinx_build_dir "${CMAKE_CURRENT_BINARY_DIR}/${ARGS_BUILD_DIRECTORY}")
-  endif ()
+  endif()
 
-  if (ARGS_CONFIGURE_CONF_PY)
+  if(ARGS_CONFIGURE_CONF_PY)
     configure_file("${sphinx_source_dir}/conf.py.in" "conf.py")
     set(sphinx_config_dir "${CMAKE_CURRENT_BINARY_DIR}")
-  else ()
+  else()
     set(sphinx_config_dir "${sphinx_source_dir}")
-  endif ()
+  endif()
 
-  if (NOT ARGS_BUILDER)
+  if(NOT ARGS_BUILDER)
     set(ARGS_BUILDER "html")
-  endif ()
+  endif()
 
   # Verify locations
 
-  if (NOT EXISTS "${sphinx_source_dir}")
+  if(NOT EXISTS "${sphinx_source_dir}")
     _jcm_build_error_targets("sphinx-docs"
       "Sphinx source directory does not exist: ${sphinx_source_dir}")
-  endif ()
+  endif()
 
   # Build Target
   add_custom_target(sphinx-docs

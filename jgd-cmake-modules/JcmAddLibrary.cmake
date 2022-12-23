@@ -158,13 +158,13 @@ function(jcm_add_library)
     ARGUMENTS "${ARGN}")
 
   # transform arguments to normalized absolute paths
-  foreach (source_type "INTERFACE_HEADERS" "PUBLIC_HEADERS" "PRIVATE_HEADERS" "SOURCES")
+  foreach(source_type "INTERFACE_HEADERS" "PUBLIC_HEADERS" "PRIVATE_HEADERS" "SOURCES")
     set(arg_name ARGS_${source_type})
-    if (DEFINED ${arg_name})
+    if(DEFINED ${arg_name})
       jcm_transform_list(ABSOLUTE_PATH INPUT "${${arg_name}}" OUT_VAR ${arg_name})
       jcm_transform_list(NORMALIZE_PATH INPUT "${${arg_name}}" OUT_VAR ${arg_name})
-    endif ()
-  endforeach ()
+    endif()
+  endforeach()
 
   set(all_input_files
     "${ARGS_INTERFACE_HEADERS}"
@@ -173,75 +173,75 @@ function(jcm_add_library)
     "${ARGS_SOURCES}")
 
   # library component argument
-  if (DEFINED ARGS_COMPONENT AND NOT ARGS_COMPONENT STREQUAL PROJECT_NAME)
+  if(DEFINED ARGS_COMPONENT AND NOT ARGS_COMPONENT STREQUAL PROJECT_NAME)
     set(comp_arg COMPONENT ${ARGS_COMPONENT})
     set(comp_err_msg "component (${ARGS_COMPONENT}) ")
-  else ()
+  else()
     unset(comp_arg)
     unset(comp_err_msg)
-  endif ()
+  endif()
 
   # == Usage Guards ==
 
   # ensure sources are provided appropriately
-  if (ARGS_TYPE STREQUAL "INTERFACE")
-    if (DEFINED ARGS_SOURCES OR DEFINED ARGS_PUBLIC_HEADERS OR DEFINED ARGS_PRIVATE_HEADERS)
+  if(ARGS_TYPE STREQUAL "INTERFACE")
+    if(DEFINED ARGS_SOURCES OR DEFINED ARGS_PUBLIC_HEADERS OR DEFINED ARGS_PRIVATE_HEADERS)
       message(FATAL_ERROR "Interface libraries can only be added with INTERFACE_HEADERS")
-    endif ()
-  elseif (NOT DEFINED ARGS_SOURCES)
+    endif()
+  elseif(NOT DEFINED ARGS_SOURCES)
     message(FATAL_ERROR "SOURCES must be provided for non-interface libraries")
-  endif ()
+  endif()
 
   # ensure library is created in the appropriate canonical directory
-  if (NOT ARGS_WITHOUT_CANONICAL_PROJECT_CHECK)
+  if(NOT ARGS_WITHOUT_CANONICAL_PROJECT_CHECK)
     jcm_canonical_lib_subdir(${comp_arg} OUT_VAR canonical_dir)
-    if (NOT CMAKE_CURRENT_SOURCE_DIR STREQUAL canonical_dir)
+    if(NOT CMAKE_CURRENT_SOURCE_DIR STREQUAL canonical_dir)
       message(
         FATAL_ERROR
         "Creating a ${comp_err_msg}library for project ${PROJECT_NAME} must be "
         "done in the canonical directory ${canonical_dir}.")
-    endif ()
-  endif ()
+    endif()
+  endif()
 
   # verify file naming
-  if (NOT ARGS_WITHOUT_FILE_NAMING_CHECK)
+  if(NOT ARGS_WITHOUT_FILE_NAMING_CHECK)
 
-    if (DEFINED ARGS_SOURCES)
+    if(DEFINED ARGS_SOURCES)
       jcm_separate_list(
         INPUT "${ARGS_SOURCES}"
         REGEX "${JCM_SOURCE_REGEX}"
         TRANSFORM "FILENAME"
         OUT_MISMATCHED incorrectly_named)
-      if (incorrectly_named)
+      if(incorrectly_named)
         message(
           FATAL_ERROR
           "Provided source files do not match the regex for library sources, ${JCM_SOURCE_REGEX}: "
           "${incorrectly_named}.")
-      endif ()
-    endif ()
+      endif()
+    endif()
 
-    if (ARGS_INTERFACE_HEADERS OR ARGS_PUBLIC_HEADERS OR ARGS_PRIVATE_HEADERS)
+    if(ARGS_INTERFACE_HEADERS OR ARGS_PUBLIC_HEADERS OR ARGS_PRIVATE_HEADERS)
       jcm_separate_list(
         INPUT "${ARGS_INTERFACE_HEADERS}" "${ARGS_PUBLIC_HEADERS}" "${ARGS_PRIVATE_HEADERS}"
         REGEX "${JCM_HEADER_REGEX}"
         TRANSFORM "FILENAME"
         OUT_MISMATCHED incorrectly_named)
-      if (incorrectly_named)
+      if(incorrectly_named)
         message(
           FATAL_ERROR
           "Provided header files do not match the regex for library headers, "
           "${JCM_HEADER_REGEX}: ${incorrectly_named}.")
-      endif ()
-    endif ()
+      endif()
+    endif()
 
-  endif ()
+  endif()
 
   # verify file locations
   _jcm_verify_source_locations(SOURCES "${all_input_files}")
 
   # == Build options related to libraries and this library ==
 
-  if (NOT DEFINED ARGS_TYPE)
+  if(NOT DEFINED ARGS_TYPE)
     # commonly used (build-wide) build-shared option
     option(BUILD_SHARED_LIBS "Build libraries with unspecified types shared." OFF)
 
@@ -253,7 +253,7 @@ function(jcm_add_library)
     set(build_project_shared ${${JCM_PROJECT_PREFIX_NAME}_BUILD_SHARED_LIBS})
 
     # component specific build shared option
-    if (DEFINED comp_arg)
+    if(DEFINED comp_arg)
       string(TOUPPER ${ARGS_COMPONENT} comp_temp)
       string(REPLACE "-" "_" comp_upper ${comp_temp})
       option(
@@ -261,43 +261,43 @@ function(jcm_add_library)
         "Build library component ${ARGS_COMPONENT} of project ${PROJECT_NAME} shared."
         ${${JCM_PROJECT_PREFIX_NAME}_BUILD_SHARED_LIBS})
       set(build_component_shared ${${JCM_PROJECT_PREFIX_NAME}_${comp_upper}_BUILD_SHARED})
-    endif ()
-  endif ()
+    endif()
+  endif()
 
   # == Library Configuration ==
 
   # set library type, if provided and supported
   set(lib_type STATIC)
-  if (DEFINED ARGS_TYPE)
+  if(DEFINED ARGS_TYPE)
     set(lib_type ${ARGS_TYPE})
     set(supported_types STATIC SHARED MODULE INTERFACE OBJECT)
     list(FIND supported_types "${ARGS_TYPE}" supported)
-    if (supported EQUAL -1)
+    if(supported EQUAL -1)
       message(
         FATAL_ERROR
         "Unsupported type ${ARGS_TYPE}. ${CMAKE_CURRENT_FUNCTION} must be "
         "called with no type or one of: ${supported_types}")
-    endif ()
-  elseif (build_project_shared OR build_component_shared)
+    endif()
+  elseif(build_project_shared OR build_component_shared)
     set(lib_type SHARED)
-  endif ()
+  endif()
 
   # resolve library names
-  if (DEFINED ARGS_NAME)
+  if(DEFINED ARGS_NAME)
     set(target_name ${ARGS_NAME})
     set(export_name ${ARGS_NAME})
     set(output_name ${ARGS_NAME})
-  else ()
+  else()
     jcm_library_naming(
       ${comp_arg}
       OUT_TARGET target_name
       OUT_EXPORT_NAME export_name
       OUT_OUTPUT_NAME output_name)
-  endif ()
+  endif()
 
-  if (DEFINED ARGS_OUT_TARGET)
+  if(DEFINED ARGS_OUT_TARGET)
     set(${ARGS_OUT_TARGET} ${target_name} PARENT_SCOPE)
-  endif ()
+  endif()
 
   # == Create Library Target ==
 
@@ -310,38 +310,38 @@ function(jcm_add_library)
 
   # == Generate an export header ==
 
-  if (NOT ARGS_TYPE STREQUAL "INTERFACE")
+  if(NOT ARGS_TYPE STREQUAL "INTERFACE")
     set(base_name ${JCM_PROJECT_PREFIX_NAME})
-    if (DEFINED comp_arg)
+    if(DEFINED comp_arg)
       string(APPEND base_name "_${comp_upper}")
-    endif ()
+    endif()
 
     generate_export_header(
       ${target_name}
       BASE_NAME ${base_name}
       EXPORT_FILE_NAME "export_macros.hpp")
-  endif ()
+  endif()
 
   # == Set Target Properties ==
 
   # custom component property
-  if (DEFINED comp_arg)
+  if(DEFINED comp_arg)
     set_target_properties(${target_name} PROPERTIES ${comp_arg})
-  endif ()
+  endif()
 
   # header properties
-  if (DEFINED ARGS_INTERFACE_HEADERS)
+  if(DEFINED ARGS_INTERFACE_HEADERS)
     jcm_header_file_sets(INTERFACE TARGET ${target_name} HEADERS "${ARGS_INTERFACE_HEADERS}")
-  elseif (DEFINED ARGS_PRIVATE_HEADERS)
+  elseif(DEFINED ARGS_PRIVATE_HEADERS)
     jcm_header_file_sets(PRIVATE TARGET ${target_name} HEADERS "${ARGS_PRIVATE_HEADERS}")
-  endif ()
+  endif()
 
-  if (NOT ARGS_TYPE STREQUAL "INTERFACE")
+  if(NOT ARGS_TYPE STREQUAL "INTERFACE")
     jcm_header_file_sets(
       PUBLIC
       TARGET ${target_name}
       HEADERS "${ARGS_PUBLIC_HEADERS}" "${CMAKE_CURRENT_BINARY_DIR}/export_macros.hpp")
-  endif ()
+  endif()
 
   # common properties
   set_target_properties(${target_name}
@@ -352,10 +352,10 @@ function(jcm_add_library)
     COMPILE_OPTIONS "${JCM_DEFAULT_COMPILE_OPTIONS}")
 
   # shared library versioning
-  if (PROJECT_VERSION AND lib_type STREQUAL "SHARED")
+  if(PROJECT_VERSION AND lib_type STREQUAL "SHARED")
     set_target_properties(${target_name}
       PROPERTIES
       VERSION ${PROJECT_VERSION}
       SOVERSION ${PROJECT_VERSION_MAJOR})
-  endif ()
+  endif()
 endfunction()

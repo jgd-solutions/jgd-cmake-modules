@@ -92,9 +92,9 @@ Examples
 
 #]=======================================================================]
 function(jcm_add_test_executable)
-  if (NOT ${JCM_PROJECT_PREFIX_NAME}_BUILD_TESTS)
+  if(NOT ${JCM_PROJECT_PREFIX_NAME}_BUILD_TESTS)
     return()
-  endif ()
+  endif()
 
   jcm_parse_arguments(
     ONE_VALUE_KEYWORDS "NAME;TEST_NAME"
@@ -111,11 +111,11 @@ function(jcm_add_test_executable)
 
   # Verify source naming
 
-  if (CMAKE_CURRENT_SOURCE_DIR MATCHES "^${JCM_PROJECT_TESTS_DIR}")
+  if(CMAKE_CURRENT_SOURCE_DIR MATCHES "^${JCM_PROJECT_TESTS_DIR}")
     set(test_source_regex "${JCM_SOURCE_REGEX}") # other tests & drivers, only
-  else ()
+  else()
     set(test_source_regex "${JCM_TEST_SOURCE_REGEX}") # unit test files, only
-  endif ()
+  endif()
 
   set(regex "${JCM_HEADER_REGEX}|${test_source_regex}")
   jcm_separate_list(
@@ -124,19 +124,19 @@ function(jcm_add_test_executable)
     TRANSFORM "FILENAME"
     OUT_MISMATCHED incorrectly_named
   )
-  if (incorrectly_named)
+  if(incorrectly_named)
     message(
       FATAL_ERROR
       "Provided source files do not match the regex for test executable sources, ${regex}: "
       "${incorrectly_named}.")
-  endif ()
+  endif()
 
   # Default test name
-  if (DEFINED ARGS_TEST_NAME)
+  if(DEFINED ARGS_TEST_NAME)
     set(test_name "${ARGS_TEST_NAME}")
-  else ()
+  else()
     set(test_name "${ARGS_NAME}")
-  endif ()
+  endif()
 
   # Test executable
   add_executable(${ARGS_NAME} "${ARGS_SOURCES}")

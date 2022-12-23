@@ -99,30 +99,30 @@ function(jcm_configure_package_config_file)
   unset(comp_arg)
   unset(comp_err_msg)
 
-  if (DEFINED ARGS_TARGET OR DEFINED ARGS_COMPONENT)
-    if (DEFINED ARGS_COMPONENT)
+  if(DEFINED ARGS_TARGET OR DEFINED ARGS_COMPONENT)
+    if(DEFINED ARGS_COMPONENT)
       set(component ${ARGS_COMPONENT})
-    else ()
+    else()
       get_target_property(component ${ARGS_TARGET} COMPONENT)
-    endif ()
-    if (NOT component STREQUAL PROJECT_NAME)
+    endif()
+    if(NOT component STREQUAL PROJECT_NAME)
       set(comp_arg COMPONENT ${component})
       set(comp_err_msg " for component ${component}")
-    endif ()
-  endif ()
+    endif()
+  endif()
 
   # resolve input and output pkg-config file names
   jcm_package_config_file_name(${comp_arg} OUT_VAR config_file)
   set(in_config_file "${config_file}${JCM_IN_FILE_EXTENSION}")
   string(PREPEND in_config_file "${JCM_PROJECT_CMAKE_DIR}/")
   string(PREPEND config_file "${JCM_CMAKE_DESTINATION}/")
-  if (NOT EXISTS "${in_config_file}")
+  if(NOT EXISTS "${in_config_file}")
     message(
       FATAL_ERROR
       "Cannot configure a package config file for project "
       "${PROJECT_NAME}. Could not find file ${in_config_file}${comp_err_msg}."
     )
-  endif ()
+  endif()
 
   configure_package_config_file(
     "${in_config_file}"
@@ -131,9 +131,9 @@ function(jcm_configure_package_config_file)
   )
 
   # output variable
-  if (DEFINED ARGS_OUT_FILE_VAR)
+  if(DEFINED ARGS_OUT_FILE_VAR)
     set(${ARGS_OUT_FILE_VAR} "${config_file}" PARENT_SCOPE)
-  endif ()
+  endif()
 endfunction()
 
 #[=======================================================================[.rst:
@@ -197,29 +197,29 @@ function(jcm_configure_file)
 
   # Usage Guards
   # cmake's configure_file warns about directories being provided
-  if (NOT in_file_name MATCHES "${JCM_IN_FILE_REGEX}")
+  if(NOT in_file_name MATCHES "${JCM_IN_FILE_REGEX}")
     message(
       FATAL_ERROR
       "${ARGS_IN_FILE} does not end with the extension '${JCM_IN_FILE_EXTENSION}' required by "
       "${CMAKE_CURRENT_FUNCTION}")
-  endif ()
+  endif()
 
-  if (NOT EXISTS "${in_file_path}")
+  if(NOT EXISTS "${in_file_path}")
     # configure_file warns about not existing, this is just more informative for specific project
     message(
       FATAL_ERROR
       "Cannot configure file '${in_file_path}' for project ${PROJECT_NAME}. "
       "The file does not exist")
-  endif ()
+  endif()
 
   # Configure
   string(REGEX REPLACE "${JCM_IN_FILE_REGEX}" "" out_file_name "${in_file_name}")
   configure_file("${in_file_path}" "${out_file_name}" @ONLY)
 
   # Out Var
-  if (DEFINED ARGS_OUT_FILE_VAR)
+  if(DEFINED ARGS_OUT_FILE_VAR)
     set(${ARGS_OUT_FILE_VAR} "${CMAKE_CURRENT_BINARY_DIR}/${out_file_name}" PARENT_SCOPE)
-  endif ()
+  endif()
 endfunction()
 
 #[=======================================================================[.rst:
@@ -249,16 +249,16 @@ Examples
 
 #]=======================================================================]
 function(jcm_configure_vcpkg_manifest_file)
-  if (NOT PROJECT_IS_TOP_LEVEL)
+  if(NOT PROJECT_IS_TOP_LEVEL)
     return()
-  endif ()
+  endif()
 
   set(in_manifest_file "${JCM_PROJECT_CMAKE_DIR}/vcpkg.json${JCM_IN_FILE_EXTENSION}")
 
-  if (NOT EXISTS "${in_manifest_file}")
+  if(NOT EXISTS "${in_manifest_file}")
     message(FATAL_ERROR "Cannot configure a vcpkg manifest file for project ${PROJECT_NAME}. "
       "Could not find file ${in_manifest_file}.")
-  endif ()
+  endif()
 
   configure_file("${in_manifest_file}" "${PROJECT_SOURCE_DIR}/vcpkg.json" @ONLY)
 endfunction()
