@@ -24,6 +24,8 @@ function(_create_ctest_test test_name)
     unset(build_target_argument)
   endif ()
 
+  message(STATUS "Building target ${ARGS_BUILD_TARGET} for ${ARGS_PROJECT_NAME}")
+
   add_test(
     NAME ${test_name}
     COMMAND
@@ -33,6 +35,7 @@ function(_create_ctest_test test_name)
     --build-noclean
     --build-generator "${CMAKE_GENERATOR}"
     --build-config $<CONFIG>
+    ${build_target_argument}
     --build-and-test
     "${CMAKE_CURRENT_SOURCE_DIR}/${ARGS_PROJECT_NAME}"
     "${CMAKE_CURRENT_BINARY_DIR}/${ARGS_PROJECT_NAME}"
@@ -45,7 +48,7 @@ endfunction()
 
 function(_build_and_ctest project_name)
   jcm_parse_arguments(
-    ONE_VALUE_KEYWORDS "NAME_SUFFIX" "BUILD_TARGET"
+    ONE_VALUE_KEYWORDS "NAME_SUFFIX" "BUILD_TARGET" "FIXTURES_SETUP"
     MULTI_VALUE_KEYWORDS "BUILD_OPTIONS" "DEPENDS"
     ARGUMENTS "${ARGN}")
 
@@ -65,17 +68,27 @@ function(_build_and_ctest project_name)
     BUILD_OPTIONS "${ARGS_BUILD_OPTIONS}"
     ${build_target_arg})
 
-  set_tests_properties(${test_name} PROPERTIES RESOURCE_LOCK "build-${project_name}")
-  if (DEFINED ARGS_DEPENDS)
+  set_tests_properties(${test_name} PROPERTIES
+    RESOURCE_LOCK "build-${project_name}"
+    FIXTURES_REQUIRED ${PROJECT_NAME}-install-fixture)
+
+  if(DEFINED ARGS_FIXTURES_SETUP)
+    set_tests_properties(${test_name} PROPERTIES
+      FIXTURES_SETUP "${ARGS_FIXTURES_SETUP}")
+  endif()
+
+  if(DEFINED ARGS_DEPENDS)
     set_tests_properties(${test_name} PROPERTIES DEPENDS "${ARGS_DEPENDS}")
-  endif ()
+  endif()
 endfunction()
 
 
 function(_install_project project_name)
-  jcm_parse_arguments(MULTI_VALUE_KEYWORDS "DEPENDS" ARGUMENTS "${ARGN}")
-  set(test_name ${project_name}-install)
+  jcm_parse_arguments(
+    MULTI_VALUE_KEYWORDS "FIXTURES_REQUIRED" "DEPENDS"
+    ARGUMENTS "${ARGN}")
 
+  set(test_name ${project_name}-install)
   add_test(
     NAME ${test_name}
     COMMAND
@@ -85,9 +98,17 @@ function(_install_project project_name)
     --config $<CONFIG>
     --verbose)
 
-  if (DEFINED ARGS_DEPENDS)
+  set_tests_properties(${test_name} PROPERTIES
+    FIXTURES_SETUP ${project_name}-install-fixture)
+
+  if(DEFINED ARGS_FIXTURES_REQUIRED)
+    set_tests_properties(${test_name} PROPERTIES
+      FIXTURES_REQUIRED "${ARGS_FIXTURES_REQUIRED}")
+  endif()
+
+  if(DEFINED ARGS_DEPENDS)
     set_tests_properties(${test_name} PROPERTIES DEPENDS "${ARGS_DEPENDS}")
-  endif ()
+  endif()
 endfunction()
 
 
@@ -117,7 +138,9 @@ function(_find_use_project project_name)
     "-D test_name=find-use-${project_name}"
     "-D components=${specified_components}")
 
-  set_tests_properties(${test_name} PROPERTIES RESOURCE_LOCK "test-project-consumption")
+  set_tests_properties(${test_name} PROPERTIES
+    RESOURCE_LOCK "test-project-consumption"
+    FIXTURES_REQUIRED ${project_name}-install-fixture)
 
   if (DEFINED ARGS_OUT_TEST_NAME)
     set(${ARGS_OUT_TEST_NAME} ${test_name} PARENT_SCOPE)

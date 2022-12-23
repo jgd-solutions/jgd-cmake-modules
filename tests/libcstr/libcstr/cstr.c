@@ -4,9 +4,10 @@
 
 static const size_t growth_rate = 2;
 
-static void _strcpy(char *restrict dest, const char *restrict src) {
+static void _strcpy(char* restrict dest, const char* restrict src)
+{
 #ifdef _MSC_VER
-  #pragma warning(push)
+#pragma warning(push)
 #pragma warning(disable : 4996)
 #endif
 
