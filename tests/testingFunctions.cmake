@@ -12,19 +12,17 @@ function(_create_ctest_test test_name)
     REQUIRES_ALL "PROJECT_NAME"
     ARGUMENTS "${ARGN}")
 
-  if (DEFINED ARGS_RUN_INNER_CTEST)
+  if(DEFINED ARGS_RUN_INNER_CTEST)
     set(ctest_argument --test-command "${CMAKE_CTEST_COMMAND}" --verbose --output-on-failure)
-  else ()
+  else()
     unset(ctest_argument)
-  endif ()
+  endif()
 
-  if (ARGS_BUILD_TARGET)
+  if(ARGS_BUILD_TARGET)
     set(build_target_argument --build-target ${ARGS_BUILD_TARGET})
-  else ()
+  else()
     unset(build_target_argument)
-  endif ()
-
-  message(STATUS "Building target ${ARGS_BUILD_TARGET} for ${ARGS_PROJECT_NAME}")
+  endif()
 
   add_test(
     NAME ${test_name}
@@ -53,19 +51,25 @@ function(_build_and_ctest project_name)
     ARGUMENTS "${ARGN}")
 
   # not running ctest when target specified is specific to JCM's tests
-  if (ARGS_BUILD_TARGET)
+  if(ARGS_BUILD_TARGET)
     set(build_target_arg BUILD_TARGET ${ARGS_BUILD_TARGET})
     unset(run_inner_ctest)
   else ()
     unset(build_target_arg)
     set(run_inner_ctest RUN_INNER_CTEST)
-  endif ()
+  endif()
+
+  if(ARGS_BUILD_OPTIONS)
+    set(build_options_arg BUILD_OPTIONS "${ARGS_BUILD_OPTIONS}")
+  else()
+    unset(build_options_arg)
+  endif()
 
   set(test_name "${project_name}${ARGS_NAME_SUFFIX}")
   _create_ctest_test(${test_name}
     ${run_inner_ctest}
     PROJECT_NAME ${project_name}
-    BUILD_OPTIONS "${ARGS_BUILD_OPTIONS}"
+    ${build_options_arg}
     ${build_target_arg})
 
   set_tests_properties(${test_name} PROPERTIES

@@ -32,12 +32,10 @@ if (NOT broken_symlink)
   _build_and_ctest("single-exec"
     NAME_SUFFIX -format
     BUILD_TARGET clang-format-check
-    BUILD_OPTIONS -DSINGLE_EXEC_BUILD_TESTS=ON
     DEPENDS ${PROJECT_NAME}-install)
 endif ()
 
 _build_and_ctest("single-exec"
-  BUILD_OPTIONS -DSINGLE_EXEC_BUILD_TESTS=ON
   FIXTURES_SETUP "single-exec-fixture"
   DEPENDS single-exec-format)
 
@@ -52,7 +50,6 @@ if (NOT broken_symlink)
   _build_and_ctest("many-exec"
     NAME_SUFFIX -format
     BUILD_TARGET clang-format-check
-    BUILD_OPTIONS -DMANY_EXEC_BUILD_TESTS=ON
     DEPENDS ${PROJECT_NAME}-install)
 endif ()
 
@@ -83,7 +80,6 @@ if(NOT broken_symlink)
   _build_and_ctest("libsingle"
     NAME_SUFFIX -format
     BUILD_TARGET clang-format-check
-    BUILD_OPTIONS -DLIBSINGLE_BUILD_TESTS=ON
     DEPENDS ${PROJECT_NAME}-install)
 endif()
 
@@ -121,7 +117,6 @@ if (NOT broken_symlink)
   _build_and_ctest("libcomponents"
     NAME_SUFFIX -format
     BUILD_TARGET clang-format-check
-    BUILD_OPTIONS -DLIBCOMPONENTS_BUILD_TESTS=ON
     DEPENDS ${PROJECT_NAME}-install)
 endif ()
 
@@ -160,7 +155,6 @@ if (NOT broken_symlink)
   _build_and_ctest("libheaders"
     NAME_SUFFIX -format
     BUILD_TARGET clang-format-check
-    BUILD_OPTIONS -DLIBHEADERS_BUILD_TESTS=ON
     DEPENDS ${PROJECT_NAME}-install)
 endif ()
 
@@ -184,7 +178,6 @@ if (NOT broken_symlink)
   _build_and_ctest("libcstr"
     NAME_SUFFIX -format
     BUILD_TARGET clang-format-check
-    BUILD_OPTIONS -DLIBCSTR_BUILD_TESTS=ON
     DEPENDS ${PROJECT_NAME}-install)
 endif ()
 
