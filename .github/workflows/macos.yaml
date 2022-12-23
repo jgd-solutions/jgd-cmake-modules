@@ -13,7 +13,7 @@ jobs:
     runs-on: macos-12
     strategy:
       matrix:
-        generator: [ "Ninja" ]
+        generator: ["Ninja"]
     # apple-clang doesn't support one-ranges proposal, which
     # is used in automated tests. Not concerned with test C/C++ code, just CMake.
     env:
@@ -32,4 +32,4 @@ jobs:
       - name: Configure tests target
         run: cmake -G "${{ matrix.generator }}" --preset tests-ninja
       - name: Run all automated tests
-        run: ctest --preset test-to-fail
+        run: ctest --preset test-to-fail -R format
