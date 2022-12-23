@@ -32,6 +32,8 @@ jobs:
       - name: Configure tests target
         run: cmake -G "${{ matrix.generator }}" --preset tests-ninja
       - name: Format all test code
-        run: clang-format --style=file -i tests/**.hpp tests/**.h tests/**.cpp tests/**.c
+        run: >
+          shopt -s globstar &&
+          clang-format --style=file -i tests/**/*.hpp tests/**/*.h tests/**/*.cpp tests/**/*.c
       - name: Run all automated tests
         run: ctest --preset test-to-fail
