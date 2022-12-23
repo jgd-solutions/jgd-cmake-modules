@@ -32,4 +32,4 @@ jobs:
       - name: Configure tests target
         run: cmake -G "${{ matrix.generator }}" --preset tests-ninja
       - name: Run all automated tests
-        run: ctest --preset test-to-fail -R format
+        run: ctest --preset test-to-fail -E format
