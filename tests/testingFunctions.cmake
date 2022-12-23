@@ -31,6 +31,7 @@ function(_create_ctest_test test_name)
     --verbose
     --output-on-failure
     --build-noclean
+    --build-project "${ARGS_PROJECT_NAME}" # helps msvc when --build-target
     --build-generator "${CMAKE_GENERATOR}"
     --build-config $<CONFIG>
     ${build_target_argument}
