@@ -20,7 +20,7 @@ Pages
    find_modules
    modules
    tests_readme_link
-   build_with_cmake
+   cmake_command_tutorial
 
 
 Indices
