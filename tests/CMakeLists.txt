@@ -91,7 +91,6 @@ _build_and_ctest("libsingle"
   NAME_SUFFIX -docs
   BUILD_TARGET doxygen-docs
   BUILD_OPTIONS
-  -DLIBSINGLE_BUILD_TESTS=ON
   -DLIBSINGLE_BUILD_DOCS=ON
   DEPENDS libsingleshare)
 
