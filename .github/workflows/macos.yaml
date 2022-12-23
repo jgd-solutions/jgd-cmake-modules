@@ -31,5 +31,7 @@ jobs:
         run: brew install doxygen clang-format
       - name: Configure tests target
         run: cmake -G "${{ matrix.generator }}" --preset tests-ninja
+      - name: Format all test code
+        run: clang-format --styl=file -i tests/**.hpp tests/**.h tests/**.cpp tests/**.c
       - name: Run all automated tests
         run: ctest --preset test-to-fail -E format
