@@ -49,6 +49,10 @@ Sample
       :language: cmake
       :caption: docs/CMakeLists.txt
 
+   .. literalinclude:: ../tests/libsingle/cmake/libsingle-config.cmake.in
+      :language: none
+      :caption: cmake/libsingle-config.cmake.in
+
 Examples
 --------
 
