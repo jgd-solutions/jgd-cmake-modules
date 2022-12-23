@@ -17,6 +17,7 @@ TL;DR
 
   cmake -B <build-dir> -G Ninja -DCMAKE_BUILD_TYPE=Release  # configure
   cmake --build <build-dir>                                 # build
+  ctest --test-dir <build-dir> --output-on-failure          # test
   cmake --install <build-dir>                               # install
 
 Installing CMake
@@ -179,3 +180,59 @@ Uninstalling
 #. Upon installing, CMake will generate a file `<build-dir>/install_manifest.txt` listing all
    installed files. Removing these files and any generated parent directories will uninstall the
    project.
+
+Testing
+~~~~~~~
+
+Testing is done with a tool called `CTest
+<https://cmake.org/cmake/help/latest/manual/ctest.1.html>`_. In a project's list files, they can
+register tests with CTest, then these tests will be invoked when *ctest* is invoked, and their
+outcomes will be recorded and summarized by CTest.
+
+Although CTest is a powerful tool which supports publishing to dashboards, test scripts, test
+parallelization, and even building entire CMake projects, basic examples to test an existing project
+are shown below. These options can be joined:
+
+.. code-block:: bash
+
+  ctest --test-dir <build-dir>                     # run all tests, and show summary at the end
+  ctest --test-dir <build-dir> --output-on-failure # print output from failed tests
+  ctest --test-dir <build-dir> --stop-on-failure   # stop all testing when a single failure occurs
+  ctest --test-dir <build-dir> --rerun-failed      # only run tests that did not previously pass
+  ctest --test-dir <build-dir> -R <regex>          # run all tests matching <regex>
+  ctest --test-dir <build-dir> -E <regex>          # exclude all tests matching <regex>
+  ctest --test-dir --output-junit <file>           # produce junit formatted test summary in <file>
+
+  ctest --test-dir --build-config <cfg>            # Desired config for Multi-Config generators
+
+Projects often require you to enable building tests in the configuration stage through a variable,
+as they're off by default.
+
+.. code-block:: bash
+
+  cmake -B <build-dir> -D <enable-test-var>:BOOL=ON
+  # Ex. cmake -B <build-dir> -D BUILD_TESTING:BOOL=ON
+
+CMake Presets
+~~~~~~~~~~~~~
+
+CMake `presets <https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html>`_ exist in the
+files `CMakePresets.json` and `CMakeUserPresets.json`. The former is checked into version control,
+while the latter is for personal use. These include JSON descriptions of settings for `cmake` (and
+`ctest`), which can be invoked by simply naming the desired preset.
+
+.. code-block:: bash
+
+  cmake --preset <configure-preset>     # configure
+  cmake --build --preset <build-preset> # build
+  ctest --preset <test-preset>          # test
+
+For example, if a project's `CMakePresets.json` named a config preset called *debug-tests*, and
+build preset called *unit-tests*, and a test preset called *core-tests*, a user's workflow could be
+simplified to the following commands, instead of manually providing numerous command-line options.
+
+.. code-block:: bash
+
+  cmake --preset debug-tests        # configure
+  cmake --build --preset unit-tests # build
+  ctest --preset core-tests         # test
