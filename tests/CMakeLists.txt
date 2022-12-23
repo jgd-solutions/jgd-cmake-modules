@@ -31,8 +31,7 @@ set_tests_properties(${PROJECT_NAME}-install PROPERTIES
 if(NOT broken_symlink)
   _build_and_ctest("single-exec"
     NAME_SUFFIX -format
-    BUILD_TARGET clang-format-check
-    DEPENDS ${PROJECT_NAME}-install)
+    BUILD_TARGET clang-format-check)
 endif()
 
 _build_and_ctest("single-exec"
@@ -49,8 +48,7 @@ _add_use_project("single-exec")
 if(NOT broken_symlink)
   _build_and_ctest("many-exec"
     NAME_SUFFIX -format
-    BUILD_TARGET clang-format-check
-    DEPENDS ${PROJECT_NAME}-install)
+    BUILD_TARGET clang-format-check)
 endif()
 
 _build_and_ctest("many-exec"
@@ -79,8 +77,7 @@ _add_use_project("many-exec")
 if(NOT broken_symlink)
   _build_and_ctest("libsingle"
     NAME_SUFFIX -format
-    BUILD_TARGET clang-format-check
-    DEPENDS ${PROJECT_NAME}-install)
+    BUILD_TARGET clang-format-check)
 endif()
 
 _build_and_ctest("libsingle"
@@ -115,8 +112,7 @@ _file_exists("libsingle" -license-exists "${licenses_dir}/LICENSE.md" DEPENDS li
 if(NOT broken_symlink)
   _build_and_ctest("libcomponents"
     NAME_SUFFIX -format
-    BUILD_TARGET clang-format-check
-    DEPENDS ${PROJECT_NAME}-install)
+    BUILD_TARGET clang-format-check)
 endif()
 
 _build_and_ctest("libcomponents"
@@ -153,8 +149,7 @@ _add_use_project("libcomponents")
 if(NOT broken_symlink)
   _build_and_ctest("libheaders"
     NAME_SUFFIX -format
-    BUILD_TARGET clang-format-check
-    DEPENDS ${PROJECT_NAME}-install)
+    BUILD_TARGET clang-format-check)
 endif()
 
 _build_and_ctest("libheaders"
@@ -176,8 +171,7 @@ _file_exists("libheaders" -license-exists
 if(NOT broken_symlink)
   _build_and_ctest("libcstr"
     NAME_SUFFIX -format
-    BUILD_TARGET clang-format-check
-    DEPENDS ${PROJECT_NAME}-install)
+    BUILD_TARGET clang-format-check)
 endif()
 
 _build_and_ctest("libcstr"
