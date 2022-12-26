@@ -160,10 +160,10 @@ configuration your buildsystem supports, which may or may not be the configurati
 
 
 The installation can be limited to a specific subsection of a project's installation, called an
-*install component* with the :code:`--component` option. Install components are often used to
-separate installations by their release and development artifacts, or  by license variants. An
-install component may also not necessarily be installed by default (above), therefore requiring a
-component-specific explicit.
+*install component*, using the :code:`--component` option. Install components are often used to
+separate installed artifacts by their release and development artifacts, or  by license variants.
+Additionally, an install component may not necessarily be installed by default (above), consequently
+requiring explicit component-specific installation.
 
 .. code-block:: bash
 
