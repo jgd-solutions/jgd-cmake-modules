@@ -191,7 +191,7 @@ outcomes will be recorded and summarized by CTest.
 
 Although CTest is a powerful tool which supports publishing to dashboards, test scripts, test
 parallelization, and even building entire CMake projects, basic examples to test an existing project
-are shown below. These options can be joined:
+are shown below - these options can be joined:
 
 .. code-block:: bash
 
@@ -223,9 +223,9 @@ while the latter is for personal use. These include JSON descriptions of setting
 
 .. code-block:: bash
 
-  cmake --preset <configure-preset>     # configure
-  cmake --build --preset <build-preset> # build
-  ctest --preset <test-preset>          # test
+  cmake --preset <configure-preset>     # configure using preset
+  cmake --build --preset <build-preset> # build using preset
+  ctest --preset <test-preset>          # test using preset
 
 For example, if a project's `CMakePresets.json` named a config preset called *debug-tests*, and
 build preset called *unit-tests*, and a test preset called *core-tests*, a user's workflow could be
@@ -233,6 +233,6 @@ simplified to the following commands, instead of manually providing numerous com
 
 .. code-block:: bash
 
-  cmake --preset debug-tests        # configure
-  cmake --build --preset unit-tests # build
-  ctest --preset core-tests         # test
+  cmake --preset debug-tests        # configure using preset
+  cmake --build --preset unit-tests # build using preset
+  ctest --preset core-tests         # test using preset

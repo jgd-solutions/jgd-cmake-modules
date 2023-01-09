@@ -174,8 +174,7 @@ function(jcm_install_config_file_package)
     message(
       FATAL_ERROR
       "Unable to install a config-file package without a config file. "
-      "Could not find the file ${unconfigured_config_file}."
-    )
+      "Could not find the file ${unconfigured_config_file}.")
   endfunction()
 
   # Resolve components' package config files, append to cmake files to be installed
