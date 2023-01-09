@@ -19,6 +19,7 @@ Pages
    overview
    find_modules
    modules
+   build_docs_tests
    tests_readme_link
    cmake_command_tutorial
 

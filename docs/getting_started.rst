@@ -10,7 +10,7 @@ Getting Started
 
   .. code-block:: bash
 
-    git clone git@github.com:jgd-solutions/jgd-cmake-modules.git
+    git clone https://github.com/jgd-solutions/jgd-cmake-modules.git
     cd jgd-cmake-modules
 
   Configure, build, and install
@@ -42,7 +42,7 @@ Getting Started
         {
           "kind": "git",
           "baseline": "<desired-vcpkg-registry-ref>",
-          "repository": "git@github.com:jgd-solutions/vcpkg-registry.git",
+          "repository": "https://github.com/jgd-solutions/vcpkg-registry.git",
           "packages": [
             "jgd-cmake-modules"
           ]
@@ -65,5 +65,6 @@ Find *jgd-cmake-modules* as an external package in your top-level *CMakeLists.tx
 .. code-block:: cmake
 
   # Ex.
+  find_package(ClangFormat)
   include(JcmCreateAccessoryTargets)
   jcm_create_clang_format_targets(SOURCE_TARGETS libexample::libexample)
