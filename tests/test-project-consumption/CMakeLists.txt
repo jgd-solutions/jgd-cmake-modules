@@ -106,9 +106,11 @@ elseif(test_name MATCHES "libcomponents")
 elseif(test_name MATCHES "libheaders")
   add_executable(${test_name} use_libheaders.cpp)
   target_link_libraries(${test_name} PRIVATE libheaders::libheaders)
+
 elseif(test_name MATCHES "libcstr")
   add_executable(${test_name} use_libcstr.c)
   target_link_libraries(${test_name} PRIVATE libcstr::libcstr)
+
 else()
   message(FATAL_ERROR "${test_name} is not a recognized test name in ${PROJECT_NAME}")
 endif()

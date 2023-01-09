@@ -60,6 +60,11 @@ licenses within :cmake:variable:`JCM_PROJECT_LICENSES_DIR` will be installed. Sy
 until a file is reached, ensuring to install the license file with the original name of the symlink.
 Intermediate symlinks are not installed.
 
+By default, installation is only performed when the project is top-level. However, the install
+commands of this function can be enabled/disabled using the option
+:cmake:variable:`<JCM_PROJECT_PREFIX_NAME>_INSTALL`, also created by this function, allowing users
+to override this behaviour.
+
 Parameters
 ##########
 
@@ -123,6 +128,15 @@ function(jcm_install_config_file_package)
         "Cannot install target ${target}. The target does not exist!")
     endif()
   endforeach()
+
+  # Install Option
+  option(${JCM_PROJECT_PREFIX_NAME}_INSTALL
+    "Enables install commands of project ${PROJECT_NAME}"
+    ${PROJECT_IS_TOP_LEVEL})
+
+  if(NOT ${JCM_PROJECT_PREFIX_NAME}_INSTALL)
+    return()
+  endif()
 
   set(install_cmake_files) # list of cmake files to install at end
 
