@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
   push:
     paths-ignore:
-      - macos.yaml
-      - ubuntu.yaml
-      - windows.yaml
+      - .github/workflows/macos.yaml
+      - .github/workflows/ubuntu.yaml
+      - .github/workflows/windows.yaml
     branches:
       - main
 

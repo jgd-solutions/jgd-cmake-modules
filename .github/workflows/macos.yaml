@@ -4,16 +4,16 @@ on:
   workflow_dispatch:
   push:
     paths-ignore:
-      - pages.yaml
-      - ubuntu.yaml
-      - windows.yaml
+      - .github/workflows/pages.yaml
+      - .github/workflows/ubuntu.yaml
+      - .github/workflows/windows.yaml
     branches:
       - main
   pull_request:
     paths-ignore:
-      - pages.yaml
-      - ubuntu.yaml
-      - windows.yaml
+      - .github/workflows/pages.yaml
+      - .github/workflows/ubuntu.yaml
+      - .github/workflows/windows.yaml
     branches:
       - main
 jobs:
