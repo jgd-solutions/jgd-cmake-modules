@@ -48,10 +48,11 @@ dependencies as subprojects, and *jgd-cmake-modules* supports its consumptions a
   specific source. This provides maximum flexibility for future users to provide the dependency in
   whatever manner is most suitable for them, like a package manager. Furthermore, since only usage
   requirements are specified, it's seamless to opt into a direct means of providing the dependency
-  like as `FetchContent <https://cmake.org/cmake/help/latest/module/FetchContent.html#fetchcontent>`_
-  or :cmake:command:`add_subdirectory()`, to fulfill those needs. `Dependency Providers
-  <https://cmake.org/cmake/help/latest/command/cmake_language.html#dependency-providers>`_ is a direct
-  mechanism for this. Trying to do the reverse is often more convoluted, even considering
+  such as `FetchContent
+  <https://cmake.org/cmake/help/latest/module/FetchContent.html#fetchcontent>`_ or
+  :cmake:command:`add_subdirectory()`, to fulfill those needs. `Dependency Providers
+  <https://cmake.org/cmake/help/latest/command/cmake_language.html#dependency-providers>`_ is a
+  direct mechanism for this. Trying to do the reverse is often more convoluted, even considering
   FetchContent's `find_package integration
   <https://cmake.org/cmake/help/latest/module/FetchContent.html#integrating-with-find-package>`_.
 

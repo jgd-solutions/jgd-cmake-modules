@@ -3,9 +3,17 @@ name: JCM CI (MacOS)
 on:
   workflow_dispatch:
   push:
+    paths-ignore:
+      - pages.yaml
+      - ubuntu.yaml
+      - windows.yaml
     branches:
       - main
   pull_request:
+    paths-ignore:
+      - pages.yaml
+      - ubuntu.yaml
+      - windows.yaml
     branches:
       - main
 jobs:

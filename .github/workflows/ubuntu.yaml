@@ -3,9 +3,17 @@ name: JCM CI (Ubuntu)
 on:
   workflow_dispatch:
   push:
+    paths-ignore:
+      - macos.yaml
+      - pages.yaml
+      - windows.yaml
     branches:
       - main
   pull_request:
+    paths-ignore:
+      - macos.yaml
+      - pages.yaml
+      - windows.yaml
     branches:
       - main
 
@@ -14,7 +22,7 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        generator: [ "Ninja", "Ninja Multi-Config", "Unix Makefiles" ]
+        generator: ["Ninja", "Ninja Multi-Config", "Unix Makefiles"]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
