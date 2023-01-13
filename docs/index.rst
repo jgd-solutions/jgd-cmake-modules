@@ -6,8 +6,8 @@ Welcome to JCM's documentation!
 jgd-cmake-modules
 -----------------
 
-A set of CMake modules to easily and consistently develop proper CMake based projects conforming to
-the `Canonical Project Structure`_.
+CMake library of CMake modules to easily and consistently develop proper CMake projects.
+
 
 Pages
 -----
