@@ -36,5 +36,9 @@ jobs:
         shell: bash
       - name: Configure tests target
         run: cmake -G "${{ matrix.generator }}" --preset tests-ninja
+      - name: Format test code to ignore formatting errors
+        run: >
+          clang-format --style=file -i
+          $(find tests -name "*.hpp" -o -name "*.cpp" -o -name "*.h" -o -name "*.c")
       - name: Run all automated tests
         run: ctest --preset test-to-fail
