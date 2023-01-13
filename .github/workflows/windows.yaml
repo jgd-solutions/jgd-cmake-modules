@@ -33,6 +33,7 @@ jobs:
           version: 1.11.1
       - name: Install Doxygen for tests
         run: for i in 1 2 3; do choco install doxygen.install && break; done # multiple attempts
+        shell: bash
       - name: Configure tests target
         run: cmake -G "${{ matrix.generator }}" --preset tests-ninja
       - name: Run all automated tests
