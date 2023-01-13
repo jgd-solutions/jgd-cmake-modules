@@ -120,8 +120,7 @@ function(jcm_configure_package_config_file)
     message(
       FATAL_ERROR
       "Cannot configure a package config file for project "
-      "${PROJECT_NAME}. Could not find file ${in_config_file}${comp_err_msg}."
-    )
+      "${PROJECT_NAME}. Could not find file ${in_config_file}${comp_err_msg}.")
   endif()
 
   configure_package_config_file(

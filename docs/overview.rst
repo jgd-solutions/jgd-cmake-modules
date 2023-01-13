@@ -19,7 +19,8 @@ CMake <https://crascit.com/professional-cmake/>`_, and KitWare's `CMake
 Documentation <https://cmake.org/cmake/help/latest/index.html>`_.
 
 Many opinionated aspects of projects are enforced. These include target names, project structure,
-file naming, and more. Trying to conform to existing projects or alternative designs is not the goal.
+file naming, and more. Trying to conform to existing projects or alternative designs is not the
+goal.
 
 Project Structures
 ------------------
@@ -37,14 +38,28 @@ The provider of dependencies are not defined in CMake, nor do these modules try 
 This keeps the project agnostic to C++ package managers, system package managers, etc.
 
 It's recommended that all external requirements are to be found with :cmake:command:`find_package()`
-and :cmake:command:`target_link_libraries()`, but these modules do not prohibit adding dependencies
-as subprojects, and *jgd-cmake-modules* supports usage as a subproject.
+and  linked with :cmake:command:`target_link_libraries()`, but these modules do not prohibit adding
+dependencies as subprojects, and *jgd-cmake-modules* supports its consumptions as a subproject.
+
+.. collapse:: Why?
+
+  Acquiring dependencies through :cmake:command:`find_package()` is recommended because it specifies
+  the usage requirements of a dependency, and not a series of steps to provide the dependency from a
+  specific source. This provides maximum flexibility for future users to provide the dependency in
+  whatever manner is most suitable for them, like a package manager. Furthermore, since only usage
+  requirements are specified, it's seamless to opt into a direct means of providing the dependency
+  like as `FetchContent <https://cmake.org/cmake/help/latest/module/FetchContent.html#fetchcontent>`_
+  or :cmake:command:`add_subdirectory()`, to fulfill those needs. `Dependency Providers
+  <https://cmake.org/cmake/help/latest/command/cmake_language.html#dependency-providers>`_ is a direct
+  mechanism for this. Trying to do the reverse is often more convoluted, even considering
+  FetchContent's `find_package integration
+  <https://cmake.org/cmake/help/latest/module/FetchContent.html#integrating-with-find-package>`_.
 
 Components
 ----------
 
-"Component" is a generic term in CMake for project subsets. It's further refined for our purposes,
-here.
+"Component" is a generic term in CMake for project subsets. The term is further refined within
+*jgd-cmake-modules*.
 
 Components are *optional* subsets of a project. In the vast majority of cases, these components
 represent libraries (one library per component). As an example, a project, *libviewer*, may offer
@@ -52,19 +67,21 @@ components *core*, *gtk*, and *qt*, providing the libraries *libviewer-core*, *l
 *libviewer-qt*, respectively.
 
 However, a component may rarely represent an executable. For example, if a project produces multiple
-executables that operate together, such as a CLI and a daemon, these may be offered as components.
+executables that operate together, such as a CLI and a daemon, these may be offered as components of
+the same project.
 
 JCM introduces a target property, `COMPONENT`, which the commands
 :cmake:command:`jcm_add_executable` and :cmake:command:`jcm_add_library` set to the value provided
-to their respective *COMPONENT* arguments. This property is used throughout JCM to query a target's
-component.
+to their respective *COMPONENT* arguments. CMake extensively uses `COMPONENT` in function arguments
+- this property merely stores the value on the target to be queried throughout JCM.
 
 CMake components refer to what's described in the `Canonical Project Structure`_ as a "family of
 libraries". Discussions with its author, Boris Kolpackov, have clarified how the project structure
 extends to executable components - the results of which are enforced by *jgd-cmake-modules*.
 
-Prefer separating services, libraries, executables, etc. into individual projects instead of adding
-them as components. Use components where appropriate.
+Prefer separating services, libraries, executables, etc. into individual projects instead of
+adding them as components. Use components where appropriate to avoid bloating projects and
+complicating their usage.
 
 Target Names
 ------------
@@ -121,8 +138,9 @@ the generated target name through the argument :cmake:`OUT_TARGET`.
 Examples
 ########
 
-#. In the project `libcandy` (`name` is *candy* in the above table), a main library is created, without
-   any :cmake:variable:`COMPONENT` argument. The exported target name will be :cmake:`libcandy::libcandy`.
+#. In the project `libcandy` (`name` is *candy* in the above table), a main library is created,
+   without any :cmake:variable:`COMPONENT` argument. The exported target name will be
+   :cmake:`libcandy::libcandy`.
 
 #. In the project `candy` (*name* is *candy* in the above table), a component executable is created
    with the component `wrap`. The exported target name will be :cmake:`candy::wrap`.
