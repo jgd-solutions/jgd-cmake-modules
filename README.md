@@ -5,7 +5,7 @@ CMake library of CMake modules to easily and consistently develop proper CMake p
 [![Build & Test (MacOS)](https://github.com/jgd-solutions/jgd-cmake-modules/actions/workflows/macos.yaml/badge.svg)](https://github.com/jgd-solutions/jgd-cmake-modules/actions/workflows/macos.yaml)
 [![Build & Test (Ubuntu)](https://github.com/jgd-solutions/jgd-cmake-modules/actions/workflows/ubuntu.yaml/badge.svg)](https://github.com/jgd-solutions/jgd-cmake-modules/actions/workflows/ubuntu.yaml)
 [![Build & Test (Windows)](https://github.com/jgd-solutions/jgd-cmake-modules/actions/workflows/windows.yaml/badge.svg)](https://github.com/jgd-solutions/jgd-cmake-modules/actions/workflows/windows.yaml)
-[![Deploy to GH Pages](https://github.com/jgd-solutions/jgd-cmake-modules/actions/workflows/pages.yaml/badge.svg)](https://github.com/jgd-solutions/jgd-cmake-modules/actions/workflows/pages.yaml)
+[![Docs on GH Pages](https://github.com/jgd-solutions/jgd-cmake-modules/actions/workflows/pages.yaml/badge.svg)](https://github.com/jgd-solutions/jgd-cmake-modules/actions/workflows/pages.yaml)
 
 Checkout the full [documentation](https://jgd-solutions.github.io/jgd-cmake-modules/).
 
