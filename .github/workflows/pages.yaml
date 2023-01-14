@@ -9,6 +9,13 @@ on:
       - .github/workflows/windows.yaml
     branches:
       - main
+  pull_request:
+    paths-ignore:
+      - .github/workflows/macos.yaml
+      - .github/workflows/ubuntu.yaml
+      - .github/workflows/windows.yaml
+    branches:
+      - main
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
@@ -21,10 +28,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  build:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout
@@ -41,12 +45,25 @@ jobs:
         run: cmake --preset docs-ninja
       - name: Build documentation
         run: cmake --build --preset sphinx-docs
-      - name: Setup Pages
-        uses: actions/configure-pages@v2
       - name: Upload artifact
+        if: ${{ github.ref_name == 'main' && github.event_name == 'push' }}
         uses: actions/upload-pages-artifact@v1
         with:
+          name: jcm-sphinx-docs
           path: "./build/docs/sphinx"
+  deploy:
+    if: ${{ github.ref_name == 'main' && github.event_name == 'push' }}
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-22.04
+    needs: [build]
+    steps:
+      - uses: actions/download-artifact@v2
+        with:
+          name: jcm-sphinx-docs
+      - name: Setup Pages
+        uses: actions/configure-pages@v2
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v1
