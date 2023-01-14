@@ -17,6 +17,10 @@ on:
     branches:
       - main
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   build-test-windows:
     runs-on: windows-2022
@@ -33,7 +37,6 @@ jobs:
           version: 1.11.1
       - name: Install Doxygen for tests
         run: for i in 1 2 3; do choco install doxygen.install && break; done # multiple attempts
-        shell: bash
       - name: Configure tests target
         run: cmake -G "${{ matrix.generator }}" --preset tests-ninja
       - name: Format test code to ignore formatting errors
