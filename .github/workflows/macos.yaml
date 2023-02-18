@@ -7,7 +7,7 @@ on:
       - .github/workflows/pages.yaml
       - .github/workflows/ubuntu.yaml
       - .github/workflows/windows.yaml
-      - docs/
+      - docs/*
     branches:
       - main
   pull_request:
@@ -15,7 +15,7 @@ on:
       - .github/workflows/pages.yaml
       - .github/workflows/ubuntu.yaml
       - .github/workflows/windows.yaml
-      - docs/
+      - docs/*
     branches:
       - main
 jobs:
