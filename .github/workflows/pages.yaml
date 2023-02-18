@@ -50,6 +50,7 @@ jobs:
   deploy:
     # can't use env @ workflow level. Duplicate 'if' on each step
     # https://github.com/actions/runner/issues/480
+    if: github.ref_name == env.push_deploy_branch && github.event_name == 'push'
     concurrency:
       group: "pages"
       cancel-in-progress: true
@@ -59,14 +60,10 @@ jobs:
     runs-on: ubuntu-22.04
     needs: [build]
     steps:
-      - name: Env
-        run: echo running
       - uses: actions/download-artifact@v3
-        if: github.ref_name == env.push_deploy_branch && github.event_name == 'push'
         with:
           name: github-pages
       - name: Setup Pages
-        if: github.ref_name == env.push_deploy_branch && github.event_name == 'push'
         uses: actions/configure-pages@v2
       - name: Deploy to GitHub Pages
         if: github.ref_name == env.push_deploy_branch && github.event_name == 'push'
