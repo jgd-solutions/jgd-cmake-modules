@@ -45,8 +45,6 @@ jobs:
         with:
           path: "./build/docs/sphinx"
   deploy:
-    # can't use env @ workflow level. Duplicate 'if' on each step
-    # https://github.com/actions/runner/issues/480
     if: github.ref_name == github.event.repository.default_branch && github.event_name == 'push'
     concurrency:
       group: "pages"
