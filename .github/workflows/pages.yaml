@@ -1,8 +1,5 @@
 name: Docs on GH Pages
 
-env:
-  push_deploy_branch: main
-
 on:
   workflow_dispatch:
   push:
@@ -43,13 +40,12 @@ jobs:
       - name: Build documentation
         run: cmake --build --preset sphinx-docs
       - name: Upload artifact
-        if: github.ref_name == env.push_deploy_branch && github.event_name == 'push'
+        if: github.ref_name == github.event.repository.default_branch && github.event_name == 'push'
         uses: actions/upload-pages-artifact@v1
         with:
-          path: "./build/docs/sphinx"
+          path: ./build/docs/sphinx
   deploy:
-    # can't use env @ workflow level. Duplicate 'if' on each step
-    # https://github.com/actions/runner/issues/480
+    if: github.ref_name == github.event.repository.default_branch && github.event_name == 'push'
     concurrency:
       group: "pages"
       cancel-in-progress: true
@@ -60,13 +56,10 @@ jobs:
     needs: [build]
     steps:
       - uses: actions/download-artifact@v3
-        if: github.ref_name == env.push_deploy_branch && github.event_name == 'push'
         with:
           name: github-pages
       - name: Setup Pages
-        if: github.ref_name == env.push_deploy_branch && github.event_name == 'push'
         uses: actions/configure-pages@v2
       - name: Deploy to GitHub Pages
-        if: github.ref_name == env.push_deploy_branch && github.event_name == 'push'
         id: deployment
         uses: actions/deploy-pages@v1

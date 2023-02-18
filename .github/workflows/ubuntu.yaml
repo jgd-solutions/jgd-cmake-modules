@@ -7,6 +7,7 @@ on:
       - .github/workflows/macos.yaml
       - .github/workflows/pages.yaml
       - .github/workflows/windows.yaml
+      - docs/**
     branches:
       - main
   pull_request:
@@ -14,6 +15,7 @@ on:
       - .github/workflows/macos.yaml
       - .github/workflows/pages.yaml
       - .github/workflows/windows.yaml
+      - docs/**
     branches:
       - main
 
