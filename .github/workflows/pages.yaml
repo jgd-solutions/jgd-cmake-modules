@@ -59,6 +59,8 @@ jobs:
     runs-on: ubuntu-22.04
     needs: [build]
     steps:
+      - name: Env
+        run: echo running
       - uses: actions/download-artifact@v3
         if: github.ref_name == env.push_deploy_branch && github.event_name == 'push'
         with:
