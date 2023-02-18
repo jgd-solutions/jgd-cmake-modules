@@ -7,7 +7,6 @@ on:
       - .github/workflows/macos.yaml
       - .github/workflows/ubuntu.yaml
       - .github/workflows/windows.yaml
-      - fake-path
     branches:
       - main
   pull_request:
