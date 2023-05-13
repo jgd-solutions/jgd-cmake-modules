@@ -11,12 +11,6 @@ include(JcmParseArguments)
 include(JcmListTransformations)
 include(CMakeDependentOption)
 
-# provides named arguments
-# handles more types than just bool
-# handles (filesystem) PATH type
-# handles dependent options
-# verify naming scheme
-
 #[=======================================================================[.rst:
 
 jcm_add_option
@@ -73,9 +67,9 @@ One Value
   The name of the option to create.
 
 :cmake:variable:`TYPE`
-  The type of the option to create. Must be one of :cmake:`BOOL`, :cmake:`FILEPATH`, :cmake:`PATH`,
-  :cmake:`STRING`, :cmake:`INTERNAL`; the `types available for cache entries
-  <https://cmake.org/cmake/help/latest/command/set.html#set-cache-entry>`_
+  The type of the option to create. Must be one of the `types available for cache entries
+  <https://cmake.org/cmake/help/latest/command/set.html#set-cache-entry>`_: :cmake:`BOOL`,
+  :cmake:`FILEPATH`, :cmake:`PATH`, :cmake:`STRING`, or :cmake:`INTERNAL`.
 
 :cmake:variable:`DEFAULT`
   The default value of the option should it not already be set in the CMake cache. This value is
