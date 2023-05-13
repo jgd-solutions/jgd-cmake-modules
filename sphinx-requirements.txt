@@ -24,6 +24,6 @@ sphinxcontrib-moderncmakedomain==3.25.0
 sphinxcontrib-qthelp==1.0.3
 sphinxcontrib-serializinghtml==1.1.5
 sphinxnotes-strike==1.2
-style==1.1.6
+style==1.1.0
 update==0.0.1
 urllib3==1.26.15
