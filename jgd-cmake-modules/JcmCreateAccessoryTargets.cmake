@@ -35,12 +35,8 @@ function(_jcm_build_error_targets targets err_msg)
   jcm_create_message_command(
     NAME ${PROJECT_NAME}_err
     LEVEL FATAL_ERROR
-    MESSAGES "${target_err_msgs}"
-  )
-    ONE_VALUE_KEYWORDS "COMMAND" "LEVEL"
-    MULTI_VALUE_KEYWORDS "MESSAGES"
-    REQUIRES_ALL "COMMAND" "LEVEL" "MESSAGES"
-    ARGUMENTS "${ARGN}")
+    MESSAGES "${target_err_msgs}")
+
 
   foreach(target IN LISTS targets)
     add_custom_target(
@@ -90,7 +86,7 @@ Parameters
 ##########
 
 Options
-~~~~~~~~~~
+~~~~~~~
 
 :cmake:variable:`QUIET`
   Omits the --verbose option to the underlying clang-format executable.

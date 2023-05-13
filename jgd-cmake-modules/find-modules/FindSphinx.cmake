@@ -80,8 +80,8 @@ if(Sphinx_EXECUTABLE)
 
   if(_Sphinx_version_stderr)
     message(WARNING
-      "Failed to determine version of sphinx build executable (${Sphinx_EXECUTABLE})! Error:\n"
-      "${_Sphinx_version_stderr}")
+      "Failed to determine version of sphinx build executable (${Sphinx_EXECUTABLE})! Ensure any "
+      "pertinent Python virtual environment is activated. Error: ${_Sphinx_version_stderr}")
   elseif(NOT _Sphinx_version_stdout MATCHES "sphinx-build[23]? [0-9]+\\.[0-9]+\\.[0-9]+")
     message(WARNING
       "Sphinx's version output is not recognized by this find module (${_Sphinx_version_stdout})!)")
