@@ -6,8 +6,9 @@ Modules
 .. cmake-module:: ../jgd-cmake-modules/JcmAddExecutable.cmake
 .. cmake-module:: ../jgd-cmake-modules/JcmAddLibrary.cmake
 .. cmake-module:: ../jgd-cmake-modules/JcmAddTestExecutable.cmake
-.. cmake-module:: ../jgd-cmake-modules/JcmCreateAccessoryTargets.cmake
 .. cmake-module:: ../jgd-cmake-modules/JcmSourceSubdirectories.cmake
+.. cmake-module:: ../jgd-cmake-modules/JcmCreateAccessoryTargets.cmake
+.. cmake-module:: ../jgd-cmake-modules/JcmAddOption.cmake
 .. cmake-module:: ../jgd-cmake-modules/JcmBasicPackageConfig.cmake
 .. cmake-module:: ../jgd-cmake-modules/JcmInstallConfigFilePackage.cmake
 .. cmake-module:: ../jgd-cmake-modules/JcmDefaultCompileOptions.cmake

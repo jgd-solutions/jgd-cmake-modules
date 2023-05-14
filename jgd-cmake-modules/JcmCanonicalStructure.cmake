@@ -356,8 +356,7 @@ jcm_canonical_include_dirs
     jcm_canonical_include_dirs(
       [WITH_BINARY_INCLUDE_DIRS]
       OUT_VAR <out-var>
-      TARGET <target>
-    )
+      TARGET <target>)
 
 Sets the variable specified by :cmake:variable:`OUT_VAR` to the canonical include directories for
 :cmake:variable:`TARGET`.
@@ -428,8 +427,7 @@ function(jcm_canonical_include_dirs)
     OPTIONS "WITH_BINARY_INCLUDE_DIRS"
     ONE_VALUE_KEYWORDS "TARGET;OUT_VAR"
     REQUIRES_ALL "TARGET;OUT_VAR"
-    ARGUMENTS "${ARGN}"
-  )
+    ARGUMENTS "${ARGN}")
 
   # Usage guards
   if(NOT TARGET ${ARGS_TARGET})

@@ -21,8 +21,7 @@ jcm_header_file_sets
 
     jcm_header_file_sets(
       [TARGET <target>]
-      [HEADERS <file-path>...]
-    )
+      [HEADERS <file-path>...])
 
 Creates header `file-sets
 <https://cmake.org/cmake/help/latest/command/target_sources.html#file-sets>`_ of the provided
@@ -79,8 +78,7 @@ Examples
   jcm_header_file_sets(
     PUBLIC
     TARGET libimage_libimage
-    HEADERS image.hpp
-  )
+    HEADERS image.hpp)
 
   # canonical include directory of image.hpp added PUBLICally to libimage_libimage
   # now it's available when linking against libimage_libimage
@@ -88,8 +86,7 @@ Examples
   jcm_add_test_executable(
     NAME use_image_hpp
     SOURCES use_image_hpp.cpp
-    LIBS libimage_libimage
-  )
+    LIBS libimage_libimage)
 
 #]=======================================================================]
 function(jcm_header_file_sets scope)
@@ -122,8 +119,7 @@ function(jcm_header_file_sets scope)
   jcm_canonical_include_dirs(
     WITH_BINARY_INCLUDE_DIRS
     TARGET ${ARGS_TARGET}
-    OUT_VAR available_include_dirs
-  )
+    OUT_VAR available_include_dirs)
 
   foreach(header_path ${ARGS_HEADERS})
     set(shortest_distance_from_include_dir 65000)

@@ -1,10 +1,17 @@
 cmake_minimum_required(VERSION 3.24)
 project(libcomponents VERSION 0.0.0 LANGUAGES CXX)
 
-# a very large project may want to omit expensive configuration of a component
-option(
-  LIBCOMPONENTS_BUILD_EXTRA
-  "Allows omitting configuring & building libcomponents::extra target" ON)
+find_package(jgd-cmake-modules CONFIG REQUIRED)
+include(JcmAllModules)
+
+# a very large project may want to omit the expensive configuration of a component
+# targets can always be selectively with `--target <target>` option to `cmake --build`
+# this is mostly easy to test for
+jcm_add_option(
+  NAME LIBCOMPONENTS_BUILD_EXTRA
+  DESCRIPTION "Allows omitting the expensive configuration of libcomponents::extra target"
+  TYPE BOOL
+  DEFAULT ON)
 
 if(LIBCOMPONENTS_BUILD_EXTRA)
   set(libcomponents_components core extra)
@@ -14,13 +21,9 @@ else()
   set(libcomponents_targets libcomponents::core)
 endif()
 
-
-find_package(jgd-cmake-modules CONFIG REQUIRED)
 find_package(ClangFormat)
 
-include(JcmAllModules)
 jcm_setup_project()
-
 jcm_source_subdirectories(
   ADD_SUBDIRS
   WITH_TESTS_DIR

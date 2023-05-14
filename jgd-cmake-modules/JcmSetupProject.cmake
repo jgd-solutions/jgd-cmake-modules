@@ -16,6 +16,7 @@ binary package. Creates target component, *COMPONENT*, and defines macro
 include(JcmParseArguments)
 include(JcmFileNaming)
 include(JcmStandardDirs)
+include(JcmAddOption)
 include(CheckIPOSupported)
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
@@ -184,16 +185,24 @@ macro(JCM_SETUP_PROJECT)
 
   # == Invariable Project Options ==
 
-  if(BUILD_TESTING AND PROJECT_IS_TOP_LEVEL)
-    set(default_enable_tests ON)
+  if(BUILD_TESTING)
+    set(default_build_tests ON)
   else()
-    set(default_enable_tests OFF)
+    set(default_build_tests OFF)
   endif()
 
-  option(${JCM_PROJECT_PREFIX_NAME}_BUILD_TESTS "Build all automated tests for ${PROJECT_NAME}" ${default_enable_tests})
-  unset(default_enable_tests)
+  jcm_add_option(
+    NAME ${JCM_PROJECT_PREFIX_NAME}_BUILD_TESTS
+    DESCRIPTION "Build all automated tests for ${PROJECT_NAME}"
+    TYPE BOOL
+    DEFAULT ${default_build_tests})
+  unset(default_build_tests)
 
-  option(${JCM_PROJECT_PREFIX_NAME}_BUILD_DOCS "Build all documentation for ${PROJECT_NAME}" OFF)
+  jcm_add_option(
+    NAME ${JCM_PROJECT_PREFIX_NAME}_BUILD_DOCS
+    DESCRIPTION "Build all documentation for ${PROJECT_NAME}"
+    TYPE BOOL
+    DEFAULT OFF)
 
   # == Variables Setting Default Target Properties ==
 

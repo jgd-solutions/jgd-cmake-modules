@@ -21,6 +21,7 @@ include(JcmListTransformations)
 include(JcmCanonicalStructure)
 include(JcmStandardDirs)
 include(JcmSymlinks)
+include(JcmMessages)
 
 # Private function to build targets that emit error messages instead of their intended purpose
 # Escape sequences (\n) in the message may cause havoc in the generated build files if not properly
@@ -31,13 +32,17 @@ function(_jcm_build_error_targets targets err_msg)
 
   set(exit_failure "${CMAKE_COMMAND}" -E false)
   set(print_err "${CMAKE_COMMAND}" -E echo "${target_err_msgs}")
+  jcm_create_message_command(
+    NAME ${PROJECT_NAME}_err
+    LEVEL FATAL_ERROR
+    MESSAGES "${target_err_msgs}")
+
 
   foreach(target IN LISTS targets)
     add_custom_target(
       ${target}
       COMMAND "${print_err}"
-      COMMAND "${exit_failure}"
-    )
+      COMMAND "${exit_failure}")
   endforeach()
 endfunction()
 
@@ -56,8 +61,7 @@ jcm_create_clang_format_targets
       [EXCLUDE_REGEX <regex>]
       [COMMAND <command|target>]
       [ADDITIONAL_PATHS <path>...]
-      SOURCE_TARGETS <target>...
-    )
+      SOURCE_TARGETS <target>...)
 
 Creates custom targets "clang-format" and "clang-format-check" that invoke the `clang::format`
 target, or the provided :cmake:variable:`COMMAND`, on all the sources for the provided
@@ -82,7 +86,7 @@ Parameters
 ##########
 
 Options
-~~~~~~~~~~
+~~~~~~~
 
 :cmake:variable:`QUIET`
   Omits the --verbose option to the underlying clang-format executable.
@@ -138,8 +142,7 @@ Examples
     EXCLUDE_REGEX "libbbq_config.hpp$"
     ADDITIONAL_PATHS
       completely/separate/file.hpp
-      completely/separate/file.cpp
-  )
+      completely/separate/file.cpp)
 
 --------------------------------------------------------------------------
 
@@ -150,8 +153,7 @@ function(jcm_create_clang_format_targets)
     MULTI_VALUE_KEYWORDS "ADDITIONAL_PATHS;SOURCE_TARGETS"
     ONE_VALUE_KEYWORD "EXCLUDE_REGEX" "COMMAND" "STYLE_FILE"
     REQUIRES_ALL "SOURCE_TARGETS"
-    ARGUMENTS "${ARGN}"
-  )
+    ARGUMENTS "${ARGN}")
 
   if(NOT PROJECT_IS_TOP_LEVEL AND NOT ARGS_WITHOUT_TOP_LEVEL_CHECK)
     return()

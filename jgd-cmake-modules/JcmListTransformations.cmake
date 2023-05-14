@@ -127,8 +127,7 @@ jcm_transform_list
     jcm_transform_list(
       <ABSOLUTE_PATH [BASE <path>] | NORMALIZE_PATH | FILENAME>
       INPUT <item>...
-      OUT_VAR <out-var>
-    )
+      OUT_VAR <out-var>)
 
 Transforms the items in :cmake:variable:`INPUT` with the given transformation into the list
 specified by :cmake:variable:`OUT_VAR`.
@@ -173,16 +172,14 @@ Examples
   jcm_transform_list(
     ABSOLUTE_PATH
     INPUT image.hpp readers.hpp viewer.hpp
-    OUT_VAR absolute_headers
-  )
+    OUT_VAR absolute_headers)
 
 .. code-block:: cmake
 
   jcm_transform_list(
     FILENAME
     INPUT libimage/image.hpp libimage/readers.hpp libimage/viewer.hpp
-    OUT_VAR header_file_names
-  )
+    OUT_VAR header_file_names)
 
 --------------------------------------------------------------------------
 
@@ -197,8 +194,7 @@ function(jcm_transform_list)
     REQUIRES_ALL "OUT_VAR"
     REQUIRES_ANY "ABSOLUTE_PATH" "NORMALIZE_PATH" "FILENAME"
     MUTUALLY_EXCLUSIVE "ABSOLUTE_PATH" "NORMALIZE_PATH" "FILENAME"
-    ARGUMENTS "${ARGN}"
-  )
+    ARGUMENTS "${ARGN}")
 
   # check for missing values on other variables, besides INPUT
   if(ARGS_KEYWORDS_MISSING_VALUES)
@@ -266,8 +262,7 @@ jcm_regex_find_list
       REGEX <regex>
       <[OUT_IDX <out-var>
        [OUT_ELEMENT <out-var>]>
-      INPUT <item>...
-    )
+      INPUT <item>...)
 
 Searches :cmake:variable:`INPUT` for an item that either matches or mismatches
 (:cmake:variable:`MISMATCH` is provided) the regular expression :cmake:variable:`REGEX`.
@@ -327,8 +322,7 @@ function(jcm_regex_find_list)
     MULTI_VALUE_KEYWORDS "INPUT"
     REQUIRES_ANY "OUT_IDX" "OUT_ELEMENT"
     REQUIRES_ALL "REGEX" "INPUT"
-    ARGUMENTS "${ARGN}"
-  )
+    ARGUMENTS "${ARGN}")
 
   if(ARGS_MISMATCH)
     set(mismatch_not NOT)

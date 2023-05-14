@@ -1,20 +1,26 @@
 include(JcmParseArguments)
 
-option(
-  MANY_EXEC_BUILD_COMPILER
-  "Allows omitting configuring & building many-exec::compiler target" ON)
+# configuration of these components may be expensive, so provide options to avoid configuring them
+# targets can always be selectively with `--target <target>` option to `cmake --build`
+# these are mostly easy to test against
+jcm_add_option(
+  NAME MANY_EXEC_BUILD_COMPILER
+  DESCRIPTION "Allows omitting configuring & building many-exec::compiler target"
+  TYPE BOOL
+  DEFAULT ON)
 
-option(
-  MANY_EXEC_BUILD_FORMATTER
-  "Allows omitting configuring & building many-exec::formatter target" ON)
+jcm_add_option(
+  NAME MANY_EXEC_BUILD_FORMATTER
+  DESCRIPTION "Allows omitting configuring & building many-exec::formatter target"
+  TYPE BOOL
+  DEFAULT ON)
 
 
 function(many_exec_get_enabled_targets)
   jcm_parse_arguments(
     ONE_VALUE_KEYWORDS "OUT_FORMAT_TARGETS" "OUT_BUILD_TARGETS"
     REQUIRES_ANY "OUT_FORMAT_TARGETS" "OUT_BUILD_TARGETS"
-    ARGUMENTS "${ARGN}"
-  )
+    ARGUMENTS "${ARGN}")
 
   set(many_exec_build_targets)
   set(many_exec_format_targets)

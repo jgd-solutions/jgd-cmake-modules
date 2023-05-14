@@ -15,6 +15,7 @@ include(JcmConfigureFiles)
 include(JcmExpandDirectories)
 include(JcmListTransformations)
 include(JcmSymlinks)
+include(JcmAddOption)
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
@@ -130,11 +131,12 @@ function(jcm_install_config_file_package)
   endforeach()
 
   # Install Option
-  option(${JCM_PROJECT_PREFIX_NAME}_INSTALL
-    "Enables install commands of project ${PROJECT_NAME}"
-    ${PROJECT_IS_TOP_LEVEL})
-
-  if(NOT ${JCM_PROJECT_PREFIX_NAME}_INSTALL)
+  jcm_add_option(
+    NAME ${JCM_PROJECT_PREFIX_NAME}_CONFIGURE_INSTALL
+    DESCRIPTION  "Enables install commands of project ${PROJECT_NAME}"
+    TYPE BOOL
+    DEFAULT ${PROJECT_IS_TOP_LEVEL})
+  if(NOT ${JCM_PROJECT_PREFIX_NAME}_CONFIGURE_INSTALL)
     return()
   endif()
 

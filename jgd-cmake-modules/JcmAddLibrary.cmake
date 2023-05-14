@@ -14,6 +14,7 @@ include(JcmListTransformations)
 include(JcmCanonicalStructure)
 include(JcmDefaultCompileOptions)
 include(JcmHeaderFileSet)
+include(JcmAddOption)
 include(GenerateExportHeader)
 
 #[=======================================================================[.rst:
@@ -243,23 +244,30 @@ function(jcm_add_library)
 
   if(NOT DEFINED ARGS_TYPE)
     # commonly used (build-wide) build-shared option
-    option(BUILD_SHARED_LIBS "Build libraries with unspecified types shared." OFF)
+    jcm_add_option(
+      NAME BUILD_SHARED_LIBS
+      DESCRIPTION "Build libraries with unspecified types shared."
+      WITHOUT_NAME_PREFIX_CHECK
+      TYPE BOOL
+      DEFAULT OFF)
 
     # project specific build shared option
-    option(
-      ${JCM_PROJECT_PREFIX_NAME}_BUILD_SHARED_LIBS
-      "Build libraries of project ${PROJECT_NAME} with unspecified types shared."
-      ${BUILD_SHARED_LIBS})
+    jcm_add_option(
+      NAME ${JCM_PROJECT_PREFIX_NAME}_BUILD_SHARED_LIBS
+      DESCRIPTION "Build libraries of project ${PROJECT_NAME} with unspecified types shared."
+      TYPE BOOL
+      DEFAULT ${BUILD_SHARED_LIBS})
     set(build_project_shared ${${JCM_PROJECT_PREFIX_NAME}_BUILD_SHARED_LIBS})
 
     # component specific build shared option
     if(DEFINED comp_arg)
       string(TOUPPER ${ARGS_COMPONENT} comp_temp)
       string(REPLACE "-" "_" comp_upper ${comp_temp})
-      option(
-        ${JCM_PROJECT_PREFIX_NAME}_${comp_upper}_BUILD_SHARED
-        "Build library component ${ARGS_COMPONENT} of project ${PROJECT_NAME} shared."
-        ${${JCM_PROJECT_PREFIX_NAME}_BUILD_SHARED_LIBS})
+      jcm_add_option(
+        NAME ${JCM_PROJECT_PREFIX_NAME}_${comp_upper}_BUILD_SHARED
+        DESCRIPTION "Build library component ${ARGS_COMPONENT} of project ${PROJECT_NAME} shared."
+        TYPE BOOL
+        DEFAULT ${build_project_shared})
       set(build_component_shared ${${JCM_PROJECT_PREFIX_NAME}_${comp_upper}_BUILD_SHARED})
     endif()
   endif()
