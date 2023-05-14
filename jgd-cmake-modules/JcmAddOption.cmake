@@ -23,9 +23,9 @@ jcm_add_option
     jcm_add_option(
       [WITHOUT_NAME_PREFIX_CHECK]
       NAME <option-name>
+      DESCRIPTION <description>
       TYPE <BOOL|FILEPATH|PATH|STRING|INTERNAL>
       DEFAULT <default-value>
-      DESCRIPTION <description>
       [CONDITION <condition>
        CONDITION_MET_DEFAULT <default-value-when-met>]
       [ACCEPT_VALUES <value>...])
@@ -66,6 +66,9 @@ One Value
 :cmake:variable:`NAME`
   The name of the option to create.
 
+:cmake:variable:`DESCRIPTION`
+  A description of the option for builders of the project.
+
 :cmake:variable:`TYPE`
   The type of the option to create. Must be one of the `types available for cache entries
   <https://cmake.org/cmake/help/latest/command/set.html#set-cache-entry>`_: :cmake:`BOOL`,
@@ -74,9 +77,6 @@ One Value
 :cmake:variable:`DEFAULT`
   The default value of the option should it not already be set in the CMake cache. This value is
   also used if :cmake:variable:`CONDITION` is provided to this function but is not met.
-
-:cmake:variable:`DESCRIPTION`
-  A description of the option for builders of the project.
 
 :cmake:variable:`CONDITION`
   An optional condition that will make the option a dependent option; dependent upon the provided
@@ -102,10 +102,10 @@ Examples
 .. code-block:: cmake
 
   jcm_add_option(
-    NAME ${PROJECT_NAME}_LINK_STATIC
-    DESCRIPTION "Links the target ${PROJECT_NAME} exclusively against static libraries"
+    NAME ${PROJECT_NAME}_BUILD_INTEGRATION_TESTS
+    DESCRIPTION "Builds the automated integration tests"
     TYPE BOOL
-    DEFAULT OFF)
+    DEFAULT ${PROJECT_NAME})
 
 .. code-block:: cmake
 
@@ -116,6 +116,21 @@ Examples
     DEFAULT "NONE"
     CONDITION "${PROJECT_NAME}_BUILD_TRANSPORT_LAYER"
     VALUES "NONE;ZIP;BROTLI;LZ")
+
+.. code-block:: cmake
+
+    jcm_add_option(
+      NAME BUILD_SHARED_LIBS
+      DESCRIPTION "Build libraries with unspecified types shared."
+      WITHOUT_NAME_PREFIX_CHECK
+      TYPE BOOL
+      DEFAULT OFF)
+
+    jcm_add_option(
+      NAME ${JCM_PROJECT_PREFIX_NAME}_BUILD_SHARED_LIBS
+      DESCRIPTION "Build libraries of project ${PROJECT_NAME} with unspecified types shared."
+      TYPE BOOL
+      DEFAULT ${BUILD_SHARED_LIBS})
 
 --------------------------------------------------------------------------
 
