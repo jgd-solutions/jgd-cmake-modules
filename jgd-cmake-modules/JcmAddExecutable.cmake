@@ -31,8 +31,7 @@ jcm_add_executable
       [NAME <name>]
       [OUT_TARGET <out-var>]
       [LIB_SOURCES <source>...]
-      SOURCES <source>...
-    )
+      SOURCES <source>...)
 
 Adds an executable target to the project, similar to CMake's `add_executable`, but with enhancements
 . It allows creating both the executable and, optionally, an associated object or interface library
@@ -113,14 +112,12 @@ Examples
   jcm_add_executable(
     OUT_TARGET target
     SOURCES main.cpp
-    LIB_SOURCES xml.cpp
-  )
+    LIB_SOURCES xml.cpp)
 
   jcm_add_test_executable(
     NAME test_parser
     SOURCES test_parser.cpp
-    LIBS ${target}-library Boost::ut
-  )
+    LIBS ${target}-library Boost::ut)
 
 .. code-block:: cmake
 
@@ -129,8 +126,7 @@ Examples
   jcm_add_executable(
     OUT_TARGET target
     SOURCES main.cpp
-    LIB_SOURCES coffee.hpp
-  )
+    LIB_SOURCES coffee.hpp)
 
 #]=======================================================================]
 function(jcm_add_executable)
@@ -183,14 +179,12 @@ function(jcm_add_executable)
     INPUT "${ARGS_SOURCES};${ARGS_LIB_SOURCES}"
     REGEX "${regex}"
     TRANSFORM "FILENAME"
-    OUT_MISMATCHED incorrectly_named
-  )
+    OUT_MISMATCHED incorrectly_named)
   if(incorrectly_named)
     message(
       FATAL_ERROR
       "Provided source files do not match the regex for executable sources, ${regex}: "
-      "${incorrectly_named}."
-    )
+      "${incorrectly_named}.")
   endif()
 
   # verify file locations

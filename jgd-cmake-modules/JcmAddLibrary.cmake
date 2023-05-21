@@ -35,8 +35,7 @@ jcm_add_library
       <[INTERFACE_HEADERS <header>...]
        [PUBLIC_HEADERS <header>...]
        [PRIVATE_HEADERS <header>...]
-       [SOURCES <source>...]>
-    )
+       [SOURCES <source>...]>)
 
 
 Adds a library target to the project, similar to CMake's `add_library`, but with enhancements.
@@ -143,8 +142,7 @@ Examples
     COMPONENT engine
     PUBLIC_HEADERS engine.hpp
     PRIVATE_HEADERS crank.hpp
-    SOURCES engine.cpp crank.cpp
-  )
+    SOURCES engine.cpp crank.cpp)
 
   jcm_add_executable(SOURCES main.cpp)
   target_link_libraries(car::car PRIVATE car::libengine)
