@@ -142,7 +142,7 @@ function(jcm_canonical_subdir)
       "TARGET '${ARGS_TARGET}' provided to ${CMAKE_CURRENT_FUNCTION} does not "
       "start with '${PROJECT_NAME}::' or '${PROJECT_NAME}_' and is therefore not a target of "
       "project ${PROJECT_NAME} or does not follow the target naming structure."
-      )
+    )
   else()
     unset(mismatched_target_message)
   endif()
@@ -482,11 +482,15 @@ endfunction()
 # Given a list of absolute, normalized source file paths in SOURCES, will check each source file
 # against the possible paths in ROOT_DIRS. If ROOT_DIRS is not provided, ROOT_DIRS will contain the
 # current source directory, current binary directory, and the project binary directory, if that's
-# different from the current binary directory. ADD_PARENT will append the parent source and binary
-# directory to ROOT_DIRS for executable components' common files.
+# different from the current binary directory. ADD_PARENT will append each parent directory in
+# ROOT_DIRS to ROOT_DIRS, namely for the shared files of executable components directories:
+# project
+#    - project
+#      - exec-comp1
+#      - exec-comp2
 #
-# This function assumes it is called within a canonical source subdirectory, which is why the
-# CURRRENT_* variables are used.
+# Without ROOT_DIRS provided, this function assumes it is called within a canonical source
+# subdirectory, which is why the CMAKE_CURRRENT_* variables are used.
 #
 # A fatal error is emitted if one of the source files is not within one of the ROOT_DIRS
 #
@@ -495,6 +499,7 @@ function(_jcm_verify_source_locations)
     OPTIONS "ADD_PARENT"
     MULTI_VALUE_KEYWORDS "SOURCES" "ROOT_DIRS"
     REQUIRES_ALL "SOURCES"
+    MUTUALLY_EXCLUSIVE "ADD_PARENT:ROOT_DIRS"
     ARGUMENTS "${ARGN}")
 
   if(DEFINED ARGS_ROOT_DIRS)
@@ -502,15 +507,11 @@ function(_jcm_verify_source_locations)
   else()
     set(root_source_dirs "${CMAKE_CURRENT_SOURCE_DIR}")
     set(root_binary_dirs "${CMAKE_CURRENT_BINARY_DIR};${PROJECT_BINARY_DIR}")
-
-    if(ARGS_ADD_PARENT)
-      cmake_path(GET CMAKE_CURRENT_SOURCE_DIR PARENT_PATH non_component_source_dir)
-      cmake_path(GET CMAKE_CURRENT_BINARY_DIR PARENT_PATH non_component_binary_dir)
-      list(APPEND root_source_dirs "${non_component_source_dir}")
-      list(APPEND root_binary_dirs "${non_component_binary_dir}")
-    endif()
-
     set(root_dirs "${root_source_dirs}" "${root_binary_dirs}")
+  endif()
+
+  if(ARGS_ADD_PARENT)
+    jcm_transform_list(PARENT_PATH INPUT "${root_dirs}" OUT_VAR root_dirs)
   endif()
 
   list(REMOVE_DUPLICATES root_dirs)
@@ -524,9 +525,8 @@ function(_jcm_verify_source_locations)
 
     if(misplaced_file)
       message(FATAL_ERROR
-        "The following file is not an acceptable input file for the library at ${CMAKE_CURRENT_SOURCE_DIR}. "
-        "The file must be located within one of ${root_dirs}. "
-        "Misplaced file: ${misplaced_file}")
+        "The file '${misplaced_file}' is not located in an acceptable location. It must be located "
+        "within one of '${root_dirs}'.")
     endif()
   endforeach()
 endfunction()
