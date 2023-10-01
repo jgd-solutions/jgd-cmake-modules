@@ -125,7 +125,7 @@ jcm_transform_list
   .. code-block:: cmake
 
     jcm_transform_list(
-      <ABSOLUTE_PATH [BASE <path>] | NORMALIZE_PATH | FILENAME>
+      <ABSOLUTE_PATH [BASE <path>] | NORMALIZE_PATH | PARENT_PATH | FILENAME>
       INPUT <item>...
       OUT_VAR <out-var>)
 
@@ -148,9 +148,13 @@ Options
   <https://cmake.org/cmake/help/latest/command/cmake_path.html#normalization>`_ (canonical) path.
   Excludes other transformation options.
 
+:cmake:variable:`PARENT_PATH`
+  A transformation that treats each input item as a path, and transforms it to its parent path.
+  Excludes other transformation options.
+
 :cmake:variable:`FILENAME`
-  A transformation that treats each input item as a path, and converts it to its extraced file name;
-  the last component in the path. Excludes other transformation options.
+  A transformation that treats each input item as a path, and transform it to its file name; the
+  last component in the path. Excludes other transformation options.
 
 One Value
 ~~~~~~~~~
@@ -181,6 +185,8 @@ Examples
     INPUT libimage/image.hpp libimage/readers.hpp libimage/viewer.hpp
     OUT_VAR header_file_names)
 
+  message(STATUS "${header_file_names} == image.hpp;readers.hpp;viewer.hpp")
+
 --------------------------------------------------------------------------
 
 #]=======================================================================]
@@ -188,7 +194,7 @@ function(jcm_transform_list)
   # Argument parsing, allowing value to INPUT to be empty
   jcm_parse_arguments(
     WITHOUT_MISSING_VALUES_CHECK
-    OPTIONS "ABSOLUTE_PATH" "NORMALIZE_PATH" "FILENAME"
+    OPTIONS "ABSOLUTE_PATH" "NORMALIZE_PATH" "PARENT_PATH" "FILENAME"
     ONE_VALUE_KEYWORDS "BASE;OUT_VAR"
     MULTI_VALUE_KEYWORDS "INPUT"
     REQUIRES_ALL "OUT_VAR"
@@ -229,6 +235,10 @@ function(jcm_transform_list)
   elseif(ARGS_NORMALIZE_PATH)
     set(selected_transformation [=[
       cmake_path(SET transformed_result NORMALIZE "${input}")
+    ]=])
+  elseif(ARGS_PARENT_PATH)
+    set(selected_transformation [=[
+      cmake_path(GET input PARENT_PATH transformed_result)
     ]=])
   elseif(ARGS_FILENAME)
     set(selected_transformation [=[
