@@ -28,6 +28,7 @@ jcm_parse_arguments
       [REQUIRES_ALL <keyword>...]
       [REQUIRES_ANY <keyword>...]
       [MUTUALLY_EXCLUSIVE <keyword>..]
+      [MUTUALLY_EXCLUSIVE_<n> <keyword>..]
       ARGUMENTS <arg>...
     )
 
@@ -82,6 +83,15 @@ Multi Value
   parsing will emit an error.
 
 :cmake:variable:`MUTUALLY_EXCLUSIVE`
+  A list of keywords from any of the above keyword lists that must one one keyword present. If
+  :cmake:variable:`ARGUMENTS` includes more than one of the keywords listed here, parsing will emit
+  an error.
+
+:cmake:variable:`MUTUALLY_EXCLUSIVE_<n>`
+  Where *n* is an integer in the range [1,3], these three arguments provide the exact same
+  functionality as :cmake:variable:`MUTUALLY_EXCLUSIVE`, but through separate variables so multiple
+  exclusivity constraints can be provided simultaneously. Each constraint is independently verified.
+
   A list of keywords from any of the above keyword lists that must one one keyword present. If
   :cmake:variable:`ARGUMENTS` includes more than one of the keywords listed here, parsing will emit
   an error.
@@ -150,7 +160,8 @@ macro(JCM_PARSE_ARGUMENTS)
     # one-value
     "PREFIX"
     # multi-value
-    "ARGUMENTS;OPTIONS;ONE_VALUE_KEYWORDS;MULTI_VALUE_KEYWORDS;REQUIRES_ALL;REQUIRES_ANY;MUTUALLY_EXCLUSIVE"
+    "ARGUMENTS;OPTIONS;ONE_VALUE_KEYWORDS;MULTI_VALUE_KEYWORDS;REQUIRES_ALL;REQUIRES_ANY"
+    "MUTUALLY_EXCLUSIVE;MUTUALLY_EXCLUSIVE_1;MUTUALLY_EXCLUSIVE_2;MUTUALLY_EXCLUSIVE_3"
     # function arguments
     "${ARGN}")
 
@@ -223,7 +234,13 @@ macro(JCM_PARSE_ARGUMENTS)
   unset(first_keyword)
   unset(second_keyword)
 
-  foreach(keyword IN LISTS INS_MUTUALLY_EXCLUSIVE)
+  foreach(keyword IN LISTS
+    INS_MUTUALLY_EXCLUSIVE
+    INS_MUTUALLY_EXCLUSIVE_1
+    INS_MUTUALLY_EXCLUSIVE_2
+    INS_MUTUALLY_EXCLUSIVE_3)
+
+    # foreach IN LISTS won't execute body if list isn't defined :)
     list(FIND INS_ARGUMENTS ${keyword} idx)
     if(NOT idx EQUAL -1)
       if(DEFINED first_keyword)
