@@ -227,7 +227,6 @@ function(jcm_add_executable)
     INPUT "${ARGS_SOURCES}"
     TRANSFORM "FILENAME"
     OUT_MATCHED executable_header_files)
-
   if(executable_header_files)
     jcm_header_file_sets(PRIVATE
       TARGET ${target_name}

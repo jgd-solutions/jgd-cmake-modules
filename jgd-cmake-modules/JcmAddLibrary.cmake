@@ -353,7 +353,7 @@ function(jcm_add_library)
   set_target_properties(${target_name}
     PROPERTIES
     OUTPUT_NAME ${output_name}
-    PREFIX ""
+    PREFIX "" # JCM already mandates 'lib' prefix; don't prepend another
     EXPORT_NAME ${export_name}
     COMPILE_OPTIONS "${JCM_DEFAULT_COMPILE_OPTIONS}")
 

@@ -27,8 +27,7 @@ jcm_add_test_executable
       NAME <name>
       [TEST_NAME <test-name>]
       [LIBS <lib>...]
-      SOURCES <source>...
-    )
+      SOURCES <source>...)
 
 A convenience function to create an executable and add it as a test in one command, while also
 setting target properties. This function has no affect if
