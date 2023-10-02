@@ -32,8 +32,7 @@ jcm_configure_package_config_file
 
     jcm_configure_package_config_file(
       [TARGET <target> | COMPONENT <component>]
-      [OUT_FILE_VAR <out-var>]
-    )
+      [OUT_FILE_VAR <out-var>])
 
 Configures the package config-file for the project or for a project component when either
 :cmake:variable:`TARGET` or :cmake:variable:`COMPONENT` is provided. The input and out config file
@@ -235,7 +234,8 @@ jcm_configure_vcpkg_manifest_file
 Configures an config template of a vcpkg manifest file located in
 :cmake:variable:`JCM_PROJECT_CMAKE_DIR` to :cmake:variable:`PROJECT_SOURCE_DIR`, using `@`
 substitution, only. This function provides consistency of configuring vcpkg manifests across
-projects, and has no effect if the project is not the top-level project.
+projects, and has no effect if the project is not the top-level project. Furthermore, seeing as this
+function merely configures a file, it doesn't prescribe vcpkg as the dependency manager.
 
 Examples
 ########
