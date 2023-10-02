@@ -87,8 +87,7 @@ jcm_canonical_subdir
 
     jcm_canonical_subdir(
       OUT_VAR <out-var>
-      TARGET <target>
-    )
+      TARGET <target>)
 
 Sets the variable specified by :cmake:variable:`OUT_VAR` to the canonical source subdirectory for
 either an executable or library of project :cmake:variable:`PROJECT_NAME`. Calls either
@@ -141,8 +140,7 @@ function(jcm_canonical_subdir)
     set(mismatched_target_message
       "TARGET '${ARGS_TARGET}' provided to ${CMAKE_CURRENT_FUNCTION} does not "
       "start with '${PROJECT_NAME}::' or '${PROJECT_NAME}_' and is therefore not a target of "
-      "project ${PROJECT_NAME} or does not follow the target naming structure."
-    )
+      "project ${PROJECT_NAME} or does not follow the target naming structure.")
   else()
     unset(mismatched_target_message)
   endif()
@@ -163,8 +161,7 @@ function(jcm_canonical_subdir)
     jcm_target_type_component_from_name(
       TARGET_NAME ${ARGS_TARGET}
       OUT_TYPE target_type
-      OUT_COMPONENT component
-    )
+      OUT_COMPONENT component)
   endif()
 
   # Resolve subdir based on type
