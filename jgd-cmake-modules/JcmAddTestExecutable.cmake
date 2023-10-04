@@ -121,8 +121,7 @@ function(jcm_add_test_executable)
     INPUT "${ARGS_SOURCES}"
     REGEX "${regex}"
     TRANSFORM "FILENAME"
-    OUT_MISMATCHED incorrectly_named
-  )
+    OUT_MISMATCHED incorrectly_named)
   if(incorrectly_named)
     message(
       FATAL_ERROR

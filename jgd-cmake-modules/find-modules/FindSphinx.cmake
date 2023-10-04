@@ -108,8 +108,7 @@ find_package_handle_standard_args(Sphinx
   FOUND_VAR Sphinx_FOUND
   REQUIRED_VARS Sphinx_EXECUTABLE
   VERSION_VAR Sphinx_VERSION
-  REASON_FAILURE_MESSAGE ${_Sphinx_failure_message}
-  )
+  REASON_FAILURE_MESSAGE ${_Sphinx_failure_message})
 unset(_Sphinx_failure_message)
 
 if(Sphinx_FOUND AND NOT TARGET Sphinx::build)

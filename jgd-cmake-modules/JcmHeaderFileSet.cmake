@@ -121,10 +121,10 @@ function(jcm_header_file_sets scope)
     TARGET ${ARGS_TARGET}
     OUT_VAR available_include_dirs)
 
-  foreach(header_path ${ARGS_HEADERS})
-    set(shortest_distance_from_include_dir 65000)
+  foreach(header_path IN LISTS ARGS_HEADERS)
+    set(shortest_distance_from_include_dir 65000) # biggest int ?
     unset(chosen_include_dir)
-    foreach(include_dir ${available_include_dirs})
+    foreach(include_dir IN LISTS available_include_dirs)
       if(NOT header_path MATCHES "^${include_dir}")
         continue()
       endif()
