@@ -42,11 +42,11 @@ One Value
 
 :cmake:variable:`OUT_MATCHED`
   The variable named will be set to a list of elements from :cmake:variable:`INPUT` that matched
-  :cmake:variable:`REGEX`
+  :cmake:variable:`REGEX`.
 
 :cmake:variable:`OUT_MISMATCHED`
   The variable named will be set to a list of elements from :cmake:variable:`INPUT` that did *not*
-  match :cmake:variable:`REGEX`
+  match :cmake:variable:`REGEX`.
 
 :cmake:variable:`REGEX`
   When present, this provided regular expression will be the filter  used to separate the input
@@ -122,7 +122,7 @@ function(jcm_separate_list)
       "It must be one of ${supported_transforms}.")
   endif()
 
-  if("${ARGS_TRANSFORM}" STREQUAL "FILENAME" AND DEFINED ARGS_IS_ABSOLUTE)
+  if("${ARGS_TRANSFORM}" STREQUAL "FILENAME" AND ARGS_IS_ABSOLUTE)
     message(AUTHOR_WARNING
       "Using 'FILENAME' as the TRANSFORM in combination with the 'IS_ABSOLUTE' to "
       "${CMAKE_CURENT_FUNCTION} is nonsensical, as all filenames are strictly not absolute. ")
@@ -133,10 +133,12 @@ function(jcm_separate_list)
     set(selected_transformation [[
       cmake_path(GET element FILENAME transformed_element)
     ]])
+  else()
+    set(selected_transformation)
   endif()
 
   # form filter; default is a mismatch
-  if(DEFINED ARGS_IS_DIRECTORY)
+  if(ARGS_IS_DIRECTORY)
     set(selected_filter [[
       if(IS_DIRECTORY "${transformed_element}")
         set(element_matched TRUE)
@@ -144,7 +146,7 @@ function(jcm_separate_list)
         set(element_matched FALSE)
       endif()
     ]])
-  elseif(DEFINED ARGS_IS_SYMLINK)
+  elseif(ARGS_IS_SYMLINK)
     set(selected_filter [[
       if(IS_SYMLINK "${transformed_element}")
         set(element_matched TRUE)
@@ -152,7 +154,7 @@ function(jcm_separate_list)
         set(element_matched FALSE)
       endif()
     ]])
-  elseif(DEFINED ARGS_IS_ABSOLUTE)
+  elseif(ARGS_IS_ABSOLUTE)
     set(selected_filter [[
       if(IS_ABSOLUTE "${transformed_element}")
         set(element_matched TRUE)
@@ -171,10 +173,10 @@ function(jcm_separate_list)
   set(mismatched_elements)
   foreach(element ${ARGS_INPUT})
     # transform element to be matched
-    set(transformed_element "${element}")
-    cmake_language(EVAL CODE "${selected_transformation}")
-    if(ARGS_TRANSFORM STREQUAL "FILENAME")
-      cmake_path(GET element FILENAME transformed_element)
+    if(DEFINED selected_transformation)
+      cmake_language(EVAL CODE "${selected_transformation}")
+    else()
+      set(transformed_element "${element}")
     endif()
 
     # compare element against selected filter
