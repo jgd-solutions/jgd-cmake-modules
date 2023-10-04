@@ -22,15 +22,15 @@ jcm_parse_arguments
       [WITHOUT_MISSING_VALUES_CHECK]
       [WITHOUT_UNPARSED_CHECK]
       [PREFIX <prefix>]
-      <[OPTIONS <keyword>...]
-       [ONE_VALUE_KEYWORDS <keyword>...]
-       [MULTI_VALUE_KEYWORDS <keyword>...]>
+      <OPTIONS <keyword>... |
+       ONE_VALUE_KEYWORDS <keyword>... |
+       MULTI_VALUE_KEYWORDS <keyword>...>
       [REQUIRES_ALL <keyword>...]
       [REQUIRES_ANY <keyword>...]
+      [REQUIRES_ANY_<n> <keyword>...]
       [MUTUALLY_EXCLUSIVE <keyword>..]
       [MUTUALLY_EXCLUSIVE_<n> <keyword>..]
-      ARGUMENTS <arg>...
-    )
+      ARGUMENTS <arg>...)
 
 
 A wrapper around CMake's :cmake:command:`cmake_parse_arguments` that provides sensible defaults,
@@ -82,13 +82,19 @@ Multi Value
   present. If :cmake:variable:`ARGUMENTS` does not include at least one of the keywords listed here,
   parsing will emit an error.
 
+:cmake:variable:`REQUIRES_ANY_<n>`
+  Where *n* is an integer in the range [1,3], these three parameters provide the exact same
+  functionality as :cmake:variable:`REQUIRES_ANY`, but through separate variables so multiple
+  independent constraints can be provided simultaneously. Each constraints is independently
+  verified.
+
 :cmake:variable:`MUTUALLY_EXCLUSIVE`
   A list of keywords from any of the above keyword lists that must one one keyword present. If
   :cmake:variable:`ARGUMENTS` includes more than one of the keywords listed here, parsing will emit
   an error.
 
 :cmake:variable:`MUTUALLY_EXCLUSIVE_<n>`
-  Where *n* is an integer in the range [1,3], these three arguments provide the exact same
+  Where *n* is an integer in the range [1,3], these three parameters provide the exact same
   functionality as :cmake:variable:`MUTUALLY_EXCLUSIVE`, but through separate variables so multiple
   exclusivity constraints can be provided simultaneously. Each constraint is independently verified.
 
@@ -120,7 +126,7 @@ Examples
       # example usage of one-value argument
     endif()
 
-    foreach(input "${ARGS_INPUT}")
+    foreach(input IN LISTS ARGS_INPUT)
       # example usage of multi-value argument
     endforeach()
 
@@ -144,7 +150,7 @@ Examples
     INPUT "first" "second" "third"
     REGEX ".*$d")
 
-  # Error, USE_PERL_REGEX and USE_EXTENDED provided
+  # Error, USE_PERL_REGEX **and** USE_EXTENDED provided
   separate_list(
     USE_PERL_REGEX
     USE_EXTENDED
@@ -160,7 +166,7 @@ macro(JCM_PARSE_ARGUMENTS)
     # one-value
     "PREFIX"
     # multi-value
-    [[ARGUMENTS;OPTIONS;ONE_VALUE_KEYWORDS;MULTI_VALUE_KEYWORDS;REQUIRES_ALL;REQUIRES_ANY;MUTUALLY_EXCLUSIVE;MUTUALLY_EXCLUSIVE_1;MUTUALLY_EXCLUSIVE_2;MUTUALLY_EXCLUSIVE_3]]
+    [[ARGUMENTS;OPTIONS;ONE_VALUE_KEYWORDS;MULTI_VALUE_KEYWORDS;REQUIRES_ALL;REQUIRES_ANY;REQUIRES_ANY_1;REQUIRES_ANY_2;REQUIRES_ANY_3;MUTUALLY_EXCLUSIVE;MUTUALLY_EXCLUSIVE_1;MUTUALLY_EXCLUSIVE_2;MUTUALLY_EXCLUSIVE_3]]
     # function arguments
     "${ARGN}")
 
@@ -180,14 +186,13 @@ macro(JCM_PARSE_ARGUMENTS)
   # ensure required keywords are a subset of the function's parsed keywords
   set(parsed_keywords ${INS_OPTIONS} ${INS_ONE_VALUE_KEYWORDS} ${INS_MULTI_VALUE_KEYWORDS})
 
-  foreach(req_keyword IN LISTS INS_REQUIRES_ALL INS_REQUIRES_ANY)
+  foreach(req_keyword IN LISTS
+    INS_REQUIRES_ALL INS_REQUIRES_ANY INS_REQUIRES_ANY_1 INS_REQUIRES_ANY_2 INS_REQUIRES_ANY_3)
     list(FIND parsed_keywords ${req_keyword} idx)
     if(idx EQUAL -1)
-      message(
-        FATAL_ERROR
-        "The required keyword ${req_keyword} is not in the list of function "
-        "keywords ${parsed_keywords}. This keyword cannot be required if it "
-        "is not parsed by the function.")
+      message(FATAL_ERROR
+        "The required keyword '${req_keyword}' is not in the list of function keywords, "
+        "'${parsed_keywords}'. This keyword cannot be required if it is not a function parameter")
     endif()
   endforeach()
 
@@ -211,22 +216,27 @@ macro(JCM_PARSE_ARGUMENTS)
   endforeach()
 
   # validate keywords that must have one present
-  if(INS_REQUIRES_ANY)
+  foreach(requires_any_arg IN ITEMS
+    INS_REQUIRES_ANY INS_REQUIRES_ANY_1 INS_REQUIRES_ANY_2 INS_REQUIRES_ANY_3)
+    if(NOT ${requires_any_arg})
+      continue()
+    endif()
+
     set(at_least_one_defined FALSE)
-    foreach(keyword IN LISTS INS_REQUIRES_ANY)
-      if(DEFINED ${INS_PREFIX}_${keyword})
+    foreach(param_keyword IN LISTS ${requires_any_arg})
+      if(DEFINED ${INS_PREFIX}_${param_keyword})
         set(at_least_one_defined TRUE)
         break()
       endif()
     endforeach()
 
     if(NOT at_least_one_defined)
-      message(
-        FATAL_ERROR
-        "None of the following keywords were provided or may be missing their values: ${INS_REQUIRES_ANY}")
+      message(FATAL_ERROR
+        "None of the following keywords were provided or may be missing their values: "
+        "'${${requires_any_arg}}'")
     endif()
     unset(at_least_one_defined)
-  endif()
+  endforeach()
 
 
   # validate keywords that are mutually exclusive
