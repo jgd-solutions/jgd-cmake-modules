@@ -9,6 +9,7 @@ JcmHeaderFileSet
 
 include(JcmParseArguments)
 include(JcmCanonicalStructure)
+include(JcmTargetNaming)
 
 #[=======================================================================[.rst:
 
@@ -20,12 +21,14 @@ jcm_header_file_sets
   .. code-block:: cmake
 
     jcm_header_file_sets(
+      <INTERFACE | PUBLIC | PRIVATE>
       [TARGET <target>]
       [HEADERS <file-path>...])
 
 Creates header `file-sets
 <https://cmake.org/cmake/help/latest/command/target_sources.html#file-sets>`_ of the provided
-`scope` containing the files in :cmake:variable:`HEADERS`.
+`scope` containing the files in :cmake:variable:`HEADERS` for the possibly alias target,
+:cmake:variable:`TARGET`.
 
 For each header file-path, the closest canonical include directory, one of those provided by
 :cmake:command:`jcm_canonical_include_dirs`, will be found. For each canonical include directory
@@ -146,9 +149,12 @@ function(jcm_header_file_sets scope)
       message(FATAL_ERROR "Could not resolve the canonical include directory for ${header_path}")
     endif()
 
+    # non-aliased both required by target_sources and provides basic chars for file set name
+    jcm_aliased_target(TARGET "${ARGS_TARGET}" OUT_TARGET ARGS_TARGET)
+
     # add the header to the header file set for its belonging include directory
     string(MD5 include_dir_hash "${chosen_include_dir}")
-    string(REPLACE "-" "_" file_set_name "${ARGS_TARGET}_${scope}_${include_dir_hash}")
+    string(REPLACE "-" "_" file_set_name "jcm_${ARGS_TARGET}_${scope}_${include_dir_hash}")
 
     target_sources(${ARGS_TARGET}
       ${scope}

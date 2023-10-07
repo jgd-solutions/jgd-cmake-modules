@@ -71,8 +71,7 @@ function(jcm_library_naming)
     "OUT_TARGET"
     "OUT_EXPORT_NAME"
     "OUT_OUTPUT_NAME"
-    ARGUMENTS "${ARGN}"
-  )
+    ARGUMENTS "${ARGN}")
 
   # Resolve project name
   if(ARGS_PROJECT)
@@ -275,8 +274,7 @@ Examples
     PROJECT libssh
     TARGET_NAME libssh::libssh
     TARGET_TYPE type
-    TARGET_COMPONENT component
-  )
+    TARGET_COMPONENT component)
 
 --------------------------------------------------------------------------
 
@@ -358,4 +356,76 @@ function(jcm_target_type_component_from_name)
   if(DEFINED ARGS_OUT_COMPONENT)
     set(${ARGS_OUT_COMPONENT} "${component}" PARENT_SCOPE)
   endif()
+endfunction()
+
+#[=======================================================================[.rst:
+
+jcm_aliased_target
+^^^^^^^^^^^^^^^^^^
+
+.. cmake:command:: jcm_aliased_target
+
+  .. code-block:: cmake
+
+    jcm_aliased_target(
+      TARGET <target>
+      OUT_TARGET <out-var>)
+
+Recursively searches the chain of alias targets named by :cmake:variable:`TARGET` until a
+non-alias target is found. The name of the first non-alias target encountered in this search will
+be placed in the variable specified by :cmake:variable:`OUT_TARGET`. Consequently, the resulting
+target name will be that of a non-alias target. Should :cmake:variable:`TARGET` not be an alias
+target, it's name will simply be the result. A fatal error will be emitted if any target name in
+this search does not name an actual target.
+
+Parameters
+##########
+
+One Value
+~~~~~~~~~
+
+:cmake:variable:`TARGET`
+
+
+:cmake:variable:`OUT_TARGET`
+
+Examples
+########
+
+.. code-block:: cmake
+
+  jcm_aliased_target(
+    TARGET libformat::io
+    OUT_TARGET aliased_target)
+
+  message(STATUS "libformat_libformat-io == ${aliased_target}")
+
+--------------------------------------------------------------------------
+
+#]=======================================================================]
+function(jcm_aliased_target)
+  jcm_parse_arguments(
+    ONE_VALUE_KEYWORDS "TARGET" "OUT_TARGET"
+    REQUIRES_ALL "TARGET" "OUT_TARGET"
+    ARGUMENTS "${ARGN}")
+
+  if(NOT TARGET "${ARGS_TARGET}")
+    message(FATAL_ERROR
+      "The target name '${ARGS_TARGET}' provided to parameter TARGET of ${CMAKE_CURRENT_FUNCITON} "
+      "does not name a target.")
+  endif()
+
+  set(aliased_target_prop "${ARGS_TARGET}")
+  while(aliased_target_prop)
+    set(aliased_target "${aliased_target_prop}")
+    if(NOT TARGET "${aliased_target}")
+      message(FATAL_ERROR
+        "The target name '${aliased_target}' found in the alias chain stemming from TARGET  "
+        "'${ARGS_TARGET}' provided to ${CMAKE_CURRENT_FUNCITON} does not name a target.")
+    endif()
+
+    get_target_property(aliased_target_prop "${aliased_target}" ALIASED_TARGET)
+  endwhile()
+
+  set(${ARGS_OUT_TARGET} "${aliased_target}" PARENT_SCOPE)
 endfunction()

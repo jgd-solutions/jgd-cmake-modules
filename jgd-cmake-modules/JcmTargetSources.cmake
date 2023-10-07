@@ -10,6 +10,7 @@ JcmTargetSources
 include(JcmParseArguments)
 include(JcmListTransformations)
 include(JcmFileNaming)
+include(JcmTargetNaming)
 include(JcmHeaderFileSet)
 
 # classic absolute, normalized paths
@@ -81,11 +82,11 @@ function(jcm_verify_sources)
   endforeach()
 
   # ensure input files are appropriately provided for target type
-  if("${ARGS_TARGET_TYPE}" STREQUAL "EXECUTABLE" AND
-  (DEFINED ARGS_INTERFACE_HEADERS OR DEFINED ARGS_PUBLIC_HEADERS))
+  if("${ARGS_TARGET_TYPE}" STREQUAL "EXECUTABLE" AND DEFINED ARGS_INTERFACE_HEADERS)
     message(AUTHOR_WARNING
-      "No interface headers should be added as sources to an executable target. These will be "
-      "treated as private headers.")
+      "No interface headers should be added as sources to an executable target. The interface"
+      "headers to target 'k{ARGS_TARGET}' will be ignored.")
+    unset(ARGS_INTERFACE_HEADERS)
   endif()
 
   if("${ARGS_TARGET_TYPE}" STREQUAL "INTERFACE_LIBRARY")
@@ -174,7 +175,7 @@ function(jcm_verify_sources)
   if("${ARGS_TYPE}" STREQUAL "EXECUTABLE")
     set(ARGS_SOURCES "${non_headers_in_sources}")
 
-    if(DEFINED ARGS_PRIVATE_HEADERS AND non_headers_in_sources)
+    if(non_headers_in_sources)
       list(APPEND ARGS_PRIVATE_HEADERS "${non_headers_in_sources}")
     endif()
   endif()
@@ -182,8 +183,7 @@ function(jcm_verify_sources)
   foreach(source_type "INTERFACE_HEADERS" "PUBLIC_HEADERS" "PRIVATE_HEADERS" "SOURCES")
     set(in_arg_name ARGS_${source_type}) # path values have been transformed
     set(out_arg_name ARGS_OUT_${source_type})
-    if(${in_arg_name} # since variables are mutated, check value, not presence
-      AND DEFINED ${out_arg_name})
+    if(DEFINED ${out_arg_name})
       set(${${out_arg_name}} "${${in_arg_name}}" PARENT_SCOPE)
     endif()
   endforeach()
@@ -271,10 +271,10 @@ function(jcm_add_target_sources)
     OUT_SOURCES ARGS_SOURCES)
 
   # header properties
-  if(DEFINED ARGS_INTERFACE_HEADERS)
-    jcm_header_file_sets(INTERFACE TARGET ${target_name} HEADERS "${ARGS_INTERFACE_HEADERS}")
-  elseif(DEFINED ARGS_PRIVATE_HEADERS)
-    jcm_header_file_sets(PRIVATE TARGET ${target_name} HEADERS "${ARGS_PRIVATE_HEADERS}")
+  if(ARGS_INTERFACE_HEADERS)
+    jcm_header_file_sets(INTERFACE TARGET ${ARGS_TARGET} HEADERS "${ARGS_INTERFACE_HEADERS}")
+  elseif(ARGS_PRIVATE_HEADERS)
+    jcm_header_file_sets(PRIVATE TARGET ${ARGS_TARGET} HEADERS "${ARGS_PRIVATE_HEADERS}")
   endif()
 
   # header file sets - already assured header sources are appropriate for target
@@ -289,19 +289,14 @@ function(jcm_add_target_sources)
   endforeach()
 
   # sources
-  get_target_property(aliased ${ARGS_TARGET} ALIASED_TARGET)
-  if(aliased)
-    set(referenced_target "${aliased}")
-  else()
-    set(referenced_target "${ARGS_TARGET}")
-  endif()
-
   # Note: empty values are considered relative paths by target_sources, which therefore adds
   # a directory as a target source. Avoid this.
+  jcm_aliased_target(TARGET "${ARGS_TARGET}" OUT_TARGET ARGS_TARGET)
+
   if(ARGS_PRIVATE_HEADERS)
-    target_sources(${referenced_target} PRIVATE "${ARGS_PRIVATE_HEADERS}")
+    target_sources(${ARGS_TARGET} PRIVATE "${ARGS_PRIVATE_HEADERS}")
   endif()
   if(ARGS_SOURCES)
-    target_sources(${referenced_target} PRIVATE "${ARGS_SOURCES}")
+    target_sources(${ARGS_TARGET} PRIVATE "${ARGS_SOURCES}")
   endif()
 endfunction()

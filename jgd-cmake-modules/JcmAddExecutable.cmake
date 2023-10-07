@@ -33,23 +33,28 @@ jcm_add_executable
       [LIB_SOURCES <source>...]
       SOURCES <source>...)
 
-Adds an executable target to the project, similar to CMake's `add_executable`, but with enhancements
-. It allows creating both the executable and, optionally, an associated object or interface library
-to allow better automated testing of the executable's sources. This library will have the
-same name as the executable, but with '-library' appended (*main* -> *main-library*).
+Adds an executable target to the project, similar to CMake's :cmake:`add_executable`, but with
+enhancements. It allows creating both the executable and, optionally, an associated object or
+interface library to allow better automated testing of the executable's sources. This library
+will have the same name as the executable, but with '-library' appended (*main* -> *main-library*).
 
 This function will:
 
 - ensure it's called within a canonical source subdirectory, verify the naming conventions and
   locations of the input source files, and transform :cmake:variable:`SOURCES` and
   :cmake:variable:`LIB_SOURCES` to normalized absolute paths.
+- create an executable target with :cmake:command:`add_executable`, including an associated alias
+- optionally create an object library, `<target>-library`, with an associated alias
+  <PROJECT_NAME>::<EXPORT_NAME>-library
+  (<PROJECT_NAME>::<EXPORT_NAME>) - both following JCM's target naming conventions
+- optionally create an object library, `<target>-library`, with an associated alias
+  <PROJECT_NAME>::<EXPORT_NAME>-library
+  (<PROJECT_NAME>::<EXPORT_NAME>) - both following JCM's target naming conventions
 - create header sets with :cmake:command:`jcm_header_file_sets` for both the main executable target,
   and the optional library target. PRIVATE header sets will be added to the executable using header
   files found in :cmake:variable:`SOURCES`, while PUBLIC or INTERFACE header sets will be added to
   the object/interface library using header files found in :cmake:variable:`LIB_SOURCES`.
   This is what sets the *INCLUDE_DIRECTORIES* properties.
-- create an executable target with :cmake:command:`add_executable`, including an associated alias
-  (<PROJECT_NAME>::<EXPORT_NAME>) - both following JCM's target naming conventions
 - set target properties:
 
   - OUTPUT_NAME
@@ -258,6 +263,8 @@ function(jcm_add_executable)
       set(include_dirs_scope INTERFACE)
       add_library(${target_name}-library INTERFACE)
     endif()
+
+    add_library(${PROJECT_NAME}::${export_name}-library ALIAS ${target_name}-library)
 
     if(library_header_files)
       jcm_header_file_sets(${include_dirs_scope}

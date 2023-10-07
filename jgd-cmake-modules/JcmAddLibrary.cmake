@@ -31,7 +31,7 @@ jcm_add_library
       [COMPONENT <component>]
       [NAME <name>]
       [OUT_TARGET <out-var>]
-      [TYPE <type>]
+      [TYPE <STATIC | SHARED | MODULE | INTERFACE | OBJECT>]
       <INTERFACE_HEADERS <header>... |
        PUBLIC_HEADERS <header>... |
        PRIVATE_HEADERS <header>... |
@@ -103,9 +103,11 @@ One Value
   The variable named will be set to the created target's name
 
 :cmake:variable:`TYPE`
-  Overrides the library type from the default value of either STATIC or SHARED, dictated by the
-  the *\*_BUILD_SHARED_LIBS* options. When specified, this call will not create any of the
-  *\*_BUILD_SHARED_LIBS* options.
+  Overrides the library type from the default value. When :cmake:variable:`SOURCES` are provided,
+  the default is one of either *STATIC* or *SHARED*, dictated by the *\*_BUILD_SHARED_LIBS*
+  configuration options. Otherwise, the default is *INTERFACE*. When specified, this call will not
+  create any of the *\*_BUILD_SHARED_LIBS* options. Supported values: *STATIC* *SHARED* *MODULE*
+  *INTERFACE* *OBJECT*.
 
 Multi Value
 ~~~~~~~~~~~

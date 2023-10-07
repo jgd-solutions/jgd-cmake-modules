@@ -15,4 +15,4 @@ jcm_install_config_file_package(
 jcm_create_clang_format_targets(
   SOURCE_TARGETS
     single-exec::single-exec
-    single-exec_single-exec-library)
+    single-exec::single-exec-library)
