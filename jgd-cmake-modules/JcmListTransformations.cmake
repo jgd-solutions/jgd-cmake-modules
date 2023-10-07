@@ -242,6 +242,11 @@ One Value
 :cmake:variable:`OUT_VAR`
   The variable named will be set to a list of transformed input elements.
 
+:cmake:variable:`BASE`
+  When the selected transformation is :cmake:variable:`ABSOLUTE_PATH`, this names the absolute path
+  to the directory upon which relative paths will be made absolute. When omitted, the default is
+  :cmake:variable:`CMAKE_CURRENT_SOURCE_DIR`
+
 Multi Value
 ~~~~~~~~~~~
 
@@ -292,9 +297,15 @@ function(jcm_transform_list)
   endif()
 
   # usage guard
-  if(DEFINED ARGS_BASE AND NOT ARGS_ABSOLUTE_PATH)
-    message(FATAL_ERROR
-      "'BASE' may only be provided to ${CMAKE_CURRENT_FUNCTION} with the 'ABSOLUTE_PATH' transformation")
+  if(DEFINED ARGS_BASE)
+    if(NOT ARGS_ABSOLUTE_PATH)
+      message(FATAL_ERROR
+        "'BASE' may only be provided to ${CMAKE_CURRENT_FUNCTION} with the 'ABSOLUTE_PATH' "
+        "transformation")
+    elseif(NOT IS_ABSOLUTE "${ARGS_BASE}")
+      message(FATAL_ERROR
+        "The directory path provided to 'BASE' of ${CMAKE_CURRENT_FUNCTION} must be absolute.")
+    endif()
   endif()
 
   # Set transformation code based on selected transformation argument

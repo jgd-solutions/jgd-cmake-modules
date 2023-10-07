@@ -15,14 +15,12 @@ When included, includes all of JCM's CMake modules, excluding any `Find Modules
 file(
   GLOB jcm_cmake_modules_to_include
   LIST_DIRECTORIES false
-  "${CMAKE_CURRENT_LIST_DIR}/*.cmake"
-)
+  "${CMAKE_CURRENT_LIST_DIR}/*.cmake")
 
 list(
   REMOVE_ITEM
   jcm_cmake_modules_to_include
-  "${CMAKE_CURRENT_LIST_FILE}"
-)
+  "${CMAKE_CURRENT_LIST_FILE}")
 
 list(FILTER jcm_cmake_modules_to_include EXCLUDE REGEX "Find.+\.cmake$")
 

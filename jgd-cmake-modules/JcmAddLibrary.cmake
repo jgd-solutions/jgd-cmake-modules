@@ -32,10 +32,10 @@ jcm_add_library
       [NAME <name>]
       [OUT_TARGET <out-var>]
       [TYPE <STATIC | SHARED | MODULE | INTERFACE | OBJECT>]
-      <INTERFACE_HEADERS <header>... |
-       PUBLIC_HEADERS <header>... |
-       PRIVATE_HEADERS <header>... |
-       SOURCES <source>...>)
+      <[INTERFACE_HEADERS <header>...]
+       [PUBLIC_HEADERS <header>...]
+       [PRIVATE_HEADERS <header>...]
+       [SOURCES <source>...] >)
 
 
 Adds a library target to the project, similar to CMake's `add_library`, but with enhancements.
