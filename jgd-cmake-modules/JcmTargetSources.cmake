@@ -16,7 +16,7 @@ include(JcmHeaderFileSet)
 #[=======================================================================[.rst:
 
 jcm_verify_sources
-^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^
 
 .. cmake:command:: jcm_verify_sources
 
@@ -81,14 +81,14 @@ Parameters
 ##########
 
 Options
-~~~~~~~~~~
+~~~~~~~
 
 :cmake:variable:`WITHOUT_FILE_NAMING_CHECK`
   When provided, will forgo the default check that provided header and source files conform to JCM's
   file naming conventions
 
 One Value
-~~~~~~~~~~
+~~~~~~~~~
 
 :cmake:variable:`TARGET_TYPE`
   Specifies the type of the potential target - that is, the target's
@@ -145,26 +145,26 @@ Multi Value
 
 :cmake:variable:`INTERFACE_HEADERS`
   A list of relative or absolute paths to header files required by consumers of the potential
-  target, but not by the target itself. Interface header files, and therefor this parameter, are
-  only meaningful for library targets. Required when :cmake:variable:`TARGET_TYPE` is
-  *INTERFACE_LIBRARY*.
+  target, but not by the target itself. Interface header files, and therefore this parameter, are
+  only meaningful for library targets. Required when the target property :cmake:variable:`TYPE` of
+  the target :cmake:variable:`TARGET` is *INTERFACE_LIBRARY*.
 
 :cmake:variable:`PUBLIC_HEADERS`
   A list of relative or absolute paths to header files required by consumers of the potential
-  target, and by the target itself. Prohibited when :cmake:variable:`TARGET_TYPE` is
-  *INTERFACE_LIBRARY*.
+  target, and by the target itself. Prohibited when the target property :cmake:variable:`TYPE` of
+  the target :cmake:variable:`TARGET` is *INTERFACE_LIBRARY*.
 
 :cmake:variable:`PRIVATE_HEADERS`
   A list of relative or absolute paths to header files required exclusively by the target itself;
-  not by consumers of the potential target. Prohibited when :cmake:variable:`TARGET_TYPE` is
-  *INTERFACE_LIBRARY*.
+  not by consumers of the potential target. Prohibited when the target property
+  :cmake:variable:`TYPE` of the target :cmake:variable:`TARGET` is *INTERFACE_LIBRARY*.
 
 :cmake:variable:`SOURCES`
   A list of relative or absolute paths to sources files to build the potential target. Prohibited
-  when :cmake:variable:`TARGET_TYPE` is *INTERFACE_LIBRARY*.
-  For only executable targets, private header files may be included in this list, and will have the
-  same effect as providing them through :cmake:variable:`PRIVATE_HEADERS`. For other target types,
-  any header files found in this parameter will cause an error.
+  when the target property :cmake:variable:`TYPE` of the target :cmake:variable:`TARGET` is
+  *INTERFACE_LIBRARY*. For executable targets, private header files may be included in this
+  list, and will have the same effect as providing them through :cmake:variable:`PRIVATE_HEADERS`.
+  For other target types, any header files found in this parameter will cause an error.
 
 Examples
 ########
@@ -391,6 +391,22 @@ endfunction()
 
 #[=======================================================================[.rst:
 
+jcm_add_target_sources
+^^^^^^^^^^^^^^^^^^^^^^
+
+.. cmake:command:: jcm_add_target_sources
+
+  .. code-block:: cmake
+
+    jcm_add_target_sources(
+      [WITHOUT_FILE_NAMING_CHECK]
+      <TARGET <target>>
+      <[INTERFACE_HEADERS <header>...]
+       [PUBLIC_HEADERS <header>...]
+       [PRIVATE_HEADERS <header>...]
+       [SOURCES <source>...] >)
+
+
 After validating and cleaning the paths of the provided sources with
 :cmake:command:`jcm_verify_sources`, adds them to the given target, :cmake:variable:`TARGET`, using
 CMake's built-in :cmake:command:`target_sources` command and JCM's
@@ -421,6 +437,72 @@ in the :cmake:variable:`INTERFACE_HEADERS`, :cmake:variable:`PUBLIC_HEADERS`, an
 :cmake:variable:`PRIVATE_HEADERS` arguments, as header files in :cmake:variable:`SOURCES` will be
 rejected by naming convention filters.
 
+Parameters
+##########
+
+Options
+~~~~~~~
+
+:cmake:variable:`WITHOUT_FILE_NAMING_CHECK`
+  When provided, will forgo the default check that provided header and source files conform to JCM's
+  file naming conventions
+
+One Value
+~~~~~~~~~
+
+:cmake:variable:`TARGET`
+  Names an existing target onto which the provided source will be added.
+
+Multi Value
+~~~~~~~~~~~
+
+:cmake:variable:`INTERFACE_HEADERS`
+  A list of relative or absolute paths to header files required by consumers of the potential
+  target, but not by the target itself. Interface header files, and therefore this parameter, are
+  only meaningful for library targets. Required when :cmake:variable:`TARGET_TYPE` is
+  *INTERFACE_LIBRARY*.
+
+:cmake:variable:`PUBLIC_HEADERS`
+  A list of relative or absolute paths to header files required by consumers of the potential
+  target, and by the target itself. Prohibited when :cmake:variable:`TARGET_TYPE` is
+  *INTERFACE_LIBRARY*.
+
+:cmake:variable:`PRIVATE_HEADERS`
+  A list of relative or absolute paths to header files required exclusively by the target itself;
+  not by consumers of the potential target. Prohibited when :cmake:variable:`TARGET_TYPE` is
+  *INTERFACE_LIBRARY*.
+
+:cmake:variable:`SOURCES`
+  A list of relative or absolute paths to sources files to build the potential target. Prohibited
+  when :cmake:variable:`TARGET_TYPE` is *INTERFACE_LIBRARY*.
+  For executable targets, private header files may be included in this list, and will have the
+  same effect as providing them through :cmake:variable:`PRIVATE_HEADERS`. For other target types,
+  any header files found in this parameter will cause an error.
+
+Examples
+########
+
+.. code-block:: cmake
+
+  jcm_add_target_sources(
+    TARGET libgeometry::2d
+    PUBLIC_HEADERS "shapes.hpp" "intersections.hpp"
+    PRIVATE_HEADERS "shape_theory.hpp"
+    SOURCES "shapes.cpp" "shape_theory.cpp")
+
+.. code-block:: cmake
+
+  jcm_add_target_sources(
+    TARGET netman::netman
+    SOURCES
+      "main.cpp"
+      "cli.hpp"
+      "cli.cpp"
+      "protocols.hpp"
+      "protocols.cpp"
+      "buffers.hpp"
+      "buffers.cpp"
+      "tracing.hpp")
 
 #]=======================================================================]
 function(jcm_add_target_sources)
@@ -453,7 +535,6 @@ function(jcm_add_target_sources)
   else()
     unset(target_component_arg)
   endif()
-
 
   jcm_verify_sources(
     ${without_file_naming_arg}
