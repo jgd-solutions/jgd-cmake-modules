@@ -28,7 +28,8 @@ jcm_basic_package_config
 
   .. code-block:: cmake
 
-    jcm_basic_package_config(<project>
+    jcm_basic_package_config(
+      <project>
       [NO_TARGETS])
 
 
@@ -200,7 +201,9 @@ jcm_basic_component_config
 
   .. code-block:: cmake
 
-    jcm_basic_component_config(<project> <component>
+    jcm_basic_component_config(
+      <project>
+      <component>
       [REQUIRED_COMPONENTS <component>...]
       [NO_TARGETS])
 

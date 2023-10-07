@@ -303,8 +303,8 @@ jcm_create_doxygen_target
       [README_MAIN_PAGE]
       [EXCLUDE_REGEX <regex>]
       [OUTPUT_DIRECTORY <dir>]
-      <SOURCE_TARGETS <target>... |
-       ADDITIONAL_PATHS <path>... >)
+      <[SOURCE_TARGETS <target>...]
+       [ADDITIONAL_PATHS <path>...] >)
 
 Creates a target, "doxygen-docs", that generates documentation of the provided
 :cmake:variable:`SOURCE_TARGETS`'s header files and any :cmake:variable:`ADDITIONAL_PATHS` using
@@ -366,8 +366,7 @@ Examples
 
   jcm_create_doxygen_target(
     README_MAIN_PAGE
-    SOURCE_TARGETS libbbq::libbbq
-  )
+    SOURCE_TARGETS libbbq::libbbq)
 
 .. code-block:: cmake
 
@@ -375,8 +374,7 @@ Examples
     README_MAIN_PAGE
     SOURCE_TARGETS libbbq::libbbq libbbq::vegetarian
     EXCLUDE_REGEX "export_macros.hpp$"
-    ADDITIONAL_PATHS ../completely/separate/file.hpp
-  )
+    ADDITIONAL_PATHS ../completely/separate/file.hpp)
 
 --------------------------------------------------------------------------
 

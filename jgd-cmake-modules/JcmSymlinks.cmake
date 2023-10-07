@@ -25,10 +25,9 @@ jcm_check_symlinks_available
   .. code-block:: cmake
 
     jcm_check_symlinks_available(
-      <OUT_VAR <out-var> |
-       OUT_ERROR_MESSAGE <out-var> >
-      [USE_CACHE | SUCCESS_CACHE]
-    )
+      <[OUT_VAR <out-var>]
+       [OUT_ERROR_MESSAGE <out-var>] >
+      [USE_CACHE | SUCCESS_CACHE])
 
 Checks if the current build environment has symbolic links available to it by attempting to create
 a temporary symbolic link in :cmake:variable:`CMAKE_CURRENT_BINARY_DIR`. The resultant error message
@@ -161,8 +160,8 @@ jcm_check_symlinks_cloned
 
     jcm_check_symlinks_cloned(
       PATHS <path>...
-      <OUT_BROKEN_SYMLINK <out-var> |
-       OUT_ERROR_MESSAGE <out-var> >)
+      <[OUT_BROKEN_SYMLINK <out-var>]
+       [OUT_ERROR_MESSAGE <out-var>] >)
 
 Checks if all of the :cmake:variable:`PATHS` refer to symbolic links. All of the paths must exist, or
 the function will emit a fatal error. All relative paths will be converted to full-paths, based off
@@ -268,8 +267,8 @@ jcm_follow_symlinks
 
     jcm_follow_symlinks(
       PATHS <path>...
-      <OUT_VAR <out-var> |
-       OUT_NON_EXISTENT_INDICES <out-var> >)
+      <[OUT_VAR <out-var>]
+       [OUT_NON_EXISTENT_INDICES <out-var>] >)
 
 Converts the provided list of paths, :cmake:variable:`PATHS`, into a list of absolute, normalized
 paths with all symbolic link chains traced to their final files/directories. Care is taken for

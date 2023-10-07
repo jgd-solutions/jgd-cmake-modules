@@ -22,9 +22,9 @@ jcm_library_naming
     jcm_library_naming(
       [PROJECT <project-name>]
       [COMPONENT <component>]
-      <OUT_TARGET <target> |
-       OUT_EXPORT_NAME <out-var> |
-       OUT_OUTPUT_NAME <out-var> >)
+      <[OUT_TARGET <target>]
+       [OUT_EXPORT_NAME <out-var>]
+       [OUT_OUTPUT_NAME <out-var>] >)
 
 
 Sets the output variable specified by the *OUT_** arguments to default,
@@ -237,8 +237,8 @@ jcm_target_type_component_from_name
     jcm_target_type_component_from_name(
       [PROJECT <project-name>]
       TARGET_NAME <target>
-      <OUT_TYPE <target> |
-       OUT_COMPONENT <out-var> >)
+      <[OUT_TYPE <target>]
+       [OUT_COMPONENT <out-var>] >)
 
 JCM's target naming conventions denote both the the target's type and component within the naming
 structure. This function will, considering the project name, compute the target type and component

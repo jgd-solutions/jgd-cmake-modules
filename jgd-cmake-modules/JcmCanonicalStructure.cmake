@@ -191,8 +191,7 @@ jcm_canonical_lib_subdir
 
     jcm_canonical_lib_subdir(
       OUT_VAR <out-var>
-      [COMPONENT <component>]
-    )
+      [COMPONENT <component>])
 
 Sets the variable specified by :cmake:variable:`OUT_VAR` to the canonical source subdirectory for a
 library of project :cmake:variable:`PROJECT_NAME`.
@@ -273,8 +272,7 @@ jcm_canonical_exec_subdir
 
     jcm_canonical_exec_subdir(
       OUT_VAR <out-var>
-      [COMPONENT <component>]
-    )
+      [COMPONENT <component>])
 
 Sets the variable specified by :cmake:variable:`OUT_VAR` to the canonical source subdirectory for an
 executable of project :cmake:variable:`PROJECT_NAME`.

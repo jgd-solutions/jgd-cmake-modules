@@ -22,9 +22,9 @@ jcm_parse_arguments
       [WITHOUT_MISSING_VALUES_CHECK]
       [WITHOUT_UNPARSED_CHECK]
       [PREFIX <prefix>]
-      <OPTIONS <keyword>... |
-       ONE_VALUE_KEYWORDS <keyword>... |
-       MULTI_VALUE_KEYWORDS <keyword>...>
+      <[OPTIONS <keyword>...]
+       [ONE_VALUE_KEYWORDS <keyword>..]
+       [MULTI_VALUE_KEYWORDS <keyword>...] >
       [REQUIRES_ALL <keyword>...]
       [REQUIRES_ANY <keyword>...]
       [REQUIRES_ANY_<n> <keyword>...]

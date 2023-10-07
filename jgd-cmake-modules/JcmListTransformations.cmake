@@ -20,12 +20,9 @@ jcm_separate_list
 
     jcm_separate_list(
       INPUT <item>...
-      <OUT_MATCHED <out-var> |
-       OUT_MISMATCHED <out-var> >
-      <REGEX <regex> |
-       IS_DIRECTORY |
-       IS_SYMLINK |
-       IS_ABSOLUTE >
+      <[OUT_MATCHED <out-var>]
+       [OUT_MISMATCHED <out-var>] >
+      <REGEX <regex> | IS_DIRECTORY | IS_SYMLINK | IS_ABSOLUTE >
       [TRANSFORM <transform>])
 
 Separates the elements of list :cmake:variable:`INPUT` into two groups:
@@ -361,8 +358,8 @@ jcm_regex_find_list
     jcm_regex_find_list(
       [MISMATCH]
       REGEX <regex>
-      <OUT_IDX <out-var> |
-       OUT_ELEMENT <out-var> >
+      <[OUT_IDX <out-var>]
+       [OUT_ELEMENT <out-var>] >
       INPUT <item>...)
 
 Searches :cmake:variable:`INPUT` for an item that either matches or mismatches
