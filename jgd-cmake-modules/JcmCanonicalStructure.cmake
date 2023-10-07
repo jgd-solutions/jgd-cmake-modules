@@ -519,8 +519,8 @@ function(_jcm_verify_source_locations)
       INPUT "${ARGS_SOURCES}")
 
     if(misplaced_file)
-      message(FATAL_ERROR
-        "The file '${misplaced_file}' is not located in an acceptable location. It must be located "
+      message(fatal_error
+        "the file '${misplaced_file}' is not located in an acceptable location. it must be located "
         "within one of '${root_dirs}'.")
     endif()
   endforeach()

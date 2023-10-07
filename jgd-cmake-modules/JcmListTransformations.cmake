@@ -363,7 +363,7 @@ jcm_regex_find_list
       INPUT <item>...)
 
 Searches :cmake:variable:`INPUT` for an item that either matches or mismatches
-(:cmake:variable:`MISMATCH` is provided) the regular expression :cmake:variable:`REGEX`.
+(when :cmake:variable:`MISMATCH` is provided) the regular expression :cmake:variable:`REGEX`.
 
 Parameters
 ##########

@@ -28,7 +28,7 @@ include(JcmMessages)
 # escaped themselves (\\n).
 function(_jcm_build_error_targets targets err_msg)
   string(CONCAT target_err_msgs "${err_msg}" "${ARGN}")
-  string(REPLACE ";" "" target_err_msgs "${target_err_msgs}")
+  list(JOIN target_err_msgs "" target_err_msgs)
 
   set(exit_failure "${CMAKE_COMMAND}" -E false)
   set(print_err "${CMAKE_COMMAND}" -E echo "${target_err_msgs}")

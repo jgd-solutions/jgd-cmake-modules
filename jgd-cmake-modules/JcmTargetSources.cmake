@@ -46,8 +46,7 @@ This function will:
 - verify the file names as conforming to JCM's file naming conventions based on the regular
   expressions in *JcmFileNaming.cmake*
 - verify the locations of the input files as conforming to the `Canonical Project Structure`_ for
-  the given target. Enforcement is governed by the JCM "private" function
-  :cmake:`_jcm_verify_source_locations`, from *JcmCanonicalStructure.cmake*.
+  the given target.
 - create PRIVATE, PUBLIC, and INTERFACE header sets with :cmake:command:`jcm_header_file_sets` using
   the respective *\*_HEADERS* parameters and any headers found in :cmake:variable:`SOURCES` for
   executable targets. This is what sets the *\*INCLUDE_DIRECTORIES* properties.
@@ -433,10 +432,10 @@ function(jcm_verify_sources)
   # Argument validation
   set(target_type_property_values
     "STATIC_LIBRARY|MODULE_LIBRARY|SHARED_LIBRARY|OBJECT_LIBRARY|INTERFACE_LIBRARY|EXECUTABLE")
-  if(DEFINED ARGS_TARGET_TYPE AND NOT ARGS_TARGET_TYPE MATCHES target_type_property_values)
+  if(DEFINED ARGS_TARGET_TYPE AND NOT ARGS_TARGET_TYPE MATCHES "${target_type_property_values}")
     message(FATAL_ERROR
-      "When provided, 'TARGET_TYPE' must name an acceptable value for a target's TYPE property -
-      one of: ${target_type_property_values}")
+      "Invalid 'TARGET_TYPE': ${ARGS_TARGET_TYPE}. When provided, 'TARGET_TYPE' must name an "
+      "acceptable value for a target's 'TYPE' property, one of: ${target_type_property_values}")
   endif()
 
   # transform arguments to normalized absolute paths
@@ -538,7 +537,7 @@ function(jcm_verify_sources)
 
   endif()
 
-
+  # verify file locations
   set(acceptable_file_root_dirs)
   list(
     APPEND acceptable_file_root_dirs
@@ -550,13 +549,22 @@ function(jcm_verify_sources)
     list(APPEND acceptable_file_root_dirs "${exec_component_parent_dir}")
   endif()
 
-  _jcm_verify_source_locations(
-    ROOT_DIRS "${accetpable_file_root_dirs}"
-    SOURCES
+  list(TRANSFORM acceptable_file_root_dirs PREPEND "^" OUTPUT_VARIABLE acceptable_file_roots_regex)
+  list(JOIN acceptable_file_roots_regex "|" acceptable_file_roots_regex)
+  jcm_separate_list(
+    REGEX "${acceptable_file_roots_regex}"
+    OUT_MISMATCHED misplaced_files
+    INPUT
     "${ARGS_INTERFACE_HEADERS}"
     "${ARGS_PUBLIC_HEADERS}"
     "${ARGS_PRIVATE_HEADERS}"
     "${ARGS_SOURCES}")
+  if(misplaced_files)
+    message(FATAL_ERROR
+      "The following files aren't placed within an acceptable location.\n"
+      "Acceptable Locations: ${acceptable_file_root_dirs}\n"
+      "Misplaced Files: ${misplaced_files}")
+  endif()
 
   # Results
 
