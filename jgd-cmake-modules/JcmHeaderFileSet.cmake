@@ -46,6 +46,8 @@ respective `*INCLUDE_DIRECTORIES` properties, based on the `scope`, and are wrap
 :cmake:command:`jcm_add_library` uses this function, and it is often not necessary to use directly,
 unless supplementary headers sets are to be added to a target, like in a nested directory.
 
+TODO: support separately creating header sets for integration tests
+
 .. note::
   Use a target's `HEADER_SETS` and `INTERFACE_HEADER_SETS` `properties
   <https://cmake.org/cmake/help/latest/prop_tgt/HEADER_SETS.html>`_ to query its header sets.

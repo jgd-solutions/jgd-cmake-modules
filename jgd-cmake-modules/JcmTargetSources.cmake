@@ -141,68 +141,74 @@ function(jcm_add_target_sources)
       "The target provided to ${CMAKE_CURRENT_FUNCTION}, '${ARGS_TARGET}', does not exist.")
   endif()
 
-  get_target_property(target_type "${ARGS_TARGET}" TYPE)
-  get_target_property(target_source_dir "${ARGS_TARGET}" SOURCE_DIR)
-  get_target_property(target_binary_dir "${ARGS_TARGET}" BINARY_DIR)
-  get_target_property(target_component "${ARGS_TARGET}" COMPONENT)
-
-  # form conditional arguments for verify
-  if(ARGS_WITHOUT_FILE_NAMING_CHECK)
-    set(without_file_naming_arg WITHOUT_FILE_NAMING_CHECK)
-  else()
-    unset(without_file_naming_arg)
+  if(NOT DEFINED ARGS_SOURCES)
+    message(FATAL_ERROR
+      "SOURCES must be provided to ${CMAKE_CURRENT_FUNCTION} when adding sources to non-interface "
+      "libraries. Refer to jcm_header_file_sets for adding exclusively headers to targets.")
   endif()
 
-  if(NOT target_component)
-    set(target_component_arg TARGET_COMPONENT ${target_component})
-  else()
-    unset(target_component_arg)
-  endif()
+    get_target_property(target_type "${ARGS_TARGET}" TYPE)
+    get_target_property(target_source_dir "${ARGS_TARGET}" SOURCE_DIR)
+    get_target_property(target_binary_dir "${ARGS_TARGET}" BINARY_DIR)
+    get_target_property(target_component "${ARGS_TARGET}" COMPONENT)
 
-  jcm_verify_sources(
-    ${without_file_naming_arg}
-    ${target_component_arg}
-    TARGET_TYPE "${target_type}"
-    TARGET_SOURCE_DIR "${target_source_dir}"
-    TARGET_BINARY_DIR "${target_binary_dir}"
-    INTERFACE_HEADERS "${ARGS_INTERFACE_HEADERS}"
-    PUBLIC_HEADERS "${ARGS_PUBLIC_HEADERS}"
-    PRIVATE_HEADERS "${ARGS_PRIVATE_HEADERS}"
-    SOURCES "${ARGS_SOURCES}"
-    OUT_INTERFACE_HEADERS ARGS_INTERFACE_HEADERS
-    OUT_PUBLIC_HEADERS ARGS_PUBLIC_HEADERS
-    OUT_PRIVATE_HEADERS ARGS_PRIVATE_HEADERS
-    OUT_SOURCES ARGS_SOURCES)
-
-  # header properties
-  if(ARGS_INTERFACE_HEADERS)
-    jcm_header_file_sets(INTERFACE TARGET ${ARGS_TARGET} HEADERS "${ARGS_INTERFACE_HEADERS}")
-  elseif(ARGS_PRIVATE_HEADERS)
-    jcm_header_file_sets(PRIVATE TARGET ${ARGS_TARGET} HEADERS "${ARGS_PRIVATE_HEADERS}")
-  endif()
-
-  # header file sets - already assured header sources are appropriate for target
-  foreach(header_scope IN ITEMS INTERFACE PUBLIC PRIVATE)
-    set(header_source "ARGS_${header_scope}_HEADERS")
-    if(NOT "${${header_source}}")
-      continue()
+    # form conditional arguments for verify
+    if(ARGS_WITHOUT_FILE_NAMING_CHECK)
+      set(without_file_naming_arg WITHOUT_FILE_NAMING_CHECK)
+    else()
+      unset(without_file_naming_arg)
     endif()
-    jcm_header_file_sets(${header_scope}
-      TARGET "${ARGS_TARGET}"
-      HEADERS "${${header_source}}")
-  endforeach()
 
-  # sources
-  # Note: empty values are considered relative paths by target_sources, which therefore adds
-  # a directory as a target source. Avoid this.
-  jcm_aliased_target(TARGET "${ARGS_TARGET}" OUT_TARGET ARGS_TARGET)
+    if(NOT target_component)
+      set(target_component_arg TARGET_COMPONENT ${target_component})
+    else()
+      unset(target_component_arg)
+    endif()
 
-  if(ARGS_PRIVATE_HEADERS)
-    target_sources(${ARGS_TARGET} PRIVATE "${ARGS_PRIVATE_HEADERS}")
-  endif()
-  if(ARGS_SOURCES)
-    target_sources(${ARGS_TARGET} PRIVATE "${ARGS_SOURCES}")
-  endif()
+    jcm_verify_sources(
+      ${without_file_naming_arg}
+      ${target_component_arg}
+      TARGET_TYPE "${target_type}"
+      TARGET_SOURCE_DIR "${target_source_dir}"
+      TARGET_BINARY_DIR "${target_binary_dir}"
+      INTERFACE_HEADERS "${ARGS_INTERFACE_HEADERS}"
+      PUBLIC_HEADERS "${ARGS_PUBLIC_HEADERS}"
+      PRIVATE_HEADERS "${ARGS_PRIVATE_HEADERS}"
+      SOURCES "${ARGS_SOURCES}"
+      OUT_INTERFACE_HEADERS ARGS_INTERFACE_HEADERS
+      OUT_PUBLIC_HEADERS ARGS_PUBLIC_HEADERS
+      OUT_PRIVATE_HEADERS ARGS_PRIVATE_HEADERS
+      OUT_SOURCES ARGS_SOURCES)
+
+    # header properties
+    if(ARGS_INTERFACE_HEADERS)
+      jcm_header_file_sets(INTERFACE TARGET ${ARGS_TARGET} HEADERS "${ARGS_INTERFACE_HEADERS}")
+    elseif(ARGS_PRIVATE_HEADERS)
+      jcm_header_file_sets(PRIVATE TARGET ${ARGS_TARGET} HEADERS "${ARGS_PRIVATE_HEADERS}")
+    endif()
+
+    # header file sets - already assured header sources are appropriate for target
+    foreach(header_scope IN ITEMS INTERFACE PUBLIC PRIVATE)
+      set(header_source "ARGS_${header_scope}_HEADERS")
+      if(NOT "${${header_source}}")
+        continue()
+      endif()
+      jcm_header_file_sets(${header_scope}
+        TARGET "${ARGS_TARGET}"
+        HEADERS "${${header_source}}")
+    endforeach()
+
+    # sources
+    # Note: empty values are considered relative paths by target_sources, which therefore adds
+    # a directory as a target source. Avoid this.
+    jcm_aliased_target(TARGET "${ARGS_TARGET}" OUT_TARGET ARGS_TARGET)
+
+    if(ARGS_PRIVATE_HEADERS)
+      target_sources(${ARGS_TARGET} PRIVATE "${ARGS_PRIVATE_HEADERS}")
+    endif()
+    if(ARGS_SOURCES)
+      target_sources(${ARGS_TARGET} PRIVATE "${ARGS_SOURCES}")
+    endif()
 endfunction()
 
 #[=======================================================================[.rst:
@@ -448,11 +454,13 @@ function(jcm_verify_sources)
     endif()
   endforeach()
 
-  jcm_transform_list(ABSOLUTE_PATH
+  jcm_transform_list(
+    ABSOLUTE_PATH
     BASE "${CMAKE_CURRENT_BINARY_DIR}"
     INPUT "${ARGS_TARGET_BINARY_DIR}"
     OUT_VAR ARGS_TARGET_BINARY_DIR)
-  jcm_transform_list(NORMALIZE_PATH
+  jcm_transform_list(
+    NORMALIZE_PATH
     INPUT "${ARGS_TARGET_BINARY_DIR}"
     OUT_VAR ARGS_TARGET_BINARY_DIR)
 
@@ -468,13 +476,10 @@ function(jcm_verify_sources)
     if(DEFINED ARGS_SOURCES OR DEFINED ARGS_PUBLIC_HEADERS OR DEFINED ARGS_PRIVATE_HEADERS)
       message(FATAL_ERROR "Interface libraries can only be added with INTERFACE_HEADERS")
     endif()
-  elseif(NOT DEFINED ARGS_SOURCES)
-    message(FATAL_ERROR "SOURCES must be provided for non-interface libraries")
   endif()
 
   # extract any headers from sources
-  if(DEFINED ARGS_OUT_PRIVATE_HEADERS OR DEFINED ARGS_OUT_SOURCES
-    OR "${ARGS_TARGET_TYPE}" STREQUAL "EXECUTABLE")
+  if(DEFINED ARGS_OUT_SOURCES AND "${ARGS_TARGET_TYPE}" STREQUAL "EXECUTABLE")
     jcm_separate_list(
       INPUT "${ARGS_SOURCES}"
       REGEX "${JCM_HEADER_REGEX}"

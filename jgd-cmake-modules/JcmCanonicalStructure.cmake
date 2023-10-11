@@ -1,3 +1,12 @@
+
+# define project sensitive variable before include guard to catch PROJECT_NAME changes
+
+set(JCM_LIB_PREFIX "lib")
+
+string(REGEX REPLACE "^${JCM_LIB_PREFIX}" "" _jcm_project_name_no_lib_prefix "${PROJECT_NAME}")
+set(JCM_PROJECT_CANONICAL_SUBDIR_PREFIX_REGEX
+  "^${PROJECT_SOURCE_DIR}/(${JCM_LIB_PREFIX})?${_jcm_project_name_no_lib_prefix}")
+
 include_guard()
 
 #[=======================================================================[.rst:
@@ -15,8 +24,8 @@ naming is implemented in *JcmFileNaming*, which uses the file extensions defined
 Variables
 ^^^^^^^^^
 
-The file extensions specified by the Canonical Project Structure have been extended for the CMake recognized languages
-of CXX, C, CUDA, OBJC, OBJCXX, and HIP.
+The file extensions specified by the Canonical Project Structure have been extended for the CMake
+recognized languages of CXX, C, CUDA, OBJC, OBJCXX, and HIP.
 
 :cmake:variable:`JCM_LIB_PREFIX`
   The prefix used throughout JCM for libraries. Used in project names and when naming targets. Set
@@ -40,6 +49,11 @@ of CXX, C, CUDA, OBJC, OBJCXX, and HIP.
   File extension for module interface files. '.mpp' option selected from `Canonical Project
   Structure`_
 
+:cmake:variable:`JCM_PROJECT_CANONICAL_SUBDIR_PREFIX_REGEX`
+  A regular expression describing the path prefix for every canonical subdirectory for the current
+  project, given by :cmake:variable:`PROJECT_NAME`. An absolute, normalized path matching this
+  regular expression is a canonical subdirectory for the current project.
+
 --------------------------------------------------------------------------
 
 #]=======================================================================]
@@ -48,7 +62,6 @@ include(JcmParseArguments)
 include(JcmTargetNaming)
 include(JcmListTransformations)
 
-set(JCM_LIB_PREFIX "lib")
 set(JCM_IN_FILE_EXTENSION ".in")
 
 set(JCM_CXX_HEADER_EXTENSION ".hpp")
@@ -248,8 +261,7 @@ function(jcm_canonical_lib_subdir)
   jcm_parse_arguments(
     ONE_VALUE_KEYWORDS "OUT_VAR;COMPONENT"
     REQUIRES_ALL "OUT_VAR"
-    ARGUMENTS "${ARGN}"
-  )
+    ARGUMENTS "${ARGN}")
 
   if(DEFINED ARGS_COMPONENT)
     string(JOIN "-" comp_dir ${PROJECT_NAME} ${ARGS_COMPONENT})
@@ -329,6 +341,7 @@ function(jcm_canonical_exec_subdir)
     ONE_VALUE_KEYWORDS "OUT_VAR;COMPONENT"
     REQUIRES_ALL "OUT_VAR"
     ARGUMENTS "${ARGN}")
+
   if(DEFINED ARGS_COMPONENT)
     jcm_canonical_exec_subdir(OUT_VAR exec_subdir)
     set(exec_comp_subdir "${exec_subdir}/${ARGS_COMPONENT}")
@@ -353,16 +366,16 @@ jcm_canonical_include_dirs
       OUT_VAR <out-var>
       TARGET <target>)
 
-Sets the variable specified by :cmake:variable:`OUT_VAR` to the canonical include directories for
-:cmake:variable:`TARGET`.
+Sets the variable specified by :cmake:variable:`OUT_VAR` to a list containing the canonical include
+directories for the target named by :cmake:variable:`TARGET`.
 
 The provided target's :cmake:variable:`SOURCE_DIR`, :cmake:variable:`TYPE`, and
 :cmake:variable:`COMPONENT` properties will be queried to resolve the target's include directory in
-the source tree. This will be one or two parent directories from its canonical source directory.
-This creates the include prefix of `<PROJECT_NAME>`, or `<PROJECT_NAME>/<COMPONENT>` when the target
-is a component. Binary directories :cmake:variable:`PROJECT_BINARY_DIR` and
-`${PROJECT_BINARY_DIR}/${PROJECT_NAME}-<COMPONENT>` can be appended to the result for generated
-headers.
+the source tree. This will be one or two parent directories above the target's canonical source
+directory to establish the include prefix of `<PROJECT_NAME>`, or `<PROJECT_NAME>/<COMPONENT>`
+when the target is a component. Binary directories :cmake:variable:`PROJECT_BINARY_DIR` and, when
+the target is a component, `${PROJECT_BINARY_DIR}/${PROJECT_NAME}-<COMPONENT>` can be appended to
+the result for generated headers by providing :cmake:variable:`WITH_BINARY_INCLUDE_DIRS`
 
 Parameters
 ##########
