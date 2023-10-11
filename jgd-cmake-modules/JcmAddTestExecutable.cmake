@@ -12,7 +12,8 @@ include(JcmDefaultCompileOptions)
 include(JcmFileNaming)
 include(JcmStandardDirs)
 include(JcmListTransformations)
-include(JcmCanonicalStructure)
+include(JcmTargetSources)
+
 
 #[=======================================================================[.rst:
 
@@ -101,33 +102,29 @@ function(jcm_add_test_executable)
     REQUIRES_ALL "NAME;SOURCES"
     ARGUMENTS "${ARGN}")
 
-  # transform arguments to normalized absolute paths
-  jcm_transform_list(ABSOLUTE_PATH INPUT "${ARGS_SOURCES}" OUT_VAR ARGS_SOURCES)
-  jcm_transform_list(NORMALIZE_PATH INPUT "${ARGS_SOURCES}" OUT_VAR ARGS_SOURCES)
+  jcm_verify_sources(
+    TARGET_TYPE "EXECUTABLE"
+    TARGET_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}"
+    TARGET_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}"
+    SOURCES "${ARGS_SOURCES}"
+    OUT_PRIVATE_HEADERS test_headers
+    OUT_SOURCES test_sources)
 
-  # verify source locations
-  _jcm_verify_source_locations(SOURCES "${ARGS_SOURCES}")
-
-  # Verify source naming
-
-  if(CMAKE_CURRENT_SOURCE_DIR MATCHES "^${JCM_PROJECT_TESTS_DIR}")
-    set(test_source_regex "${JCM_SOURCE_REGEX}") # other tests & drivers, only
-  else()
-    set(test_source_regex "${JCM_TEST_SOURCE_REGEX}") # unit test files, only
+  # Additional naming verification for unit test sources
+  if(NOT CMAKE_CURRENT_SOURCE_DIR MATCHES "^${JCM_PROJECT_TESTS_DIR}")
+    jcm_separate_list(
+      INPUT "${test_sources}"
+      REGEX "${JCM_UTEST_SOURCE_REGEX}"
+      TRANSFORM "FILENAME"
+      OUT_MISMATCHED incorrectly_named)
+    if(incorrectly_named)
+      message(
+        FATAL_ERROR
+        "Provided source files do not match the regex for unit test executable sources, "
+        "'${JCM_UTEST_SOURCE_REGEX}': ${incorrectly_named}.")
+    endif()
   endif()
 
-  set(regex "${JCM_HEADER_REGEX}|${test_source_regex}")
-  jcm_separate_list(
-    INPUT "${ARGS_SOURCES}"
-    REGEX "${regex}"
-    TRANSFORM "FILENAME"
-    OUT_MISMATCHED incorrectly_named)
-  if(incorrectly_named)
-    message(
-      FATAL_ERROR
-      "Provided source files do not match the regex for test executable sources, ${regex}: "
-      "${incorrectly_named}.")
-  endif()
 
   # Default test name
   if(DEFINED ARGS_TEST_NAME)

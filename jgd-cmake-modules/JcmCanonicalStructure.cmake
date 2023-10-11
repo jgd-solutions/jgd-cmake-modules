@@ -32,7 +32,7 @@ of CXX, C, CUDA, OBJC, OBJCXX, and HIP.
 :cmake:variable:`JCM_<LANG>_SOURCE_EXTENSION`
   File extension for source files. '.cpp' option selected from `Canonical Project Structure`_ for C++
 
-:cmake:variable:`JCM_<LANG>_TEST_SOURCE_EXTENSION`
+:cmake:variable:`JCM_<LANG>_UTEST_SOURCE_EXTENSION`
   File extension for unit testing source files. '.test.cpp' option selected from `Canonical Project
   Structure`_ for C++
 
@@ -54,27 +54,27 @@ set(JCM_IN_FILE_EXTENSION ".in")
 set(JCM_CXX_HEADER_EXTENSION ".hpp")
 set(JCM_CXX_SOURCE_EXTENSION ".cpp")
 set(JCM_CXX_MODULE_EXTENSION ".mpp") # cmake doesn't support modules, but for future
-set(JCM_CXX_TEST_SOURCE_EXTENSION ".test${JCM_CXX_SOURCE_EXTENSION}")
+set(JCM_CXX_UTEST_SOURCE_EXTENSION ".test${JCM_CXX_SOURCE_EXTENSION}")
 
 set(JCM_C_HEADER_EXTENSION ".h")
 set(JCM_C_SOURCE_EXTENSION ".c")
-set(JCM_C_TEST_SOURCE_EXTENSION ".test${JCM_C_SOURCE_EXTENSION}")
+set(JCM_C_UTEST_SOURCE_EXTENSION ".test${JCM_C_SOURCE_EXTENSION}")
 
 set(JCM_CUDA_HEADER_EXTENSION ".cuh")
 set(JCM_CUDA_SOURCE_EXTENSION ".cu")
-set(JCM_CUDA_TEST_SOURCE_EXTENSION ".test${JCM_CUDA_SOURCE_EXTENSION}")
+set(JCM_CUDA_UTEST_SOURCE_EXTENSION ".test${JCM_CUDA_SOURCE_EXTENSION}")
 
 set(JCM_OBJC_HEADER_EXTENSION ".h")
 set(JCM_OBJC_SOURCE_EXTENSION ".m")
-set(JCM_OBJC_TEST_SOURCE_EXTENSION ".test${JCM_OBJC_SOURCE_EXTENSION}")
+set(JCM_OBJC_UTEST_SOURCE_EXTENSION ".test${JCM_OBJC_SOURCE_EXTENSION}")
 
 set(JCM_OBJCXX_HEADER_EXTENSION ".h")
 set(JCM_OBJCXX_SOURCE_EXTENSION ".mm")
-set(JCM_OBJCXX_TEST_SOURCE_EXTENSION ".test${JCM_OBJCXX_SOURCE_EXTENSION}")
+set(JCM_OBJCXX_UTEST_SOURCE_EXTENSION ".test${JCM_OBJCXX_SOURCE_EXTENSION}")
 
 set(JCM_HIP_HEADER_EXTENSION ".hpp")
 set(JCM_HIP_SOURCE_EXTENSION ".cpp")
-set(JCM_HIP_TEST_SOURCE_EXTENSION ".test${JCM_HIP_SOURCE_EXTENSION}")
+set(JCM_HIP_UTEST_SOURCE_EXTENSION ".test${JCM_HIP_SOURCE_EXTENSION}")
 
 #[=======================================================================[.rst:
 
