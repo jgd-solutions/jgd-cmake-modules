@@ -151,9 +151,9 @@ function(jcm_canonical_subdir)
   # Usage Guards
   if(NOT ARGS_TARGET MATCHES "^${PROJECT_NAME}(::|_)")
     set(mismatched_target_message
-      "TARGET '${ARGS_TARGET}' provided to ${CMAKE_CURRENT_FUNCTION} does not "
-      "start with '${PROJECT_NAME}::' or '${PROJECT_NAME}_' and is therefore not a target of "
-      "project ${PROJECT_NAME} or does not follow the target naming structure.")
+      [[TARGET '${ARGS_TARGET}' provided to ${CMAKE_CURRENT_FUNCTION} does not
+      start with '${PROJECT_NAME}::' or '${PROJECT_NAME}_' and is therefore not a target of
+      project ${PROJECT_NAME} or does not follow the target naming structure.]])
   else()
     unset(mismatched_target_message)
   endif()
