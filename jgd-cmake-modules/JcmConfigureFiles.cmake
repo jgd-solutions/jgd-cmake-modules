@@ -18,6 +18,7 @@ All input file names are simply the output file name with :cmake:variable:`JCM_I
 
 include(JcmParseArguments)
 include(JcmFileNaming)
+include(JcmListTransformations)
 include(JcmCanonicalStructure)
 include(CMakePackageConfigHelpers)
 
@@ -125,8 +126,7 @@ function(jcm_configure_package_config_file)
   configure_package_config_file(
     "${in_config_file}"
     "${config_file}"
-    INSTALL_DESTINATION "${JCM_INSTALL_CMAKE_DESTINATION}"
-  )
+    INSTALL_DESTINATION "${JCM_INSTALL_CMAKE_DESTINATION}")
 
   # output variable
   if(DEFINED ARGS_OUT_FILE_VAR)
@@ -146,17 +146,17 @@ jcm_configure_file
     jcm_configure_file(
       IN_FILE <file>
       [OUT_FILE_VAR <out-var>]
-    )
+      [DEST_DIR <dest-dir>])
 
 Configures the file specified by :cmake:variable:`IN_FILE`, just like CMake's
 :cmake:command:`configure_file`, but follows JCM's input-file naming conventions, has richer error
-checks and messages, and uses *@* uses substitution, only.
+checks and messages, and uses *@* uses substitution only.
 
 The output file will be computed by removing the file extension
 :cmake:variable:`JCM_IN_FILE_EXTENSION` from :cmake:variable:`IN_FILE` and configuring the file to
-:cmake:variable:`CMAKE_CURRENT_BINARY_DIR`, replacing `@` variables, only. Like
-:cmake:command:`configure_file`, relative input paths are treated with respect to
-:cmake:variable:`CMAKE_CURRENT_SOURCE_DIR`.
+:cmake:variable:`DEST_DIR` (default :cmake:variable:`CMAKE_CURRENT_BINARY_DIR`), replacing `@`
+variables, only. Like :cmake:command:`configure_file`, relative input paths are treated with
+respect to :cmake:variable:`CMAKE_CURRENT_SOURCE_DIR`.
 
 Use this function when configuring various files for which there is not a specific *configure*
 function for, such as headers and sources.
@@ -168,10 +168,17 @@ One Value
 ~~~~~~~~~
 
 :cmake:variable:`IN_FILE`
-  The input config-file template.
+  A relative or absolute path to the input config-file template. Relative paths will be computed
+  relative to :cmake:variable:`CMAKE_CURRENT_SOURCE_DIR`, and all paths will be normalized.
 
 :cmake:variable:`OUT_FILE_VAR`
-  The variable named will be set to the output file path
+  The variable named will be set to the absolute, normalized file path of the output file
+
+:cmake:variable:`DEST_DIR`
+  A relative or absolute path to the directory into which the configured file will be placed.
+  Relative paths will be computed relative to :cmake:variable:`CMAKE_CURRENT_BINARY_DIR`, and all
+  paths will be normalized. When omitted, the default value of
+  :cmake:variable:`CMAKE_CURRENT_BINARY_DIR` will be used.
 
 Examples
 ########
@@ -180,43 +187,68 @@ Examples
 
   jcm_configure_file(IN_FILE my_config.hpp.in)
 
+.. code-block:: cmake
+
+  jcm_configure_file(
+    IN_FILE my_config.hpp.in # WRT CMAKE_CURRENT_SOURCE_DIR
+    DEST_DIR "gen"           # WRT CMAKE_CURRENT_BINARY_DIR
+    OUT_FILE_VAR generated_file)
+
 --------------------------------------------------------------------------
 
 #]=======================================================================]
 function(jcm_configure_file)
   jcm_parse_arguments(
-    ONE_VALUE_KEYWORDS "IN_FILE" "OUT_FILE_VAR"
+    ONE_VALUE_KEYWORDS "IN_FILE" "OUT_FILE_VAR" "DEST_DIR"
     REQUIRES_ALL "IN_FILE"
-    ARGUMENTS "${ARGN}"
-  )
+    ARGUMENTS "${ARGN}")
 
-  cmake_path(GET ARGS_IN_FILE FILENAME in_file_name)
-  jcm_transform_list(ABSOLUTE_PATH INPUT "${ARGS_IN_FILE}" OUT_VAR in_file_path)
+  # checking 'EXISTS' before 'IS_DIRECTORY' for more precise error reporting
 
-  # Usage Guards
-  # cmake's configure_file warns about directories being provided
-  if(NOT in_file_name MATCHES "${JCM_IN_FILE_REGEX}")
-    message(
-      FATAL_ERROR
-      "${ARGS_IN_FILE} does not end with the extension '${JCM_IN_FILE_EXTENSION}' required by "
-      "${CMAKE_CURRENT_FUNCTION}")
+  jcm_transform_list(ABSOLUTE_PATH INPUT "${ARGS_IN_FILE}" OUT_VAR ARGS_IN_FILE)
+  jcm_transform_list(NORMALIZE_PATH INPUT "${ARGS_IN_FILE}" OUT_VAR ARGS_IN_FILE)
+
+  if(DEFINED ARGS_DEST_DIR)
+    jcm_transform_list(
+      ABSOLUTE_PATH BASE "${CMAKE_CURRENT_BINARY_DIR}"
+      INPUT "${ARGS_DEST_DIR}"
+      OUT_VAR ARGS_DEST_DIR)
+    jcm_transform_list(NORMALIZE_PATH INPUT "${ARGS_DEST_DIR}" OUT_VAR ARGS_DEST_DIR)
+
+    set(destdir_err_base
+      "'DEST_DIR' provided to ${CMAKE_CURRENT_FUNCTION} of project ${PROJECT_NAME}")
+    if(NOT EXISTS "${ARGS_DEST_DIR}")
+      message(FATAL_ERROR "${destdir_err_base} does not exist: '${ARGS_DEST_DIR}'")
+    elseif(NOT IS_DIRECTORY "${ARGS_DEST_DIR}")
+      message(FATAL_ERROR "${destdir_err_base} does not name a directory: '${ARGS_DEST_DIR}'")
+    endif()
+  else()
+    set(ARGS_DEST_DIR "${CMAKE_CURRENT_BINARY_DIR}")
   endif()
 
-  if(NOT EXISTS "${in_file_path}")
+  set(infile_err_base "'IN_FILE' provided to ${CMAKE_CURRENT_FUNCTION} of project ${PROJECT_NAME}")
+  if(NOT EXISTS "${ARGS_IN_FILE}")
     # configure_file warns about not existing, this is just more informative for specific project
-    message(
-      FATAL_ERROR
-      "Cannot configure file '${in_file_path}' for project ${PROJECT_NAME}. "
-      "The file does not exist")
+    message(FATAL_ERROR "${infile_err_base} doesn't exist. Cannot configure file.")
+  elseif(IS_DIRECTORY "${ARGS_IN_FILE}")
+    # configure_file warns about directories being provided, this is more informative for project
+    message(FATAL_ERROR "${infile_err_base} names a directory: '${ARGS_IN_FILE}'")
+  endif()
+
+  cmake_path(GET ARGS_IN_FILE FILENAME in_file_name)
+  if(NOT in_file_name MATCHES "${JCM_IN_FILE_REGEX}")
+    message(FATAL_ERROR
+      "${infile_err_base} does not end with the extension '${JCM_IN_FILE_EXTENSION}': "
+      "'${ARGS_IN_FILE}'")
   endif()
 
   # Configure
   string(REGEX REPLACE "${JCM_IN_FILE_REGEX}" "" out_file_name "${in_file_name}")
-  configure_file("${in_file_path}" "${out_file_name}" @ONLY)
+  configure_file("${ARGS_IN_FILE}" "${out_file_name}" @ONLY)
 
   # Out Var
   if(DEFINED ARGS_OUT_FILE_VAR)
-    set(${ARGS_OUT_FILE_VAR} "${CMAKE_CURRENT_BINARY_DIR}/${out_file_name}" PARENT_SCOPE)
+    set(${ARGS_OUT_FILE_VAR} "${ARGS_DEST_DIR}/${out_file_name}" PARENT_SCOPE)
   endif()
 endfunction()
 
