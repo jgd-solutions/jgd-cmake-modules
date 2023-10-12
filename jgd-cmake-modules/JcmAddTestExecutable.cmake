@@ -11,8 +11,10 @@ include(JcmParseArguments)
 include(JcmDefaultCompileOptions)
 include(JcmFileNaming)
 include(JcmStandardDirs)
+include(JcmCanonicalStructure) # JCM_CANONICAL_SUBDIR_PREFIX_REGEX
 include(JcmListTransformations)
-include(JcmCanonicalStructure)
+include(JcmTargetSources)
+
 
 #[=======================================================================[.rst:
 
@@ -27,8 +29,7 @@ jcm_add_test_executable
       NAME <name>
       [TEST_NAME <test-name>]
       [LIBS <lib>...]
-      SOURCES <source>...
-    )
+      SOURCES <source>...)
 
 A convenience function to create an executable and add it as a test in one command, while also
 setting target properties. This function has no affect if
@@ -36,16 +37,17 @@ setting target properties. This function has no affect if
 
 This function will:
 
-- verify the naming conventions of the input source files, and transform them to absolute paths.
-- create an executable with name NAME from SOURCES.
-- register this executable as a test via CTest with name TEST_NAME, or NAME, if TEST_NAME is not
-  provided.
+- verify the input source files using :cmake:command:`jcm_verify_target_sources`, and use the
+  cleaned sources produced by that function.
+- create an executable with name :cmake:variable:`NAME` from :cmake:variable:`SOURCES`.
+- register this executable as a test via CTest with name :cmake:variable:`TEST_NAME`, which
+  defaults to :cmake:variable:`NAME`, if :cmake:variable:`TEST_NAME` isn't provided.
+- creates a private header set
 - set target properties:
 
   - OUTPUT_NAME
   - COMPILE_OPTIONS
   - LINK_LIBRARIES
-  - INCLUDE_DIRECTORIES
 
 Parameters
 ##########
@@ -102,33 +104,30 @@ function(jcm_add_test_executable)
     REQUIRES_ALL "NAME;SOURCES"
     ARGUMENTS "${ARGN}")
 
-  # transform arguments to normalized absolute paths
-  jcm_transform_list(ABSOLUTE_PATH INPUT "${ARGS_SOURCES}" OUT_VAR ARGS_SOURCES)
-  jcm_transform_list(NORMALIZE_PATH INPUT "${ARGS_SOURCES}" OUT_VAR ARGS_SOURCES)
-
-  # verify source locations
-  _jcm_verify_source_locations(SOURCES "${ARGS_SOURCES}")
-
-  # Verify source naming
-
-  if(CMAKE_CURRENT_SOURCE_DIR MATCHES "^${JCM_PROJECT_TESTS_DIR}")
-    set(test_source_regex "${JCM_SOURCE_REGEX}") # other tests & drivers, only
-  else()
-    set(test_source_regex "${JCM_TEST_SOURCE_REGEX}") # unit test files, only
-  endif()
-
-  set(regex "${JCM_HEADER_REGEX}|${test_source_regex}")
+  # Additional naming considerations for unit test sources
   jcm_separate_list(
     INPUT "${ARGS_SOURCES}"
-    REGEX "${regex}"
+    REGEX "${JCM_UTEST_SOURCE_REGEX}"
     TRANSFORM "FILENAME"
-    OUT_MISMATCHED incorrectly_named
-  )
-  if(incorrectly_named)
-    message(
-      FATAL_ERROR
-      "Provided source files do not match the regex for test executable sources, ${regex}: "
-      "${incorrectly_named}.")
+    OUT_MATCHED unit_test_sources
+    OUT_MISMATCHED standard_sources)
+
+  if(unit_test_sources AND
+    NOT CMAKE_CURRENT_SOURCE_DIR MATCHES "${JCM_PROJECT_CANONICAL_SUBDIR_PREFIX_REGEX}")
+    message(FATAL_ERROR
+      "The '.test' file extension is reserved for unit test sources. ${CMAKE_CURRENT_FUNCTION} is "
+      "being called to create target '${ARGS_NAME}' with unit test source files outside of a "
+      "canonical target subdirectory: ${unit_test_sources}")
+  endif()
+
+  if(standard_sources)
+    jcm_verify_sources(
+      TARGET_TYPE "EXECUTABLE"
+      TARGET_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}"
+      TARGET_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}"
+      SOURCES "${standard_sources}"
+      OUT_PRIVATE_HEADERS test_headers
+      OUT_SOURCES standard_test_sources)
   endif()
 
   # Default test name

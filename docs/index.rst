@@ -42,6 +42,10 @@ Sample
       :language: cmake
       :caption: libsingle/CMakeLists.txt
 
+   .. literalinclude:: ../tests/libsingle/libsingle/material/CMakeLists.txt
+      :language: cmake
+      :caption: libsingle/material/CMakeLists.txt
+
    .. literalinclude:: ../tests/libsingle/tests/CMakeLists.txt
       :language: cmake
       :caption: tests/CMakeLists.txt

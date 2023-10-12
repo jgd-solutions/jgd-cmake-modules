@@ -19,18 +19,17 @@ jcm_separate_list
   .. code-block:: cmake
 
     jcm_separate_list(
-      REGEX <regex>
       INPUT <item>...
-      [TRANSFORM <transform>]
       <[OUT_MATCHED <out-var>]
-       [OUT_MISMATCHED <out-var>]>
-    )
+       [OUT_MISMATCHED <out-var>] >
+      <REGEX <regex> | IS_DIRECTORY | IS_SYMLINK | IS_ABSOLUTE >
+      [TRANSFORM <transform>])
 
-Separates the :cmake:variable:`INPUT` into two groups: :cmake:variable:`OUT_MATCHED`, if the element
-matches the provided :cmake:variable:`REGEX`, and :cmake:variable:`OUT_MISMATCHED`, otherwise.
-Before matching, the elements can optionally be transformed by the selected
-:cmake:variable:`TRANSFORM` before being matched. Nevertheless, :cmake:variable:`INPUT` is not
-modified, and the results in the out-variables are identical to those provided via INPUT.
+Separates the elements of list :cmake:variable:`INPUT` into two groups:
+:cmake:variable:`OUT_MATCHED` if the element matches the provided filter, and
+:cmake:variable:`OUT_MISMATCHED` otherwise. Before matching, the elements can optionally be
+transformed by the selected :cmake:variable:`TRANSFORM`. The elements in the out-variables are
+always identical to those provided via :cmake:variable:`INPUT`.
 
 Parameters
 ##########
@@ -38,16 +37,29 @@ Parameters
 One Value
 ~~~~~~~~~
 
-:cmake:variable:`REGEX`
-  The regular expression used to separate the input elements.
-
 :cmake:variable:`OUT_MATCHED`
   The variable named will be set to a list of elements from :cmake:variable:`INPUT` that matched
-  :cmake:variable:`REGEX`
+  :cmake:variable:`REGEX`.
 
 :cmake:variable:`OUT_MISMATCHED`
   The variable named will be set to a list of elements from :cmake:variable:`INPUT` that did *not*
-  match :cmake:variable:`REGEX`
+  match :cmake:variable:`REGEX`.
+
+:cmake:variable:`REGEX`
+  When present, this provided regular expression will be the filter  used to separate the input
+  elements.
+
+:cmake:variable:`IS_DIRECTORY`
+  When present, the filter used to separate the input elements will match when an element is a
+  directory.
+
+:cmake:variable:`IS_SYMLINK`
+  When present, the filter used to separate the input elements will match when an element is a
+  symlink.
+
+:cmake:variable:`IS_ABSOLUTE`
+  When present, the filter used to separate the input elements will match when an element is an
+  absolute path
 
 :cmake:variable:`TRANSFORM`
   A transformation to apply to the input before matching. The outputs will not contain this
@@ -70,24 +82,87 @@ Examples
     OUT_MISMATCHED improperly_named
     INPUT
       "${CMAKE_CURRENT_SOURCE_DIR}/thing.hpp"
-      "${CMAKE_CURRENT_SOURCE_DIR}/thINg.hxx"
-  )
+      "${CMAKE_CURRENT_SOURCE_DIR}/thINg.hxx")
+
+.. code-block:: cmake
+
+  jcm_separate_list(
+    IS_DIRECTORY
+    OUT_MATCHED directories
+    OUT_MISMATCHED non_directories
+    INPUT
+      "/path/to/my/file.txt"
+      "/path/to/my")
+      "/path/to/")
+
+   message(STATUS "${directories}" == "/path/to/my;/path/to/")
+   message(STATUS "${non_directories}" == "/path/to/my/file.txt")
 
 --------------------------------------------------------------------------
 
 #]=======================================================================]
 function(jcm_separate_list)
   jcm_parse_arguments(
-    ONE_VALUE_KEYWORDS "REGEX;OUT_MATCHED;OUT_MISMATCHED;TRANSFORM"
+    OPTIONS "IS_DIRECTORY" "IS_SYMLINK" "IS_ABSOLUTE"
+    ONE_VALUE_KEYWORDS "REGEX" "OUT_MATCHED" "OUT_MISMATCHED" "TRANSFORM"
     MULTI_VALUE_KEYWORDS "INPUT"
-    REQUIRES_ALL "REGEX;INPUT"
-    REQUIRES_ANY "OUT_MATCHED;OUT_MISMATCHED"
+    REQUIRES_ALL "INPUT"
+    REQUIRES_ANY "OUT_MATCHED" "OUT_MISMATCHED"
+    REQUIRES_ANY_1 "REGEX" "IS_DIRECTORY" "IS_SYMLINK" "IS_ABSOLUTE"
+    MUTUALLY_EXCLUSIVE "REGEX" "IS_DIRECTORY" "IS_SYMLINK" "IS_ABSOLUTE"
     ARGUMENTS "${ARGN}")
 
+  # additional argument validation
   set(supported_transforms "FILENAME")
   if(DEFINED ARGS_TRANSFORM AND NOT ARGS_TRANSFORM MATCHES "${supported_transforms}")
     message(FATAL_ERROR "The TRANSFORM of ${ARGS_TRANSFORM} is not supported. "
       "It must be one of ${supported_transforms}.")
+  endif()
+
+  if("${ARGS_TRANSFORM}" STREQUAL "FILENAME" AND ARGS_IS_ABSOLUTE)
+    message(AUTHOR_WARNING
+      "Using 'FILENAME' as the TRANSFORM in combination with the 'IS_ABSOLUTE' to "
+      "${CMAKE_CURENT_FUNCTION} is nonsensical, as all filenames are strictly not absolute. ")
+  endif()
+
+  # form internal transformation; default is no transform
+  if(ARGS_TRANSFORM STREQUAL "FILENAME")
+    set(selected_transformation [[
+      cmake_path(GET element FILENAME transformed_element)
+    ]])
+  else()
+    set(selected_transformation)
+  endif()
+
+  # form filter; default is a mismatch
+  if(ARGS_IS_DIRECTORY)
+    set(selected_filter [[
+      if(IS_DIRECTORY "${transformed_element}")
+        set(element_matched TRUE)
+      else()
+        set(element_matched FALSE)
+      endif()
+    ]])
+  elseif(ARGS_IS_SYMLINK)
+    set(selected_filter [[
+      if(IS_SYMLINK "${transformed_element}")
+        set(element_matched TRUE)
+      else()
+        set(element_matched FALSE)
+      endif()
+    ]])
+  elseif(ARGS_IS_ABSOLUTE)
+    set(selected_filter [[
+      if(IS_ABSOLUTE "${transformed_element}")
+        set(element_matched TRUE)
+      else()
+        set(element_matched FALSE)
+      endif()
+    ]])
+  else()
+    set(selected_filter [[
+      string(REGEX MATCH "${ARGS_REGEX}" element_matched "${transformed_element}")
+    ]])
   endif()
 
   # Split input into two lists
@@ -95,14 +170,16 @@ function(jcm_separate_list)
   set(mismatched_elements)
   foreach(element ${ARGS_INPUT})
     # transform element to be matched
-    set(transformed_element "${element}")
-    if(ARGS_TRANSFORM STREQUAL "FILENAME")
-      cmake_path(GET element FILENAME transformed_element)
+    if(DEFINED selected_transformation)
+      cmake_language(EVAL CODE "${selected_transformation}")
+    else()
+      set(transformed_element "${element}")
     endif()
 
-    # compare element against regex
-    string(REGEX MATCH "${ARGS_REGEX}" matched "${transformed_element}")
-    if(matched)
+    # compare element against selected filter
+    set(element_matched FALSE)
+    cmake_language(EVAL CODE "${selected_filter}")
+    if(element_matched)
       list(APPEND matched_elements "${element}")
     else()
       list(APPEND mismatched_elements "${element}")
@@ -125,7 +202,7 @@ jcm_transform_list
   .. code-block:: cmake
 
     jcm_transform_list(
-      <ABSOLUTE_PATH [BASE <path>] | NORMALIZE_PATH | FILENAME>
+      <ABSOLUTE_PATH [BASE <path>] | NORMALIZE_PATH | PARENT_PATH | FILENAME>
       INPUT <item>...
       OUT_VAR <out-var>)
 
@@ -148,15 +225,24 @@ Options
   <https://cmake.org/cmake/help/latest/command/cmake_path.html#normalization>`_ (canonical) path.
   Excludes other transformation options.
 
+:cmake:variable:`PARENT_PATH`
+  A transformation that treats each input item as a path, and transforms it to its parent path.
+  Excludes other transformation options.
+
 :cmake:variable:`FILENAME`
-  A transformation that treats each input item as a path, and converts it to its extraced file name;
-  the last component in the path. Excludes other transformation options.
+  A transformation that treats each input item as a path, and transform it to its file name; the
+  last component in the path. Excludes other transformation options.
 
 One Value
 ~~~~~~~~~
 
 :cmake:variable:`OUT_VAR`
   The variable named will be set to a list of transformed input elements.
+
+:cmake:variable:`BASE`
+  When the selected transformation is :cmake:variable:`ABSOLUTE_PATH`, this names the absolute path
+  to the directory upon which relative paths will be made absolute. When omitted, the default is
+  :cmake:variable:`CMAKE_CURRENT_SOURCE_DIR`
 
 Multi Value
 ~~~~~~~~~~~
@@ -181,6 +267,8 @@ Examples
     INPUT libimage/image.hpp libimage/readers.hpp libimage/viewer.hpp
     OUT_VAR header_file_names)
 
+  message(STATUS "${header_file_names} == image.hpp;readers.hpp;viewer.hpp")
+
 --------------------------------------------------------------------------
 
 #]=======================================================================]
@@ -188,12 +276,12 @@ function(jcm_transform_list)
   # Argument parsing, allowing value to INPUT to be empty
   jcm_parse_arguments(
     WITHOUT_MISSING_VALUES_CHECK
-    OPTIONS "ABSOLUTE_PATH" "NORMALIZE_PATH" "FILENAME"
+    OPTIONS "ABSOLUTE_PATH" "NORMALIZE_PATH" "PARENT_PATH" "FILENAME"
     ONE_VALUE_KEYWORDS "BASE;OUT_VAR"
     MULTI_VALUE_KEYWORDS "INPUT"
     REQUIRES_ALL "OUT_VAR"
     REQUIRES_ANY "ABSOLUTE_PATH" "NORMALIZE_PATH" "FILENAME"
-    MUTUALLY_EXCLUSIVE "ABSOLUTE_PATH" "NORMALIZE_PATH" "FILENAME"
+    MUTUALLY_EXCLUSIVE "ABSOLUTE_PATH" "NORMALIZE_PATH" "PARENT_PATH" "FILENAME"
     ARGUMENTS "${ARGN}")
 
   # check for missing values on other variables, besides INPUT
@@ -206,9 +294,15 @@ function(jcm_transform_list)
   endif()
 
   # usage guard
-  if(DEFINED ARGS_BASE AND NOT ARGS_ABSOLUTE_PATH)
-    message(FATAL_ERROR
-      "'BASE' may only be provided to ${CMAKE_CURRENT_FUNCTION} with the 'ABSOLUTE_PATH' transformation")
+  if(DEFINED ARGS_BASE)
+    if(NOT ARGS_ABSOLUTE_PATH)
+      message(FATAL_ERROR
+        "'BASE' may only be provided to ${CMAKE_CURRENT_FUNCTION} with the 'ABSOLUTE_PATH' "
+        "transformation")
+    elseif(NOT IS_ABSOLUTE "${ARGS_BASE}")
+      message(FATAL_ERROR
+        "The directory path provided to 'BASE' of ${CMAKE_CURRENT_FUNCTION} must be absolute.")
+    endif()
   endif()
 
   # Set transformation code based on selected transformation argument
@@ -229,6 +323,10 @@ function(jcm_transform_list)
   elseif(ARGS_NORMALIZE_PATH)
     set(selected_transformation [=[
       cmake_path(SET transformed_result NORMALIZE "${input}")
+    ]=])
+  elseif(ARGS_PARENT_PATH)
+    set(selected_transformation [=[
+      cmake_path(GET input PARENT_PATH transformed_result)
     ]=])
   elseif(ARGS_FILENAME)
     set(selected_transformation [=[
@@ -260,12 +358,12 @@ jcm_regex_find_list
     jcm_regex_find_list(
       [MISMATCH]
       REGEX <regex>
-      <[OUT_IDX <out-var>
-       [OUT_ELEMENT <out-var>]>
+      <[OUT_IDX <out-var>]
+       [OUT_ELEMENT <out-var>] >
       INPUT <item>...)
 
 Searches :cmake:variable:`INPUT` for an item that either matches or mismatches
-(:cmake:variable:`MISMATCH` is provided) the regular expression :cmake:variable:`REGEX`.
+(when :cmake:variable:`MISMATCH` is provided) the regular expression :cmake:variable:`REGEX`.
 
 Parameters
 ##########

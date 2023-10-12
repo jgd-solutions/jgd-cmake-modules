@@ -1,3 +1,12 @@
+
+# define project sensitive variable before include guard to catch PROJECT_NAME changes
+
+set(JCM_LIB_PREFIX "lib")
+
+string(REGEX REPLACE "^${JCM_LIB_PREFIX}" "" _jcm_project_name_no_lib_prefix "${PROJECT_NAME}")
+set(JCM_PROJECT_CANONICAL_SUBDIR_PREFIX_REGEX
+  "^${PROJECT_SOURCE_DIR}/(${JCM_LIB_PREFIX})?${_jcm_project_name_no_lib_prefix}")
+
 include_guard()
 
 #[=======================================================================[.rst:
@@ -15,8 +24,8 @@ naming is implemented in *JcmFileNaming*, which uses the file extensions defined
 Variables
 ^^^^^^^^^
 
-The file extensions specified by the Canonical Project Structure have been extended for the CMake recognized languages
-of CXX, C, CUDA, OBJC, OBJCXX, and HIP.
+The file extensions specified by the Canonical Project Structure have been extended for the CMake
+recognized languages of CXX, C, CUDA, OBJC, OBJCXX, and HIP.
 
 :cmake:variable:`JCM_LIB_PREFIX`
   The prefix used throughout JCM for libraries. Used in project names and when naming targets. Set
@@ -32,13 +41,18 @@ of CXX, C, CUDA, OBJC, OBJCXX, and HIP.
 :cmake:variable:`JCM_<LANG>_SOURCE_EXTENSION`
   File extension for source files. '.cpp' option selected from `Canonical Project Structure`_ for C++
 
-:cmake:variable:`JCM_<LANG>_TEST_SOURCE_EXTENSION`
+:cmake:variable:`JCM_<LANG>_UTEST_SOURCE_EXTENSION`
   File extension for unit testing source files. '.test.cpp' option selected from `Canonical Project
   Structure`_ for C++
 
 :cmake:variable:`JCM_CXX_MODULE_EXTENSION`
   File extension for module interface files. '.mpp' option selected from `Canonical Project
   Structure`_
+
+:cmake:variable:`JCM_PROJECT_CANONICAL_SUBDIR_PREFIX_REGEX`
+  A regular expression describing the path prefix for every canonical subdirectory for the current
+  project, given by :cmake:variable:`PROJECT_NAME`. An absolute, normalized path matching this
+  regular expression is a canonical subdirectory for the current project.
 
 --------------------------------------------------------------------------
 
@@ -48,33 +62,32 @@ include(JcmParseArguments)
 include(JcmTargetNaming)
 include(JcmListTransformations)
 
-set(JCM_LIB_PREFIX "lib")
 set(JCM_IN_FILE_EXTENSION ".in")
 
 set(JCM_CXX_HEADER_EXTENSION ".hpp")
 set(JCM_CXX_SOURCE_EXTENSION ".cpp")
 set(JCM_CXX_MODULE_EXTENSION ".mpp") # cmake doesn't support modules, but for future
-set(JCM_CXX_TEST_SOURCE_EXTENSION ".test${JCM_CXX_SOURCE_EXTENSION}")
+set(JCM_CXX_UTEST_SOURCE_EXTENSION ".test${JCM_CXX_SOURCE_EXTENSION}")
 
 set(JCM_C_HEADER_EXTENSION ".h")
 set(JCM_C_SOURCE_EXTENSION ".c")
-set(JCM_C_TEST_SOURCE_EXTENSION ".test${JCM_C_SOURCE_EXTENSION}")
+set(JCM_C_UTEST_SOURCE_EXTENSION ".test${JCM_C_SOURCE_EXTENSION}")
 
 set(JCM_CUDA_HEADER_EXTENSION ".cuh")
 set(JCM_CUDA_SOURCE_EXTENSION ".cu")
-set(JCM_CUDA_TEST_SOURCE_EXTENSION ".test${JCM_CUDA_SOURCE_EXTENSION}")
+set(JCM_CUDA_UTEST_SOURCE_EXTENSION ".test${JCM_CUDA_SOURCE_EXTENSION}")
 
 set(JCM_OBJC_HEADER_EXTENSION ".h")
 set(JCM_OBJC_SOURCE_EXTENSION ".m")
-set(JCM_OBJC_TEST_SOURCE_EXTENSION ".test${JCM_OBJC_SOURCE_EXTENSION}")
+set(JCM_OBJC_UTEST_SOURCE_EXTENSION ".test${JCM_OBJC_SOURCE_EXTENSION}")
 
 set(JCM_OBJCXX_HEADER_EXTENSION ".h")
 set(JCM_OBJCXX_SOURCE_EXTENSION ".mm")
-set(JCM_OBJCXX_TEST_SOURCE_EXTENSION ".test${JCM_OBJCXX_SOURCE_EXTENSION}")
+set(JCM_OBJCXX_UTEST_SOURCE_EXTENSION ".test${JCM_OBJCXX_SOURCE_EXTENSION}")
 
 set(JCM_HIP_HEADER_EXTENSION ".hpp")
 set(JCM_HIP_SOURCE_EXTENSION ".cpp")
-set(JCM_HIP_TEST_SOURCE_EXTENSION ".test${JCM_HIP_SOURCE_EXTENSION}")
+set(JCM_HIP_UTEST_SOURCE_EXTENSION ".test${JCM_HIP_SOURCE_EXTENSION}")
 
 #[=======================================================================[.rst:
 
@@ -87,8 +100,7 @@ jcm_canonical_subdir
 
     jcm_canonical_subdir(
       OUT_VAR <out-var>
-      TARGET <target>
-    )
+      TARGET <target>)
 
 Sets the variable specified by :cmake:variable:`OUT_VAR` to the canonical source subdirectory for
 either an executable or library of project :cmake:variable:`PROJECT_NAME`. Calls either
@@ -141,8 +153,7 @@ function(jcm_canonical_subdir)
     set(mismatched_target_message
       "TARGET '${ARGS_TARGET}' provided to ${CMAKE_CURRENT_FUNCTION} does not "
       "start with '${PROJECT_NAME}::' or '${PROJECT_NAME}_' and is therefore not a target of "
-      "project ${PROJECT_NAME} or does not follow the target naming structure."
-      )
+      "project ${PROJECT_NAME} or does not follow the target naming structure.")
   else()
     unset(mismatched_target_message)
   endif()
@@ -163,8 +174,7 @@ function(jcm_canonical_subdir)
     jcm_target_type_component_from_name(
       TARGET_NAME ${ARGS_TARGET}
       OUT_TYPE target_type
-      OUT_COMPONENT component
-    )
+      OUT_COMPONENT component)
   endif()
 
   # Resolve subdir based on type
@@ -194,8 +204,7 @@ jcm_canonical_lib_subdir
 
     jcm_canonical_lib_subdir(
       OUT_VAR <out-var>
-      [COMPONENT <component>]
-    )
+      [COMPONENT <component>])
 
 Sets the variable specified by :cmake:variable:`OUT_VAR` to the canonical source subdirectory for a
 library of project :cmake:variable:`PROJECT_NAME`.
@@ -252,8 +261,7 @@ function(jcm_canonical_lib_subdir)
   jcm_parse_arguments(
     ONE_VALUE_KEYWORDS "OUT_VAR;COMPONENT"
     REQUIRES_ALL "OUT_VAR"
-    ARGUMENTS "${ARGN}"
-  )
+    ARGUMENTS "${ARGN}")
 
   if(DEFINED ARGS_COMPONENT)
     string(JOIN "-" comp_dir ${PROJECT_NAME} ${ARGS_COMPONENT})
@@ -276,8 +284,7 @@ jcm_canonical_exec_subdir
 
     jcm_canonical_exec_subdir(
       OUT_VAR <out-var>
-      [COMPONENT <component>]
-    )
+      [COMPONENT <component>])
 
 Sets the variable specified by :cmake:variable:`OUT_VAR` to the canonical source subdirectory for an
 executable of project :cmake:variable:`PROJECT_NAME`.
@@ -334,6 +341,7 @@ function(jcm_canonical_exec_subdir)
     ONE_VALUE_KEYWORDS "OUT_VAR;COMPONENT"
     REQUIRES_ALL "OUT_VAR"
     ARGUMENTS "${ARGN}")
+
   if(DEFINED ARGS_COMPONENT)
     jcm_canonical_exec_subdir(OUT_VAR exec_subdir)
     set(exec_comp_subdir "${exec_subdir}/${ARGS_COMPONENT}")
@@ -358,16 +366,16 @@ jcm_canonical_include_dirs
       OUT_VAR <out-var>
       TARGET <target>)
 
-Sets the variable specified by :cmake:variable:`OUT_VAR` to the canonical include directories for
-:cmake:variable:`TARGET`.
+Sets the variable specified by :cmake:variable:`OUT_VAR` to a list containing the canonical include
+directories for the target named by :cmake:variable:`TARGET`.
 
 The provided target's :cmake:variable:`SOURCE_DIR`, :cmake:variable:`TYPE`, and
 :cmake:variable:`COMPONENT` properties will be queried to resolve the target's include directory in
-the source tree. This will be one or two parent directories from its canonical source directory.
-This creates the include prefix of `<PROJECT_NAME>`, or `<PROJECT_NAME>/<COMPONENT>` when the target
-is a component. Binary directories :cmake:variable:`PROJECT_BINARY_DIR` and
-`${PROJECT_BINARY_DIR}/${PROJECT_NAME}-<COMPONENT>` can be appended to the result for generated
-headers.
+the source tree. This will be one or two parent directories above the target's canonical source
+directory to establish the include prefix of `<PROJECT_NAME>`, or `<PROJECT_NAME>/<COMPONENT>`
+when the target is a component. Binary directories :cmake:variable:`PROJECT_BINARY_DIR` and, when
+the target is a component, `${PROJECT_BINARY_DIR}/${PROJECT_NAME}-<COMPONENT>` can be appended to
+the result for generated headers by providing :cmake:variable:`WITH_BINARY_INCLUDE_DIRS`
 
 Parameters
 ##########
@@ -476,57 +484,4 @@ function(jcm_canonical_include_dirs)
   endif()
 
   set(${ARGS_OUT_VAR} "${include_dirs}" PARENT_SCOPE)
-endfunction()
-
-#
-# Given a list of absolute, normalized source file paths in SOURCES, will check each source file
-# against the possible paths in ROOT_DIRS. If ROOT_DIRS is not provided, ROOT_DIRS will contain the
-# current source directory, current binary directory, and the project binary directory, if that's
-# different from the current binary directory. ADD_PARENT will append the parent source and binary
-# directory to ROOT_DIRS for executable components' common files.
-#
-# This function assumes it is called within a canonical source subdirectory, which is why the
-# CURRRENT_* variables are used.
-#
-# A fatal error is emitted if one of the source files is not within one of the ROOT_DIRS
-#
-function(_jcm_verify_source_locations)
-  jcm_parse_arguments(
-    OPTIONS "ADD_PARENT"
-    MULTI_VALUE_KEYWORDS "SOURCES" "ROOT_DIRS"
-    REQUIRES_ALL "SOURCES"
-    ARGUMENTS "${ARGN}")
-
-  if(DEFINED ARGS_ROOT_DIRS)
-    set(root_dirs "${ARGS_ROOT_DIRS}")
-  else()
-    set(root_source_dirs "${CMAKE_CURRENT_SOURCE_DIR}")
-    set(root_binary_dirs "${CMAKE_CURRENT_BINARY_DIR};${PROJECT_BINARY_DIR}")
-
-    if(ARGS_ADD_PARENT)
-      cmake_path(GET CMAKE_CURRENT_SOURCE_DIR PARENT_PATH non_component_source_dir)
-      cmake_path(GET CMAKE_CURRENT_BINARY_DIR PARENT_PATH non_component_binary_dir)
-      list(APPEND root_source_dirs "${non_component_source_dir}")
-      list(APPEND root_binary_dirs "${non_component_binary_dir}")
-    endif()
-
-    set(root_dirs "${root_source_dirs}" "${root_binary_dirs}")
-  endif()
-
-  list(REMOVE_DUPLICATES root_dirs)
-
-  foreach(root_dir IN LISTS root_dirs)
-    jcm_regex_find_list(
-      MISMATCH
-      REGEX "^${root_dir}"
-      OUT_ELEMENT misplaced_file
-      INPUT "${ARGS_SOURCES}")
-
-    if(misplaced_file)
-      message(FATAL_ERROR
-        "The following file is not an acceptable input file for the library at ${CMAKE_CURRENT_SOURCE_DIR}. "
-        "The file must be located within one of ${root_dirs}. "
-        "Misplaced file: ${misplaced_file}")
-    endif()
-  endforeach()
 endfunction()

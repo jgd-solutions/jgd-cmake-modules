@@ -77,8 +77,7 @@ endif()
 find_program(
   ClangFormat_EXECUTABLE
   NAMES ${_ClangFormat_versioned_names} "clang-format"
-  DOC "Path to clang-format executable"
-)
+  DOC "Path to clang-format executable")
 unset(_ClangFormat_versioned_names)
 mark_as_advanced(ClangFormat_EXECUTABLE)
 
@@ -103,8 +102,7 @@ if(ClangFormat_EXECUTABLE)
     # extract version from stdout
     string(
       REGEX REPLACE ".*clang-format.* version " ""
-      ClangFormat_VERSION "${_ClangFormat_version_stdout}"
-    )
+      ClangFormat_VERSION "${_ClangFormat_version_stdout}")
     string(REPLACE "." ";" _ClangFormat_version_components "${ClangFormat_VERSION}")
     list(GET _ClangFormat_version_components 0 ClangFormat_VERSION_MAJOR)
     list(GET _ClangFormat_version_components 1 ClangFormat_VERSION_MINOR)

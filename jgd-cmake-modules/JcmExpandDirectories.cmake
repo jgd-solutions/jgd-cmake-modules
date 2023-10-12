@@ -59,8 +59,7 @@ Examples
   jcm_expand_directories(
     OUT_VAR cmake_module_paths
     GLOB *.cmake
-    PATHS "${JCM_PROJECT_CMAKE_DIR}" "additional/path/special.cmake"
-  )
+    PATHS "${JCM_PROJECT_CMAKE_DIR}" "additional/path/special.cmake")
 
 #]=======================================================================]
 function(jcm_expand_directories)

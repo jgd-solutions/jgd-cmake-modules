@@ -125,7 +125,7 @@ function(_find_use_project project_name)
 
   if(ARGS_COMPONENTS)
     set(specified_components "${ARGS_COMPONENTS}")
-    string(REPLACE ";" "-" test_name_suffix "${specified_components}")
+    list(JOIN specified_components "-" test_name_suffix)
     set(test_name_suffix "-${test_name_suffix}")
   else()
     unset(specified_components)

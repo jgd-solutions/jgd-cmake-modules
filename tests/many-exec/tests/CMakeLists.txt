@@ -9,6 +9,5 @@ jcm_add_test_executable(
   NAME ${PROJECT_NAME}-integration
   SOURCES integration.cpp
   LIBS
-    many-exec_many-exec-compiler-library
-    many-exec_many-exec-formatter-library
-)
+    many-exec::compiler-library
+    many-exec::formatter-library)

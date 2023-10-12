@@ -4,10 +4,8 @@ target_compile_features(libheaders_libheaders INTERFACE cxx_std_20)
 jcm_add_test_executable(
   NAME equality-ut
   SOURCES equality.test.cpp
-  LIBS libheaders::libheaders
-)
+  LIBS libheaders::libheaders)
 jcm_add_test_executable(
   NAME sum-ut
   SOURCES sum.test.cpp
-  LIBS libheaders::libheaders
-)
+  LIBS libheaders::libheaders)

@@ -15,6 +15,7 @@ include(JcmConfigureFiles)
 include(JcmExpandDirectories)
 include(JcmListTransformations)
 include(JcmSymlinks)
+include(JcmTargetNaming)
 include(JcmAddOption)
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
@@ -32,8 +33,7 @@ jcm_install_config_file_package
       [CONFIGURE_PACKAGE_CONFIG_FILES]
       <[TARGETS <target>...]
        [CMAKE_MODULES <path>...]
-       INSTALL_LICENSES>
-    )
+       [INSTALL_LICENSES] >)
 
 Provides ability to consistently and reliably install a project as a config-file package in one
 command.  All of the named :cmake:variable:`TARGETS`, :cmake:variable:`CMAKE_MODULES`, and licenses
@@ -222,8 +222,7 @@ function(jcm_install_config_file_package)
         OUT_MISMATCHED incorrect_files
       )
       if(incorrect_files)
-        message(
-          AUTHOR_WARNING
+        message(AUTHOR_WARNING
           "The function ${CMAKE_CURRENT_FUNCTION} will not install the "
           "following CMake modules, as they don't meet the regex "
           "'${JCM_CMAKE_MODULE_REGEX}'. CMake modules: ${incorrect_files}")
@@ -250,14 +249,10 @@ function(jcm_install_config_file_package)
       set(comp_arg COMPONENT ${target_component})
     endif()
 
-    get_target_property(aliased ${target} ALIASED_TARGET)
-    if(aliased)
-      set(target ${aliased})
-    endif()
-
     jcm_package_targets_file_name(${comp_arg} OUT_VAR targets_file)
     cmake_path(GET targets_file STEM export_set_name)
 
+    jcm_aliased_target(TARGET "${target}" OUT_TARGET target)
     get_target_property(interface_header_sets ${target} INTERFACE_HEADER_SETS)
     set(file_set_args)
     if(interface_header_sets)

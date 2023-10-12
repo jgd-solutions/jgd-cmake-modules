@@ -11,7 +11,7 @@ names for the given language. Supported languages are currently C,CXX,CUDA,OBJC,
 
 - :cmake:variable:`JCM_<LANG>_HEADER_REGEX`
 - :cmake:variable:`JCM_<LANG>_SOURCE_REGEX`
-- :cmake:variable:`JCM_<LANG>_TEST_SOURCE_REGEX`
+- :cmake:variable:`JCM_<LANG>_UTEST_SOURCE_REGEX`
 
 The following variables provide cumulative regular expressions for all the enabled languages
 encountered to the point of inclusion. These are built by joining the variables above with the '|'
@@ -19,7 +19,7 @@ character.
 
 - :cmake:variable:`JCM_HEADER_REGEX`
 - :cmake:variable:`JCM_SOURCE_REGEX`
-- :cmake:variable:`JCM_TEST_SOURCE_REGEX`
+- :cmake:variable:`JCM_UTEST_SOURCE_REGEX`
 
 Additional, non-languages specific variables with regular expressions for file names are introduced:
 
@@ -40,15 +40,15 @@ set(JCM_IN_FILE_REGEX "\\${JCM_IN_FILE_EXTENSION}$")
 # Create regexs of file names based on file extensions from JcmCanonicalStructure.
 # Variables of the same name, but with _EXTENSION replaced with _REGEX
 foreach(ext_var
-    JCM_CXX_HEADER_EXTENSION JCM_CXX_SOURCE_EXTENSION JCM_CXX_TEST_SOURCE_EXTENSION JCM_CXX_MODULE_EXTENSION
-    JCM_C_HEADER_EXTENSION JCM_C_SOURCE_EXTENSION JCM_C_TEST_SOURCE_EXTENSION
-    JCM_CUDA_HEADER_EXTENSION JCM_CUDA_SOURCE_EXTENSION JCM_CUDA_TEST_SOURCE_EXTENSION
-    JCM_OBJC_HEADER_EXTENSION JCM_OBJC_SOURCE_EXTENSION JCM_OBJC_TEST_SOURCE_EXTENSION
-    JCM_OBJCXX_HEADER_EXTENSION JCM_OBJCXX_SOURCE_EXTENSION JCM_OBJCXX_TEST_SOURCE_EXTENSION
-    JCM_HIP_HEADER_EXTENSION JCM_HIP_SOURCE_EXTENSION JCM_HIP_TEST_SOURCE_EXTENSION)
+    JCM_CXX_HEADER_EXTENSION JCM_CXX_SOURCE_EXTENSION JCM_CXX_UTEST_SOURCE_EXTENSION JCM_CXX_MODULE_EXTENSION
+    JCM_C_HEADER_EXTENSION JCM_C_SOURCE_EXTENSION JCM_C_UTEST_SOURCE_EXTENSION
+    JCM_CUDA_HEADER_EXTENSION JCM_CUDA_SOURCE_EXTENSION JCM_CUDA_UTEST_SOURCE_EXTENSION
+    JCM_OBJC_HEADER_EXTENSION JCM_OBJC_SOURCE_EXTENSION JCM_OBJC_UTEST_SOURCE_EXTENSION
+    JCM_OBJCXX_HEADER_EXTENSION JCM_OBJCXX_SOURCE_EXTENSION JCM_OBJCXX_UTEST_SOURCE_EXTENSION
+    JCM_HIP_HEADER_EXTENSION JCM_HIP_SOURCE_EXTENSION JCM_HIP_UTEST_SOURCE_EXTENSION)
 
   string(REPLACE "_EXTENSION" "_REGEX" regex_var "${ext_var}")
-  string(REPLACE "." "\\." ${regex_var} "${${ext_var}}")
+  string(REPLACE "." "\\\\." ${regex_var} "${${ext_var}}")
   set(${regex_var} "^[a-z][a-z0-9_]*${${regex_var}}$")
 endforeach()
 
@@ -72,16 +72,16 @@ if(_jcm_languages)
 
     list(APPEND JCM_HEADER_REGEX "${JCM_${lang}_HEADER_REGEX}")
     list(APPEND JCM_SOURCE_REGEX "${JCM_${lang}_SOURCE_REGEX}")
-    list(APPEND JCM_TEST_SOURCE_REGEX "${JCM_${lang}_TEST_SOURCE_REGEX}")
+    list(APPEND JCM_UTEST_SOURCE_REGEX "${JCM_${lang}_UTEST_SOURCE_REGEX}")
     list(APPEND _jcm_already_enabled_languages ${lang})
   endforeach()
 
   list(REMOVE_DUPLICATES JCM_HEADER_REGEX)
   list(REMOVE_DUPLICATES JCM_SOURCE_REGEX)
-  list(REMOVE_DUPLICATES JCM_TEST_SOURCE_REGEX)
+  list(REMOVE_DUPLICATES JCM_UTEST_SOURCE_REGEX)
   list(JOIN JCM_HEADER_REGEX "|" JCM_HEADER_REGEX)
   list(JOIN JCM_SOURCE_REGEX "|" JCM_SOURCE_REGEX)
-  list(JOIN JCM_TEST_SOURCE_REGEX "|" JCM_TEST_SOURCE_REGEX)
+  list(JOIN JCM_UTEST_SOURCE_REGEX "|" JCM_UTEST_SOURCE_REGEX)
 endif()
 
 unset(_jcm_languages)

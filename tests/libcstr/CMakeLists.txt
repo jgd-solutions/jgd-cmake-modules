@@ -1,11 +1,16 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.24)
 project(libcstr VERSION 0.0.0 LANGUAGES C)
+
+if(PROJECT_IS_TOP_LEVEL)
+  set(CMAKE_C_STANDARD 11 CACHE STRING "Top-level C standard" FORCE)
+endif()
 
 find_package(jgd-cmake-modules CONFIG REQUIRED)
 find_package(ClangFormat)
 
 include(JcmAllModules)
 jcm_setup_project()
+
 jcm_source_subdirectories(ADD_SUBDIRS WITH_TESTS_DIR)
 jcm_install_config_file_package(
   INSTALL_LICENSES

@@ -5,8 +5,11 @@ jcm_configure_file(
 jcm_add_library(
   OUT_TARGET target
   PUBLIC_HEADERS widget.hpp factory.hpp
-  PRIVATE_HEADERS steal.hpp "${configured_header}"
+  PRIVATE_HEADERS "${configured_header}"
   SOURCES widget.cpp factory.cpp)
+
+# a subdirectory that's "complex" enough to warrant a separate CMakeLists.txt file.
+add_subdirectory(material)
 
 target_compile_features(${target} PRIVATE cxx_std_17)
 

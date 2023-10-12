@@ -1,5 +1,4 @@
 #include <libsingle/libsingle_config.hpp>
-#include <libsingle/steal.hpp>
 #include <libsingle/widget.hpp>
 #include <string>
 

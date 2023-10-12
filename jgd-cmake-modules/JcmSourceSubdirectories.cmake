@@ -79,11 +79,10 @@ jcm_source_subdirectories
     jcm_source_subdirectories(
       [WITH_TESTS_DIR]
       [WITH_DOCS_DIR]
-      <[OUT_VAR <out-var>] |
-       [ADD_SUBDIRS]>
+      <[OUT_VAR <out-var>]
+       [ADD_SUBDIRS] >
       [LIB_COMPONENTS <component>...]
-      [EXEC_COMPONENTS <component>...]
-    )
+      [EXEC_COMPONENTS <component>...])
 
 Computes and optionally adds subdirectories following JGD's project structure, which includes the
 `Canonical Project Structure`_, which pertains to source subdirectories. These canonical
@@ -144,8 +143,7 @@ Examples
   jcm_source_subdirectories(
     WITH_TESTS_DIR
     WITH_DOCS_DIR
-    OUT_VAR mylib_subdirectories
-  )
+    OUT_VAR mylib_subdirectories)
 
 .. code-block:: cmake
 
@@ -154,8 +152,7 @@ Examples
     WITH_DOCS_DIR
     OUT_VAR mylib_subdirectories
     ADD_SUBDIRS
-    LIB_COMPONENTS core extra more
-  )
+    LIB_COMPONENTS core extra more)
 
 #]=======================================================================]
 function(jcm_source_subdirectories)

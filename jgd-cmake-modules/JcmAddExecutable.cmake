@@ -8,12 +8,11 @@ JcmAddExecutable
 #]=======================================================================]
 
 include(JcmParseArguments)
-include(JcmFileNaming)
 include(JcmTargetNaming)
-include(JcmListTransformations)
 include(JcmHeaderFileSet)
 include(JcmCanonicalStructure)
 include(JcmDefaultCompileOptions)
+include(JcmTargetSources)
 
 
 #[=======================================================================[.rst:
@@ -27,30 +26,35 @@ jcm_add_executable
 
     jcm_add_executable(
       [WITHOUT_CANONICAL_PROJECT_CHECK]
+      [WITHOUT_FILE_NAMING_CHECK]
       [COMPONENT <component>]
       [NAME <name>]
       [OUT_TARGET <out-var>]
       [LIB_SOURCES <source>...]
-      SOURCES <source>...
-    )
+      SOURCES <source>...)
 
-Adds an executable target to the project, similar to CMake's `add_executable`, but with enhancements
-. It allows creating both the executable and, optionally, an associated object or interface library
-to allow better automated testing of the executable's sources. This library will have the
-same name as the executable, but with '-library' appended (*main* -> *main-library*).
+Adds an executable target to the project, similar to CMake's :cmake:`add_executable`, but with
+enhancements. It allows creating both the executable and, optionally, an associated object or
+interface library to allow better automated testing of the executable's sources. This library
+will have the same name as the executable, but with '-library' appended (*main* -> *main-library*).
 
 This function will:
 
 - ensure it's called within a canonical source subdirectory, verify the naming conventions and
   locations of the input source files, and transform :cmake:variable:`SOURCES` and
   :cmake:variable:`LIB_SOURCES` to normalized absolute paths.
+- create an executable target with :cmake:command:`add_executable`, including an associated alias
+- optionally create an object library, `<target>-library`, with an associated alias
+  <PROJECT_NAME>::<EXPORT_NAME>-library
+  (<PROJECT_NAME>::<EXPORT_NAME>) - both following JCM's target naming conventions
+- optionally create an object library, `<target>-library`, with an associated alias
+  <PROJECT_NAME>::<EXPORT_NAME>-library
+  (<PROJECT_NAME>::<EXPORT_NAME>) - both following JCM's target naming conventions
 - create header sets with :cmake:command:`jcm_header_file_sets` for both the main executable target,
   and the optional library target. PRIVATE header sets will be added to the executable using header
   files found in :cmake:variable:`SOURCES`, while PUBLIC or INTERFACE header sets will be added to
   the object/interface library using header files found in :cmake:variable:`LIB_SOURCES`.
   This is what sets the *INCLUDE_DIRECTORIES* properties.
-- create an executable target with :cmake:command:`add_executable`, including an associated alias
-  (<PROJECT_NAME>::<EXPORT_NAME>) - both following JCM's target naming conventions
 - set target properties:
 
   - OUTPUT_NAME
@@ -68,6 +72,10 @@ Options
 :cmake:variable:`WITHOUT_CANONICAL_PROJECT_CHECK`
   When provided, will forgo the default check that the function is called within an executable
   source subdirectory, as defined by the `Canonical Project Structure`_.
+
+:cmake:variable:`WITHOUT_FILE_NAMING_CHECK`
+  When provided, will forgo the default check that provided header and source files conform to JCM's
+  file naming conventions
 
 One Value
 ~~~~~~~~~~
@@ -113,14 +121,12 @@ Examples
   jcm_add_executable(
     OUT_TARGET target
     SOURCES main.cpp
-    LIB_SOURCES xml.cpp
-  )
+    LIB_SOURCES xml.cpp)
 
   jcm_add_test_executable(
     NAME test_parser
     SOURCES test_parser.cpp
-    LIBS ${target}-library Boost::ut
-  )
+    LIBS ${target}-library Boost::ut)
 
 .. code-block:: cmake
 
@@ -129,28 +135,16 @@ Examples
   jcm_add_executable(
     OUT_TARGET target
     SOURCES main.cpp
-    LIB_SOURCES coffee.hpp
-  )
+    LIB_SOURCES coffee.hpp)
 
 #]=======================================================================]
 function(jcm_add_executable)
   jcm_parse_arguments(
-    OPTIONS "WITHOUT_CANONICAL_PROJECT_CHECK"
+    OPTIONS "WITHOUT_CANONICAL_PROJECT_CHECK" "WITHOUT_FILE_NAMING_CHECK"
     ONE_VALUE_KEYWORDS "COMPONENT;NAME;OUT_TARGET"
     MULTI_VALUE_KEYWORDS "SOURCES;LIB_SOURCES"
     REQUIRES_ALL "SOURCES"
     ARGUMENTS "${ARGN}")
-
-  # transform arguments to normalized absolute paths
-  foreach(source_type "" "_LIB")
-    set(arg_name ARGS${source_type}_SOURCES)
-    if(DEFINED ${arg_name})
-      jcm_transform_list(ABSOLUTE_PATH INPUT "${${arg_name}}" OUT_VAR ${arg_name})
-      jcm_transform_list(NORMALIZE_PATH INPUT "${${arg_name}}" OUT_VAR ${arg_name})
-    endif()
-  endforeach()
-
-  set(all_input_files "${ARGS_SOURCES}" "${ARGS_LIB_SOURCES}")
 
   # Set executable component
   if(DEFINED ARGS_COMPONENT AND NOT ARGS_COMPONENT STREQUAL PROJECT_NAME)
@@ -162,8 +156,6 @@ function(jcm_add_executable)
     unset(comp_err_msg)
     unset(add_parent_arg)
   endif()
-
-  # == Usage Guards ==
 
   # ensure executable is created in the appropriate canonical directory
   # defining executable components within root executable directory is allowed
@@ -177,24 +169,26 @@ function(jcm_add_executable)
     endif()
   endif()
 
-  # verify source naming
-  set(regex "${JCM_HEADER_REGEX}|${JCM_SOURCE_REGEX}")
-  jcm_separate_list(
-    INPUT "${ARGS_SOURCES};${ARGS_LIB_SOURCES}"
-    REGEX "${regex}"
-    TRANSFORM "FILENAME"
-    OUT_MISMATCHED incorrectly_named
-  )
-  if(incorrectly_named)
-    message(
-      FATAL_ERROR
-      "Provided source files do not match the regex for executable sources, ${regex}: "
-      "${incorrectly_named}."
-    )
+
+  if(ARGS_WITHOUT_FILE_NAMING_CHECK)
+    set(verify_file_naming_arg "WITHOUT_FILE_NAMING_CHECK")
+  else()
+    unset(verify_file_naming_arg)
   endif()
 
-  # verify file locations
-  _jcm_verify_source_locations(${add_parent_arg} SOURCES "${all_input_files}")
+  if(NOT target_component)
+    set(verify_target_component_arg TARGET_COMPONENT ${target_component})
+  else()
+    unset(verify_target_component_arg)
+  endif()
+
+  jcm_verify_sources(
+    ${verify_file_naming_arg}
+    ${verify_target_component_arg}
+    TARGET_TYPE "EXECUTABLE"
+    SOURCES "${ARGS_SOURCES}"
+    OUT_PRIVATE_HEADERS executable_headers
+    OUT_SOURCES executable_sources)
 
   # == Create Executable ==
 
@@ -216,7 +210,7 @@ function(jcm_add_executable)
   endif()
 
   # create executable target
-  add_executable(${target_name} "${ARGS_SOURCES}")
+  add_executable(${target_name} "${executable_headers}" "${executable_sources}")
   add_executable(${PROJECT_NAME}::${export_name} ALIAS ${target_name})
 
   # == Set Target Properties ==
@@ -228,16 +222,10 @@ function(jcm_add_executable)
     COMPILE_OPTIONS "${JCM_DEFAULT_COMPILE_OPTIONS}")
 
   # include directories on the executable
-  jcm_separate_list(
-    REGEX "${JCM_HEADER_REGEX}"
-    INPUT "${ARGS_SOURCES}"
-    TRANSFORM "FILENAME"
-    OUT_MATCHED executable_header_files)
-
-  if(executable_header_files)
+  if(executable_headers)
     jcm_header_file_sets(PRIVATE
       TARGET ${target_name}
-      HEADERS "${executable_header_files}")
+      HEADERS "${executable_headers}")
   endif()
 
   # custom component property
@@ -249,27 +237,30 @@ function(jcm_add_executable)
 
   # create library of exec's sources, allowing unit testing of exec's sources
   if(DEFINED ARGS_LIB_SOURCES)
-    jcm_separate_list(
-      REGEX "${JCM_HEADER_REGEX}"
-      INPUT "${ARGS_LIB_SOURCES}"
-      TRANSFORM "FILENAME"
-      OUT_MATCHED library_header_files
-      OUT_MISMATCHED library_source_files)
+    jcm_verify_sources(
+      ${verify_file_naming_arg}
+      ${verify_target_component_arg}
+      TARGET_TYPE "EXECUTABLE"
+      SOURCES "${ARGS_LIB_SOURCES}"
+      OUT_PRIVATE_HEADERS library_headers
+      OUT_SOURCES library_sources)
 
     # create object or interface library
-    if(library_source_files)
+    if(library_sources)
       set(include_dirs_scope PUBLIC)
-      add_library(${target_name}-library OBJECT "${ARGS_LIB_SOURCES}")
+      add_library(${target_name}-library OBJECT "${library_headers}" "${library_sources}")
       target_compile_options(${target_name}-library PRIVATE "${JCM_DEFAULT_COMPILE_OPTIONS}")
     else()
       set(include_dirs_scope INTERFACE)
       add_library(${target_name}-library INTERFACE)
     endif()
 
-    if(library_header_files)
+    add_library(${PROJECT_NAME}::${export_name}-library ALIAS ${target_name}-library)
+
+    if(library_headers)
       jcm_header_file_sets(${include_dirs_scope}
         TARGET ${target_name}-library
-        HEADERS "${library_header_files}")
+        HEADERS "${library_headers}")
     endif()
 
     # link target to associated object files &/or usage requirements

@@ -27,12 +27,12 @@ function(many_exec_get_enabled_targets)
 
   if(MANY_EXEC_BUILD_FORMATTER)
     list(APPEND many_exec_build_targets many-exec::formatter)
-    list(APPEND many_exec_format_targets many-exec::formatter many-exec_many-exec-formatter-library)
+    list(APPEND many_exec_format_targets many-exec::formatter many-exec::formatter-library)
   endif()
 
   if(MANY_EXEC_BUILD_COMPILER)
     list(APPEND many_exec_build_targets many-exec::compiler)
-    list(APPEND many_exec_format_targets many-exec::compiler many-exec_many-exec-compiler-library)
+    list(APPEND many_exec_format_targets many-exec::compiler many-exec::compiler-library)
   endif()
 
   set(${ARGS_OUT_BUILD_TARGETS} ${many_exec_build_targets} PARENT_SCOPE)

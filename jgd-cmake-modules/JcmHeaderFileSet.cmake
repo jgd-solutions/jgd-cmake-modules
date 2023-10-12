@@ -9,6 +9,7 @@ JcmHeaderFileSet
 
 include(JcmParseArguments)
 include(JcmCanonicalStructure)
+include(JcmTargetNaming)
 
 #[=======================================================================[.rst:
 
@@ -20,12 +21,14 @@ jcm_header_file_sets
   .. code-block:: cmake
 
     jcm_header_file_sets(
+      <INTERFACE | PUBLIC | PRIVATE>
       [TARGET <target>]
       [HEADERS <file-path>...])
 
 Creates header `file-sets
 <https://cmake.org/cmake/help/latest/command/target_sources.html#file-sets>`_ of the provided
-`scope` containing the files in :cmake:variable:`HEADERS`.
+`scope` containing the files in :cmake:variable:`HEADERS` for the possibly alias target,
+:cmake:variable:`TARGET`.
 
 For each header file-path, the closest canonical include directory, one of those provided by
 :cmake:command:`jcm_canonical_include_dirs`, will be found. For each canonical include directory
@@ -42,6 +45,8 @@ respective `*INCLUDE_DIRECTORIES` properties, based on the `scope`, and are wrap
 
 :cmake:command:`jcm_add_library` uses this function, and it is often not necessary to use directly,
 unless supplementary headers sets are to be added to a target, like in a nested directory.
+
+TODO: support separately creating header sets for integration tests
 
 .. note::
   Use a target's `HEADER_SETS` and `INTERFACE_HEADER_SETS` `properties
@@ -121,10 +126,10 @@ function(jcm_header_file_sets scope)
     TARGET ${ARGS_TARGET}
     OUT_VAR available_include_dirs)
 
-  foreach(header_path ${ARGS_HEADERS})
-    set(shortest_distance_from_include_dir 65000)
+  foreach(header_path IN LISTS ARGS_HEADERS)
+    set(shortest_distance_from_include_dir 65000) # biggest int ?
     unset(chosen_include_dir)
-    foreach(include_dir ${available_include_dirs})
+    foreach(include_dir IN LISTS available_include_dirs)
       if(NOT header_path MATCHES "^${include_dir}")
         continue()
       endif()
@@ -146,9 +151,12 @@ function(jcm_header_file_sets scope)
       message(FATAL_ERROR "Could not resolve the canonical include directory for ${header_path}")
     endif()
 
+    # non-aliased both required by target_sources and provides basic chars for file set name
+    jcm_aliased_target(TARGET "${ARGS_TARGET}" OUT_TARGET ARGS_TARGET)
+
     # add the header to the header file set for its belonging include directory
     string(MD5 include_dir_hash "${chosen_include_dir}")
-    string(REPLACE "-" "_" file_set_name "${ARGS_TARGET}_${scope}_${include_dir_hash}")
+    string(REPLACE "-" "_" file_set_name "jcm_${ARGS_TARGET}_${scope}_${include_dir_hash}")
 
     target_sources(${ARGS_TARGET}
       ${scope}

@@ -25,10 +25,10 @@ include(JcmMessages)
 
 # Private function to build targets that emit error messages instead of their intended purpose
 # Escape sequences (\n) in the message may cause havoc in the generated build files if not properly
-# escaped themeselves (\\n).
+# escaped themselves (\\n).
 function(_jcm_build_error_targets targets err_msg)
   string(CONCAT target_err_msgs "${err_msg}" "${ARGN}")
-  string(REPLACE ";" "" target_err_msgs "${target_err_msgs}")
+  list(JOIN target_err_msgs "" target_err_msgs)
 
   set(exit_failure "${CMAKE_COMMAND}" -E false)
   set(print_err "${CMAKE_COMMAND}" -E echo "${target_err_msgs}")
@@ -178,20 +178,6 @@ function(jcm_create_clang_format_targets)
     endif()
   endif()
 
-  # Warn about targets already being created to prevent less expressive warning later
-  set(target_existed FALSE)
-  foreach(target clang-format clang-format-check)
-    if(TARGET ${target})
-      message(WARNING "The target '${target}' already exists. ${CMAKE_CURRENT_FUNCTION} will not "
-        "create this target")
-      set(target_existed TRUE)
-    endif()
-  endforeach()
-
-  if(target_existed)
-    return()
-  endif()
-
   # follow symlinks (mostly for Windows) - will also clean path & check for existence
   jcm_follow_symlinks(PATHS "${format_style_file}" OUT_VAR target_format_style_file)
   if(NOT target_format_style_file)
@@ -221,10 +207,12 @@ function(jcm_create_clang_format_targets)
         continue()
       endif()
 
-      jcm_transform_list(ABSOLUTE_PATH
+      jcm_transform_list(
+        ABSOLUTE_PATH
         BASE "${source_dir}"
         INPUT "${sources_variable}"
         OUT_VAR absolute_source_paths)
+
       jcm_transform_list(NORMALIZE_PATH
         INPUT "${absolute_source_paths}"
         OUT_VAR absolute_source_paths)
@@ -248,9 +236,25 @@ function(jcm_create_clang_format_targets)
 
   # Add additional files
   if(DEFINED ARGS_ADDITIONAL_PATHS)
-    jcm_expand_directories(PATHS "${ARGS_ADDITIONAL_PATHS}" GLOB "*" OUT_VAR globbed_files)
-    jcm_transform_list(NORMALIZE_PATH INPUT "${globbed_files}" OUT_VAR globbed_files)
-    list(APPEND files_to_format "${globbed_files}")
+    jcm_expand_directories(PATHS "${ARGS_ADDITIONAL_PATHS}" GLOB "*" OUT_VAR globbed_add_files)
+    jcm_transform_list(NORMALIZE_PATH INPUT "${globbed_add_files}" OUT_VAR globbed_add_files)
+    list(APPEND files_to_format "${globbed_add_files}")
+  endif()
+
+  # filter out any directories before calling clang-format. These are from the targets since
+  # ARGS_ADDITIONAL_PATHS have all directories expanded and therefore didn't introduce any
+  jcm_separate_list(
+    IS_DIRECTORY
+    INPUT "${files_to_format}"
+    OUT_MATCHED reject_directories
+    OUT_MISMATCHED files_to_format)
+  if(reject_directories)
+    message(AUTHOR_WARNING
+      "Source paths extracted from the targets provided to ${CMAKE_CURRENT_FUNCTION} refer to "
+      "directories. Processing will continue without them, but the existence of directories in "
+      "a target's 'SOURCES' or 'INTERFACE_SOURCES' properties is indication of a mistake upstream."
+      "  Targets considered: '${ARGS_TARGETS}'\n"
+      "  Rejected directories: ${reject_directories}")
   endif()
 
   # Create targets to run clang-format
@@ -266,11 +270,23 @@ function(jcm_create_clang_format_targets)
   endif()
 
   set(base_cmd "${clang_format_cmd}" -style=file:\"${format_style_file}\" ${verbose_flag})
-  add_custom_target(
-    clang-format COMMAND ${base_cmd} -i ${files_to_format})
-  add_custom_target(
-    clang-format-check COMMAND ${base_cmd} --dry-run --Werror ${files_to_format})
-  set_target_properties(clang-format clang-format-check PROPERTIES EXCLUDE_FROM_ALL TRUE)
+
+  # Warn about targets already being created to prevent less expressive warning later
+  if(NOT TARGET clang-format)
+    add_custom_target(clang-format COMMAND ${base_cmd} -i ${files_to_format})
+    set_target_properties(clang-format PROPERTIES EXCLUDE_FROM_ALL TRUE)
+  else()
+    message(WARNING "The target 'clang-format' already exists. ${CMAKE_CURRENT_FUNCTION} will not "
+      "create this target")
+  endif()
+
+  if(NOT TARGET clang-format-check)
+    add_custom_target(clang-format-check COMMAND ${base_cmd} --dry-run --Werror ${files_to_format})
+    set_target_properties(clang-format PROPERTIES EXCLUDE_FROM_ALL TRUE)
+  else()
+    message(WARNING "The target 'clang-format' already exists. ${CMAKE_CURRENT_FUNCTION} will not "
+      "create this target")
+  endif()
 endfunction()
 
 
@@ -288,8 +304,7 @@ jcm_create_doxygen_target
       [EXCLUDE_REGEX <regex>]
       [OUTPUT_DIRECTORY <dir>]
       <[SOURCE_TARGETS <target>...]
-       [ADDITIONAL_PATHS <path>...]>
-    )
+       [ADDITIONAL_PATHS <path>...] >)
 
 Creates a target, "doxygen-docs", that generates documentation of the provided
 :cmake:variable:`SOURCE_TARGETS`'s header files and any :cmake:variable:`ADDITIONAL_PATHS` using
@@ -351,8 +366,7 @@ Examples
 
   jcm_create_doxygen_target(
     README_MAIN_PAGE
-    SOURCE_TARGETS libbbq::libbbq
-  )
+    SOURCE_TARGETS libbbq::libbbq)
 
 .. code-block:: cmake
 
@@ -360,8 +374,7 @@ Examples
     README_MAIN_PAGE
     SOURCE_TARGETS libbbq::libbbq libbbq::vegetarian
     EXCLUDE_REGEX "export_macros.hpp$"
-    ADDITIONAL_PATHS ../completely/separate/file.hpp
-  )
+    ADDITIONAL_PATHS ../completely/separate/file.hpp)
 
 --------------------------------------------------------------------------
 

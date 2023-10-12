@@ -101,15 +101,14 @@ endif()
 
 string(CONCAT _Sphinx_failure_message
   "Sphinx is not installed or a Python virtual environment may not have been activated.\n"
-  "'Sphinx_ROOT' can be set to refer to a Sphinx installation root, even within a virtual environment. "
-  "Ex. `cmake -B build -D Sphinx_ROOT=/home/me/.venv/bin`")
+  "'Sphinx_ROOT' can be set to refer to a Sphinx installation root, even within a virtual env. "
+  "Ex. `cmake -B build -D Sphinx_ROOT=/path/to/.venv/bin`")
 
 find_package_handle_standard_args(Sphinx
   FOUND_VAR Sphinx_FOUND
   REQUIRED_VARS Sphinx_EXECUTABLE
   VERSION_VAR Sphinx_VERSION
-  REASON_FAILURE_MESSAGE ${_Sphinx_failure_message}
-  )
+  REASON_FAILURE_MESSAGE ${_Sphinx_failure_message})
 unset(_Sphinx_failure_message)
 
 if(Sphinx_FOUND AND NOT TARGET Sphinx::build)
