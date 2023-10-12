@@ -8,12 +8,12 @@ JcmAddExecutable
 #]=======================================================================]
 
 include(JcmParseArguments)
-include(JcmFileNaming)
 include(JcmTargetNaming)
 include(JcmListTransformations)
 include(JcmHeaderFileSet)
 include(JcmCanonicalStructure)
 include(JcmDefaultCompileOptions)
+include(JcmTargetSources)
 
 
 #[=======================================================================[.rst:
@@ -27,6 +27,7 @@ jcm_add_executable
 
     jcm_add_executable(
       [WITHOUT_CANONICAL_PROJECT_CHECK]
+      [WITHOUT_FILE_NAMING_CHECK]
       [COMPONENT <component>]
       [NAME <name>]
       [OUT_TARGET <out-var>]
@@ -72,6 +73,10 @@ Options
 :cmake:variable:`WITHOUT_CANONICAL_PROJECT_CHECK`
   When provided, will forgo the default check that the function is called within an executable
   source subdirectory, as defined by the `Canonical Project Structure`_.
+
+:cmake:variable:`WITHOUT_FILE_NAMING_CHECK`
+  When provided, will forgo the default check that provided header and source files conform to JCM's
+  file naming conventions
 
 One Value
 ~~~~~~~~~~
@@ -136,22 +141,11 @@ Examples
 #]=======================================================================]
 function(jcm_add_executable)
   jcm_parse_arguments(
-    OPTIONS "WITHOUT_CANONICAL_PROJECT_CHECK"
+    OPTIONS "WITHOUT_CANONICAL_PROJECT_CHECK" "WITHOUT_FILE_NAMING_CHECK"
     ONE_VALUE_KEYWORDS "COMPONENT;NAME;OUT_TARGET"
     MULTI_VALUE_KEYWORDS "SOURCES;LIB_SOURCES"
     REQUIRES_ALL "SOURCES"
     ARGUMENTS "${ARGN}")
-
-  # transform arguments to normalized absolute paths
-  foreach(source_type "" "_LIB")
-    set(arg_name ARGS${source_type}_SOURCES)
-    if(DEFINED ${arg_name})
-      jcm_transform_list(ABSOLUTE_PATH INPUT "${${arg_name}}" OUT_VAR ${arg_name})
-      jcm_transform_list(NORMALIZE_PATH INPUT "${${arg_name}}" OUT_VAR ${arg_name})
-    endif()
-  endforeach()
-
-  set(all_input_files "${ARGS_SOURCES}" "${ARGS_LIB_SOURCES}")
 
   # Set executable component
   if(DEFINED ARGS_COMPONENT AND NOT ARGS_COMPONENT STREQUAL PROJECT_NAME)
@@ -163,8 +157,6 @@ function(jcm_add_executable)
     unset(comp_err_msg)
     unset(add_parent_arg)
   endif()
-
-  # == Usage Guards ==
 
   # ensure executable is created in the appropriate canonical directory
   # defining executable components within root executable directory is allowed
@@ -178,22 +170,34 @@ function(jcm_add_executable)
     endif()
   endif()
 
-  # verify source naming
-  set(regex "${JCM_HEADER_REGEX}|${JCM_SOURCE_REGEX}")
-  jcm_separate_list(
-    INPUT "${ARGS_SOURCES};${ARGS_LIB_SOURCES}"
-    REGEX "${regex}"
-    TRANSFORM "FILENAME"
-    OUT_MISMATCHED incorrectly_named)
-  if(incorrectly_named)
-    message(
-      FATAL_ERROR
-      "Provided source files do not match the regex for executable sources, ${regex}: "
-      "${incorrectly_named}.")
+
+  if(ARGS_WITHOUT_FILE_NAMING_CHECK)
+    set(verify_file_naming_arg "WITHOUT_FILE_NAMING_CHECK")
+  else()
+    unset(verify_file_naming_arg)
   endif()
 
-  # verify file locations
-  _jcm_verify_source_locations(${add_parent_arg} SOURCES "${all_input_files}")
+  if(NOT target_component)
+    set(verify_target_component_arg TARGET_COMPONENT ${target_component})
+  else()
+    unset(verify_target_component_arg)
+  endif()
+
+  jcm_verify_sources(
+    ${verify_file_naming_arg}
+    ${verify_target_component_arg}
+    TARGET_TYPE "EXECUTABLE"
+    TARGET_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}"
+    TARGET_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}"
+    INTERFACE_HEADERS "${ARGS_INTERFACE_HEADERS}"
+    PUBLIC_HEADERS "${ARGS_PUBLIC_HEADERS}"
+    PRIVATE_HEADERS "${ARGS_PRIVATE_HEADERS}"
+    SOURCES "${ARGS_SOURCES}"
+    OUT_INTERFACE_HEADERS ARGS_INTERFACE_HEADERS
+    OUT_PUBLIC_HEADERS ARGS_PUBLIC_HEADERS
+    OUT_PRIVATE_HEADERS ARGS_PRIVATE_HEADERS
+    OUT_SOURCES ARGS_OUT_SOURCES)
+
 
   # == Create Executable ==
 

@@ -550,7 +550,7 @@ function(jcm_verify_sources)
 
   if(DEFINED ARGS_COMPONENT AND NOT ARGS_COMPONENT STREQUAL PROJECT_NAME
     AND "${ARGS_TARGET_TYPE}" STREQUAL "EXECUTABLE")
-    cmake_path(GET "${ARGS_TARGET_SOURCE_DIR}" PARENT_PATH exec_component_parent_dir)
+    cmake_path(GET ARGS_TARGET_SOURCE_DIR PARENT_PATH exec_component_parent_dir)
     list(APPEND acceptable_file_root_dirs "${exec_component_parent_dir}")
   endif()
 

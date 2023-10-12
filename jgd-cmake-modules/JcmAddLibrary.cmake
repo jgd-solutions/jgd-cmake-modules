@@ -8,13 +8,12 @@ JcmAddLibrary
 #]=======================================================================]
 
 include(JcmParseArguments)
-include(JcmFileNaming)
 include(JcmTargetNaming)
-include(JcmListTransformations)
 include(JcmCanonicalStructure)
 include(JcmDefaultCompileOptions)
 include(JcmHeaderFileSet)
 include(JcmAddOption)
+include(JcmTargetSources)
 include(GenerateExportHeader)
 
 #[=======================================================================[.rst:
@@ -204,7 +203,7 @@ function(jcm_add_library)
     ${verify_file_naming_arg}
     ${verify_target_component_arg}
     TARGET_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}"
-    TARGET_BINARY_DIR "${CMAKE_CURRENT_SOURCE_DIR}"
+    TARGET_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}"
     INTERFACE_HEADERS "${ARGS_INTERFACE_HEADERS}"
     PUBLIC_HEADERS "${ARGS_PUBLIC_HEADERS}"
     PRIVATE_HEADERS "${ARGS_PRIVATE_HEADERS}"
