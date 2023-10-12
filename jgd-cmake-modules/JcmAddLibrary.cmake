@@ -61,7 +61,8 @@ This function will:
     specific to the project. Default: :cmake:variable:`BUILD_SHARED_LIBS`
 
   <JCM_PROJECT_PREFIX_NAME>_<UPPERCASE_COMPONENT>_BUILD_SHARED
-    specific to component, if COMPONENT is provided. Default: :cmake:variable:`<JCM_PROJECT_PREFIX_NAME>_BUILD_SHARED_LIBS`
+    specific to component, if COMPONENT is provided. Default:
+    :cmake:variable:`<JCM_PROJECT_PREFIX_NAME>_BUILD_SHARED_LIBS`
 - set target properties:
 
   - OUTPUT_NAME
@@ -92,8 +93,8 @@ One Value
 ~~~~~~~~~~
 
 :cmake:variable:`COMPONENT`
-  Specifies the component that this executable represents. Used to set `COMPONENT` property and when
-  naming the target
+  Specifies the component that this executable represents. Used to set the target's `COMPONENT`
+  property, and when naming the target.
 
 :cmake:variable:`NAME`
   Overrides the target name, output name, and exported name from those automatically created to
@@ -121,8 +122,8 @@ Multi Value
   :cmake:variable:`TYPE` is *INTERFACE*.
 
 :cmake:variable:`PRIVATE_HEADERS`
-  Header files required by this library itself, but not any consumers of this library. Prohibited when
-  :cmake:variable:`TYPE` is *INTERFACE*.
+  Header files required by this library itself, but not any consumers of this library. Prohibited
+  when :cmake:variable:`TYPE` is *INTERFACE*.
 
 :cmake:variable:`SOURCES`
   Sources used to create the library
@@ -158,21 +159,6 @@ function(jcm_add_library)
     REQUIRES_ANY "INTERFACE_HEADERS;PUBLIC_HEADERS;PRIVATE_HEADERS;SOURCES"
     ARGUMENTS "${ARGN}")
 
-  # transform arguments to normalized absolute paths
-  foreach(source_type "INTERFACE_HEADERS" "PUBLIC_HEADERS" "PRIVATE_HEADERS" "SOURCES")
-    set(arg_name ARGS_${source_type})
-    if(DEFINED ${arg_name})
-      jcm_transform_list(ABSOLUTE_PATH INPUT "${${arg_name}}" OUT_VAR ${arg_name})
-      jcm_transform_list(NORMALIZE_PATH INPUT "${${arg_name}}" OUT_VAR ${arg_name})
-    endif()
-  endforeach()
-
-  set(all_input_files
-    "${ARGS_INTERFACE_HEADERS}"
-    "${ARGS_PUBLIC_HEADERS}"
-    "${ARGS_PRIVATE_HEADERS}"
-    "${ARGS_SOURCES}")
-
   # library component argument
   if(DEFINED ARGS_COMPONENT AND NOT ARGS_COMPONENT STREQUAL PROJECT_NAME)
     set(comp_arg COMPONENT ${ARGS_COMPONENT})
@@ -181,8 +167,6 @@ function(jcm_add_library)
     unset(comp_arg)
     unset(comp_err_msg)
   endif()
-
-  # == Usage Guards ==
 
   # ensure sources are provided appropriately
   if(ARGS_TYPE STREQUAL "INTERFACE")
@@ -204,41 +188,31 @@ function(jcm_add_library)
     endif()
   endif()
 
-  # verify file naming
-  if(NOT ARGS_WITHOUT_FILE_NAMING_CHECK)
-
-    if(DEFINED ARGS_SOURCES)
-      jcm_separate_list(
-        INPUT "${ARGS_SOURCES}"
-        REGEX "${JCM_SOURCE_REGEX}"
-        TRANSFORM "FILENAME"
-        OUT_MISMATCHED incorrectly_named)
-      if(incorrectly_named)
-        message(
-          FATAL_ERROR
-          "Provided source files do not match the regex for library sources, ${JCM_SOURCE_REGEX}: "
-          "${incorrectly_named}.")
-      endif()
-    endif()
-
-    if(ARGS_INTERFACE_HEADERS OR ARGS_PUBLIC_HEADERS OR ARGS_PRIVATE_HEADERS)
-      jcm_separate_list(
-        INPUT "${ARGS_INTERFACE_HEADERS}" "${ARGS_PUBLIC_HEADERS}" "${ARGS_PRIVATE_HEADERS}"
-        REGEX "${JCM_HEADER_REGEX}"
-        TRANSFORM "FILENAME"
-        OUT_MISMATCHED incorrectly_named)
-      if(incorrectly_named)
-        message(
-          FATAL_ERROR
-          "Provided header files do not match the regex for library headers, "
-          "${JCM_HEADER_REGEX}: ${incorrectly_named}.")
-      endif()
-    endif()
-
+  if(ARGS_WITHOUT_FILE_NAMING_CHECK)
+    set(verify_file_naming_arg "WITHOUT_FILE_NAMING_CHECK")
+  else()
+    unset(verify_file_naming_arg)
   endif()
 
-  # verify file locations
-  _jcm_verify_source_locations(SOURCES "${all_input_files}")
+  if(NOT target_component)
+    set(verify_target_component_arg TARGET_COMPONENT ${target_component})
+  else()
+    unset(verify_target_component_arg)
+  endif()
+
+  jcm_verify_sources(
+    ${verify_file_naming_arg}
+    ${verify_target_component_arg}
+    TARGET_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}"
+    TARGET_BINARY_DIR "${CMAKE_CURRENT_SOURCE_DIR}"
+    INTERFACE_HEADERS "${ARGS_INTERFACE_HEADERS}"
+    PUBLIC_HEADERS "${ARGS_PUBLIC_HEADERS}"
+    PRIVATE_HEADERS "${ARGS_PRIVATE_HEADERS}"
+    SOURCES "${ARGS_SOURCES}"
+    OUT_INTERFACE_HEADERS ARGS_INTERFACE_HEADERS
+    OUT_PUBLIC_HEADERS ARGS_PUBLIC_HEADERS
+    OUT_PRIVATE_HEADERS ARGS_PRIVATE_HEADERS
+    OUT_SOURCES ARGS_OUT_SOURCES)
 
   # == Build options related to libraries and this library ==
 
@@ -286,9 +260,14 @@ function(jcm_add_library)
         "Unsupported type ${ARGS_TYPE}. ${CMAKE_CURRENT_FUNCTION} must be "
         "called with no type or one of: ${supported_types}")
     endif()
-  elseif(build_project_shared OR build_component_shared)
+  elseif(build_component_shared)
     set(lib_type SHARED)
+  elseif(build_project_shared)
+    set(lib_type SHARED)
+  else()
+    # add_library already sensitive to BUILD_SHARED_LIBS when type isn't defined
   endif()
+
 
   # resolve library names
   if(DEFINED ARGS_NAME)
@@ -338,9 +317,9 @@ function(jcm_add_library)
   endif()
 
   # header properties
-  if(DEFINED ARGS_INTERFACE_HEADERS)
+  if(ARGS_INTERFACE_HEADERS)
     jcm_header_file_sets(INTERFACE TARGET ${target_name} HEADERS "${ARGS_INTERFACE_HEADERS}")
-  elseif(DEFINED ARGS_PRIVATE_HEADERS)
+  elseif(ARGS_PRIVATE_HEADERS)
     jcm_header_file_sets(PRIVATE TARGET ${target_name} HEADERS "${ARGS_PRIVATE_HEADERS}")
   endif()
 
