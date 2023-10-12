@@ -43,8 +43,8 @@ CMake built-ins, this function provides:
    does not support, and types beyond :cmake:`BOOL`, which is all that :cmake:command:`option`
    supports.
 #. Validation of the option name being both prefixed by :cmake:`${JCM_PROJECT_PREFIX_NAME}_`, and
-   being in *SCREAMING_SNAKE_CASE*. The former provides consistency, clarify, and exclusivity of
-   build options. However, this prefix check can be avoided with
+   being in *SCREAMING_SNAKE_CASE*. These provide consistency, clarity, and exclusivity of
+   build options between projects. However, this prefix check can be avoided with
    :cmake:variable:`WITHOUT_NAME_PREFIX_CHECK`, for cases described in this parameter.
 #. Limit the option value to one of :cmake:variable:`ACCEPT_VALUES`.
 
@@ -84,8 +84,8 @@ One Value
   of :cmake:command:`set` to create the option.
 
 :cmake:variable:`CONDITION_MET_DEFAULT`
-  The default value of the option when :cmake:command:`CONDITION` is provided to this function and
-  the condition is met. Like :cmake:variable:`DESCRIPTION`, when a value for the option already
+  The default value of the option when :cmake:variable:`CONDITION` is provided to this function and
+  the condition is met. Like :cmake:variable:`DEFAULT`, when a value for the option already
   exists in the cache, it will be used in place of this default.
 
 Multi Value

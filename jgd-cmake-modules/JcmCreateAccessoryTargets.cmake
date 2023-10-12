@@ -485,8 +485,7 @@ jcm_create_sphinx_target
       [BUILDER <builder>]
       [COMMAND <command|target>]
       [SOURCE_DIRECTORY <dir>]
-      [BUILD_DIRECTORY <dir>]
-    )
+      [BUILD_DIRECTORY <dir>])
 
 Creates custom target "sphinx-docs" which invokes the `Sphinx::build` target, or the provided
 :cmake:variable:`COMMAND`, to generate Sphinx documentation from the default source directory, or
