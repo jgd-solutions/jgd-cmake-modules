@@ -9,7 +9,6 @@ JcmAddExecutable
 
 include(JcmParseArguments)
 include(JcmTargetNaming)
-include(JcmListTransformations)
 include(JcmHeaderFileSet)
 include(JcmCanonicalStructure)
 include(JcmDefaultCompileOptions)
@@ -187,17 +186,9 @@ function(jcm_add_executable)
     ${verify_file_naming_arg}
     ${verify_target_component_arg}
     TARGET_TYPE "EXECUTABLE"
-    TARGET_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}"
-    TARGET_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}"
-    INTERFACE_HEADERS "${ARGS_INTERFACE_HEADERS}"
-    PUBLIC_HEADERS "${ARGS_PUBLIC_HEADERS}"
-    PRIVATE_HEADERS "${ARGS_PRIVATE_HEADERS}"
     SOURCES "${ARGS_SOURCES}"
-    OUT_INTERFACE_HEADERS ARGS_INTERFACE_HEADERS
-    OUT_PUBLIC_HEADERS ARGS_PUBLIC_HEADERS
-    OUT_PRIVATE_HEADERS ARGS_PRIVATE_HEADERS
-    OUT_SOURCES ARGS_OUT_SOURCES)
-
+    OUT_PRIVATE_HEADERS executable_headers
+    OUT_SOURCES executable_sources)
 
   # == Create Executable ==
 
@@ -219,7 +210,7 @@ function(jcm_add_executable)
   endif()
 
   # create executable target
-  add_executable(${target_name} "${ARGS_SOURCES}")
+  add_executable(${target_name} "${executable_headers}" "${executable_sources}")
   add_executable(${PROJECT_NAME}::${export_name} ALIAS ${target_name})
 
   # == Set Target Properties ==
@@ -231,15 +222,10 @@ function(jcm_add_executable)
     COMPILE_OPTIONS "${JCM_DEFAULT_COMPILE_OPTIONS}")
 
   # include directories on the executable
-  jcm_separate_list(
-    REGEX "${JCM_HEADER_REGEX}"
-    INPUT "${ARGS_SOURCES}"
-    TRANSFORM "FILENAME"
-    OUT_MATCHED executable_header_files)
-  if(executable_header_files)
+  if(executable_headers)
     jcm_header_file_sets(PRIVATE
       TARGET ${target_name}
-      HEADERS "${executable_header_files}")
+      HEADERS "${executable_headers}")
   endif()
 
   # custom component property
@@ -251,17 +237,18 @@ function(jcm_add_executable)
 
   # create library of exec's sources, allowing unit testing of exec's sources
   if(DEFINED ARGS_LIB_SOURCES)
-    jcm_separate_list(
-      REGEX "${JCM_HEADER_REGEX}"
-      INPUT "${ARGS_LIB_SOURCES}"
-      TRANSFORM "FILENAME"
-      OUT_MATCHED library_header_files
-      OUT_MISMATCHED library_source_files)
+    jcm_verify_sources(
+      ${verify_file_naming_arg}
+      ${verify_target_component_arg}
+      TARGET_TYPE "EXECUTABLE"
+      SOURCES "${ARGS_LIB_SOURCES}"
+      OUT_PRIVATE_HEADERS library_headers
+      OUT_SOURCES library_sources)
 
     # create object or interface library
-    if(library_source_files)
+    if(library_sources)
       set(include_dirs_scope PUBLIC)
-      add_library(${target_name}-library OBJECT "${ARGS_LIB_SOURCES}")
+      add_library(${target_name}-library OBJECT "${library_headers}" "${library_sources}")
       target_compile_options(${target_name}-library PRIVATE "${JCM_DEFAULT_COMPILE_OPTIONS}")
     else()
       set(include_dirs_scope INTERFACE)
@@ -270,10 +257,10 @@ function(jcm_add_executable)
 
     add_library(${PROJECT_NAME}::${export_name}-library ALIAS ${target_name}-library)
 
-    if(library_header_files)
+    if(library_headers)
       jcm_header_file_sets(${include_dirs_scope}
         TARGET ${target_name}-library
-        HEADERS "${library_header_files}")
+        HEADERS "${library_headers}")
     endif()
 
     # link target to associated object files &/or usage requirements

@@ -202,8 +202,6 @@ function(jcm_add_library)
   jcm_verify_sources(
     ${verify_file_naming_arg}
     ${verify_target_component_arg}
-    TARGET_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}"
-    TARGET_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}"
     INTERFACE_HEADERS "${ARGS_INTERFACE_HEADERS}"
     PUBLIC_HEADERS "${ARGS_PUBLIC_HEADERS}"
     PRIVATE_HEADERS "${ARGS_PRIVATE_HEADERS}"
@@ -211,7 +209,7 @@ function(jcm_add_library)
     OUT_INTERFACE_HEADERS ARGS_INTERFACE_HEADERS
     OUT_PUBLIC_HEADERS ARGS_PUBLIC_HEADERS
     OUT_PRIVATE_HEADERS ARGS_PRIVATE_HEADERS
-    OUT_SOURCES ARGS_OUT_SOURCES)
+    OUT_SOURCES ARGS_SOURCES)
 
   # == Build options related to libraries and this library ==
 

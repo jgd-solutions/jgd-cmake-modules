@@ -299,13 +299,13 @@ One Value
   Specifies a relative or absolute path to the the source directory in which the potential target
   would be created. This surrogates the target's `SOURCE_DIR property <https://cmake
   .org/cmake/help/latest/prop_tgt/SOURCE_DIR.html>`_. Relative paths are considered with respect to
-  :cmake:variable:`CMAKE_CURRENT_SOURCE_DIR`.
+  :cmake:variable:`CMAKE_CURRENT_SOURCE_DIR`, which is the argument's default value.
 
 :cmake:variable:`TARGET_BINARY_DIR`
   Specifies a relative or absolute path to the binary directory for the potential target. This
   surrogates the target's `BINARY_DIR property <https://cmake
   .org/cmake/help/latest/prop_tgt/BINARY_DIR.html>`_. Relative paths are considered
-  :cmake:variable:`CMAKE_CURRENT_BINARY_DIR`.
+  :cmake:variable:`CMAKE_CURRENT_BINARY_DIR`, which is the argument's default value.
 
 :cmake:variable:`TARGET_COMPONENT`
   Specifies the component of the potential target - whether that's a library component or an
@@ -582,8 +582,8 @@ function(jcm_verify_sources)
   if("${ARGS_TARGET_TYPE}" STREQUAL "EXECUTABLE")
     set(ARGS_SOURCES "${non_headers_in_sources}")
 
-    if(non_headers_in_sources)
-      list(APPEND ARGS_PRIVATE_HEADERS "${non_headers_in_sources}")
+    if(headers_in_sources)
+      list(APPEND ARGS_PRIVATE_HEADERS "${headers_in_sources}")
     endif()
   endif()
 
