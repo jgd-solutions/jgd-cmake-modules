@@ -228,8 +228,8 @@ jcm_verify_sources
                     OBJECT_LIBRARY |
                     INTERFACE_LIBRARY |
                     EXECUTABLE> ]
-      <TARGET_SOURCE_DIR <dir> >
-      <TARGET_BINARY_DIR <dir> >
+      [TARGET_SOURCE_DIR <dir> ]
+      [TARGET_BINARY_DIR <dir> ]
       [TARGET_COMPONENT <component>]
       <[INTERFACE_HEADERS <header>...]
        [PUBLIC_HEADERS <header>...]
@@ -371,8 +371,6 @@ Examples
 
   # for some library target
   jcm_verify_sources(
-    TARGET_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}."
-    TARGET_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}"
     INTERFACE_HEADERS "wrappers_windows.hpp" "wrappers.hpp"
     PUBLIC_HEADERS "async_io.hpp" "ply_parser.hpp"
     PRIVATE_HEADERS "os_abstractions.hpp"
@@ -426,7 +424,6 @@ function(jcm_verify_sources)
     "OUT_PRIVATE_HEADERS"
     "OUT_SOURCES"
     MULTI_VALUE_KEYWORDS "INTERFACE_HEADERS;PUBLIC_HEADERS;PRIVATE_HEADERS;SOURCES"
-    REQUIRES_ALL "TARGET_SOURCE_DIR;TARGET_BINARY_DIR"
     REQUIRES_ANY "INTERFACE_HEADERS;PUBLIC_HEADERS;PRIVATE_HEADERS;SOURCES"
     REQUIRES_ANY_1
     "OUT_INTERFACE_HEADERS"
@@ -435,13 +432,21 @@ function(jcm_verify_sources)
     "OUT_SOURCES"
     ARGUMENTS "${ARGN}")
 
-  # Argument validation
+  # Argument validation & defaults
   set(target_type_property_values
     "STATIC_LIBRARY|MODULE_LIBRARY|SHARED_LIBRARY|OBJECT_LIBRARY|INTERFACE_LIBRARY|EXECUTABLE")
   if(DEFINED ARGS_TARGET_TYPE AND NOT ARGS_TARGET_TYPE MATCHES "${target_type_property_values}")
     message(FATAL_ERROR
       "Invalid 'TARGET_TYPE': ${ARGS_TARGET_TYPE}. When provided, 'TARGET_TYPE' must name an "
       "acceptable value for a target's 'TYPE' property, one of: ${target_type_property_values}")
+  endif()
+
+  if(NOT DEFINED ARGS_TARGET_SOURCE_DIR)
+    set(ARGS_TARGET_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
+  endif()
+
+  if(NOT DEFINED ARGS_TARGET_BINARY_DIR)
+    set(ARGS_TARGET_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}")
   endif()
 
   # transform arguments to normalized absolute paths
