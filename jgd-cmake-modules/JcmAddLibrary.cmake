@@ -269,7 +269,7 @@ function(jcm_add_library)
   # resolve library names
   if(DEFINED ARGS_NAME)
     set(target_name ${ARGS_NAME})
-    set(export_name ${ARGS_NAME})
+    string(REGEX REPLACE "^${PROJECT_NAME}[-_]+" "" export_name "${ARGS_NAME}")
     set(output_name ${ARGS_NAME})
   else()
     jcm_library_naming(
