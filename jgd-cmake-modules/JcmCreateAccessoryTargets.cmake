@@ -134,7 +134,7 @@ function(_jcm_build_error_targets targets err_msg)
 
   set(exit_failure "${CMAKE_COMMAND}" -E false)
   set(print_err "${CMAKE_COMMAND}" -E echo "${target_err_msgs}")
-  jcm_create_message_command(
+  jcm_create_message_target(
     NAME ${PROJECT_NAME}_err
     LEVEL FATAL_ERROR
     MESSAGES "${target_err_msgs}")
