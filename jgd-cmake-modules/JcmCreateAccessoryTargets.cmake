@@ -1,5 +1,11 @@
 include_guard()
 
+# target from jcm_create_message_target will parse this file in script mode to emit the message at build time
+if(CMAKE_SCRIPT_MODE_FILE STREQUAL CMAKE_CURRENT_LIST_FILE)
+  message(${CMAKE_ARGV4} "${CMAKE_ARGV5}")
+  return()
+endif()
+
 #[=======================================================================[.rst:
 
 JcmCreateAccessoryTargets
@@ -21,7 +27,103 @@ include(JcmListTransformations)
 include(JcmCanonicalStructure)
 include(JcmStandardDirs)
 include(JcmSymlinks)
-include(JcmMessages)
+
+#[=======================================================================[.rst:
+
+jcm_create_message_target
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. cmake:command:: jcm_create_message_target
+
+  .. code-block:: cmake
+
+    jcm_create_message_target(
+      NAME <name>
+      LEVEL <TRACE|DEBUG|VERBOSE|STATUS|NOTICE|AUTHOR_WARNING|WARNING|SEND_ERROR|FATAL_ERROR>
+      MESSAGES <message>...)
+
+Creates a custom target with the name specified by :cmake:variable:`NAME` that will emit all of
+the messages provided to :cmake:variable:`MESSAGES` at the given log level, :cmake:variable:`LEVEL`.
+This function and the generated target are used to easily report messages to users from a target
+at **a specific log level**. This differs from a target running the `echo` cmake command
+(``cmake -E echo``) because *echo* only emits messages to stdout without log levels. An alternative
+solution is to generate a script file in the project's configuration and parse it within the command
+- that's what this function encapsulates, but without file generation.
+
+The target will parse this exact script file, :cmake:variable:`CMAKE_CURRENT_FUNCTION_LIST_FILE`, to
+emit the message. Although this file's path may differ between the build tree and install tree,
+since :cmake:variable:`CMAKE_CURRENT_FUNCTION_LIST_FILE` will be evaluated when
+:cmake:`jcm_create_message_target` is invoked, this will point to the correct instance of
+`JcmCreateAccessoryTargets.cmake`.
+
+Parameters
+##########
+
+Options
+~~~~~~~~~
+
+:cmake:variable:`ALL`
+  Indicate that the created target should be added to the default build target.
+
+One Value
+~~~~~~~~~
+
+:cmake:variable:`NAME`
+  The name of the custom command to create by invoking this function.
+
+:cmake:variable:`LEVEL`
+  The log level of the messages emitted by the created command.
+
+Multi Value
+~~~~~~~~~~~
+
+:cmake:variable:`MESSAGES`
+  The string messages that will be emitted by the created command at the given log level.
+
+Examples
+########
+
+.. code-block:: cmake
+
+  # messages will only be emitted when target is built, not when project is configured
+  if(MYLIB_SCHEMA_FILES_FOUND)
+    add_custom_target(mylib_generate_sources
+      COMMAND "command to actually generate sources")
+  else()
+    jcm_create_message_target(
+      NAME mylib_generate_sources
+      LEVEL FATAL_ERROR
+      MESSAGES "Failed to generate sources with the given schema. Schema error ${err_message}")
+  endif()
+
+#]=======================================================================]
+function(jcm_create_message_target)
+  jcm_parse_arguments(
+    OPTIONS "ALL"
+    ONE_VALUE_KEYWORDS "NAME" "LEVEL"
+    MULTI_VALUE_KEYWORDS "MESSAGES"
+    REQUIRES_ALL "NAME" "LEVEL" "MESSAGES"
+    ARGUMENTS "${ARGN}")
+
+  set(acceptable_status
+    "TRACE|DEBUG|VERBOSE|STATUS|NOTICE|AUTHOR_WARNING|WARNING|SEND_ERROR|FATAL_ERROR")
+
+  if(NOT "${ARGS_LEVEL}" MATCHES "${acceptable_status}")
+    message(FATAL_ERROR
+      "Argument 'LEVEL' of ${CMAKE_CURRENT_FUNCTION} must be one of ${acceptable_status}")
+  endif()
+
+  if(ARGS_ALL)
+    set(all_arg "ALL")
+  else()
+    unset(all_arg)
+  endif()
+
+  list(JOIN ARGS_MESSAGES "" as_single_message)
+  add_custom_target(${ARGS_NAME} ${all_arg}
+    COMMAND
+      "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_FUNCTION_LIST_FILE}" "${ARGS_LEVEL}" "${as_single_message}")
+endfunction()
 
 # Private function to build targets that emit error messages instead of their intended purpose
 # Escape sequences (\n) in the message may cause havoc in the generated build files if not properly

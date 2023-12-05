@@ -16,3 +16,9 @@ jcm_create_clang_format_targets(
   SOURCE_TARGETS
     single-exec::single-exec
     single-exec::single-exec-library)
+
+jcm_create_message_target(
+  ALL
+  NAME single-exec_message-target
+  LEVEL TRACE
+  MESSAGES "Always ensure " "message " "target works")

@@ -35,6 +35,10 @@ if(NOT broken_symlink)
 endif()
 
 _build_and_ctest("single-exec"
+  NAME_SUFFIX -message-target
+  BUILD_TARGET single-exec_message-target)
+
+_build_and_ctest("single-exec"
   FIXTURES_SETUP "single-exec-fixture"
   DEPENDS single-exec-format)
 
