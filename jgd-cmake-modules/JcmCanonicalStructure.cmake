@@ -207,18 +207,18 @@ jcm_canonical_lib_subdir
       [COMPONENT <component>])
 
 Sets the variable specified by :cmake:variable:`OUT_VAR` to the canonical source subdirectory for a
-library of project :cmake:variable:`PROJECT_NAME`.
+library of project :cmake:variable:`PROJECT_NAME`. In the following descriptions, *name* is the
+:cmake:variable:`PROJECT_NAME` without any lib prefix (*libproj* -> *proj*).
 
 When :cmake:variable:`COMPONENT` is omitted, the output will be the canonical project path for a
 single library of :cmake:variable:`PROJECT_NAME`, regardless of if :cmake:variable:`PROJECT_NAME`
 names a library or executable. The resulting path is absolute, and will be
-`/<JCM_LIB_PREFIX><name>`, with respect to :cmake:variable:`PROJECT_SOURCE_DIR`, where 'name' is the
-:cmake:variable:`PROJECT_NAME` without any lib prefix (*libproj* -> *proj*).
+`/<JCM_LIB_PREFIX><name>`, with respect to :cmake:variable:`PROJECT_SOURCE_DIR`.
 
 When :cmake:variable:`COMPONENT` is provided, the output will name a library component, considering
 the :cmake:variable:`PROJECT_NAME` and the :cmake:variable:`COMPONENT` argument. The resulting path
-is absolute, and will be `/<PROJECT_NAME>-<COMPONENT>/<PROJECT_NAME>/<COMPONENT>`, with respect to
-the :cmake:variable:`PROJECT_SOURCE_DIR`.
+is absolute, and will be `/<JCM_LIB_PREFIX><name>-<COMPONENT>/<JCM_LIB_PREFIX><name>/<COMPONENT>`,
+with respect to the :cmake:variable:`PROJECT_SOURCE_DIR`.
 
 Parameters
 ##########
@@ -254,6 +254,25 @@ Examples
   jcm_canonical_lib_subdir(OUT_VAR restore_subdir COMPONENT restore)
   message(STATUS "${restore_subdir}") # libdecorate/libdecorate-restore/libdecorate/restore
 
+.. code-block:: cmake
+  :caption: decorate/CMakeLists.txt
+
+  project(decorate VERSION 0.0.0)
+  ...
+  jcm_canonical_lib_subdir(OUT_VAR library_subdir)
+  message(STATUS "${library_subdir}") # libdecorate/libdecorate
+
+.. code-block:: cmake
+  :caption: decorate/CMakeLists.txt
+
+  project(decorate VERSION 0.0.0)
+  ...
+  jcm_canonical_lib_subdir(OUT_VAR paint_subdir COMPONENT paint)
+  message(STATUS "${paint_subdir}") # libdecorate/libdecorate-paint/libdecorate/paint
+
+  jcm_canonical_lib_subdir(OUT_VAR restore_subdir COMPONENT restore)
+  message(STATUS "${restore_subdir}") # libdecorate/libdecorate-restore/libdecorate/restore
+
 --------------------------------------------------------------------------
 
 #]=======================================================================]
@@ -263,13 +282,15 @@ function(jcm_canonical_lib_subdir)
     REQUIRES_ALL "OUT_VAR"
     ARGUMENTS "${ARGN}")
 
+  string(REGEX REPLACE "^${JCM_LIB_PREFIX}" "" no_lib "${PROJECT_NAME}")
+  set(with_lib "${JCM_LIB_PREFIX}${no_lib}")
+
   if(DEFINED ARGS_COMPONENT)
-    string(JOIN "-" comp_dir ${PROJECT_NAME} ${ARGS_COMPONENT})
-    set(${ARGS_OUT_VAR} "${PROJECT_SOURCE_DIR}/${comp_dir}/${PROJECT_NAME}/${ARGS_COMPONENT}"
-      PARENT_SCOPE)
+    string(JOIN "-" comp_dir ${with_lib} ${ARGS_COMPONENT})
+    set(${ARGS_OUT_VAR}
+      "${PROJECT_SOURCE_DIR}/${comp_dir}/${with_lib}/${ARGS_COMPONENT}" PARENT_SCOPE)
   else()
-    string(REGEX REPLACE "^${JCM_LIB_PREFIX}" "" no_lib "${PROJECT_NAME}")
-    set(${ARGS_OUT_VAR} "${PROJECT_SOURCE_DIR}/${JCM_LIB_PREFIX}${no_lib}" PARENT_SCOPE)
+    set(${ARGS_OUT_VAR} "${PROJECT_SOURCE_DIR}/${with_lib}" PARENT_SCOPE)
   endif()
 endfunction()
 
@@ -287,20 +308,18 @@ jcm_canonical_exec_subdir
       [COMPONENT <component>])
 
 Sets the variable specified by :cmake:variable:`OUT_VAR` to the canonical source subdirectory for an
-executable of project :cmake:variable:`PROJECT_NAME`.
+executable of project :cmake:variable:`PROJECT_NAME`. In the following descriptions, *name* is the
+:cmake:variable:`PROJECT_NAME` without any lib prefix (*libproj* -> *proj*).
 
 When COMPONENT is omitted, the output is the canonical project path for a single executable of
 :cmake:variable:`PROJECT_NAME`, regardless of if :cmake:variable:`PROJECT_NAME` names a library or
 executable. The resulting path is absolute, and will be `/<name>`, with respect to
-:cmake:variable:`PROJECT_SOURCE_DIR`, where 'name' is the :cmake:variable:`PROJECT_NAME` without any
-lib prefix.
+:cmake:variable:`PROJECT_SOURCE_DIR`,
 
 When COMPONENT is provided, the output is the canonical project path for an executable component,
 considering the :cmake:variable:`PROJECT_NAME` and the :cmake:variable:`COMPONENT` argument,
-regardless of if :cmake:variable:`PROJECT_NAME` names a library or executable.  The resulting path
-is absolute, and will be `/<name>/<COMPONENT>`, with respect to
-:cmake:variable:`PROJECT_SOURCE_DIR`, where 'name' is :cmake:variable:`PROJECT_NAME` without any lib
-prefix.
+regardless of if :cmake:variable:`PROJECT_NAME` names a library or executable. The resulting path is
+absolute, and will be `/<name>/<COMPONENT>`, with respect to :cmake:variable:`PROJECT_SOURCE_DIR`.
 
 Parameters
 ##########
