@@ -115,7 +115,7 @@ Examples
     TYPE STRING
     DEFAULT "NONE"
     CONDITION "${PROJECT_NAME}_BUILD_TRANSPORT_LAYER"
-    VALUES "NONE;ZIP;BROTLI;LZ")
+    ACCEPT_VALUES "NONE;ZIP;BROTLI;LZ")
 
 .. code-block:: cmake
 
@@ -182,7 +182,7 @@ function(jcm_add_option)
   # Add Option
   if(DEFINED ARGS_CONDITION)
     cmake_dependent_option(
-      "${ARGS_NAME}:${ARGS_TYPE}" "${ARGS_DESCRIPTION}"
+      "${ARGS_NAME}" "${ARGS_DESCRIPTION}"
       "${ARGS_CONDITION_MET_DEFAULT}"
       "${ARGS_CONDITION}"
       "${ARGS_DEFAULT}")
