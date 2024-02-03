@@ -109,7 +109,7 @@ Examples
 #]=======================================================================]
 function(jcm_separate_list)
   jcm_parse_arguments(
-    OPTIONS "IS_DIRECTORY" "IS_SYMLINK" "IS_ABSOLUTE"
+    OPTIONS "IS_DIRECTORY" "IS_SYMLINK" "IS_ABSOLUTE" "IS_TRUE"
     ONE_VALUE_KEYWORDS "REGEX" "OUT_MATCHED" "OUT_MISMATCHED" "TRANSFORM"
     MULTI_VALUE_KEYWORDS "INPUT"
     REQUIRES_ALL "INPUT"
