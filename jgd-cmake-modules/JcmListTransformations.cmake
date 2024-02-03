@@ -22,7 +22,7 @@ jcm_separate_list
       INPUT <item>...
       <[OUT_MATCHED <out-var>]
        [OUT_MISMATCHED <out-var>] >
-      <REGEX <regex> | IS_DIRECTORY | IS_SYMLINK | IS_ABSOLUTE | IS_TRUE>
+      <REGEX <regex> | IS_DIRECTORY | IS_SYMLINK | IS_ABSOLUTE | EVAL_TRUE>
       [TRANSFORM <transform>])
 
 Separates the elements of list :cmake:variable:`INPUT` into two groups:
@@ -60,12 +60,12 @@ One Value
   When present, the filter used to separate the input elements will match when an element is an
   absolute path
 
-:cmake:variable:`IS_TRUE`
-  When present, the filter used to separate the input elements will match when an element evaluated
-  as a `condition <https://cmake.org/cmake/help/latest/command/if.html#condition-syntax>`_ evaluates
-  to true. With this filter, each element is directly interpreted as a condition. This is primarily
-  useful for testing a batch of conditions, such as which elements in a list of options are
-  1/ON/TRUE/YES... vs. 0/OFF/FALSE/NO/NOTFOUND...
+:cmake:variable:`EVAL_TRUE`
+  When present, the filter used to separate the input elements will match when an element
+  interpreted as a `condition <https://cmake.org/cmake/help/latest/command/if.html#condition-syntax>`_
+  evaluates to true using CMake's `if clause <https://cmake.org/cmake/help/latest/command/if.html>`_.
+  This is primarily useful for testing a batch of conditions, such as which elements in a list of
+  options are 1/ON/TRUE/YES... vs. 0/OFF/FALSE/NO/NOTFOUND...
 
 :cmake:variable:`TRANSFORM`
   A transformation to apply to the input before matching. The outputs will not contain this
@@ -109,13 +109,13 @@ Examples
 #]=======================================================================]
 function(jcm_separate_list)
   jcm_parse_arguments(
-    OPTIONS "IS_DIRECTORY" "IS_SYMLINK" "IS_ABSOLUTE" "IS_TRUE"
+    OPTIONS "IS_DIRECTORY" "IS_SYMLINK" "IS_ABSOLUTE" "EVAL_TRUE"
     ONE_VALUE_KEYWORDS "REGEX" "OUT_MATCHED" "OUT_MISMATCHED" "TRANSFORM"
     MULTI_VALUE_KEYWORDS "INPUT"
     REQUIRES_ALL "INPUT"
     REQUIRES_ANY "OUT_MATCHED" "OUT_MISMATCHED"
-    REQUIRES_ANY_1 "REGEX" "IS_DIRECTORY" "IS_SYMLINK" "IS_ABSOLUTE" "IS_TRUE"
-    MUTUALLY_EXCLUSIVE "REGEX" "IS_DIRECTORY" "IS_SYMLINK" "IS_ABSOLUTE" "IS_TRUE"
+    REQUIRES_ANY_1 "REGEX" "IS_DIRECTORY" "IS_SYMLINK" "IS_ABSOLUTE" "EVAL_TRUE"
+    MUTUALLY_EXCLUSIVE "REGEX" "IS_DIRECTORY" "IS_SYMLINK" "IS_ABSOLUTE" "EVAL_TRUE"
     ARGUMENTS "${ARGN}")
 
   # additional argument validation
