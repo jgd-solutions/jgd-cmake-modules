@@ -48,7 +48,6 @@ One Value
 :cmake:variable:`REGEX`
   When present, this provided regular expression will be the filter  used to separate the input
   elements.
-
 :cmake:variable:`IS_DIRECTORY`
   When present, the filter used to separate the input elements will match when an element is a
   directory.
@@ -60,6 +59,13 @@ One Value
 :cmake:variable:`IS_ABSOLUTE`
   When present, the filter used to separate the input elements will match when an element is an
   absolute path
+
+:cmake:variable:`IS_TRUE`
+  When present, the filter used to separate the input elements will match when an element evaluated
+  as a `condition <https://cmake.org/cmake/help/latest/command/if.html#condition-syntax>`_ evaluates
+  to true. With this filter, each element is directly interpreted as a condition. This is primarily
+  useful for testing a batch of conditions, such as which elements in a list of options are
+  1/ON/TRUE/YES... vs. 0/OFF/FALSE/NO/NOTFOUND...
 
 :cmake:variable:`TRANSFORM`
   A transformation to apply to the input before matching. The outputs will not contain this
@@ -108,8 +114,8 @@ function(jcm_separate_list)
     MULTI_VALUE_KEYWORDS "INPUT"
     REQUIRES_ALL "INPUT"
     REQUIRES_ANY "OUT_MATCHED" "OUT_MISMATCHED"
-    REQUIRES_ANY_1 "REGEX" "IS_DIRECTORY" "IS_SYMLINK" "IS_ABSOLUTE"
-    MUTUALLY_EXCLUSIVE "REGEX" "IS_DIRECTORY" "IS_SYMLINK" "IS_ABSOLUTE"
+    REQUIRES_ANY_1 "REGEX" "IS_DIRECTORY" "IS_SYMLINK" "IS_ABSOLUTE" "IS_TRUE"
+    MUTUALLY_EXCLUSIVE "REGEX" "IS_DIRECTORY" "IS_SYMLINK" "IS_ABSOLUTE" "IS_TRUE"
     ARGUMENTS "${ARGN}")
 
   # additional argument validation
@@ -159,9 +165,17 @@ function(jcm_separate_list)
         set(element_matched FALSE)
       endif()
     ]])
-  else()
+  elsif(ARGS_REGEX)
     set(selected_filter [[
       string(REGEX MATCH "${ARGS_REGEX}" element_matched "${transformed_element}")
+    ]])
+  else()
+    set(selected_filter [[
+      if(${transformed_element})
+        set(element_matched TRUE)
+      else()
+        set(element_matched FALSE)
+      endif()
     ]])
   endif()
 
@@ -187,8 +201,12 @@ function(jcm_separate_list)
   endforeach()
 
   # Set out variables
-  set(${ARGS_OUT_MATCHED} "${matched_elements}" PARENT_SCOPE)
-  set(${ARGS_OUT_MISMATCHED} "${mismatched_elements}" PARENT_SCOPE)
+  if(DEFINED ARGS_OUT_MATCHED)
+    set(${ARGS_OUT_MATCHED} "${matched_elements}" PARENT_SCOPE)
+  endif()
+  if(DEFINED ARGS_OUT_MISMATCHED)
+    set(${ARGS_OUT_MISMATCHED} "${mismatched_elements}" PARENT_SCOPE)
+  endif()
 endfunction()
 
 
