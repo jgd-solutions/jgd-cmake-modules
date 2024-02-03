@@ -165,7 +165,7 @@ function(jcm_separate_list)
         set(element_matched FALSE)
       endif()
     ]])
-  elsif(ARGS_REGEX)
+  elseif(DEFINED ARGS_REGEX)
     set(selected_filter [[
       string(REGEX MATCH "${ARGS_REGEX}" element_matched "${transformed_element}")
     ]])

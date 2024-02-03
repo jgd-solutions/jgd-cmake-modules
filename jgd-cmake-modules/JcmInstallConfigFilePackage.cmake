@@ -218,8 +218,7 @@ function(jcm_install_config_file_package)
         REGEX "${JCM_CMAKE_MODULE_REGEX}"
         TRANSFORM "FILENAME"
         OUT_MATCHED correct_files
-        OUT_MISMATCHED incorrect_files
-      )
+        OUT_MISMATCHED incorrect_files)
       if(incorrect_files)
         message(AUTHOR_WARNING
           "The function ${CMAKE_CURRENT_FUNCTION} will not install the "
