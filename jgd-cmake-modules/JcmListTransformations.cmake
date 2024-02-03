@@ -22,7 +22,7 @@ jcm_separate_list
       INPUT <item>...
       <[OUT_MATCHED <out-var>]
        [OUT_MISMATCHED <out-var>] >
-      <REGEX <regex> | IS_DIRECTORY | IS_SYMLINK | IS_ABSOLUTE >
+      <REGEX <regex> | IS_DIRECTORY | IS_SYMLINK | IS_ABSOLUTE | IS_TRUE>
       [TRANSFORM <transform>])
 
 Separates the elements of list :cmake:variable:`INPUT` into two groups:
