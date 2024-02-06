@@ -188,8 +188,7 @@ macro(JCM_PARSE_ARGUMENTS)
 
   foreach(req_keyword IN LISTS
     INS_REQUIRES_ALL INS_REQUIRES_ANY INS_REQUIRES_ANY_1 INS_REQUIRES_ANY_2 INS_REQUIRES_ANY_3)
-    list(FIND parsed_keywords ${req_keyword} idx)
-    if(idx EQUAL -1)
+    if(NOT "${req_keyword}" IN_LIST parsed_keywords)
       message(FATAL_ERROR
         "The required keyword '${req_keyword}' is not in the list of function keywords, "
         "'${parsed_keywords}'. This keyword cannot be required if it is not a function parameter")
@@ -250,8 +249,7 @@ macro(JCM_PARSE_ARGUMENTS)
     INS_MUTUALLY_EXCLUSIVE_3)
 
     # foreach IN LISTS won't execute body if list isn't defined :)
-    list(FIND INS_ARGUMENTS ${keyword} idx)
-    if(NOT idx EQUAL -1)
+    if("${keyword}" IN_LIST INS_ARGUMENT)
       if(DEFINED first_keyword)
         set(second_keyword ${keyword})
         break()
@@ -266,7 +264,6 @@ macro(JCM_PARSE_ARGUMENTS)
       "mutually exclusive list of function arguments: ${INS_MUTUALLY_EXCLUSIVE}")
   endif()
 
-  unset(idx)
   unset(second_keyword)
   unset(first_keyword)
 

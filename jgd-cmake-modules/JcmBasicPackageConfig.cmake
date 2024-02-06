@@ -167,8 +167,7 @@ macro(JCM_BASIC_PACKAGE_CONFIG project)
   unset(jcm_version_file)
 
   # Append module path for any additional (non-package) CMake modules
-  list(FIND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}" jcm_current_dir_idx)
-  if(jcm_current_dir_idx EQUAL -1)
+  if(NOT "${CMAKE_CURRENT_LIST_DIR}" IN_LIST CMAKE_MODULE_PATH)
     file(
       GLOB_RECURSE
       jcm_additional_modules
@@ -183,7 +182,6 @@ macro(JCM_BASIC_PACKAGE_CONFIG project)
     endif()
   endif()
 
-  unset(jcm_current_dir_idx)
   unset(jcm_additional_modules)
 
   # As recommended in CMake's configure_package_config_file command, ensure

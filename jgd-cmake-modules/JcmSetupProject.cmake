@@ -34,7 +34,7 @@ macro(_JCM_WARN_SET variable value)
       message(AUTHOR_WARNING
         "The variable ${variable} was set for project ${PROJECT_NAME} prior to calling "
         "jcm_setup_project. This variable will by overridden to the default value of ${value} in "
-		    "the project setup. If you wish to override the default value, set ${variable} in the "
+        "the project setup. If you wish to override the default value, set ${variable} in the "
         "CMake cache, either with CMake-GUI or through the command-line flag '-D'.")
     endif()
 
@@ -219,11 +219,10 @@ macro(JCM_SETUP_PROJECT)
   _jcm_warn_set(CMAKE_DEBUG_POSTFIX "-debug")
 
   # add project's cmake modules to path
-  list(FIND CMAKE_MODULE_PATH "${JCM_PROJECT_CMAKE_DIR}" cmake_dir_idx)
-  if(cmake_dir_idx EQUAL -1 AND EXISTS "${JCM_PROJECT_CMAKE_DIR}")
+  if((NOT "${JCM_PROJECT_CMAKE_DIR}" IN_LIST CMAKE_MODULE_PATH)
+     AND EXISTS "${JCM_PROJECT_CMAKE_DIR}")
     list(APPEND CMAKE_MODULE_PATH "${JCM_PROJECT_CMAKE_DIR}")
   endif()
-  unset(cmake_dir_idx)
 
   # build artifact destinations
   _jcm_warn_set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")

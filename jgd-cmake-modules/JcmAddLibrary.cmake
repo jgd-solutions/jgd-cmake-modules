@@ -250,8 +250,7 @@ function(jcm_add_library)
   if(DEFINED ARGS_TYPE)
     set(lib_type ${ARGS_TYPE})
     set(supported_types STATIC SHARED MODULE INTERFACE OBJECT)
-    list(FIND supported_types "${ARGS_TYPE}" supported)
-    if(supported EQUAL -1)
+    if(NOT "${ARGS_TYPE}" IN_LIST supported_types)
       message(
         FATAL_ERROR
         "Unsupported type ${ARGS_TYPE}. ${CMAKE_CURRENT_FUNCTION} must be "

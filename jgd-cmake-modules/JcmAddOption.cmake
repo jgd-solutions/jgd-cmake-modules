@@ -194,11 +194,10 @@ function(jcm_add_option)
   if(DEFINED ARGS_ACCEPT_VALUES)
     set_property(CACHE "${ARGS_NAME}" PROPERTY STRINGS "${ARGS_ACCEPT_VALUES}")
 
-    list(FIND ARGS_ACCEPT_VALUES "${${ARGS_NAME}}" accepted_index)
-    if(accepted_index EQUAL -1)
+    if(NOT "${${ARGS_NAME}}" IN_LIST ARGS_ACCEPT_VALUES)
       list(JOIN ARGS_ACCEPT_VALUES "|" pretty_accept_values)
       message(FATAL_ERROR "Build option '${ARGS_NAME}' is restricted to one of "
-        "'${pretty_accept_values}'. Its value, '${ARGS_NAME}', is not one of these")
+        "'${pretty_accept_values}'. Its value, '${${ARGS_NAME}}', is not one of these")
     endif()
   endif()
 endfunction()
