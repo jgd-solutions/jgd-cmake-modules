@@ -27,6 +27,7 @@ jcm_add_library
 
     jcm_add_library(
       [WITHOUT_CANONICAL_PROJECT_CHECK]
+      [WITHOUT_FILE_NAMING_CHECK]
       [COMPONENT <component>]
       [NAME <name>]
       [OUT_TARGET <out-var>]
