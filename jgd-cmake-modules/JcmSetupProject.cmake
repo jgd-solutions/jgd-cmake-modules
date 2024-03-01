@@ -208,10 +208,10 @@ macro(JCM_SETUP_PROJECT)
 
   # basic
   if(NOT CMAKE_BUILD_TYPE)
-    _jcm_warn_set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Single-config build type" FORCE)
+    _jcm_warn_set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Build type of single-config build-systems" FORCE)
   endif()
   if(NOT CMAKE_EXPORT_COMPILE_COMMANDS)
-    _jcm_warn_set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE BOOL "Control compilation DB gen." FORCE)
+    _jcm_warn_set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE BOOL "Control generation of compilation DB" FORCE)
   endif()
   _jcm_warn_set(CMAKE_OPTIMIZE_DEPENDENCIES ON)
   _jcm_warn_set(CMAKE_LINK_WHAT_YOU_USE ON)
@@ -307,7 +307,7 @@ macro(JCM_SETUP_PROJECT)
   if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT AND NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
     # can follow opt/ with provider, once registered with LANANA
     _jcm_warn_set(
-      CMAKE_INSTALL_PREFIX "/opt/${PROJECT_NAME}" CACHE PATH "Base installation location. " FORCE)
+      CMAKE_INSTALL_PREFIX "/opt/${PROJECT_NAME}" CACHE PATH "Default installation root directory" FORCE)
   endif()
 
   # enable testing by default so invoking ctest always succeeds
