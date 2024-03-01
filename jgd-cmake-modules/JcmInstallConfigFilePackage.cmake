@@ -94,14 +94,14 @@ Examples
 
 .. code-block:: cmake
 
-  jcm_install_config_file_package(TARGETS libbbg::libbbq)
+  jcm_install_config_file_package(TARGETS libbbq::libbbq)
 
 .. code-block:: cmake
 
   jcm_install_config_file_package(
     CONFIGURE_PACKAGE_CONFIG_FILES
     INSTALL_LICENSES
-    TARGETS libbbg::core libbbq::meat libbbg::veg
+    TARGETS libbbq::core libbbq::meat libbbq::veg
     CMAKE_MODULES "${JCM_PROJECT_CMAKE_DIR}")
 
 #]=======================================================================]
