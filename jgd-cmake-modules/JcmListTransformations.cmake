@@ -1,6 +1,7 @@
 include_guard()
 
 include(JcmParseArguments)
+include(JcmTargetNaming)
 
 #[=======================================================================[.rst:
 
@@ -23,12 +24,12 @@ jcm_separate_list
       <[OUT_MATCHED <out-var>]
        [OUT_MISMATCHED <out-var>] >
       <REGEX <regex> | IS_DIRECTORY | IS_SYMLINK | IS_ABSOLUTE | EVAL_TRUE>
-      [TRANSFORM <transform>])
+      [TRANSFORM <FILENAME|ALIASED_TARGET>])
 
 Separates the elements of list :cmake:variable:`INPUT` into two groups:
 :cmake:variable:`OUT_MATCHED` if the element matches the provided filter, and
 :cmake:variable:`OUT_MISMATCHED` otherwise. Before matching, the elements can optionally be
-transformed by the selected :cmake:variable:`TRANSFORM`. The elements in the out-variables are
+transformed by the selected :cmake:variable:`TRANSFORM`, but the elements in the out-variables are
 always identical to those provided via :cmake:variable:`INPUT`.
 
 Parameters
@@ -60,6 +61,10 @@ One Value
   When present, the filter used to separate the input elements will match when an element is an
   absolute path
 
+:cmake:variable:`IS_TARGET`
+  When present, the filter used to separate the input elements will match when an element names
+  an existent target
+
 :cmake:variable:`EVAL_TRUE`
   When present, the filter used to separate the input elements will match when an element
   interpreted as a `condition <https://cmake.org/cmake/help/latest/command/if.html#condition-syntax>`_
@@ -69,7 +74,7 @@ One Value
 
 :cmake:variable:`TRANSFORM`
   A transformation to apply to the input before matching. The outputs will not contain this
-  transformation. Currently, only "FILENAME" is supported.
+  transformation. Currently, only :cmake:`FILENAME` or :cmake:`ALIASED_TARGET` is supported.
 
 Multi Value
 ~~~~~~~~~~~
@@ -109,17 +114,17 @@ Examples
 #]=======================================================================]
 function(jcm_separate_list)
   jcm_parse_arguments(
-    OPTIONS "IS_DIRECTORY" "IS_SYMLINK" "IS_ABSOLUTE" "EVAL_TRUE"
+    OPTIONS "IS_DIRECTORY" "IS_SYMLINK" "IS_ABSOLUTE" "IS_TARGET" "EVAL_TRUE"
     ONE_VALUE_KEYWORDS "REGEX" "OUT_MATCHED" "OUT_MISMATCHED" "TRANSFORM"
     MULTI_VALUE_KEYWORDS "INPUT"
     REQUIRES_ALL "INPUT"
     REQUIRES_ANY "OUT_MATCHED" "OUT_MISMATCHED"
     REQUIRES_ANY_1 "REGEX" "IS_DIRECTORY" "IS_SYMLINK" "IS_ABSOLUTE" "EVAL_TRUE"
-    MUTUALLY_EXCLUSIVE "REGEX" "IS_DIRECTORY" "IS_SYMLINK" "IS_ABSOLUTE" "EVAL_TRUE"
+    MUTUALLY_EXCLUSIVE "REGEX" "IS_DIRECTORY" "IS_SYMLINK" "IS_ABSOLUTE" "IS_TARGET" "EVAL_TRUE"
     ARGUMENTS "${ARGN}")
 
   # additional argument validation
-  set(supported_transforms "FILENAME")
+  set(supported_transforms "FILENAME|ALIASED_TARGET")
   if(DEFINED ARGS_TRANSFORM AND NOT ARGS_TRANSFORM MATCHES "${supported_transforms}")
     message(FATAL_ERROR "The TRANSFORM of ${ARGS_TRANSFORM} is not supported. "
       "It must be one of ${supported_transforms}.")
@@ -135,6 +140,10 @@ function(jcm_separate_list)
   if(ARGS_TRANSFORM STREQUAL "FILENAME")
     set(selected_transformation [[
       cmake_path(GET element FILENAME transformed_element)
+    ]])
+  elseif(ARGS_TRANSFORM STREQUAL "ALIASED_TARGET")
+    set(selected_transformation [[
+      jcm_aliased_target(TARGET "${element}" OUT_TARGET transformed_element)
     ]])
   else()
     set(selected_transformation)
@@ -160,6 +169,14 @@ function(jcm_separate_list)
   elseif(ARGS_IS_ABSOLUTE)
     set(selected_filter [[
       if(IS_ABSOLUTE "${transformed_element}")
+        set(element_matched TRUE)
+      else()
+        set(element_matched FALSE)
+      endif()
+    ]])
+  elseif(ARGS_IS_TARGET)
+    set(selected_filter [[
+      if(TARGET "${transformed_element}")
         set(element_matched TRUE)
       else()
         set(element_matched FALSE)
@@ -251,6 +268,11 @@ Options
   A transformation that treats each input item as a path, and transform it to its file name; the
   last component in the path. Excludes other transformation options.
 
+:cmake:variable:`ALIASED_TARGET`
+  A transformation that treats each input item as a target name or target alias, and transform it to
+  the target being aliased with :cmake:function:`jcm_aliased_target`. Excludes other transformation
+  options.
+
 One Value
 ~~~~~~~~~
 
@@ -287,6 +309,16 @@ Examples
 
   message(STATUS "${header_file_names} == image.hpp;readers.hpp;viewer.hpp")
 
+.. code-block:: cmake
+
+  jcm_transform_list(
+    ALIASED_TARGET 
+    INPUT libimage::core  libimage::libimage-viewer libimage_libimage-readers
+    OUT_VAR aliased_targets)
+
+  message(STATUS 
+    "${header_file_names} == libimage_libimage-core;libimage_libimage-viewer;libimage_libimage-readers")
+
 --------------------------------------------------------------------------
 
 #]=======================================================================]
@@ -294,12 +326,12 @@ function(jcm_transform_list)
   # Argument parsing, allowing value to INPUT to be empty
   jcm_parse_arguments(
     WITHOUT_MISSING_VALUES_CHECK
-    OPTIONS "ABSOLUTE_PATH" "NORMALIZE_PATH" "PARENT_PATH" "FILENAME"
+    OPTIONS "ABSOLUTE_PATH" "NORMALIZE_PATH" "PARENT_PATH" "FILENAME" "ALIASED_TARGET"
     ONE_VALUE_KEYWORDS "BASE;OUT_VAR"
     MULTI_VALUE_KEYWORDS "INPUT"
     REQUIRES_ALL "OUT_VAR"
     REQUIRES_ANY "ABSOLUTE_PATH" "NORMALIZE_PATH" "FILENAME"
-    MUTUALLY_EXCLUSIVE "ABSOLUTE_PATH" "NORMALIZE_PATH" "PARENT_PATH" "FILENAME"
+    MUTUALLY_EXCLUSIVE "ABSOLUTE_PATH" "NORMALIZE_PATH" "PARENT_PATH" "FILENAME" "ALIASED_TARGET"
     ARGUMENTS "${ARGN}")
 
   # check for missing values on other variables, besides INPUT
@@ -332,32 +364,36 @@ function(jcm_transform_list)
     endif()
 
     set(selected_transformation [=[
-      if(IS_ABSOLUTE "${input}")
-        set(transformed_result "${input}")
+      if(IS_ABSOLUTE "${element}")
+        set(transformed_element "${element}")
       else()
-        set(transformed_result "${absolute_base_path}/${input}")
+        set(transformed_element "${absolute_base_path}/${element}")
       endif()
     ]=])
   elseif(ARGS_NORMALIZE_PATH)
     set(selected_transformation [=[
-      cmake_path(SET transformed_result NORMALIZE "${input}")
+      cmake_path(SET transformed_element NORMALIZE "${element}")
     ]=])
   elseif(ARGS_PARENT_PATH)
     set(selected_transformation [=[
-      cmake_path(GET input PARENT_PATH transformed_result)
+      cmake_path(GET element PARENT_PATH transformed_element)
     ]=])
   elseif(ARGS_FILENAME)
     set(selected_transformation [=[
-      cmake_path(GET input FILENAME transformed_result)
+      cmake_path(GET element FILENAME transformed_element)
+    ]=])
+  elseif(ARGS_ALIASED_TARGET)
+    set(selected_transformation [=[
+      jcm_aliased_target(TARGET "${element}" OUT_TARGET transformed_element)
     ]=])
   endif()
 
   # Transform list
   set(transformed_results)
-  foreach(input IN LISTS ARGS_INPUT)
-    set(transformed_result)
+  foreach(element IN LISTS ARGS_INPUT)
+    set(transformed_element)
     cmake_language(EVAL CODE "${selected_transformation}")
-    list(APPEND transformed_results "${transformed_result}")
+    list(APPEND transformed_results "${transformed_element}")
   endforeach()
 
   set(${ARGS_OUT_VAR} "${transformed_results}" PARENT_SCOPE)
