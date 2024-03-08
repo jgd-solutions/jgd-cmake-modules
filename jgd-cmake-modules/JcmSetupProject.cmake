@@ -328,3 +328,4 @@ macro(JCM_SETUP_PROJECT)
 
   endif()
 endmacro()
+

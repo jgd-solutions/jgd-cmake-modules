@@ -10,6 +10,7 @@ JcmSourceSubdirectories
 include(JcmParseArguments)
 include(JcmCanonicalStructure)
 include(JcmStandardDirs)
+include(JcmListTransformations)
 
 #
 # Private macro to the module. After checking that it's a directory, appends the
@@ -228,4 +229,87 @@ function(jcm_source_subdirectories)
   if(DEFINED ARGS_OUT_VAR)
     set(${ARGS_OUT_VAR} "${subdirs_added}" PARENT_SCOPE)
   endif()
+endfunction()
+
+
+#[=======================================================================[.rst:
+
+jcm_collect_subdirectory_targets
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. cmake:command:: jcm_collect_subdirectory_targets
+
+  .. code-block:: cmake
+
+    jcm_collect_subdirectory_targets(
+      [EXCLUDE_DIRECTORY_REGEX <regex>]
+      <[OUT_VAR <out-var>])
+
+Collects all targets created in and under the current directory. This function recursively descends
+into all subdirectories of the project named by the directory property
+:cmake:variable:`SUBDIRECTORIES` to collect all targets created in that directory, provided by the
+directory property :cmake:variable:`BUILDSYSTEM_TARGETS`. The directories can be optionally excluded
+from the search by providing a regular expression via :cmake:variable:`EXCLUDE_DIRECTORY_REGEX` that
+will be applied to the directory's absolute paths. All targets created directly in the directories
+matching the regex will be omitted.
+
+Parameters
+##########
+
+
+One Value
+~~~~~~~~~
+
+:cmake:variable:`OUT_VAR`
+  The named variable will be set to the list of resultant targets
+
+:cmake:variable:`EXCLUDE_DIRECTORY_REGEX`
+  An optional regular expression that will be used to filter directories from the search.
+
+Examples
+########
+
+.. code-block:: cmake
+
+  jcm_collect_subdirectory_targets(OUT_VAR all_project_targets)
+  jcm_separate_list(
+    REGEX "^${PROJECT_NAME}"
+    INPUT "${all_project_targets}" 
+    OUT_MATCHED named_project_targets)
+
+.. code-block:: cmake
+
+  jcm_collect_subdirectory_targets(
+    EXCLUDE_DIRECTORY_REGEX "${CMAKE_CURRENT_SOURCE_DIR}/build*"
+    OUT_VAR all_project_targets)
+
+#]=======================================================================]
+function(jcm_collect_subdirectory_targets)
+  jcm_parse_arguments(
+    ONE_VALUE_KEYWORDS "OUT_VAR" "EXCLUDE_DIRECTORY_REGEX"
+    REQUIRES_ALL "OUT_VAR"
+    ARGUMENTS "${ARGN}")
+
+  function(impl directory out_targets)
+    set(targets)
+
+    message(NOTICE "start of impl on ${directory}")
+    get_property(subdirs DIRECTORY ${directory} PROPERTY SUBDIRECTORIES)
+    if(ARGS_EXCLUDE_DIRECTORY_REGEX)
+      jcm_transform_list(REGEX "${ARGS_EXCLUDE_REGEX}" INPUT "${subdirs}" OUT_MISMATCHED subdirs)
+    endif()
+
+    foreach(subdir IN LISTS subdirs)
+      impl(${subdir} subdir_targets)
+      # message(NOTICE "got targets ${directory}: ${subdir_targets}")
+      list(APPEND targets ${subdir_targets})
+    endforeach()
+
+    get_property(current_targets DIRECTORY ${directory} PROPERTY BUILDSYSTEM_TARGETS)
+    list(APPEND targets ${current_targets})
+    set(${out_targets} ${targets} PARENT_SCOPE)
+  endfunction()
+
+  impl("${CMAKE_CURRENT_SOURCE_DIR}" targets)
+  set(${ARGS_OUT_VAR} ${targets} PARENT_SCOPE)
 endfunction()
