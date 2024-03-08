@@ -159,6 +159,8 @@ jcm_create_clang_format_targets
 
     jcm_create_clang_format_targets(
       [QUIET]
+      [WITHOUT_TOP_LEVEL_CHECK]
+      [SKIP_NONEXISTENT_TARGETS]
       [STYLE_FILE <path>]
       [EXCLUDE_REGEX <regex>]
       [COMMAND <command|target>]
@@ -195,6 +197,10 @@ Options
 
 :cmake:variable:`WITHOUT_TOP_LEVEL_CHECK`
   Causes this function not check if it's being called in the top-level project.
+
+:cmake:variable:`SKIP_NONEXISTENT_TARGETS`
+  Causes the function to skip over any non-existent targets named in
+  :cmake:variable:`SOURCE_TARGETS`. Otherwise, all source targets must exist.
 
 One Value
 ~~~~~~~~~
@@ -251,7 +257,7 @@ Examples
 #]=======================================================================]
 function(jcm_create_clang_format_targets)
   jcm_parse_arguments(
-    OPTIONS "QUIET" "WITHOUT_TOP_LEVEL_CHECK"
+    OPTIONS "QUIET" "WITHOUT_TOP_LEVEL_CHECK" "SKIP_NONEXISTENT_TARGETS"
     MULTI_VALUE_KEYWORDS "ADDITIONAL_PATHS;SOURCE_TARGETS"
     ONE_VALUE_KEYWORD "EXCLUDE_REGEX" "COMMAND" "STYLE_FILE"
     REQUIRES_ALL "SOURCE_TARGETS"
@@ -299,6 +305,9 @@ function(jcm_create_clang_format_targets)
 
   set(files_to_format)
   foreach(target ${ARGS_SOURCE_TARGETS})
+    if(ARGS_SKIP_NONEXISTENT_TARGETS AND NOT TARGET ${target})
+      continue()
+    endif()
     get_target_property(source_dir ${target} SOURCE_DIR)
     get_target_property(interface_sources ${target} INTERFACE_SOURCES)
     get_target_property(sources ${target} SOURCES)
@@ -403,6 +412,7 @@ jcm_create_doxygen_target
 
     jcm_create_doxygen_target(
       [README_MAIN_PAGE]
+      [SKIP_NONEXISTENT_TARGETS]
       [EXCLUDE_REGEX <regex>]
       [OUTPUT_DIRECTORY <dir>]
       <[SOURCE_TARGETS <target>...]
@@ -436,6 +446,10 @@ Options
 :cmake:variable:`README_MAIN_PAGE`
   Sets DOXYGEN_USE_MDFILE_AS_MAINPAGE to the project's root README.md file, such that Doxygen will
   use the project's readme as the main page.
+
+:cmake:variable:`SKIP_NONEXISTENT_TARGETS`
+  Causes the function to skip over any non-existent targets named in
+  :cmake:variable:`SOURCE_TARGETS`. Otherwise, all source targets must exist.
 
 One Value
 ~~~~~~~~~
@@ -483,7 +497,7 @@ Examples
 #]=======================================================================]
 function(jcm_create_doxygen_target)
   jcm_parse_arguments(
-    OPTIONS "README_MAIN_PAGE" "EXCLUDE_BUILD_DIRECTORY"
+    OPTIONS "README_MAIN_PAGE" "SKIP_NONEXISTENT_TARGETS"
     ONE_VALUE_KEYWORDS "OUTPUT_DIRECTORY" "EXCLUDE_REGEX"
     MULTI_VALUE_KEYWORDS "SOURCE_TARGETS;ADDITIONAL_PATHS"
     REQUIRES_ANY "SOURCE_TARGETS;ADDITIONAL_PATHS"
@@ -516,6 +530,9 @@ function(jcm_create_doxygen_target)
   set(include_dirs)
   set(doxygen_input_files)
   foreach(target ${ARGS_SOURCE_TARGETS})
+    if(ARGS_SKIP_NONEXISTENT_TARGETS AND NOT TARGET ${target})
+      continue()
+    endif()
     get_target_property(interface_include_dirs ${target} INTERFACE_INCLUDE_DIRECTORIES)
     string(REGEX REPLACE "\\$<[A-Z_]*:|>" "" interface_include_dirs "${interface_include_dirs}")
     list(APPEND include_dirs ${interface_include_dirs})
