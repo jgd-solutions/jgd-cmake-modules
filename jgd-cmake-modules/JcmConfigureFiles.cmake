@@ -267,7 +267,8 @@ Configures an config template of a vcpkg manifest file located in
 :cmake:variable:`JCM_PROJECT_CMAKE_DIR` to :cmake:variable:`PROJECT_SOURCE_DIR`, using `@`
 substitution, only. This function provides consistency of configuring vcpkg manifests across
 projects, and has no effect if the project is not the top-level project. Furthermore, seeing as this
-function merely configures a file, it doesn't prescribe vcpkg as the dependency manager.
+function merely configures a file, it doesn't prescribe vcpkg as the dependency manager, or the use
+of vcpkg in any capacity.
 
 Examples
 ########

@@ -23,7 +23,7 @@ jcm_install_config_file_package(
   CONFIGURE_PACKAGE_CONFIG_FILES
   TARGETS libsingle::libsingle)
 
-jcm_collect_subdirectory_targets(OUT_TARGETS targets)
+jcm_collect_subdirectory_targets(OUT_VAR targets)
 set(expected_targets "libsingle_libsingle;clang-format;clang-format-check")
 if(NOT targets STREQUAL expected_targets)
   message(FATAL_ERROR "jcm_collect_subdirectory_targets failed. \n"
