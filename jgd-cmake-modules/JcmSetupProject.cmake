@@ -100,11 +100,19 @@ This function will:
   - always enable testing so testing never fails, even if there are no tests, and includes CTest
     when *${JCM_PROJECT_PREFIX_NAME}_BUILD_TESTS* is set. The global property
     :cmake:variable:`CTEST_TARGETS_ADDED` is set to disable CTest from producing the often unused
-    CDash targets until the `CTest policy changes <https://gitlab.kitware.com/cmake/cmake/-/issues/21730>`_
+    CDash targets until the `CTest policy changes <https://gitlab.kitware.com/cmake/cmake/-/issues/21730>`_.
 
 
 Parameters
 ##########
+
+Options
+~~~~~~~
+
+:cmake:variable:`WITH_CTEST_TARGETS`
+  When set, skips setting the global property :cmake:variable:`CTEST_TARGETS_ADDED` such that CTest
+  creates targets for interoperability with CDash. These targets are commonly unused, so they're
+  disable by JCM by default. See `CTest policy changes <https://gitlab.kitware.com/cmake/cmake/-/issues/21730>`_
 
 One Value
 ~~~~~~~~~~
@@ -174,7 +182,8 @@ macro(JCM_SETUP_PROJECT)
 
   # == Function Arguments Project Configuration  ==
 
-  jcm_parse_arguments(ONE_VALUE_KEYWORDS "PREFIX_NAME" ARGUMENTS "${ARGN}")
+  jcm_parse_arguments(
+    OPTIONS "WITH_CTEST_TARGETS" ONE_VALUE_KEYWORDS "PREFIX_NAME" ARGUMENTS "${ARGN}")
 
   # project prefix name
   if(DEFINED ARGS_PREFIX_NAME)
@@ -313,7 +322,9 @@ macro(JCM_SETUP_PROJECT)
   endif()
 
   # enable testing by default so invoking ctest always succeeds
-  set_property(GLOBAL PROPERTY CTEST_TARGETS_ADDED 1)
+  if(NOT ARGS_WITH_CTEST_TARGETS)
+    set_property(GLOBAL PROPERTY CTEST_TARGETS_ADDED TRUE)
+  endif()
   enable_testing()
 
   # include CMake's CTest when testing
