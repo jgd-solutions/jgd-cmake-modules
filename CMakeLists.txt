@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.23)
+cmake_minimum_required(VERSION 3.24)
 project(
   jgd-cmake-modules
   VERSION 2.14.0
@@ -18,7 +18,6 @@ include(JcmInstallConfigFilePackage)
 include(JcmConfigureFiles)
 
 jcm_setup_project(PREFIX_NAME "JCM")
-jcm_configure_vcpkg_manifest_file()
 
 if(JCM_BUILD_TESTS)
   # Unnecessarily finding ClangFormat here to see what ClangFormat test projects will use
