@@ -32,6 +32,8 @@ endif()
 if(LIBSINGLE_BUILD_TESTS)
   list(APPEND expected_targets "libsingle-integration-test" "widget-unit-test")
 endif()
+list(SORT targets)
+list(SORT expected_targets)
 if(NOT targets STREQUAL expected_targets)
   message(FATAL_ERROR "jcm_collect_subdirectory_targets failed. \n"
     "Found targets:\n\t'${targets}'.\n\n Expected targets:\n\t'${expected_targets}'")
