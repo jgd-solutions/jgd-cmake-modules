@@ -37,3 +37,22 @@ jcm_install_config_file_package(
   INSTALL_LICENSES
   CONFIGURE_PACKAGE_CONFIG_FILES
   TARGETS ${libcomponents_targets})
+
+# Testing jcm_collect_subdirectory_targets:
+jcm_collect_subdirectory_targets(OUT_VAR targets)
+set(expected_targets "libcomponents_libcomponents-core")
+if(LIBCOMPONENTS_BUILD_EXTRA)
+  list(APPEND expected_targets "libcomponents_libcomponents-extra")
+endif()
+if(LIBCOMPONENTS_BUILD_TESTS AND LIBCOMPONENTS_BUILD_EXTRA)
+  list(APPEND expected_targets "components-test")
+endif()
+if(ClangFormat_FOUND AND PROJECT_IS_TOP_LEVEL)
+  list(APPEND expected_targets "clang-format" "clang-format-check")
+endif()
+list(SORT targets)
+list(SORT expected_targets)
+if(NOT targets STREQUAL expected_targets)
+  message(FATAL_ERROR "jcm_collect_subdirectory_targets failed. \n"
+    "Found targets:\n\t'${targets}'.\n\n Expected targets:\n\t'${expected_targets}'")
+endif()

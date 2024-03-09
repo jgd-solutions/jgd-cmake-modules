@@ -98,7 +98,9 @@ This function will:
 
   - enable interprocedural optimization in *Release* mode
   - always enable testing so testing never fails, even if there are no tests, and includes CTest
-    when *${JCM_PROJECT_PREFIX_NAME}_BUILD_TESTS* is set.
+    when *${JCM_PROJECT_PREFIX_NAME}_BUILD_TESTS* is set. The global property
+    :cmake:variable:`CTEST_TARGETS_ADDED` is set to disable CTest from producing the often unused
+    CDash targets until the `CTest policy changes <https://gitlab.kitware.com/cmake/cmake/-/issues/21730>`_
 
 
 Parameters
@@ -311,6 +313,7 @@ macro(JCM_SETUP_PROJECT)
   endif()
 
   # enable testing by default so invoking ctest always succeeds
+  set_property(GLOBAL PROPERTY CTEST_TARGETS_ADDED 1)
   enable_testing()
 
   # include CMake's CTest when testing
