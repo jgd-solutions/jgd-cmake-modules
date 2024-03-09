@@ -6,8 +6,10 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
+from datetime import datetime
+
 project = "@PROJECT_NAME@"
-copyright = "2022, Justen Di Ruscio"
+copyright = f"{datetime.now().year}, Justen Di Ruscio"
 author = "Justen Di Ruscio"
 version = "@PROJECT_VERSION_MAJOR@.@PROJECT_VERSION_MINOR@"  # feature version
 release = "@PROJECT_VERSION@"  # full version string

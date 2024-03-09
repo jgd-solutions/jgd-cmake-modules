@@ -270,7 +270,7 @@ Options
 
 :cmake:variable:`ALIASED_TARGET`
   A transformation that treats each input item as a target name or target alias, and transform it to
-  the target being aliased with :cmake:function:`jcm_aliased_target`. Excludes other transformation
+  the target being aliased with :cmake:command:`jcm_aliased_target`. Excludes other transformation
   options.
 
 One Value
