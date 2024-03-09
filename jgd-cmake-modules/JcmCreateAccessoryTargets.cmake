@@ -742,5 +742,6 @@ function(jcm_create_sphinx_target)
     -c ${sphinx_config_dir}
     -b ${ARGS_BUILDER}
     "${sphinx_source_dir}"
-    "${sphinx_build_dir}")
+    "${sphinx_build_dir}"
+    SOURCES "${sphinx_config_dir}/conf.py")
 endfunction()
