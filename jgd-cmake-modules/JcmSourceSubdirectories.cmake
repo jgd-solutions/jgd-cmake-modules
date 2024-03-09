@@ -245,13 +245,17 @@ jcm_collect_subdirectory_targets
       [EXCLUDE_DIRECTORY_REGEX <regex>]
       <[OUT_VAR <out-var>])
 
-Collects all targets created in and under the current directory. This function recursively descends
-into all subdirectories of the project named by the directory property
-:cmake:variable:`SUBDIRECTORIES` to collect all targets created in that directory, provided by the
-directory property :cmake:variable:`BUILDSYSTEM_TARGETS`. The directories can be optionally excluded
-from the search by providing a regular expression via :cmake:variable:`EXCLUDE_DIRECTORY_REGEX` that
-will be applied to the directory's absolute paths. All targets created directly in the directories
-matching the regex will be omitted.
+Collects all targets created in and under the current directory into a unique list.
+
+This function recursively descends into all subdirectories of the project named by the directory
+property :cmake:variable:`SUBDIRECTORIES` to collect all targets created in that directory, as
+indicated by the directory property :cmake:variable:`BUILDSYSTEM_TARGETS`. The directories can be
+optionally excluded from the search by providing a regular expression via
+:cmake:variable:`EXCLUDE_DIRECTORY_REGEX` that will be applied to the directory's absolute path.
+All targets created directly in the directories matching the regex will be omitted, while targets
+from their subdirectories will still be collected should they *not* match the regex.
+The result of this function will always be a unique list, even if the global property
+:cmake:variable:`ALLOW_DUPLICATE_CUSTOM_TARGETS` is set.
 
 Parameters
 ##########
@@ -311,5 +315,6 @@ function(jcm_collect_subdirectory_targets)
   endfunction()
 
   impl("${CMAKE_CURRENT_SOURCE_DIR}" targets)
+  list(REMOVE_DUPLICATES targets)  # in case of ALLOW_DUPLICATE_CUSTOM_TARGETS
   set(${ARGS_OUT_VAR} ${targets} PARENT_SCOPE)
 endfunction()
