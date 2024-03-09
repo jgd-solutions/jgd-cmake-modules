@@ -263,12 +263,18 @@ jcm_configure_vcpkg_manifest_file
 
     jcm_configure_vcpkg_manifest_file()
 
-Configures an config template of a vcpkg manifest file located in
+Configures a config template of a vcpkg manifest file located in
 :cmake:variable:`JCM_PROJECT_CMAKE_DIR` to :cmake:variable:`PROJECT_SOURCE_DIR`, using `@`
 substitution, only. This function provides consistency of configuring vcpkg manifests across
 projects, and has no effect if the project is not the top-level project. Furthermore, seeing as this
 function merely configures a file, it doesn't prescribe vcpkg as the dependency manager, or the use
 of vcpkg in any capacity.
+
+Using the vcpkg toolchain file to operate in manifest mode will invoke vcpkg with the project's
+manifest file *before* configuring the project. As such, adding dependencies to the template won't
+be found by :cmake:command:`find_package` because vcpkg will have already run by the time this
+function configures the manifest file, and will therefore not have installed them. Simply configure
+the project again, and the updated manifest file will be available for vcpkg.
 
 Examples
 ########
