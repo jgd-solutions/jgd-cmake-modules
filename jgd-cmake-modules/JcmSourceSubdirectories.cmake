@@ -243,17 +243,19 @@ jcm_collect_subdirectory_targets
 
     jcm_collect_subdirectory_targets(
       [EXCLUDE_DIRECTORY_REGEX <regex>]
+      [START_DIR <directory>]
       <[OUT_VAR <out-var>])
 
-Collects all targets created in and under the current directory into a unique list.
+Collects all targets created in and under the current directory, or that named in
+:cmake:variable:`START_DIR`, into a unique list.
 
-This function recursively descends into all subdirectories of the project named by the directory
-property :cmake:variable:`SUBDIRECTORIES` to collect all targets created in that directory, as
-indicated by the directory property :cmake:variable:`BUILDSYSTEM_TARGETS`. The directories can be
-optionally excluded from the search by providing a regular expression via
-:cmake:variable:`EXCLUDE_DIRECTORY_REGEX` that will be applied to the directory's absolute path.
-All targets created directly in the directories matching the regex will be omitted, while targets
-from their subdirectories will still be collected should they *not* match the regex.
+This function recursively traverses directories, descending into all subdirectories provided by the
+directory property :cmake:variable:`SUBDIRECTORIES` to collect the targets created in that
+directory, as indicated by the directory property :cmake:variable:`BUILDSYSTEM_TARGETS`. The
+directories can be optionally excluded from the search by providing a regular expression via
+:cmake:variable:`EXCLUDE_DIRECTORY_REGEX` that will be applied to the directory's *normalized,
+absolute path*. All targets created directly in the directories matching the regex will be omitted,
+while targets from their subdirectories will still be collected should they *not* match the regex.
 The result of this function will always be a unique list, even if the global property
 :cmake:variable:`ALLOW_DUPLICATE_CUSTOM_TARGETS` is set.
 
@@ -267,6 +269,12 @@ One Value
 :cmake:variable:`OUT_VAR`
   The named variable will be set to the list of resultant targets
 
+:cmake:variable:`START_DIR`
+  An optional path to an existent directory that will be used as the starting directory in the
+  traversal. A relative path will first be converted to its normalized, absolute form with respect to
+  :cmake:variable:`CMAKE_CURRENT_SOURCE_DIR`. Should this be omitted, traversal will begin at
+  :cmake:`${CMAKE_CURRENT_SOURCE_DIR}`.
+
 :cmake:variable:`EXCLUDE_DIRECTORY_REGEX`
   An optional regular expression that will be used to filter directories from the search.
 
@@ -276,45 +284,64 @@ Examples
 .. code-block:: cmake
 
   jcm_collect_subdirectory_targets(OUT_VAR all_project_targets)
-  jcm_separate_list(
-    REGEX "^${PROJECT_NAME}"
-    INPUT "${all_project_targets}" 
-    OUT_MATCHED named_project_targets)
+
+  jcm_transform_list(ALIASED_TARGET
+    INPUT "${all_project_targets}"
+    OUT_VAR all_project_targets)
 
 .. code-block:: cmake
 
   jcm_collect_subdirectory_targets(
-    EXCLUDE_DIRECTORY_REGEX "${CMAKE_CURRENT_SOURCE_DIR}/build*"
+    EXCLUDE_DIRECTORY_REGEX "build.*"
     OUT_VAR all_project_targets)
+
+.. code-block:: cmake
+
+  jcm_collect_subdirectory_targets(
+    START_DIR "../code-gen"
+    EXCLUDE_REGEX "${PROJECT_SOURCE_DIR}/.*code-gen/.*database"
+    OUT_VAR code_gen_targets)
 
 #]=======================================================================]
 function(jcm_collect_subdirectory_targets)
   jcm_parse_arguments(
-    ONE_VALUE_KEYWORDS "OUT_VAR" "EXCLUDE_DIRECTORY_REGEX"
+    ONE_VALUE_KEYWORDS "OUT_VAR" "EXCLUDE_DIRECTORY_REGEX" "START_DIR"
     REQUIRES_ALL "OUT_VAR"
     ARGUMENTS "${ARGN}")
 
+  if(NOT EXISTS "${ARGS_START_DIR}")
+    message(FATAL_ERROR
+      "The 'START_DIR' provided to ${CMAKE_CURRENT_FUNCTION} does not exist: '${ARGS_START_DIR}'")
+  endif()
+  if(NOT DEFINED ARGS_START_DIR)
+    set(ARGS_START_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
+  elseif(NOT IS_DIRECTORY "${ARGS_START_DIR}")
+    message(FATAL_ERROR
+      "The 'START_DIR' provided to ${CMAKE_CURRENT_FUNCTION} does not refer to a directory: "
+      "'${ARGS_START_DIR}'")
+  endif()
+
   function(impl directory out_targets)
     set(targets)
+    cmake_path(ABSOLUTE_PATH directory NORMALIZE BASE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
 
-    message(NOTICE "start of impl on ${directory}")
-    get_property(subdirs DIRECTORY ${directory} PROPERTY SUBDIRECTORIES)
-    if(ARGS_EXCLUDE_DIRECTORY_REGEX)
-      jcm_transform_list(REGEX "${ARGS_EXCLUDE_REGEX}" INPUT "${subdirs}" OUT_MISMATCHED subdirs)
+    if(NOT DEFINED ARGS_EXCLUDE_DIRECTORY_REGEX OR
+       NOT "${directory}" MATCHES "${ARGS_EXCLUDE_DIRECTORY_REGEX}")
+      get_property(current_targets DIRECTORY ${directory} PROPERTY BUILDSYSTEM_TARGETS)
+      list(APPEND targets ${current_targets})
     endif()
 
+    # SUBDIRECTORIES property is read-only & populated by CMake with absolute, native paths
+    get_property(subdirs DIRECTORY ${directory} PROPERTY SUBDIRECTORIES)
     foreach(subdir IN LISTS subdirs)
       impl(${subdir} subdir_targets)
-      # message(NOTICE "got targets ${directory}: ${subdir_targets}")
       list(APPEND targets ${subdir_targets})
     endforeach()
 
-    get_property(current_targets DIRECTORY ${directory} PROPERTY BUILDSYSTEM_TARGETS)
-    list(APPEND targets ${current_targets})
     set(${out_targets} ${targets} PARENT_SCOPE)
   endfunction()
 
-  impl("${CMAKE_CURRENT_SOURCE_DIR}" targets)
+  impl("${ARGS_START_DIR}" targets)
   list(REMOVE_DUPLICATES targets)  # in case of ALLOW_DUPLICATE_CUSTOM_TARGETS
   set(${ARGS_OUT_VAR} ${targets} PARENT_SCOPE)
 endfunction()
