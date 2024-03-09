@@ -32,11 +32,32 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 html_theme = "sphinx_rtd_theme"
 html_use_index = True
 html_domain_indices = True
+html_context = {
+    "display_github": True,  # Integrate GitHub
+    "github_user": "jgd-solutions",
+    "github_repo": "jgd-cmake-modules",
+    "github_version": "main",
+    "conf_py_path": "/docs/",
+}
 
 rst_prolog = f"""
 .. role:: cmake(code)
    :language: cmake
 """
+
+from docutils import nodes
+from docutils.parsers.rst import roles
+
+
+def github_link_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
+    user = html_context["github_user"]
+    repo = html_context["github_repo"]
+    branch = html_context["github_version"]
+    url = f"https://github.com/{user}/{repo}/blob/{branch}/@PROJECT_NAME@/{text}.cmake"
+    node = nodes.reference("", f"Module Source on GitHub", refuri=url, **options)
+    return [node], []
+
+roles.register_local_role("github", github_link_role)
 
 canonical_proj_url = r"https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p1204r0.html#:~:text=The%20canonical%20structure%20is%20primarily,specific%20and%20well%2Ddefined%20function."
 rst_epilog = f"""
