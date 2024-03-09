@@ -23,7 +23,7 @@ jcm_separate_list
       INPUT <item>...
       <[OUT_MATCHED <out-var>]
        [OUT_MISMATCHED <out-var>] >
-      <REGEX <regex> | IS_DIRECTORY | IS_SYMLINK | IS_ABSOLUTE | EVAL_TRUE>
+      <REGEX <regex> | IS_DIRECTORY | IS_SYMLINK | IS_ABSOLUTE | IS_TARGET | EVAL_TRUE>
       [TRANSFORM <FILENAME|ALIASED_TARGET>])
 
 Separates the elements of list :cmake:variable:`INPUT` into two groups:
@@ -237,7 +237,7 @@ jcm_transform_list
   .. code-block:: cmake
 
     jcm_transform_list(
-      <ABSOLUTE_PATH [BASE <path>] | NORMALIZE_PATH | PARENT_PATH | FILENAME>
+      <ABSOLUTE_PATH [BASE <path>] | NORMALIZE_PATH | PARENT_PATH | FILENAME | ALIASED_TARGET>
       INPUT <item>...
       OUT_VAR <out-var>)
 
