@@ -18,6 +18,7 @@ include(JcmInstallConfigFilePackage)
 include(JcmConfigureFiles)
 
 jcm_setup_project(PREFIX_NAME "JCM")
+jcm_configure_vcpkg_manifest_file()
 
 if(JCM_BUILD_TESTS)
   # Unnecessarily finding ClangFormat here to see what ClangFormat test projects will use
