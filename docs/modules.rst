@@ -23,3 +23,4 @@ Modules
 .. cmake-module:: ../jgd-cmake-modules/JcmListTransformations.cmake
 .. cmake-module:: ../jgd-cmake-modules/JcmExpandDirectories.cmake
 .. cmake-module:: ../jgd-cmake-modules/JcmSymlinks.cmake
+.. cmake-module:: ../jgd-cmake-modules/JcmArbitraryScript.cmake
