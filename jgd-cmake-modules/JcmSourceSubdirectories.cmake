@@ -5,6 +5,8 @@ include_guard()
 JcmSourceSubdirectories
 -----------------------
 
+:github:`JcmSourceSubdirectories`
+
 #]=======================================================================]
 
 include(JcmParseArguments)
@@ -309,12 +311,16 @@ function(jcm_collect_subdirectory_targets)
     REQUIRES_ALL "OUT_VAR"
     ARGUMENTS "${ARGN}")
 
+  if(NOT DEFINED ARGS_START_DIR)
+    set(ARGS_START_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
+  endif()
+
+  # EXISTS and IS_DIRECTORY only valid for full paths. Must first expand START_DIR for argument
+  # validation
+  cmake_path(ABSOLUTE_PATH ARGS_START_DIR NORMALIZE BASE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
   if(NOT EXISTS "${ARGS_START_DIR}")
     message(FATAL_ERROR
       "The 'START_DIR' provided to ${CMAKE_CURRENT_FUNCTION} does not exist: '${ARGS_START_DIR}'")
-  endif()
-  if(NOT DEFINED ARGS_START_DIR)
-    set(ARGS_START_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
   elseif(NOT IS_DIRECTORY "${ARGS_START_DIR}")
     message(FATAL_ERROR
       "The 'START_DIR' provided to ${CMAKE_CURRENT_FUNCTION} does not refer to a directory: "
@@ -327,12 +333,12 @@ function(jcm_collect_subdirectory_targets)
 
     if(NOT DEFINED ARGS_EXCLUDE_DIRECTORY_REGEX OR
        NOT "${directory}" MATCHES "${ARGS_EXCLUDE_DIRECTORY_REGEX}")
-      get_property(current_targets DIRECTORY ${directory} PROPERTY BUILDSYSTEM_TARGETS)
+      get_property(current_targets DIRECTORY "${directory}" PROPERTY BUILDSYSTEM_TARGETS)
       list(APPEND targets ${current_targets})
     endif()
 
     # SUBDIRECTORIES property is read-only & populated by CMake with absolute, native paths
-    get_property(subdirs DIRECTORY ${directory} PROPERTY SUBDIRECTORIES)
+    get_property(subdirs DIRECTORY "${directory}" PROPERTY SUBDIRECTORIES)
     foreach(subdir IN LISTS subdirs)
       impl(${subdir} subdir_targets)
       list(APPEND targets ${subdir_targets})

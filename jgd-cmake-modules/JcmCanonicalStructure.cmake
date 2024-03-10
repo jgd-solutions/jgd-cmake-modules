@@ -14,6 +14,8 @@ include_guard()
 JcmCanonicalStructure
 ---------------------
 
+:github:`JcmCanonicalStructure`
+
 Specifications in `Canonical Project Structure`_, implemented in CMake. This modules concerns itself
 with source subdirectories, include directories, the 'lib' prefix, and file extensions.  Actual file
 naming is implemented in *JcmFileNaming*, which uses the file extensions defined here.

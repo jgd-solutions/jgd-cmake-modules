@@ -5,6 +5,8 @@ include_guard()
 JcmAllModules
 -------------
 
+:github:`JcmAllModules`
+
 When included, includes all of JCM's CMake modules, excluding any `Find Modules
 <https://cmake.org/cmake/help/latest/manual/cmake-developer.7.html#find-modules>`_.
 

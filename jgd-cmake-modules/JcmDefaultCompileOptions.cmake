@@ -5,6 +5,8 @@ include_guard()
 JcmDefaultCompileOptions
 -------------------------
 
+:github:`JcmDefaultCompileOptions`
+
 Defines variables with default compile options for common compilers. These are used to initialize
 the `COMPILE_OPTIONS` properties when library or executable targets are created with JCM functions.
 Of course, like any of the defaults introduced by JCM, these can easily be overridden on the target

@@ -1,6 +1,9 @@
 #[=======================================================================[.rst:
+
 FindSphinx
--------------------
+----------
+
+:github:`find-modules/FindSphinx`
 
 A CMake `find module
 <https://cmake.org/cmake/help/latest/manual/cmake-developer.7.html#find-modules>`_ used to find the

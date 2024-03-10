@@ -5,6 +5,8 @@ include_guard()
 JcmConfigureFiles
 -----------------
 
+:github:`JcmConfigureFiles`
+
 Use-case specific configure functions, like CMake's :cmake:command:`configure_file`
 (`link <https://cmake.org/cmake/help/latest/command/configure_file.html>`_), but with features for
 their respective use-case.
@@ -150,13 +152,13 @@ jcm_configure_file
 
 Configures the file specified by :cmake:variable:`IN_FILE`, just like CMake's
 :cmake:command:`configure_file`, but follows JCM's input-file naming conventions, has richer error
-checks and messages, and uses *@* uses substitution only.
+checks and messages, uses *@* uses substitution only.
 
 The output file will be computed by removing the file extension
 :cmake:variable:`JCM_IN_FILE_EXTENSION` from :cmake:variable:`IN_FILE` and configuring the file to
 :cmake:variable:`DEST_DIR` (default :cmake:variable:`CMAKE_CURRENT_BINARY_DIR`), replacing `@`
-variables, only. Like :cmake:command:`configure_file`, relative input paths are treated with
-respect to :cmake:variable:`CMAKE_CURRENT_SOURCE_DIR`.
+variables, only. Like :cmake:command:`configure_file`, relative input paths are treated with respect
+to :cmake:variable:`CMAKE_CURRENT_SOURCE_DIR`.
 
 Use this function when configuring various files for which there is not a specific *configure*
 function for, such as headers and sources.
@@ -194,12 +196,19 @@ Examples
     DEST_DIR "gen"           # WRT CMAKE_CURRENT_BINARY_DIR
     OUT_FILE_VAR generated_file)
 
+.. code-block:: cmake
+
+  jcm_configure_file(
+    IN_FILE my_config.hpp.in # WRT CMAKE_CURRENT_SOURCE_DIR
+    DEST_DIR "gen"           # WRT CMAKE_CURRENT_BINARY_DIR
+    OUT_FILE_VAR generated_file)
+
 --------------------------------------------------------------------------
 
 #]=======================================================================]
 function(jcm_configure_file)
   jcm_parse_arguments(
-    ONE_VALUE_KEYWORDS "IN_FILE" "OUT_FILE_VAR" "DEST_DIR"
+    ONE_VALUE_KEYWORDS "IN_FILE" "DEST_DIR" "OUT_FILE_VAR"
     REQUIRES_ALL "IN_FILE"
     ARGUMENTS "${ARGN}")
 
@@ -246,7 +255,7 @@ function(jcm_configure_file)
   string(REGEX REPLACE "${JCM_IN_FILE_REGEX}" "" out_file_name "${in_file_name}")
   configure_file("${ARGS_IN_FILE}" "${out_file_name}" @ONLY)
 
-  # Out Var
+  # Out Vars
   if(DEFINED ARGS_OUT_FILE_VAR)
     set(${ARGS_OUT_FILE_VAR} "${ARGS_DEST_DIR}/${out_file_name}" PARENT_SCOPE)
   endif()

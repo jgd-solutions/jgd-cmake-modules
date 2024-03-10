@@ -5,6 +5,8 @@ include_guard()
 JcmHeaderFileSet
 ----------------
 
+:github:`JcmHeaderFileSet`
+
 #]=======================================================================]
 
 include(JcmParseArguments)

@@ -5,6 +5,8 @@ include_guard()
 JcmSetupProject
 ----------------
 
+:github:`JcmSetupProject`
+
 Offers utilities to properly setup a CMake project for consumption as both a sub-project and a
 binary package. Creates target component, *COMPONENT*, and defines macro
 :cmake:command:`jcm_setup_project` used to setup a CMake project.

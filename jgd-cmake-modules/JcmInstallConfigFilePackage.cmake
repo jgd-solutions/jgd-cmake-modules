@@ -5,6 +5,8 @@ include_guard()
 JcmInstallConfigFilePackage
 ---------------------------
 
+:github:`JcmInstallConfigFilePackage`
+
 #]=======================================================================]
 
 include(JcmParseArguments)

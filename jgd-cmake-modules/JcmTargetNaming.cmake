@@ -5,6 +5,8 @@ include_guard()
 JcmTargetNaming
 ---------------
 
+:github:`JcmTargetNaming`
+
 #]=======================================================================]
 
 include(JcmParseArguments)

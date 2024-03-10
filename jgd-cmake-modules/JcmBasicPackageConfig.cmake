@@ -3,6 +3,8 @@
 JcmBasicPackageConfig
 ---------------------
 
+:github:`JcmBasicPackageConfig`
+
 Provides macros to create `Config-file Packages
 <https://cmake.org/cmake/help/latest/manual/cmake-packages.7.html#config-file-packages>`_.  Offers
 the :cmake:command:`jcm_basic_package_config` macro for top-level config-files, and the

@@ -5,6 +5,8 @@ include_guard()
 JcmAddOption
 ------------
 
+:github:`JcmAddOption`
+
 #]=======================================================================]
 
 include(JcmParseArguments)

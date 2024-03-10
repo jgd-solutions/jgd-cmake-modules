@@ -5,6 +5,8 @@ include_guard()
 JcmExpandDirectories
 --------------------
 
+:github:`JcmExpandDirectories`
+
 #]=======================================================================]
 
 include(JcmParseArguments)
@@ -21,8 +23,7 @@ jcm_expand_directories
     jcm_expand_directories(
       OUT_VAR <out-var>
       GLOB <glob>
-      PATHS <path>...
-    )
+      PATHS <path>...)
 
 
 For each path in :cmake:variable:`PATHS`, if the path is a directory, the enclosed files matching

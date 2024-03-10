@@ -5,6 +5,8 @@ include_guard()
 JcmAddTestExecutable
 --------------------
 
+:github:`JcmAddTestExecutable`
+
 #]=======================================================================]
 
 include(JcmParseArguments)

@@ -5,6 +5,8 @@ include_guard()
 JcmParseArguments
 -----------------
 
+:github:`JcmParseArguments`
+
 #]=======================================================================]
 
 include(CMakeParseArguments)

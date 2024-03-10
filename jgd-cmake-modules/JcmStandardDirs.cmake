@@ -3,6 +3,8 @@
 JcmStandardDirs
 ---------------
 
+:github:`JcmStandardDirs`
+
 Provies variables defining standard project directories for the source, build, and install trees.
 All installation paths are versioned such that multiple versions of the same project can be
 installed in the same location.

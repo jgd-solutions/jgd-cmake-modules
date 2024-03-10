@@ -5,6 +5,8 @@ include_guard()
 JcmSymlinks
 -----------
 
+:github:`JcmSymlinks`
+
 Provides functions for working with symbolic links, including those to inspect their availability
 and to trace a symbolic link chain.
 

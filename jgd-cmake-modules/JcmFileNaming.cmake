@@ -3,6 +3,8 @@
 JcmFileNaming
 -------------
 
+:github:`JcmFileNaming`
+
 Provides variables and functions to help enforce file naming conventions.
 
 For each of the enabled languages at the point of inclusion, as per the global `ENABLED_LANGUAGES`

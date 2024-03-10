@@ -5,6 +5,8 @@ include_guard()
 JcmAddLibrary
 -------------
 
+:github:`JcmAddLibrary`
+
 #]=======================================================================]
 
 include(JcmParseArguments)
