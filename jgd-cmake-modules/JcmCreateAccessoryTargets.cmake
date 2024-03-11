@@ -111,8 +111,8 @@ function(jcm_create_message_target)
     unset(all_arg)
   endif()
 
-  jcm_form_arbitrary_script_command(OUT_VAR message_command CODE "message(${ARGS_LEVEL}" "${ARGS_MESSAGES})")
-  add_custom_target(${ARGS_NAME} ${all_arg} COMMAND "${message_command}")
+  jcm_form_arbitrary_script_command(OUT_VAR message_command CODE "message(${ARGS_LEVEL} " "\"${ARGS_MESSAGES}\")")
+  add_custom_target(${ARGS_NAME} ${all_arg} COMMAND ${message_command})
 endfunction()
 
 # Private function to build targets that emit error messages instead of their intended purpose
