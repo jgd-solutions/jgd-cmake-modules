@@ -37,36 +37,50 @@ jcm_install_config_file_package
        [CMAKE_MODULES <path>...]
        [INSTALL_LICENSES] >)
 
-Provides ability to consistently and reliably install a project as a config-file package in one
-command.  All of the named :cmake:variable:`TARGETS`, :cmake:variable:`CMAKE_MODULES`, and licenses
-will be installed to paths provided by `GNUInstallDirs` with appropriate package config-files,
-version file, and targets files. Package config-files will be installed from
-:cmake:variable:`JCM_PROJECT_CMAKE_DIR` or :cmake:variable:`JCM_INSTALL_CMAKE_DESTINATION`, if they
-were configured.
-
+Provides ability to consistently and reliably create a project's config-file package install rules
+in one command.  All of the named :cmake:variable:`TARGETS`, :cmake:variable:`CMAKE_MODULES`, and
+licenses will be installed to paths provided by `GNUInstallDirs` with appropriate package
+config-files, version file, and targets files. Package config-files will be installed from
+:cmake:variable:`JCM_PROJECT_CMAKE_DIR` or :cmake:variable:`JCM_INSTALL_CMAKE_DESTINATION` if they
+were configured with some derivative of :cmake:command:`configure_file`.
 
 Each target will be installed with an associated targets file. The target will be exported within
 the namespace :cmake:`${PROJECT_NAME}::`, which includes the key "::" characters and follows common
 conventions. Executables and shared libraries will be installed under the install component
 :cmake:`${PROJECT_NAME}_runtime`, while static libraries and headers in the target's *INTERFACE* and
 *PUBLIC* header sets will be installed under the :cmake:`${PROJECT_NAME}_devel` install component.
-This supports separate runtime and development packages often distributed. Alias targets are
-supported (libsample::libsample)
+This supports separate runtime and development packages often distributed by package managers. Alias
+targets are supported (`libsample::libsample`).
 
 :cmake:variable:`CMAKE_MODULES` will be installed under the :cmake:`${PROJECT_NAME}_devel` install
-component. If any of the paths in this list name a directory, the directory will be expanded to all
-enclosed files ending in `.cmake`. Relative paths are converted to absolute paths with respect to
-:cmake:variable:`CMAKE_CURRENT_SOURCE_DIR`.
+component. If any of the paths in this list name a directory, the directory will be expanded to a
+list of  all enclosed files ending in `.cmake`. Relative paths are converted to absolute paths with
+respect to :cmake:variable:`CMAKE_CURRENT_SOURCE_DIR`.
 
 Licenses are installed under :cmake:variable:`JCM_INSTALL_DOC_DIR`. Both a root `LICENSE.*` file and
 licenses within :cmake:variable:`JCM_PROJECT_LICENSES_DIR` will be installed. Symlinks are followed
 until a file is reached, ensuring to install the license file with the original name of the symlink.
 Intermediate symlinks are not installed.
 
-By default, installation is only performed when the project is top-level. However, the install
-commands of this function can be enabled/disabled using the option
-:cmake:variable:`<JCM_PROJECT_PREFIX_NAME>_INSTALL`, also created by this function, allowing users
-to override this behaviour.
+The following project options are created:
+
+  <JCM_PROJECT_PREFIX_NAME>_ENABLE_INSTALL
+    Boolean controlling whether the install rules produced by this function are generated or not.
+    The default value is that of :cmake:variable:`PROJECT_IS_TOP_LEVEL`, meaning installation rules 
+    are generated when the project is top-level. Whether or not the project is top-level, use this
+    option to override this behaviour, such as generating install rules when the project is not
+    top-level.
+
+  <JCM_PROJECT_PREFIX_NAME>_INSTALL_VERSIONED
+    Boolean controlling whether the install rules produced by this function will install to versioned paths
+    or not. This does not affect the config-file package's version-file which is always installed.
+    The default value is :cmake:`ON`, meaning installation paths will include
+    the project's version (supported by CMake's :cmake:`find_package`). This allows installing 
+    multiple versions of the same project in the same installation root, and 
+    prevents overwriting existing installations of the same project. When turned :cmake:`OFF`, the 
+    :cmake:`UNVERSIONED` variants of the variables dictating install destinations from
+    `JcmStandardDirs`_ will be used in place of those mentioned above. For example:
+    `JCM_INSTALL_DOC_DIR` -> `JCM_UNVERSIONED_INSTALL_DOC_DIR`.
 
 Parameters
 ##########
@@ -109,7 +123,7 @@ Examples
 #]=======================================================================]
 function(jcm_install_config_file_package)
   jcm_parse_arguments(
-    OPTIONS "CONFIGURE_PACKAGE_CONFIG_FILES" "INSTALL_LICENSES"
+    OPTIONS "CONFIGURE_PACKAGE_CONFIG_FILES" "INSTALL_LICENSES" "INSTALL_VERSIONED_DEFAULT_OFF"
     MULTI_VALUE_KEYWORDS "TARGETS;CMAKE_MODULES"
     REQUIRES_ANY "TARGETS;CMAKE_MODULES;INSTALL_LICENSES"
     ARGUMENTS "${ARGN}")
@@ -131,14 +145,29 @@ function(jcm_install_config_file_package)
     endif()
   endforeach()
 
-  # Install Option
+  # Install Options
   jcm_add_option(
-    NAME ${JCM_PROJECT_PREFIX_NAME}_CONFIGURE_INSTALL
-    DESCRIPTION  "Enables install commands of project ${PROJECT_NAME}"
+    NAME ${JCM_PROJECT_PREFIX_NAME}_ENABLE_INSTALL
+    DESCRIPTION "Enables configuring install rules for project ${PROJECT_NAME}"
     TYPE BOOL
     DEFAULT ${PROJECT_IS_TOP_LEVEL})
   if(NOT ${JCM_PROJECT_PREFIX_NAME}_CONFIGURE_INSTALL)
     return()
+  endif()
+
+  jcm_add_option(
+    NAME ${JCM_PROJECT_PREFIX_NAME}_INSTALL_VERSIONED
+    DESCRIPTION "Controls whether install destinations will use versioned paths"
+    TYPE BOOL
+    DEFAULT ON)
+  if(${${JCM_PROJECT_PREFIX_NAME}_INSTALL_VERSIONED})
+    set(install_cmake_dir "${JCM_INSTALL_CMAKE_DESTINATION}")
+    set(install_include_dir "${JCM_INSTALL_INCLUDE_DIR}")
+    set(install_doc_dir "${JCM_INSTALL_DOC_DIR}")
+  else()
+    set(install_cmake_dir "${JCM_UNVERSIONED_INSTALL_CMAKE_DESTINATION}")
+    set(install_include_dir "${JCM_UNVERSIONED_INSTALL_INCLUDE_DIR}")
+    set(install_doc_dir "${JCM_UNVERSIONED_INSTALL_DOC_DIR}")
   endif()
 
   set(install_cmake_files) # list of cmake files to install at end
@@ -236,7 +265,7 @@ function(jcm_install_config_file_package)
   # Install all CMake files
   install(
     FILES ${install_cmake_files}
-    DESTINATION "${JCM_INSTALL_CMAKE_DESTINATION}"
+    DESTINATION "${install_cmake_dir}"
     COMPONENT ${PROJECT_NAME}_devel)
 
   # == Install targets via export sets ==
@@ -257,7 +286,7 @@ function(jcm_install_config_file_package)
     set(file_set_args)
     if(interface_header_sets)
       foreach(interface_header_set ${interface_header_sets})
-        set(file_set_args ${file_set_args} FILE_SET ${interface_header_set} DESTINATION "${JCM_INSTALL_INCLUDE_DIR}")
+        set(file_set_args ${file_set_args} FILE_SET ${interface_header_set} DESTINATION "${install_include_dir}")
       endforeach()
     endif()
 
@@ -273,12 +302,12 @@ function(jcm_install_config_file_package)
       COMPONENT ${PROJECT_NAME}_devel
       ${file_set_args}
       COMPONENT ${PROJECT_NAME}_devel
-      INCLUDES DESTINATION "${JCM_INSTALL_INCLUDE_DIR}")
+      INCLUDES DESTINATION "${install_include_dir}")
 
     install(
       EXPORT ${export_set_name}
       NAMESPACE ${PROJECT_NAME}::
-      DESTINATION "${JCM_INSTALL_CMAKE_DESTINATION}"
+      DESTINATION "${install_cmake_dir}"
       COMPONENT ${PROJECT_NAME}_devel)
   endforeach()
 
@@ -298,7 +327,7 @@ function(jcm_install_config_file_package)
       if(target_file)
         install(
           FILES "${target_file}"
-          DESTINATION "${JCM_INSTALL_DOC_DIR}/${dest_suffix}"
+          DESTINATION "${install_doc_dir}/${dest_suffix}"
           RENAME "${original_file_name}")
       else()
         # only can be non-existent is if it was linked to, since glob was used

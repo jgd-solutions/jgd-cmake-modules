@@ -5,7 +5,7 @@ JcmStandardDirs
 
 :github:`JcmStandardDirs`
 
-Provies variables defining standard project directories for the source, build, and install trees.
+Provides variables defining standard project directories for the source, build, and install trees.
 All installation paths are versioned such that multiple versions of the same project can be
 installed in the same location.
 The following variables are set:
@@ -32,6 +32,13 @@ The following variables are set:
   of :cmake:variable:`CMAKE_INSTALL_DOCDIR` from *GNUInstallDirs*.
 - :cmake:variable:`JCM_INSTALL_DOC_DIR` Root directory for installed docs and related files. Refers
   to a versioned form of :cmake:variable:`CMAKE_INSTALL_DOCDIR` from *GNUInstallDirs*.
+- :cmake:variable:`JCM_UNVERSIONED_INSTALL_CMAKE_DESTINATION` Unversioned variant of
+  :cmake:variable:`JCM_INSTALL_CMAKE_DESTINATION`.
+- :cmake:variable:`JCM_UNVERSIONED_INSTALL_INCLUDE_DIR` Unversioned variant of
+  :cmake:variable:`JCM_INSTALL_INCLUDE_DIR` with the same semantics.
+- :cmake:variable:`JCM_UNVERSIONED_INSTALL_DOC_DIR` Unversioned variant of
+  :cmake:variable:`JCM_UNVERSIONED_INSTALL_DOC_DIR`. Contains same value as
+  :cmake:variable:`CMAKE_INSTALL_DOCDIR` from *GNUInstallDirs*.
 
 #]=======================================================================]
 
@@ -44,7 +51,7 @@ set(JCM_PROJECT_TESTS_DIR "${PROJECT_SOURCE_DIR}/tests")
 set(JCM_PROJECT_DOCS_DIR "${PROJECT_SOURCE_DIR}/docs")
 set(JCM_PROJECT_LICENSES_DIR "${PROJECT_SOURCE_DIR}/licenses")
 
-# Configure Destination Directories
+# Configure File Destination Directories
 set(JCM_CMAKE_DESTINATION "${PROJECT_BINARY_DIR}/cmake")
 set(JCM_HEADER_DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
 
@@ -57,10 +64,13 @@ endif()
 
 # location to install cmake modules
 set(JCM_INSTALL_CMAKE_DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/cmake/${_jcm_name_version}")
+set(JCM_UNVERSIONED_INSTALL_CMAKE_DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/cmake/${PROJECT_NAME}")
 
 # interface include directory for exported targets in installation
 set(JCM_INSTALL_INCLUDE_DIR "${CMAKE_INSTALL_INCLUDEDIR}/${_jcm_name_version}")
+set(JCM_UNVERSIONED_INSTALL_INCLUDE_DIR "${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}")
 
 set(JCM_INSTALL_DOC_DIR "${CMAKE_INSTALL_DATAROOTDIR}/doc/${_jcm_name_version}")
+set(JCM_UNVERSIONED_INSTALL_DOC_DIR "${CMAKE_INSTALL_DATAROOTDIR}/doc/${PROJECT_NAME}")
 
 unset(_jcm_name_version)
