@@ -179,7 +179,7 @@ function(jcm_form_arbitrary_script_command)
   # avoid interpretation by CMake generation, or the build-system itself
   string(REPLACE \n \\n code "${code}")
   string(REPLACE \r \\r code "${code}")
-  string(REPLACE \" \\\" code "${code}")
+  string(REPLACE \" \\\\\" code "${code}") # double up
   string(REPLACE " " "\ " code "${code}")
   string(REPLACE \t \\t code "${code}")
 
