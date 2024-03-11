@@ -246,7 +246,7 @@ jcm_collect_subdirectory_targets
     jcm_collect_subdirectory_targets(
       [EXCLUDE_DIRECTORY_REGEX <regex>]
       [START_DIR <directory>]
-      <[OUT_VAR <out-var>])
+      <OUT_VAR <out-var> >)
 
 Collects all targets created in and under the current directory, or that named in
 :cmake:variable:`START_DIR`, into a unique list.
