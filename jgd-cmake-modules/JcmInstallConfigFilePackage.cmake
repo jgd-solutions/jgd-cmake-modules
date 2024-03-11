@@ -151,7 +151,7 @@ function(jcm_install_config_file_package)
     DESCRIPTION "Enables configuring install rules for project ${PROJECT_NAME}"
     TYPE BOOL
     DEFAULT ${PROJECT_IS_TOP_LEVEL})
-  if(NOT ${JCM_PROJECT_PREFIX_NAME}_CONFIGURE_INSTALL)
+  if(NOT ${JCM_PROJECT_PREFIX_NAME}_ENABLE_INSTALL)
     return()
   endif()
 
