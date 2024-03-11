@@ -20,5 +20,6 @@ jcm_create_clang_format_targets(
 jcm_create_message_target(
   ALL
   NAME single-exec_message-target
-  LEVEL TRACE
-  MESSAGES "Always ensure " "message " "target works")
+  LEVEL STATUS 
+  MESSAGES "Always ensure " "message \\( \n \t \" \\)" "target works")
+
