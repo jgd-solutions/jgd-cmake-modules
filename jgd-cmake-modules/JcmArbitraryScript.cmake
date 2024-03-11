@@ -55,7 +55,6 @@ if(CMAKE_SCRIPT_MODE_FILE STREQUAL CMAKE_CURRENT_LIST_FILE)
 
   math(EXPR last_arg_idx "${CMAKE_ARGC} - 1")
   math(EXPR separated_arg_count "${last_arg_idx} - ${separator_arg_idx}")
-  set(code "${CMAKE_ARGV${last_arg_idx}}")
   if(separator_arg_idx STREQUAL last_arg_idx)
     message(FATAL_ERROR "${base_invalid_arg_message}" "No arguments follow the separator.")
   elseif(NOT separated_arg_count STREQUAL "1")
@@ -65,7 +64,7 @@ if(CMAKE_SCRIPT_MODE_FILE STREQUAL CMAKE_CURRENT_LIST_FILE)
 
   # Evaluate code
   # interpret all escape sequences as their control characters
-  string(REPLACE \\n \n code "${code}")
+  string(REPLACE \\n \n code "${CMAKE_ARGV${last_arg_idx}}")
   string(REPLACE \\r \r code "${code}")
   string(REPLACE \\t \t code "${code}")
   string(REPLACE \\' ' code "${code}")
@@ -187,7 +186,7 @@ function(jcm_form_arbitrary_script_command)
 
   if(CMAKE_HOST_SYSTEM_NAME MATCHES "^Windows" AND NOT ARGS_WITHOUT_WINDOWS_POWERSHELL)
     set(${ARGS_OUT_VAR}
-      "powershell" "-Command" "{ Start-Process ${CMAKE_COMMAND} -Wait -ArgumentList \"-P '${CMAKE_CURRENT_FUNCTION_LIST_FILE}' -- '${code}' }" PARENT_SCOPE)
+      "powershell" "-Command" "{ Start-Process ${CMAKE_COMMAND} -Wait -ArgumentList \"-P '${CMAKE_CURRENT_FUNCTION_LIST_FILE}' -- '${code}' \"}" PARENT_SCOPE)
   else()
     set(${ARGS_OUT_VAR}
       "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_FUNCTION_LIST_FILE}" -- "'${code}'" PARENT_SCOPE)
