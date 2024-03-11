@@ -59,7 +59,7 @@ if(CMAKE_SCRIPT_MODE_FILE STREQUAL CMAKE_CURRENT_LIST_FILE)
     message(FATAL_ERROR "${base_invalid_arg_message}" "No arguments follow the separator.")
   elseif(NOT separated_arg_count STREQUAL "1")
     message(FATAL_ERROR
-      "${base_invalid_arg_message}" "Multiple (${add_arg_count}) arguments follow the separator.")
+      "${base_invalid_arg_message}" "Multiple (${separated_arg_count}) arguments follow the separator.")
   endif()
 
   # Evaluate code
