@@ -203,3 +203,207 @@ function(jcm_add_option)
     endif()
   endif()
 endfunction()
+
+
+# Creates a build option named `${PROJECT_NAME}_ENABLE_<component>`, where component is a standard
+# project component, i.e a library or executable component. An option will be created for every
+# component in the list :cmake:variable:`OPTIONAL_COMPONENTS`. The result variables will contain all
+# optional components that have been enabled via the respective build option, and all required
+# components - those named in :cmake:variable:`REQUIRED_COMPONENTS`.
+#
+
+
+
+#[=======================================================================[.rst:
+
+jcm_add_component_options
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. cmake:command:: jcm_add_component_options
+
+  .. code-block:: cmake
+
+    jcm_add_component_options(
+      [REQUIRED_COMPONENTS <component>...]
+      [DEFAULT_OFF_COMPONENTS <component>...]
+      <OPTIONAL_COMPONENTS <component>...>
+      <[OUT_COMPONENTS <out-var>] >
+       [OUT_TARGETS <out-targets>] >)
+
+Creates build options with :cmake:command:`jcm_add_option` named 
+`${JCM_PROJECT_PREFIX_NAME}_ENABLE_<component>`, where *component* is the name of a standard project 
+component, i.e a library or executable component. An option will be for every component in the list 
+:cmake:variable:`OPTIONAL_COMPONENTS`. The result variables will contain all optional components 
+that have been enabled by their respective build option, and all required components; those named 
+in :cmake:variable:`REQUIRED_COMPONENTS`.
+
+Every project component produces a single *installed* target. Targets can be selectively built by
+CMake with the command-line option `--target`, such as `cmake --build build --target
+libcomponents_libcomponents-core`, which will exclusively build the *core* component of project
+*libcomponents*. However, the configuration of undesired components may also be worth avoiding if
+their configuration is very long or introduces additional dependencies. For example, if the *extra*
+component of *libcomponents* requires eight dependencies that aren't required by *core*, users of
+*core* may not want to acquire dependencies they don't use. For this purpose, project options can be
+introduced to selectively configure project components.
+
+This function is merely a wrapper around :cmake:command`jcm_add_option` adding simplicity and
+consistency for the use-case. Using this function does not preclude creating any project options 
+through other means, nor do all project components need to be provided to this function.  
+
+Component names cannot have any regex characters in them
+
+
+Parameters
+##########
+
+Option
+~~~~~~~~~
+
+:cmake:variable:`OUT_COMPONENTS`
+  The variable named will be set to the list of enabled components.
+
+
+One Value
+~~~~~~~~~
+
+:cmake:variable:`OUT_COMPONENTS`
+  The variable named will be set to the list of enabled components.
+
+:cmake:variable:`OUT_TARGETS`
+  The variable named will be set to the list of enabled targets derived from the enabled components 
+  by prefixing each with `${PROJECT_NAME}::`.
+
+Multi Value
+~~~~~~~~~
+
+:cmake:variable:`TYPE`
+  The type of the option to create. Must be one of the `types available for cache entries
+  <https://cmake.org/cmake/help/latest/command/set.html#set-cache-entry>`_: :cmake:`BOOL`,
+  :cmake:`FILEPATH`, :cmake:`PATH`, :cmake:`STRING`, or :cmake:`INTERNAL`.
+
+:cmake:variable:`DEFAULT`
+  The default value of the option should it not already be set in the CMake cache. This value is
+  also used if :cmake:variable:`CONDITION` is provided to this function but is not met.
+
+:cmake:variable:`CONDITION`
+  An optional condition that will make the option a dependent option; dependent upon the provided
+  condition. When provided, CMake's :cmake:variable:`cmake_dependent_option` will be used in place
+  of :cmake:command:`set` to create the option.
+
+:cmake:variable:`CONDITION_MET_DEFAULT`
+  The default value of the option when :cmake:variable:`CONDITION` is provided to this function and
+  the condition is met. Like :cmake:variable:`DEFAULT`, when a value for the option already
+  exists in the cache, it will be used in place of this default.
+
+Multi Value
+~~~~~~~~~~~
+
+:cmake:variable:`REQUIRED_COMPONENTS`
+  Optional list of project components that are always configured and do not have respective options to 
+  disable them. The components named are always considered "enabled" and will appear unaltered
+  in the variable named by :cmake:variable:`OUT_COMPONENTS`. This option is included to 
+  declaratively indicate which components are required by a project, and make downstream handling
+  of enabled components simpler.
+
+:cmake:variable:`DEFAULT_OFF_COMPONENTS`
+  Optional list of optional project components named in :cmake:variable:`REQUIRED_COMPONENTS` whose 
+  respective build option should default of :cmake:`OFF`. All other build options will default to
+  `ON`.
+
+:cmake:variable:`OPTIONAL_COMPONENTS`
+  Required list of optional project components that will have build options created for them.
+
+Examples
+########
+
+.. code-block:: cmake
+
+  jcm_add_component_options(
+    REQUIRED_COMPONENTS "core"
+    OPTIONAL_COMPONENTS "io" "extra" 
+    DEFAULT_OFF_COMPONENTS "extra"
+    OUT_COMPONENTS enabled_components)
+    
+
+--------------------------------------------------------------------------
+
+#]=======================================================================]
+
+function(jcm_add_component_options)
+  jcm_parse_arguments(
+    ONE_VALUE_KEYWORDS "OUT_TARGETS" "OUT_COMPONENTS"
+    MULTI_VALUE_KEYWORDS "OPTIONAL_COMPONENTS" "REQUIRED_COMPONENTS" "DEFAULT_OFF_COMPONENTS"
+    REQUIRES_ALL "OPTIONAL_COMPONENTS"
+    REQUIRES_ANY "OUT_TARGETS" "OUT_COMPONENTS"
+    ARGUMENTS "${ARGN}")
+
+  if(DEFINED ARGS_REQUIRED_COMPONENTS)
+    # ensure there is no overlap between required and optional components 
+    set(required_regex "${ARGS_REQUIRED_COMPONENTS}")
+    list(TRANSFORM required_regex PREPEND "^")
+    list(TRANSFORM required_regex APPEND "$")
+    list(JOIN required_regex "|" required_regex)
+
+    set(overlapping_components "${ARGS_OPTIONAL_COMPONENTS}")
+    list(FILTER overlapping_components INCLUDE REGEX "${required_regex}")
+    if(overlapping_components)
+      message(FATAL_ERROR
+      "The following components are named as both OPTIONAL_COMPONENTS and REQUIRED_COMPONENTS: "
+      "${overlapping_components}")
+    endif()
+  endif()
+
+  if(DEFINED ARGS_DEFAULT_OFF_COMPONENTS)
+    # ensure default off is subset of optional
+    set(unknown_components "$${ARGS_DEFAULT_OFF_COMPONENTS}")
+    list(REMOVE_ITEM unknown_components "${ARGS_OPTIONAL_COMPONENTS}")
+    list(LENGTH unknown_components num_unknown)
+    if(NOT unknown_components STREQUAL "0")
+      message(FATAL_ERROR
+      "The following components are mentioned in DEFAULT_OFF_COMPONENTS but are not named in "
+      "OPTIONAL_COMPONENTS: ${overlapping_components}")
+
+    endif()
+  endif()
+
+  set(option_names "${ARGS_OPTIONAL_COMPONENTS}")
+  list(TRANSFORM option_names TOUPPER)
+  list(TRANSFORM option_names PREPEND "${JCM_PROJECT_PREFIX_NAME}_ENABLE_")
+
+  foreach(control IN ZIP_LISTS ARGS_OPTIONAL_COMPONENTS option_names)
+    set(component "${control_0}")
+    set(option_name "${control_1}")
+    set(option_description
+        [[Enables the configuration of project component ${component}. Useful to skip finding its \
+          dependencies when ${PROJECT_NAME}::${component} is unused]])
+
+    set(default_value ON)
+    if("${component}" IN_LIST ARGS_DEFAULT_OFF_COMPONENTS)
+      set(default_value OFF)
+    endif()
+
+    jcm_add_option(
+      NAME "${option_name}"
+      TYPE BOOL
+      DEFAULT ${default_value}
+      DESCRIPTION "${option_description}")
+  endforeach()
+
+  set(enabled_components "${ARGS_REQUIRED_COMPONENTS}")
+  foreach(control IN ZIP_LISTS ARGS_OPTIONAL_COMPONENTS option_names)
+    set(component "${control_0}")
+    set(option_name "${control_1}")
+    if(${option_name})
+      list(APPEND enabled_components "${component}")
+    endif()
+  endforeach()
+
+  if(DEFINED ARGS_OUT_COMPONENTS)
+    set(${ARGS_OUT_COMPONENTS} "${enabled_components}" PARENT_SCOPE)
+  endif()
+
+  if(DEFINED ARGS_OUT_TARGETS)
+    list(TRANSFORM enabled_components PREPEND "${PROJECT_NAME}::")
+    set(${ARGS_OUT_TARGETS} "${enabled_components}" PARENT_SCOPE)
+  endif()
+endfunction()
