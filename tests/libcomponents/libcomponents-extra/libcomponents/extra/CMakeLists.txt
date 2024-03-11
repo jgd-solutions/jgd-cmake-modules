@@ -13,6 +13,6 @@ target_link_libraries(${extra-target} INTERFACE libcomponents::core)
 target_compile_features(${extra-target} PRIVATE cxx_std_17)
 
 # part of testing JCM:
-if(NOT LIBCOMPONENTS_BUILD_EXTRA)
-  message(FATAL_ERROR  "'LIBCOMPONENTS_BUILD_EXTRA' is OFF, yet 'extra' component's subdirectory still added")
+if(NOT LIBCOMPONENTS_ENABLE_EXTRA)
+  message(FATAL_ERROR  "'LIBCOMPONENTS_ENABLE_EXTRA' is OFF, yet 'extra' component's subdirectory still added")
 endif()

@@ -110,11 +110,11 @@ Options
 
 :cmake:variable:`WITH_TESTS_DIR`
   Causes the :cmake:variable:`JCM_PROJECT_TESTS_DIR` directory to be added when the
-  :cmake:variable:`${JCM_PROJECT_PREFIX_NAME}_BUILD_TESTS` option is set.
+  :cmake:variable:`${JCM_PROJECT_PREFIX_NAME}_ENABLE_TESTS` option is set.
 
 :cmake:variable:`WITH_DOCS_DIR`
   Causes the :cmake:variable:`JCM_PROJECT_DOCS_DIR` directory to be added when the
-  :cmake:variable:`${JCM_PROJECT_PREFIX_NAME}_BUILD_DOCS` option is set.
+  :cmake:variable:`${JCM_PROJECT_PREFIX_NAME}_ENABLE_DOCS` option is set.
 
 :cmake:variable:`ADD_SUBDIRS`
   Causes this function to add each subdirectory to the project using CMake's
@@ -219,11 +219,11 @@ function(jcm_source_subdirectories)
   endif()
 
   # Add supplementary source subdirectories
-  if(ARGS_WITH_TESTS_DIR AND ${JCM_PROJECT_PREFIX_NAME}_BUILD_TESTS)
+  if(ARGS_WITH_TESTS_DIR AND ${JCM_PROJECT_PREFIX_NAME}_ENABLE_TESTS)
     _jcm_check_add_subdir(subdirs_added FATAL ${add_subdirs_arg} SUBDIR "${JCM_PROJECT_TESTS_DIR}")
   endif()
 
-  if(ARGS_WITH_DOCS_DIR AND ${JCM_PROJECT_PREFIX_NAME}_BUILD_DOCS)
+  if(ARGS_WITH_DOCS_DIR AND ${JCM_PROJECT_PREFIX_NAME}_ENABLE_DOCS)
     _jcm_check_add_subdir(subdirs_added FATAL ${add_subdirs_arg} SUBDIR "${JCM_PROJECT_DOCS_DIR}")
   endif()
 

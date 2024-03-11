@@ -424,7 +424,7 @@ The following Doxygen related variables are set by this function:
 - :cmake:variable:`DOXYGEN_OUTPUT_DIRECTORY`
 - :cmake:variable:`DOXYGEN_USE_MDFILE_AS_MAINPAGE`
 
-This function has no effect when :cmake:variable:`<JCM_PROJECT_PREFIX>_BUILD_DOCS` is not set.
+This function has no effect when :cmake:variable:`<JCM_PROJECT_PREFIX>_ENABLE_DOCS` is not set.
 Ensure to call :cmake:`find_package(Doxygen)` before using this function.
 
 Parameters
@@ -493,7 +493,7 @@ function(jcm_create_doxygen_target)
     REQUIRES_ANY "SOURCE_TARGETS;ADDITIONAL_PATHS"
     ARGUMENTS "${ARGN}")
 
-  if(NOT ${JCM_PROJECT_PREFIX_NAME}_BUILD_DOCS)
+  if(NOT ${JCM_PROJECT_PREFIX_NAME}_ENABLE_DOCS)
     return()
   endif()
 
@@ -608,7 +608,7 @@ this function.  However, `Sphinx::build` need not be available to use this funct
 situation, the generated "sphinx-docs" target will emit errors *when built*, but CMake configuration
 will not be hindered.
 
-This function has no effect when :cmake:variable:`<JCM_PROJECT_PREFIX>_BUILD_DOCS` is not set.
+This function has no effect when :cmake:variable:`<JCM_PROJECT_PREFIX>_ENABLE_DOCS` is not set.
 
 
 Parameters
@@ -667,7 +667,7 @@ function(jcm_create_sphinx_target)
     ONE_VALUE_KEYWORDS "COMMAND" "SOURCE_DIRECTORY" "BUILD_DIRECTORY"
     ARGUMENTS "${ARGN}")
 
-  if(NOT ${JCM_PROJECT_PREFIX_NAME}_BUILD_DOCS)
+  if(NOT ${JCM_PROJECT_PREFIX_NAME}_ENABLE_DOCS)
     return()
   endif()
 
@@ -731,7 +731,7 @@ function(jcm_create_sphinx_target)
   endif()
 
   add_custom_target(sphinx-docs
-    COMMAND 
+    COMMAND
     ${sphinx_cmd}
     -c ${sphinx_config_dir}
     -b ${ARGS_BUILDER}

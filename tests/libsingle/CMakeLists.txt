@@ -3,7 +3,7 @@ project(libsingle VERSION 0.0.0 LANGUAGES CXX)
 
 find_package(jgd-cmake-modules CONFIG REQUIRED)
 find_package(ClangFormat)
-if(LIBSINGLE_BUILD_DOCS)
+if(LIBSINGLE_ENABLE_DOCS)
   find_package(Doxygen REQUIRED COMPONENTS doxygen)
 endif()
 

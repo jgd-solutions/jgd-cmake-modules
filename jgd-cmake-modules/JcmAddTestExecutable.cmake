@@ -35,7 +35,7 @@ jcm_add_test_executable
 
 A convenience function to create an executable and add it as a test in one command, while also
 setting target properties. This function has no affect if
-:cmake:`${JCM_PROJECT_PREFIX_NAME}_BUILD_TESTS` is not set.
+:cmake:`${JCM_PROJECT_PREFIX_NAME}_ENABLE_TESTS` is not set.
 
 This function will:
 
@@ -96,7 +96,7 @@ Examples
 
 #]=======================================================================]
 function(jcm_add_test_executable)
-  if(NOT ${JCM_PROJECT_PREFIX_NAME}_BUILD_TESTS)
+  if(NOT ${JCM_PROJECT_PREFIX_NAME}_ENABLE_TESTS)
     return()
   endif()
 

@@ -20,12 +20,12 @@ Building & Running Tests
 Enable Tests
 ~~~~~~~~~~~~
 
-Automated tests are enabled with the option :cmake:variable:`JCM_BUILD_TESTS` during CMake
+Automated tests are enabled with the option :cmake:variable:`JCM_ENABLE_TESTS` during CMake
 configuration. The configure preset *tests-ninja* will do this.
 
 .. code-block:: bash
 
-  cmake -B <build-dir> -D JCM_BUILD_TESTS=ON ... # manually
+  cmake -B <build-dir> -D JCM_ENABLE_TESTS=ON ... # manually
   cmake --preset tests-ninja                     # using preset
 
 Run Tests
@@ -67,13 +67,13 @@ First, install the Python dependencies to preferrably a virtual environment - th
 Enable Docs
 ~~~~~~~~~~~
 
-Documentation generation is enabled with the option :cmake:variable:`JCM_BUILD_DOCS` during CMake
+Documentation generation is enabled with the option :cmake:variable:`JCM_ENABLE_DOCS` during CMake
 configuration.  The configure preset *docs-ninja* will do this. Ensure the virtual environment is
 activated or JCM may not be able to find Sphinx.
 
 .. code-block:: bash
 
-  cmake -B <build-dir> -D JCM_BUILD_DOCS=ON ... # manually
+  cmake -B <build-dir> -D JCM_ENABLE_DOCS=ON ... # manually
   cmake --preset docs-ninja                     # using preset
 
 Build Docs

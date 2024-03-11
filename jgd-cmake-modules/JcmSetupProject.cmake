@@ -66,11 +66,11 @@ This function will:
     macros, options, and variables.
   - create options:
 
-      ${JCM_PROJECT_PREFIX_NAME}_BUILD_TESTS
+      ${JCM_PROJECT_PREFIX_NAME}_ENABLE_TESTS
         Enables/disables building project tests for this specific project. Default:
         :cmake:variable:`BUILD_TESTING`
 
-      ${JCM_PROJECT_PREFIX_NAME}_BUILD_DOCS
+      ${JCM_PROJECT_PREFIX_NAME}_ENABLE_DOCS
         Enables/disables building project documentation for this specific project. Default:
         *OFF*
 
@@ -100,7 +100,7 @@ This function will:
 
   - enable interprocedural optimization in *Release* mode
   - always enable testing so testing never fails, even if there are no tests, and includes CTest
-    when *${JCM_PROJECT_PREFIX_NAME}_BUILD_TESTS* is set. The global property
+    when *${JCM_PROJECT_PREFIX_NAME}_ENABLE_TESTS* is set. The global property
     *CTEST_TARGETS_ADDED* is set to disable CTest from producing the often unused
     CDash targets until the `CTest policy changes <https://gitlab.kitware.com/cmake/cmake/-/issues/21730>`_.
 
@@ -199,20 +199,20 @@ macro(JCM_SETUP_PROJECT)
   # == Invariable Project Options ==
 
   if(BUILD_TESTING)
-    set(default_build_tests ON)
+    set(default_ENABLE_TESTS ON)
   else()
-    set(default_build_tests OFF)
+    set(default_ENABLE_TESTS OFF)
   endif()
 
   jcm_add_option(
-    NAME ${JCM_PROJECT_PREFIX_NAME}_BUILD_TESTS
+    NAME ${JCM_PROJECT_PREFIX_NAME}_ENABLE_TESTS
     DESCRIPTION "Build all automated tests for ${PROJECT_NAME}"
     TYPE BOOL
-    DEFAULT ${default_build_tests})
-  unset(default_build_tests)
+    DEFAULT ${default_ENABLE_TESTS})
+  unset(default_ENABLE_TESTS)
 
   jcm_add_option(
-    NAME ${JCM_PROJECT_PREFIX_NAME}_BUILD_DOCS
+    NAME ${JCM_PROJECT_PREFIX_NAME}_ENABLE_DOCS
     DESCRIPTION "Build all documentation for ${PROJECT_NAME}"
     TYPE BOOL
     DEFAULT OFF)
@@ -330,7 +330,7 @@ macro(JCM_SETUP_PROJECT)
   enable_testing()
 
   # include CMake's CTest when testing
-  if(${JCM_PROJECT_PREFIX_NAME}_BUILD_TESTS)
+  if(${JCM_PROJECT_PREFIX_NAME}_ENABLE_TESTS)
     if(DEFINED BUILD_TESTING)
       set(original_build_testing_value ${BUILD_TESTING})
     else()
@@ -344,4 +344,3 @@ macro(JCM_SETUP_PROJECT)
 
   endif()
 endmacro()
-

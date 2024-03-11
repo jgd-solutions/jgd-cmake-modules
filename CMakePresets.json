@@ -22,7 +22,7 @@
       "description": "CMake options to configure the project and automated tests",
       "inherits": "default-ninja",
       "cacheVariables": {
-        "JCM_BUILD_TESTS": true
+        "JCM_ENABLE_TESTS": true
       }
     },
     {
@@ -31,7 +31,7 @@
       "description": "CMake options to configure the project and docs",
       "inherits": "default-ninja",
       "cacheVariables": {
-        "JCM_BUILD_DOCS": true
+        "JCM_ENABLE_DOCS": true
       }
     },
     {

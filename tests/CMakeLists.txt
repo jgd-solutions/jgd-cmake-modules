@@ -58,15 +58,15 @@ endif()
 _build_and_ctest("many-exec"
   NAME_SUFFIX -omit-formatter
   BUILD_OPTIONS
-  -DMANY_EXEC_BUILD_TESTS=OFF
-  -DMANY_EXEC_BUILD_FORMATTER=OFF
+  -DMANY_EXEC_ENABLE_TESTS=OFF
+  -DMANY_EXEC_ENABLE_FORMATTER=OFF
   DEPENDS many-exec-format)
 
 _build_and_ctest("many-exec"
   FIXTURES_SETUP "many-exec-fixture"
   BUILD_OPTIONS
-  -DMANY_EXEC_BUILD_TESTS=ON
-  -DMANY_EXEC_BUILD_FORMATTER=ON
+  -DMANY_EXEC_ENABLE_TESTS=ON
+  -DMANY_EXEC_ENABLE_FORMATTER=ON
   DEPENDS many-exec-omit-formatter)
 
 _install_project("many-exec" FIXTURES_REQUIRED many-exec-fixture)
@@ -85,21 +85,21 @@ if(NOT broken_symlink)
 endif()
 
 _build_and_ctest("libsingle"
-  BUILD_OPTIONS -DLIBSINGLE_BUILD_TESTS=ON
+  BUILD_OPTIONS -DLIBSINGLE_ENABLE_TESTS=ON
   DEPENDS libsingle-format)
 
 _build_and_ctest("libsingle"
   NAME_SUFFIX -docs
   BUILD_TARGET doxygen-docs
   BUILD_OPTIONS
-  -DLIBSINGLE_BUILD_DOCS=ON
+  -DLIBSINGLE_ENABLE_DOCS=ON
   DEPENDS libsingleshare)
 
 _build_and_ctest("libsingle"
   NAME_SUFFIX -shared
   FIXTURES_SETUP "libsingle-fixture"
   BUILD_OPTIONS
-  -DLIBSINGLE_BUILD_TESTS=ON
+  -DLIBSINGLE_ENABLE_TESTS=ON
   -DLIBSINGLE_BUILD_SHARED_LIBS=ON
   DEPENDS libsingle-docs)
 
@@ -122,21 +122,21 @@ endif()
 _build_and_ctest("libcomponents"
   NAME_SUFFIX -omit-extra
   BUILD_OPTIONS
-  -DLIBCOMPONENTS_BUILD_TESTS=OFF
-  -DLIBCOMPONENTS_BUILD_EXTRA=OFF
+  -DLIBCOMPONENTS_ENABLE_TESTS=OFF
+  -DLIBCOMPONENTS_ENABLE_EXTRA=OFF
   DEPENDS libcomponents-format)
 
 _build_and_ctest("libcomponents"
   BUILD_OPTIONS
-  -DLIBCOMPONENTS_BUILD_TESTS=ON
-  -DLIBCOMPONENTS_BUILD_EXTRA=ON
+  -DLIBCOMPONENTS_ENABLE_TESTS=ON
+  -DLIBCOMPONENTS_ENABLE_EXTRA=ON
   DEPENDS libcomponents-omit-extra)
 
 _build_and_ctest("libcomponents"
   NAME_SUFFIX -shared
   FIXTURES_SETUP "libcomponents-fixture"
   BUILD_OPTIONS
-  -DLIBCOMPONENTS_BUILD_TESTS=ON
+  -DLIBCOMPONENTS_ENABLE_TESTS=ON
   -DLIBCOMPONENTS_CORE_BUILD_SHARED=ON
   DEPENDS libcomponents)
 
@@ -158,7 +158,7 @@ endif()
 
 _build_and_ctest("libheaders"
   FIXTURES_SETUP "libheaders-fixture"
-  BUILD_OPTIONS -DLIBHEADERS_BUILD_TESTS=ON
+  BUILD_OPTIONS -DLIBHEADERS_ENABLE_TESTS=ON
   DEPENDS libheaders-format)
 
 _install_project("libheaders" FIXTURES_REQUIRED libheaders-fixture)
@@ -179,7 +179,7 @@ endif()
 
 _build_and_ctest("libcstr"
   FIXTURES_SETUP "libcstr-fixture"
-  BUILD_OPTIONS -DLIBCSTR_BUILD_TESTS=ON
+  BUILD_OPTIONS -DLIBCSTR_ENABLE_TESTS=ON
   DEPENDS libcstr-format)
 
 _install_project("libcstr" FIXTURES_REQUIRED libcstr-fixture)

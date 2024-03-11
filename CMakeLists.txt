@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.24)
 project(
   jgd-cmake-modules
-  VERSION 2.18.0
+  VERSION 3.0.0
   DESCRIPTION "CMake library for standardized CMake projects for JGD"
   HOMEPAGE_URL "https://jgd-solutions.github.io/jgd-cmake-modules/"
   LANGUAGES NONE)
@@ -20,13 +20,13 @@ include(JcmConfigureFiles)
 jcm_setup_project(PREFIX_NAME "JCM")
 jcm_configure_vcpkg_manifest_file()
 
-if(JCM_BUILD_TESTS)
+if(JCM_ENABLE_TESTS)
   # Unnecessarily finding ClangFormat here to see what ClangFormat test projects will use
   find_package(ClangFormat)
   add_subdirectory("${JCM_PROJECT_TESTS_DIR}")
 endif()
 
-if(JCM_BUILD_DOCS)
+if(JCM_ENABLE_DOCS)
   find_package(Sphinx REQUIRED)
   add_subdirectory("${JCM_PROJECT_DOCS_DIR}")
 endif()
@@ -35,4 +35,3 @@ jcm_install_config_file_package(
   INSTALL_LICENSES
   CONFIGURE_PACKAGE_CONFIG_FILES
   CMAKE_MODULES "${PROJECT_NAME}")
-

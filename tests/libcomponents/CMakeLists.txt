@@ -8,12 +8,12 @@ include(JcmAllModules)
 # targets can always be selectively with `--target <target>` option to `cmake --build`
 # this is mostly easy to test for
 jcm_add_option(
-  NAME LIBCOMPONENTS_BUILD_EXTRA
+  NAME LIBCOMPONENTS_ENABLE_EXTRA
   DESCRIPTION "Allows omitting the expensive configuration of libcomponents::extra target"
   TYPE BOOL
   DEFAULT ON)
 
-if(LIBCOMPONENTS_BUILD_EXTRA)
+if(LIBCOMPONENTS_ENABLE_EXTRA)
   set(libcomponents_components core extra)
   set(libcomponents_targets libcomponents::core libcomponents::extra)
 else()
@@ -41,10 +41,10 @@ jcm_install_config_file_package(
 # Testing jcm_collect_subdirectory_targets:
 jcm_collect_subdirectory_targets(OUT_VAR targets)
 set(expected_targets "libcomponents_libcomponents-core")
-if(LIBCOMPONENTS_BUILD_EXTRA)
+if(LIBCOMPONENTS_ENABLE_EXTRA)
   list(APPEND expected_targets "libcomponents_libcomponents-extra")
 endif()
-if(LIBCOMPONENTS_BUILD_TESTS AND LIBCOMPONENTS_BUILD_EXTRA)
+if(LIBCOMPONENTS_ENABLE_TESTS AND LIBCOMPONENTS_ENABLE_EXTRA)
   list(APPEND expected_targets "components-test")
 endif()
 if(ClangFormat_FOUND AND PROJECT_IS_TOP_LEVEL)

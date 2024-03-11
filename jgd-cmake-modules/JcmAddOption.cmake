@@ -104,8 +104,8 @@ Examples
 .. code-block:: cmake
 
   jcm_add_option(
-    NAME ${PROJECT_NAME}_BUILD_INTEGRATION_TESTS
-    DESCRIPTION "Builds the automated integration tests"
+    NAME ${PROJECT_NAME}_ENABLE_INTEGRATION_TESTS
+    DESCRIPTION "Enables the automated integration tests"
     TYPE BOOL
     DEFAULT ${PROJECT_NAME})
 
@@ -116,7 +116,7 @@ Examples
     DESCRIPTION "Selects the compression backend to use for transport compression"
     TYPE STRING
     DEFAULT "NONE"
-    CONDITION "${PROJECT_NAME}_BUILD_TRANSPORT_LAYER"
+    CONDITION "${PROJECT_NAME}_ENABLE_TRANSPORT_LAYER"
     ACCEPT_VALUES "NONE;ZIP;BROTLI;LZ")
 
 .. code-block:: cmake
@@ -230,11 +230,11 @@ jcm_add_component_options
       <[OUT_COMPONENTS <out-var>] >
        [OUT_TARGETS <out-targets>] >)
 
-Creates build options with :cmake:command:`jcm_add_option` named 
-`${JCM_PROJECT_PREFIX_NAME}_ENABLE_<component>`, where *component* is the name of a standard project 
-component, i.e a library or executable component. An option will be for every component in the list 
-:cmake:variable:`OPTIONAL_COMPONENTS`. The result variables will contain all optional components 
-that have been enabled by their respective build option, and all required components; those named 
+Creates build options with :cmake:command:`jcm_add_option` named
+`${JCM_PROJECT_PREFIX_NAME}_ENABLE_<component>`, where *component* is the name of a standard project
+component, i.e a library or executable component. An option will be for every component in the list
+:cmake:variable:`OPTIONAL_COMPONENTS`. The result variables will contain all optional components
+that have been enabled by their respective build option, and all required components; those named
 in :cmake:variable:`REQUIRED_COMPONENTS`.
 
 Every project component produces a single *installed* target. Targets can be selectively built by
@@ -247,8 +247,8 @@ component of *libcomponents* requires eight dependencies that aren't required by
 introduced to selectively configure project components.
 
 This function is merely a wrapper around :cmake:command`jcm_add_option` adding simplicity and
-consistency for the use-case. Using this function does not preclude creating any project options 
-through other means, nor do all project components need to be provided to this function.  
+consistency for the use-case. Using this function does not preclude creating any project options
+through other means, nor do all project components need to be provided to this function.
 
 Component names cannot have any regex characters in them
 
@@ -270,7 +270,7 @@ One Value
   The variable named will be set to the list of enabled components.
 
 :cmake:variable:`OUT_TARGETS`
-  The variable named will be set to the list of enabled targets derived from the enabled components 
+  The variable named will be set to the list of enabled targets derived from the enabled components
   by prefixing each with `${PROJECT_NAME}::`.
 
 Multi Value
@@ -299,14 +299,14 @@ Multi Value
 ~~~~~~~~~~~
 
 :cmake:variable:`REQUIRED_COMPONENTS`
-  Optional list of project components that are always configured and do not have respective options to 
+  Optional list of project components that are always configured and do not have respective options to
   disable them. The components named are always considered "enabled" and will appear unaltered
-  in the variable named by :cmake:variable:`OUT_COMPONENTS`. This option is included to 
+  in the variable named by :cmake:variable:`OUT_COMPONENTS`. This option is included to
   declaratively indicate which components are required by a project, and make downstream handling
   of enabled components simpler.
 
 :cmake:variable:`DEFAULT_OFF_COMPONENTS`
-  Optional list of optional project components named in :cmake:variable:`REQUIRED_COMPONENTS` whose 
+  Optional list of optional project components named in :cmake:variable:`REQUIRED_COMPONENTS` whose
   respective build option should default of :cmake:`OFF`. All other build options will default to
   `ON`.
 
@@ -320,10 +320,10 @@ Examples
 
   jcm_add_component_options(
     REQUIRED_COMPONENTS "core"
-    OPTIONAL_COMPONENTS "io" "extra" 
+    OPTIONAL_COMPONENTS "io" "extra"
     DEFAULT_OFF_COMPONENTS "extra"
     OUT_COMPONENTS enabled_components)
-    
+
 
 --------------------------------------------------------------------------
 
@@ -338,7 +338,7 @@ function(jcm_add_component_options)
     ARGUMENTS "${ARGN}")
 
   if(DEFINED ARGS_REQUIRED_COMPONENTS)
-    # ensure there is no overlap between required and optional components 
+    # ensure there is no overlap between required and optional components
     set(required_regex "${ARGS_REQUIRED_COMPONENTS}")
     list(TRANSFORM required_regex PREPEND "^")
     list(TRANSFORM required_regex APPEND "$")

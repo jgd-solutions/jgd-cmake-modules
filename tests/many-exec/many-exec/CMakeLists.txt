@@ -3,11 +3,11 @@ jcm_configure_file(IN_FILE many_exec_config.hpp.in OUT_FILE_VAR many-exec_config
 # again, example of omitting targets from configuration process
 set(exec_components)
 
-if(MANY_EXEC_BUILD_COMPILER)
+if(MANY_EXEC_ENABLE_COMPILER)
   list(APPEND exec_components compiler)
 endif()
 
-if(MANY_EXEC_BUILD_FORMATTER)
+if(MANY_EXEC_ENABLE_FORMATTER)
   list(APPEND exec_components formatter)
 endif()
 
