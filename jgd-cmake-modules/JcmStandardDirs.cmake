@@ -63,8 +63,8 @@ else()
 endif()
 
 # location to install cmake modules
-set(JCM_INSTALL_CMAKE_DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/cmake/${_jcm_name_version}")
-set(JCM_UNVERSIONED_INSTALL_CMAKE_DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/cmake/${PROJECT_NAME}")
+set(JCM_INSTALL_CMAKE_DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/${_jcm_name_version}")
+set(JCM_UNVERSIONED_INSTALL_CMAKE_DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME}")
 
 # interface include directory for exported targets in installation
 set(JCM_INSTALL_INCLUDE_DIR "${CMAKE_INSTALL_INCLUDEDIR}/${_jcm_name_version}")
