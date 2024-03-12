@@ -36,8 +36,8 @@ Adds a project build-option using either :cmake:command:`set` or
 :cmake:command:`cmake_dependent_option`, while providing better type support and validation. Like
 the CMake built-ins to add options, :cmake:command:`option` and
 :cmake:command:`cmake_dependent_option`, the options introduced by this function are just CACHE
-variables that can be used to control the project's build.  As opposed to using either of those
-CMake built-ins, this function provides:
+variables that can be used to control the project's configuration.  As opposed to using either of 
+those CMake built-ins, this function provides:
 
 #. Named arguments
 #. Access to both independent and dependent build-options from a single function
@@ -47,8 +47,8 @@ CMake built-ins, this function provides:
 #. Validation of the option name being both prefixed by :cmake:`${JCM_PROJECT_PREFIX_NAME}_`, and
    being in *SCREAMING_SNAKE_CASE*. These provide consistency, clarity, and exclusivity of
    build options between projects. However, this prefix check can be avoided with
-   :cmake:variable:`WITHOUT_NAME_PREFIX_CHECK`, for cases described in this parameter.
-#. Limit the option value to one of :cmake:variable:`ACCEPT_VALUES`.
+   :cmake:variable:`WITHOUT_NAME_PREFIX_CHECK`, for cases described in the below Parameters.
+#. Restrict the option's value to one of :cmake:variable:`ACCEPT_VALUES`.
 
 Parameters
 ##########
