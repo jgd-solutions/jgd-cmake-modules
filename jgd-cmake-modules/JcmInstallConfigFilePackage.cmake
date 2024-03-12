@@ -93,7 +93,9 @@ Options
   :cmake:command:`jcm_configure_package_config_file`
 
 :cmake:variable:`INSTALL_LICENSES`
-  Causes this function to install licenses from the paths described above.
+  Causes this function to install licenses from the paths described above. Should there be no
+  licenses in these paths, an author warning will be emitted and installation of other files 
+  will continue without hindrance.
 
 Multi Value
 ~~~~~~~~~~~
@@ -315,9 +317,10 @@ function(jcm_install_config_file_package)
 
   # == Install project licenses ==
 
-  function(install_licenses license_glob dest_suffix)
+  function(install_licenses license_glob dest_suffix out_found)
     file(GLOB license_files LIST_DIRECTORIES false "${license_glob}")
     if(NOT license_files)
+      set(${out_found} FALSE PARENT_SCOPE)
       return()
     endif()
 
@@ -338,11 +341,20 @@ function(jcm_install_config_file_package)
           "to a non-existent path: ${target_file}")
       endif()
     endforeach()
+
+    set(${out_found} TRUE PARENT_SCOPE)
   endfunction()
 
   if(ARGS_INSTALL_LICENSES)
     cmake_path(GET JCM_PROJECT_LICENSES_DIR FILENAME licenses_dir)
-    install_licenses("${PROJECT_SOURCE_DIR}/LICENSE*" "")
-    install_licenses("${JCM_PROJECT_LICENSES_DIR}/*" "${licenses_dir}")
+    set(found_root_license FALSE)
+    set(found_dir_licenses FALSE)
+    install_licenses("${PROJECT_SOURCE_DIR}/LICENSE*" "" found_root_license)
+    install_licenses("${JCM_PROJECT_LICENSES_DIR}/*" "${licenses_dir}" found_dir_licenses)
+    if(NOT (found_root_license OR found_root_license))
+      message(AUTHOR_WARNING 
+        "INSTALL_LICENSES was specified to ${CMAKE_CURRENT_FUNCTION} but no licenses were found "
+        "in the project's source tree.")
+    endif()
   endif()
 endfunction()
