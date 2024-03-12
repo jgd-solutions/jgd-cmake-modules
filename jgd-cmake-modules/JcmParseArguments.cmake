@@ -276,8 +276,9 @@ macro(JCM_PARSE_ARGUMENTS)
     
     if(DEFINED second_keyword)
       message(FATAL_ERROR
-        "The keywords ${first_keyword} and ${second_keyword} were both defined but are part of the "
-        "mutually exclusive list of function arguments, ${mutex_list}: ${${mutex_list}}")
+        "The keywords ${first_keyword} and ${second_keyword} cannot be provided togehter. They're "
+        "part of the mutually exclusive list of function arguments, '${${mutex_list}}'. Providing "
+        "any one of these precludes providing any other.")
     endif()
   endforeach()
 
@@ -300,8 +301,9 @@ macro(JCM_PARSE_ARGUMENTS)
     list(REMOVE_ITEM missing_keywords "${INS_ARGUMENTS}") 
     if(missing_keywords)
       message(FATAL_ERROR
-        "The keywords were not present '${missing_keywords}' but are specified as part of the "
-        "mutually inclusive list of arguments ${inclusive_list}: ${${inclusive_list}}")
+        "The following keywords are missing: '${missing_keywords}'. They're part of the mutually "
+        "inclusive list of function arguments, '${${inclusive_list}}'. Providing any one of "
+        "these requires providing all of them.")
     endif()
   endforeach()
 
