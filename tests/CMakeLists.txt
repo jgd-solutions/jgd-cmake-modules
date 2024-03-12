@@ -192,3 +192,23 @@ _file_exists("libcstr" -license2-exists "${licenses_dir}/license2.txt")
 
 set_tests_properties("libcstr-license1-exists" "libcstr-license2-exists"
   PROPERTIES FIXTURES_REQUIRED libcstr-install-fixture)
+
+
+# == independent tests ==
+
+set(JCM_ENABLE_EXTRA ON)
+jcm_add_component_options(
+  REQUIRED_COMPONENTS "core"
+  OPTIONAL_COMPONENTS "io" "extra"
+  DEFAULT_OFF_COMPONENTS "extra"
+  OUT_COMPONENTS enabled_components
+  MISSING_DEPENDENCY_ACTION "ENABLE"
+  COMPONENT_DEPENDENCIES_JSON [[ 
+    {
+      "extra": [ "io", "core" ],
+      "io": []
+    }
+  ]])
+if(NOT JCM_ENABLE_IO)
+  message(FATAL_ERROR "jcm_add_component_options failed to enable missing dependency")
+endif()
