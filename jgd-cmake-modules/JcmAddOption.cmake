@@ -23,6 +23,7 @@ jcm_add_option
   .. code-block:: cmake
 
     jcm_add_option(
+      
       [WITHOUT_NAME_PREFIX_CHECK]
       NAME <option-name>
       DESCRIPTION <description>
@@ -205,13 +206,124 @@ function(jcm_add_option)
 endfunction()
 
 
-# Creates a build option named `${PROJECT_NAME}_ENABLE_<component>`, where component is a standard
-# project component, i.e a library or executable component. An option will be created for every
-# component in the list :cmake:variable:`OPTIONAL_COMPONENTS`. The result variables will contain all
-# optional components that have been enabled via the respective build option, and all required
-# components - those named in :cmake:variable:`REQUIRED_COMPONENTS`.
-#
+macro(_verify_component_dependencies_json)
+  # 0. root string is JSON that describes an object
+  set(json_err_msg_base "Malformed JSON document in COMPONENT_DEPENDENCIES_JSON. ")
+  string(JSON json_kind ERROR_VARIABLE json_err TYPE "${ARGS_COMPONENT_DEPENDENCIES_JSON}")
+  if(json_err)
+    message(FATAL_ERROR "${json_err_msg_base}" "${json_err}")
+  endif()
+  if(NOT json_kind STREQUAL "OBJECT")
+    message(FATAL_ERROR "${json_err_msg_base}" "Root JSON must be an object; found '${json_kind}'")
+  endif()
 
+  string(JSON num_entries LENGTH "${ARGS_COMPONENT_DEPENDENCIES_JSON}")
+  if(num_entries STREQUAL "0")
+    message(AUTHOR_WARNING
+      "Empty JSON object was provided to COMPONENT_DEPENDENCIES_JSON. The argument can be completely "
+      " removed because this has no effect.")
+    # cannot continue with foreach() below when empty because arguments must be non-negative
+  else()
+    math(EXPR max_index "${num_entries} - 1")
+    foreach(entry_idx RANGE ${max_index})
+      # 1. is this entry key in optional components?
+      string(JSON entry_key MEMBER "${ARGS_COMPONENT_DEPENDENCIES_JSON}" ${entry_idx})
+      if(NOT entry_key IN_LIST ARGS_OPTIONAL_COMPONENTS)
+        message(FATAL_ERROR "${json_err_msg_base}" "Entry '${}' is not named in OPTIONAL_COMPONENTS")
+      endif()
+
+      # 2. is this the value an array
+      string(JSON dependencies GET "${ARGS_COMPONENT_DEPENDENCIES_JSON}" ${entry_key})
+      string(JSON json_kind TYPE "${dependencies}")
+      if(NOT json_kind STREQUAL "ARRAY")
+        message(FATAL_ERROR
+          "${json_err_msg_base}" "Values of the dependencies object must be arrays; found "
+          "'${json_kind}' @ COMPONENT_DEPENDENCIES_JSON[${entry_key}]")
+      endif()
+
+      # 3. is every entry in the array a string naming an optional or required component?
+      string(JSON num_deps LENGTH "${dependencies}")
+      if(num_deps STREQUAL "0")
+        continue()
+      endif()
+
+      math(EXPR max_dep_index "${num_deps} - 1")
+      foreach(dependency_idx RANGE ${max_dep_index})
+        string(JSON dependency GET "${dependencies}" ${dependency_idx})
+        string(JSON json_kind TYPE "${dependencies}" ${dependency_idx})
+        if(NOT json_kind STREQUAL "STRING")
+          message(FATAL_ERROR
+            "${json_err_msg_base}" "Elements of every component dependencies array must contain "
+            " strings; found '${json_kind}' @ "
+            "COMPONENT_DEPENDENCIES_JSON[${entry_key}][${dependency_idx}]")
+        endif()
+
+        if(NOT (dependency IN_LIST ARGS_OPTIONAL_COMPONENTS OR 
+                dependency IN_LIST ARGS_REQUIRED_COMPONENTS))
+          message(FATAL_ERROR
+            "${json_err_msg_base}" "Component '${dependency}', named as dependency of ${entry_key} "
+            "is not named in OPTIONAL_COMPONENTS nor REQUIRED_COMPONENTS - "
+            "COMPONENT_DEPENDENCIES_JSON[${entry_key}][${dependency_idx}]")
+        endif()
+
+        if(entry_key STREQUAL dependency)
+          message(FATAL_ERROR
+            "${json_err_msg_base}" "Component '${dependency}' named as dependency of itself - "
+            "COMPONENT_DEPENDENCIES_JSON[${entry_key}][${dependency_idx}]")
+        endif()
+      endforeach(dependency_idx RANGE ${max_dep_index})
+
+    endforeach(entry_idx RANGE ${max_index})
+  endif(num_entries STREQUAL "0")
+endmacro()
+
+macro(_verify_component_dependencies_json)
+  string(JSON num_entries LENGTH "${ARGS_COMPONENT_DEPENDENCIES_JSON}")
+  if(NOT num_entries STREQUAL "0")
+    math(EXPR max_index "${num_entries} - 1")
+    foreach(entry_idx RANGE ${max_index})
+      string(JSON entry_key MEMBER "${ARGS_COMPONENT_DEPENDENCIES_JSON}" ${entry_idx})
+      if(NOT entry_key IN_LIST ARGS_OPTIONAL_COMPONENTS)
+        message(FATAL_ERROR "${json_err_msg_base}" "Entry '${}' is not named in OPTIONAL_COMPONENTS")
+      endif()
+
+      # # 2. is this the value an array
+      string(JSON dependencies GET "${ARGS_COMPONENT_DEPENDENCIES_JSON}" ${entry_key})
+      string(JSON json_kind TYPE "${dependencies}")
+      if(NOT json_kind STREQUAL "ARRAY")
+        message(FATAL_ERROR
+          "${json_err_msg_base}" "Values of the dependencies object must be arrays; found "
+          "'${json_kind}' @ COMPONENT_DEPENDENCIES_JSON[${entry_key}]")
+      endif()
+
+      # # 3. is every entry in the array a string naming an optional or required component?
+      string(JSON num_deps LENGTH "${dependencies}")
+      if(num_deps STREQUAL "0")
+        continue()
+      endif()
+
+      math(EXPR max_dep_index "${num_deps} - 1")
+      foreach(dependency_idx RANGE ${max_dep_index})
+        string(JSON dependency GET "${dependencies}" ${dependency_idx})
+        string(JSON json_kind TYPE "${dependencies}" ${dependency_idx})
+        if(NOT json_kind STREQUAL "STRING")
+          message(FATAL_ERROR
+            "${json_err_msg_base}" "Elements of every component dependencies array must contain "
+            " strings; found '${json_kind}' @ "
+            "COMPONENT_DEPENDENCIES_JSON[${entry_key}][${dependency_idx}]")
+        endif()
+
+        if(NOT (dependency IN_LIST ARGS_OPTIONAL_COMPONENTS OR 
+                dependency IN_LIST ARGS_REQUIRED_COMPONENTS))
+          message(FATAL_ERROR
+            "${json_err_msg_base}" "Component '${dependency}', named as dependency of ${entry_key} "
+            "is not named in OPTIONAL_COMPONENTS nor REQUIRED_COMPONENTS - "
+            "COMPONENT_DEPENDENCIES_JSON[${entry_key}][${dependency_idx}]")
+        endif()
+      endforeach()
+    endforeach()
+  endif()
+endmacro()
 
 
 #[=======================================================================[.rst:
@@ -228,7 +340,9 @@ jcm_add_component_options
       [DEFAULT_OFF_COMPONENTS <component>...]
       <OPTIONAL_COMPONENTS <component>...>
       <[OUT_COMPONENTS <out-var>] >
-       [OUT_TARGETS <out-targets>] >)
+       [OUT_TARGETS <out-targets>] >
+      [<COMPONENT_DEPENDENCIES_JSON <json> 
+      <MISSING_DEPENDENCY_ACTION <ENABLE|ERROR> > ])
 
 Creates build options with :cmake:command:`jcm_add_option` named
 `${JCM_PROJECT_PREFIX_NAME}_ENABLE_<component>`, where *component* is the name of a standard project
@@ -273,30 +387,28 @@ One Value
   The variable named will be set to the list of enabled targets derived from the enabled components
   by prefixing each with `${PROJECT_NAME}::`.
 
-Multi Value
-~~~~~~~~~
+:cmake:variable:`COMPONENT_DEPENDENCIES_JSON`
+  Optional string containing a JSON document detailing the components dependencies on one another. 
+  The document structure is an object where keys are names of optional components, and  values 
+  are arrays of component names. When the component named by one of the object entries is enabled by
+  its respective build option, all the build options for the components named in the value array
+  will also be enabled. Although unnecessary, required component can be named in the value array.
 
-:cmake:variable:`TYPE`
-  The type of the option to create. Must be one of the `types available for cache entries
-  <https://cmake.org/cmake/help/latest/command/set.html#set-cache-entry>`_: :cmake:`BOOL`,
-  :cmake:`FILEPATH`, :cmake:`PATH`, :cmake:`STRING`, or :cmake:`INTERNAL`.
+  This argument must be accompanied by :cmake:variable:`MISSING_DEPENDENCY_ACTION`.
 
-:cmake:variable:`DEFAULT`
-  The default value of the option should it not already be set in the CMake cache. This value is
-  also used if :cmake:variable:`CONDITION` is provided to this function but is not met.
+:cmake:variable:`MISSING_DEPENDENCY_ACTION`
+  Optional literal of either *ERROR* or *ENABLE* indicating what action will be taken when a 
+  component named in :cmake:variable:`COMPONENT_DEPENDENCIES_JSON` is enabled but a dependency in 
+  its dependency array is not. A value of *ENABLE* will set the project option of the 
+  disabled dependency component to enable it. A value of *ERROR* will emit a fatal error.
 
-:cmake:variable:`CONDITION`
-  An optional condition that will make the option a dependent option; dependent upon the provided
-  condition. When provided, CMake's :cmake:variable:`cmake_dependent_option` will be used in place
-  of :cmake:command:`set` to create the option.
-
-:cmake:variable:`CONDITION_MET_DEFAULT`
-  The default value of the option when :cmake:variable:`CONDITION` is provided to this function and
-  the condition is met. Like :cmake:variable:`DEFAULT`, when a value for the option already
-  exists in the cache, it will be used in place of this default.
+  This argument must be accompanied by :cmake:variable:`COMPONENT_DEPENDENCIES_JSON`.
 
 Multi Value
 ~~~~~~~~~~~
+
+:cmake:variable:`OPTIONAL_COMPONENTS`
+  Required list of optional project components that will have build options created for them.
 
 :cmake:variable:`REQUIRED_COMPONENTS`
   Optional list of project components that are always configured and do not have respective options to
@@ -306,12 +418,10 @@ Multi Value
   of enabled components simpler.
 
 :cmake:variable:`DEFAULT_OFF_COMPONENTS`
-  Optional list of optional project components named in :cmake:variable:`REQUIRED_COMPONENTS` whose
-  respective build option should default of :cmake:`OFF`. All other build options will default to
-  `ON`.
-
-:cmake:variable:`OPTIONAL_COMPONENTS`
-  Required list of optional project components that will have build options created for them.
+  Optional list of optional project components who's associated project option will be created with
+  a default value of `OFF` instead of `ON`. As such, configuring a project using its default options
+  will not enable the components named in this list. Builders will have to explicitly enable them 
+  through their respective project option.
 
 Examples
 ########
@@ -324,6 +434,21 @@ Examples
     DEFAULT_OFF_COMPONENTS "extra"
     OUT_COMPONENTS enabled_components)
 
+.. code-block:: cmake
+
+  jcm_add_component_options(
+    REQUIRED_COMPONENTS "core"
+    OPTIONAL_COMPONENTS "io" "extra"
+    DEFAULT_OFF_COMPONENTS "extra"
+    OUT_COMPONENTS enabled_components)
+    MISSING_DEPENDENCY_ACTION "ENABLE"
+    COMPONENT_DEPENDENCIES_JSON [[ 
+      {
+        "extra": [ "io", "core" ],
+        "io": [ "core" ]
+      }
+    ]])
+
 
 --------------------------------------------------------------------------
 
@@ -331,10 +456,15 @@ Examples
 
 function(jcm_add_component_options)
   jcm_parse_arguments(
-    ONE_VALUE_KEYWORDS "OUT_TARGETS" "OUT_COMPONENTS"
-    MULTI_VALUE_KEYWORDS "OPTIONAL_COMPONENTS" "REQUIRED_COMPONENTS" "DEFAULT_OFF_COMPONENTS"
+    ONE_VALUE_KEYWORDS "OUT_TARGETS" "OUT_COMPONENTS" "MISSING_DEPENDENCY_ACTION"
+    MULTI_VALUE_KEYWORDS
+      "OPTIONAL_COMPONENTS"
+      "REQUIRED_COMPONENTS"
+      "DEFAULT_OFF_COMPONENTS"
+      "COMPONENT_DEPENDENCIES_JSON"
     REQUIRES_ALL "OPTIONAL_COMPONENTS"
     REQUIRES_ANY "OUT_TARGETS" "OUT_COMPONENTS"
+    MUTUALLY_INCLUSIVE "COMPONENT_DEPENDENCIES_JSON" "MISSING_DEPENDENCY_ACTION"
     ARGUMENTS "${ARGN}")
 
   if(DEFINED ARGS_REQUIRED_COMPONENTS)
@@ -362,14 +492,24 @@ function(jcm_add_component_options)
       message(FATAL_ERROR
       "The following components are mentioned in DEFAULT_OFF_COMPONENTS but are not named in "
       "OPTIONAL_COMPONENTS: ${overlapping_components}")
-
     endif()
+  endif()
+
+  set(available_actions "FORCE|ENABLE")
+  if(DEFINED ARGS_MISSING_DEPENDENCY_ACTION AND 
+    NOT ARGS_MISSING_DEPENDENCY_ACTION MATCHES "${available_actions}")
+    message(FATAL_ERROR "MISSING_DEPENDENCY_ACTIONS must be one of ${available_actions}")
+  endif()
+
+  if(DEFINED ARGS_COMPONENT_DEPENDENCIES_JSON)
+    _verify_component_dependencies_json()
   endif()
 
   set(option_names "${ARGS_OPTIONAL_COMPONENTS}")
   list(TRANSFORM option_names TOUPPER)
   list(TRANSFORM option_names PREPEND "${JCM_PROJECT_PREFIX_NAME}_ENABLE_")
 
+  set(forced_dependencies_message)
   foreach(control IN ZIP_LISTS ARGS_OPTIONAL_COMPONENTS option_names)
     set(component "${control_0}")
     set(option_name "${control_1}")
@@ -387,6 +527,41 @@ function(jcm_add_component_options)
       TYPE BOOL
       DEFAULT ${default_value}
       DESCRIPTION "${option_description}")
+
+    # overwrite based on dependencies
+    if(NOT ARGS_COMPONENT_DEPENDENCIES_JSON)
+      continue()
+    endif()
+
+    string(JSON dependencies GET "${ARGS_COMPONENT_DEPENDENCIES_JSON}" ${component})
+    string(JSON num_deps LENGTH "${dependencies}")
+    if(num_deps STREQUAL "0")
+      continue()
+    endif()
+
+    set(forced_dependencies) 
+    math(EXPR max_dep_index "${num_deps} - 1")
+    foreach(dependency_idx RANGE ${max_dep_index})
+      # 1. get associated build option of named dependency from JSON
+      string(JSON dependency GET "${dependencies}" ${dependency_idx})
+      list(FIND ARGS_OPTIONAL_COMPONENTS "${dependency}" component_idx)
+      list(GET option_names ${component_idx} dependency_option_name)
+
+      # 2. test if it's set or not
+      if(${dependency_option_name})
+        continue()
+      endif()
+
+      # 3. if not, take the action specified by MISSING_DEPENDENCY_ACTION
+      if(ARGS_MISSING_DEPENDENCY_ACTION STREQUAL ENABLE)
+        set(${option_name} ON)
+      else()
+        message(FATAL_ERROR
+          "The project component '${component}' depends upon component '${dependency}', but this "
+          "component is disabled. Enable ${PROJECT_NAME}::${dependency} with the option "
+          "${dependency_option_name}")
+      endif()
+    endforeach()
   endforeach()
 
   set(enabled_components "${ARGS_REQUIRED_COMPONENTS}")
