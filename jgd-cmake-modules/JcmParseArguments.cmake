@@ -299,6 +299,10 @@ macro(JCM_PARSE_ARGUMENTS)
 
     set(missing_keywords "${${inclusive_list}}")
     list(REMOVE_ITEM missing_keywords "${INS_ARGUMENTS}") 
+    if(missing_keywords STREQUAL "${${inclusive_list}}")
+      # all keywords in inclusivity list are missing: condition satisfied
+      continue()
+    endif()
     if(missing_keywords)
       message(FATAL_ERROR
         "The following keywords are missing: '${missing_keywords}'. They're part of the mutually "
