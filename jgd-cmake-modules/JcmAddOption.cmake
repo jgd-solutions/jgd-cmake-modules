@@ -229,7 +229,8 @@ macro(_verify_component_dependencies_json)
       # 1. is this entry key in optional components?
       string(JSON entry_key MEMBER "${ARGS_COMPONENT_DEPENDENCIES_JSON}" ${entry_idx})
       if(NOT entry_key IN_LIST ARGS_OPTIONAL_COMPONENTS)
-        message(FATAL_ERROR "${json_err_msg_base}" "Entry '${}' is not named in OPTIONAL_COMPONENTS")
+        message(FATAL_ERROR
+          "${json_err_msg_base}" "Entry '${entry_key}' is not named in OPTIONAL_COMPONENTS")
       endif()
 
       # 2. is this the value an array
@@ -440,7 +441,7 @@ Examples
     REQUIRED_COMPONENTS "core"
     OPTIONAL_COMPONENTS "io" "extra"
     DEFAULT_OFF_COMPONENTS "extra"
-    OUT_COMPONENTS enabled_components)
+    OUT_COMPONENTS enabled_components
     MISSING_DEPENDENCY_ACTION "ENABLE"
     COMPONENT_DEPENDENCIES_JSON [[ 
       {
@@ -485,13 +486,13 @@ function(jcm_add_component_options)
 
   if(DEFINED ARGS_DEFAULT_OFF_COMPONENTS)
     # ensure default off is subset of optional
-    set(unknown_components "$${ARGS_DEFAULT_OFF_COMPONENTS}")
-    list(REMOVE_ITEM unknown_components "${ARGS_OPTIONAL_COMPONENTS}")
+    set(unknown_components "${ARGS_DEFAULT_OFF_COMPONENTS}")
+    list(REMOVE_ITEM unknown_components ${ARGS_OPTIONAL_COMPONENTS})
     list(LENGTH unknown_components num_unknown)
-    if(NOT unknown_components STREQUAL "0")
+    if(NOT num_unknown STREQUAL "0")
       message(FATAL_ERROR
       "The following components are mentioned in DEFAULT_OFF_COMPONENTS but are not named in "
-      "OPTIONAL_COMPONENTS: ${overlapping_components}")
+      "OPTIONAL_COMPONENTS: ${unknown_components}, ${}")
     endif()
   endif()
 

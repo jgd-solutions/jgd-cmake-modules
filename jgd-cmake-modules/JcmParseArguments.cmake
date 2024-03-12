@@ -298,7 +298,7 @@ macro(JCM_PARSE_ARGUMENTS)
     endif()
 
     set(missing_keywords "${${inclusive_list}}")
-    list(REMOVE_ITEM missing_keywords "${INS_ARGUMENTS}") 
+    list(REMOVE_ITEM missing_keywords ${INS_ARGUMENTS}) 
     if(missing_keywords STREQUAL "${${inclusive_list}}")
       # all keywords in inclusivity list are missing: condition satisfied
       continue()
