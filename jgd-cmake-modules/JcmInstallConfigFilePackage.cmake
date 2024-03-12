@@ -71,7 +71,7 @@ The following project options are created:
     option to override this behaviour, such as generating install rules when the project is not
     top-level.
 
-  <JCM_PROJECT_PREFIX_NAME>_INSTALL_VERSIONED
+<JCM_PROJECT_PREFIX_NAME>_INSTALL_VERSIONED_PATHS
     Boolean controlling whether the install rules produced by this function will install to versioned paths
     or not. This does not affect the config-file package's version-file which is always installed.
     The default value is :cmake:`ON`, meaning installation paths will include
@@ -123,7 +123,7 @@ Examples
 #]=======================================================================]
 function(jcm_install_config_file_package)
   jcm_parse_arguments(
-    OPTIONS "CONFIGURE_PACKAGE_CONFIG_FILES" "INSTALL_LICENSES" "INSTALL_VERSIONED_DEFAULT_OFF"
+    OPTIONS "CONFIGURE_PACKAGE_CONFIG_FILES" "INSTALL_LICENSES" "INSTALL_VERSIONED_PATHS_DEFAULT_OFF"
     MULTI_VALUE_KEYWORDS "TARGETS;CMAKE_MODULES"
     REQUIRES_ANY "TARGETS;CMAKE_MODULES;INSTALL_LICENSES"
     ARGUMENTS "${ARGN}")
@@ -156,11 +156,13 @@ function(jcm_install_config_file_package)
   endif()
 
   jcm_add_option(
-    NAME ${JCM_PROJECT_PREFIX_NAME}_INSTALL_VERSIONED
-    DESCRIPTION "Controls whether install destinations will use versioned paths"
     TYPE BOOL
+    NAME ${JCM_PROJECT_PREFIX_NAME}_INSTALL_VERSIONED_PATHS
+    DESCRIPTION "Controls whether install destinations will use versioned paths"
+    CONDITION "${JCM_PROJECT_PREFIX_NAME}_ENABLE_INSTALL"
+    CONDITION_MET_DEFAULT ON
     DEFAULT ON)
-  if(${${JCM_PROJECT_PREFIX_NAME}_INSTALL_VERSIONED})
+  if(${${JCM_PROJECT_PREFIX_NAME}_INSTALL_VERSIONED_PATHS})
     set(install_cmake_dir "${JCM_INSTALL_CMAKE_DESTINATION}")
     set(install_include_dir "${JCM_INSTALL_INCLUDE_DIR}")
     set(install_doc_dir "${JCM_INSTALL_DOC_DIR}")

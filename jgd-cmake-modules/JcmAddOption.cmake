@@ -23,7 +23,6 @@ jcm_add_option
   .. code-block:: cmake
 
     jcm_add_option(
-      
       [WITHOUT_NAME_PREFIX_CHECK]
       NAME <option-name>
       DESCRIPTION <description>
@@ -144,6 +143,7 @@ function(jcm_add_option)
     ONE_VALUE_KEYWORDS "NAME" "TYPE" "DEFAULT" "DESCRIPTION" "CONDITION" "CONDITION_MET_DEFAULT"
     MULTI_VALUE_KEYWORDS "ACCEPT_VALUES"
     REQUIRES_ALL "NAME" "TYPE" "DEFAULT" "DESCRIPTION"
+    MUTUALLY_INCLUSIVE "CONDITION" "CONDITION_MET_DEFAULT"
     ARGUMENTS "${ARGN}")
 
   # Usage Guards
@@ -152,18 +152,6 @@ function(jcm_add_option)
     message(FATAL_ERROR
       "Argument 'TYPE' to ${CMAKE_CURRENT_FUNCTION} must name one of ${supported_types}. Instead, "
       "it names type '${ARGS_TYPE}'")
-  endif()
-
-  if(DEFINED ARGS_CONDITION AND NOT DEFINED ARGS_CONDITION_MET_DEFAULT)
-    message(FATAL_ERROR
-      "The argument 'CONDITION' must be accompanied by argument 'CONDITION_MET_DEFAULT' in "
-      "function ${CMAKE_CURRENT_FUNCTION}")
-  endif()
-
-  if(NOT DEFINED ARGS_CONDITION AND DEFINED ARGS_CONDITION_MET_DEFAULT)
-    message(AUTHOR_WARNING
-      "Argument 'CONDITION_MET_DEFAULT' has no effect when argument 'CONDITION' isn't provided in "
-      "function ${CMAKE_CURRENT_FUNCTION}")
   endif()
 
   # Option naming scheme
