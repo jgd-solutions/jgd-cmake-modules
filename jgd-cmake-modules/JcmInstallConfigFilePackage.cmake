@@ -125,7 +125,7 @@ Examples
 #]=======================================================================]
 function(jcm_install_config_file_package)
   jcm_parse_arguments(
-    OPTIONS "CONFIGURE_PACKAGE_CONFIG_FILES" "INSTALL_LICENSES" "INSTALL_VERSIONED_PATHS_DEFAULT_OFF"
+    OPTIONS "CONFIGURE_PACKAGE_CONFIG_FILES" "INSTALL_LICENSES"
     MULTI_VALUE_KEYWORDS "TARGETS;CMAKE_MODULES"
     REQUIRES_ANY "TARGETS;CMAKE_MODULES;INSTALL_LICENSES"
     ARGUMENTS "${ARGN}")
