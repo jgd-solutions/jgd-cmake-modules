@@ -431,12 +431,12 @@ Examples
     DEFAULT_OFF_COMPONENTS "extra"
     OUT_COMPONENTS enabled_components
     MISSING_DEPENDENCY_ACTION "ENABLE"
-    COMPONENT_DEPENDENCIES_JSON [[ 
+    COMPONENT_DEPENDENCIES_JSON [=[ 
       {
         "extra": [ "io", "core" ],
         "io": [ "core" ]
       }
-    ]])
+    ]=])
 
 
 --------------------------------------------------------------------------
