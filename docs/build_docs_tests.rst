@@ -74,7 +74,7 @@ activated or JCM may not be able to find Sphinx.
 .. code-block:: bash
 
   cmake -B <build-dir> -D JCM_ENABLE_DOCS=ON ... # manually
-  cmake --preset docs-ninja                     # using preset
+  cmake --preset docs-ninja                      # using preset
 
 Build Docs
 ~~~~~~~~~~
