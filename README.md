@@ -22,8 +22,7 @@ Checkout the full [documentation](https://jgd-solutions.github.io/jgd-cmake-modu
   />
 </p>
 
-Examples
---------
+## Examples
 
 This project uses its own modules, and acts as its own example!
 
