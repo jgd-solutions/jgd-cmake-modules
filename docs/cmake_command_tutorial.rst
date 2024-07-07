@@ -99,7 +99,7 @@ All default build targets from :ref:`configuring <configuringcmake>` can be buil
 
   cmake --build <build-dir>
 
-Specific targets can be individually built with:
+Specific targets can be individually built using the flag :code:`target`:
 
 .. code-block:: bash
 
@@ -108,7 +108,7 @@ Specific targets can be individually built with:
 
 For multi-configuration generators (Ninja Multi-Config, MSVC), those that correspond to
 build-systems which support multiple build-types in a single build-directory, add the
-:code:`--config flag` to build commands:
+:code:`--config` flag to build commands:
 
 .. code-block:: bash
 
@@ -118,6 +118,16 @@ build-systems which support multiple build-types in a single build-directory, ad
 .. note::
 
   All of the available targets can be listed with :code:`cmake --build <build-dir> --target help`
+
+Deleting build artifacts from a build directory, also known as *cleaning*, is useful to subsequently
+build without relying on any previous artifacts. CMake always generates a `clean` target that can be
+"built" to explicitly clean, or the :code:`--clean-first` flag can be provided with :code:`--build`,
+to clean and build in one step:
+
+.. code-block:: bash
+
+  cmake --build <build-dir> --target clean  # only clean
+  cmake --build <build-dir> --clean-first   # clean, then build
 
 Installing
 ~~~~~~~~~~
