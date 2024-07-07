@@ -33,11 +33,15 @@ html_theme = "furo"
 html_use_index = True
 html_domain_indices = True
 html_context = {
-    "display_github": True,  # Integrate GitHub
     "github_user": "jgd-solutions",
     "github_repo": "jgd-cmake-modules",
     "github_version": "main",
     "conf_py_path": "/docs/",
+}
+html_theme_options = {
+    "source_repository": "https://github.com/jgd-solutions/jgd-cmake-modules/",
+    "source_branch": "main",
+    "source_directory": "docs/",
 }
 
 rst_prolog = f"""
