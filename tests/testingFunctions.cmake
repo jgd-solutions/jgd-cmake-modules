@@ -202,3 +202,12 @@ function(_file_exists project_name test_suffix file_path)
     set_tests_properties(${test_name} PROPERTIES DEPENDS "${ARGS_DEPENDS}")
   endif()
 endfunction()
+
+function(ignore_clang_format_violations test_name)
+  # tests of clang-format targets are testing the proper use and application of clang-format on a
+  # project, not that the code is properly formatted, which changes between clang-format versions.
+  # Consequently, this function classifies the test as passing when it produces success or violation
+  # messages; so long as clang-format is running.
+
+  set_tests_properties(${test_name} PROPERTIES PASS_REGULAR_EXPRESSION "\[Formatting\];-Wclang-format-violations")
+endfunction()
