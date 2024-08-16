@@ -21,7 +21,7 @@ jcm_setup_project(PREFIX_NAME "JCM")
 jcm_configure_vcpkg_manifest_file()
 
 if(JCM_ENABLE_TESTS)
-  # Unnecessarily finding ClangFormat here to see what ClangFormat test projects will use
+  # Preemptively finding ClangFormat to see what ClangFormat the test projects will use
   find_package(ClangFormat)
   add_subdirectory("${JCM_PROJECT_TESTS_DIR}")
 endif()

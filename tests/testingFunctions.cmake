@@ -47,7 +47,8 @@ endfunction()
 
 function(_build_and_ctest project_name)
   jcm_parse_arguments(
-    ONE_VALUE_KEYWORDS "NAME_SUFFIX" "BUILD_TARGET" "FIXTURES_SETUP"
+    OPTIONS "DISABLED"
+    ONE_VALUE_KEYWORDS "NAME_SUFFIX" "BUILD_TARGET" "FIXTURES_SETUP" "OUT_TEST_NAME"
     MULTI_VALUE_KEYWORDS "BUILD_OPTIONS" "DEPENDS"
     ARGUMENTS "${ARGN}")
 
@@ -84,6 +85,16 @@ function(_build_and_ctest project_name)
 
   if(DEFINED ARGS_DEPENDS)
     set_tests_properties(${test_name} PROPERTIES DEPENDS "${ARGS_DEPENDS}")
+  endif()
+
+  if(ARGS_DISABLED)
+    set_tests_properties(${test_name} PROPERTIES DISABLED "True")
+  else()
+    set_tests_properties(${test_name} PROPERTIES DISABLED "False")
+  endif()
+
+  if(DEFINED ARGS_OUT_TEST_NAME)
+    set("${ARGS_OUT_TEST_NAME}" "${test_name}" PARENT_SCOPE)
   endif()
 endfunction()
 
@@ -190,4 +201,13 @@ function(_file_exists project_name test_suffix file_path)
   if(DEFINED ARGS_DEPENDS)
     set_tests_properties(${test_name} PROPERTIES DEPENDS "${ARGS_DEPENDS}")
   endif()
+endfunction()
+
+function(ignore_clang_format_violations test_name)
+  # tests of clang-format targets are testing the proper use and application of clang-format on a
+  # project, not that the code is properly formatted, which changes between clang-format versions.
+  # Consequently, this function classifies the test as passing when it produces success or violation
+  # messages; so long as clang-format is running.
+
+  set_tests_properties(${test_name} PROPERTIES PASS_REGULAR_EXPRESSION "\[Formatting\];-Wclang-format-violations")
 endfunction()

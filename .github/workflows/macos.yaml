@@ -27,8 +27,8 @@ jobs:
     # apple-clang doesn't support one-ranges proposal, which
     # is used in automated tests. Not concerned with test C/C++ code, just CMake.
     env:
-      CC: gcc-11
-      CXX: g++-11
+      CC: gcc-14
+      CXX: g++-14
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -41,9 +41,5 @@ jobs:
         run: brew install doxygen clang-format
       - name: Configure tests target
         run: cmake -G "${{ matrix.generator }}" --preset tests-ninja
-      - name: Format test code to ignore formatting errors
-        run: >
-          clang-format --style=file -i
-          $(find tests -name "*.hpp" -o -name "*.cpp" -o -name "*.h" -o -name "*.c")
       - name: Run all automated tests
         run: ctest --preset test-to-fail
