@@ -34,8 +34,11 @@ set_tests_properties(${PROJECT_NAME}-install PROPERTIES
 
 _build_and_ctest("single-exec"
   ${disable_format_tests}
+  OUT_TEST_NAME single-exec-format-test
   NAME_SUFFIX -format
   BUILD_TARGET clang-format-check)
+ignore_clang_format_violations(${single-exec-format-test})
+
 
 _build_and_ctest("single-exec"
   NAME_SUFFIX -message-target
@@ -54,8 +57,10 @@ _add_use_project("single-exec")
 
 _build_and_ctest("many-exec"
   ${disable_format_tests}
+  OUT_TEST_NAME many-exec-format-test
   NAME_SUFFIX -format
   BUILD_TARGET clang-format-check)
+ignore_clang_format_violations(${many-exec-format-test})
 
 _build_and_ctest("many-exec"
   NAME_SUFFIX -omit-formatter
@@ -82,8 +87,10 @@ _add_use_project("many-exec")
 
 _build_and_ctest("libsingle"
   ${disable_format_tests}
+  OUT_TEST_NAME libsingle-format-test
   NAME_SUFFIX -format
   BUILD_TARGET clang-format-check)
+ignore_clang_format_violations(${libsingle-format-test})
 
 _build_and_ctest("libsingle"
   BUILD_OPTIONS -DLIBSINGLE_ENABLE_TESTS=ON
@@ -116,8 +123,10 @@ _file_exists("libsingle" -license-exists "${licenses_dir}/LICENSE.md")
 
 _build_and_ctest("libcomponents"
   ${disable_format_tests}
+  OUT_TEST_NAME libcomponents-format-test
   NAME_SUFFIX -format
   BUILD_TARGET clang-format-check)
+ignore_clang_format_violations(${libcomponents-format-test})
 
 _build_and_ctest("libcomponents"
   NAME_SUFFIX -omit-extra
@@ -155,6 +164,7 @@ _build_and_ctest("libheaders"
   OUT_TEST_NAME libheaders-format-test
   NAME_SUFFIX -format
   BUILD_TARGET clang-format-check)
+ignore_clang_format_violations(${libheaders-format-test})
 
 _build_and_ctest("libheaders"
   FIXTURES_SETUP "libheaders-fixture"
@@ -173,8 +183,10 @@ _file_exists("libheaders" -license-exists
 
 _build_and_ctest("libcstr"
   ${disable_format_tests}
+  OUT_TEST_NAME libcstr-format-test
   NAME_SUFFIX -format
   BUILD_TARGET clang-format-check)
+ignore_clang_format_violations(${libcstr-format-test})
 
 _build_and_ctest("libcstr"
   FIXTURES_SETUP "libcstr-fixture"
