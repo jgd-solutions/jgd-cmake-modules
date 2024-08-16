@@ -10,6 +10,10 @@ jcm_check_symlinks_cloned(
 if(broken_symlink)
   message(WARNING "Project ${PROJECT_NAME} will not create any clang-format tests due to the "
     "following error:\n" ${symlink_message})
+
+  set(disable_format_tests "DISABLED")
+else()
+  unset(disable_format_tests)
 endif()
 
 
@@ -28,11 +32,10 @@ set_tests_properties(${PROJECT_NAME}-install PROPERTIES
 
 # == single-exec ==
 
-if(NOT broken_symlink)
-  _build_and_ctest("single-exec"
-    NAME_SUFFIX -format
-    BUILD_TARGET clang-format-check)
-endif()
+_build_and_ctest("single-exec"
+  ${disable_format_tests}
+  NAME_SUFFIX -format
+  BUILD_TARGET clang-format-check)
 
 _build_and_ctest("single-exec"
   NAME_SUFFIX -message-target
@@ -49,11 +52,10 @@ _add_use_project("single-exec")
 
 # == many-exec ==
 
-if(NOT broken_symlink)
-  _build_and_ctest("many-exec"
-    NAME_SUFFIX -format
-    BUILD_TARGET clang-format-check)
-endif()
+_build_and_ctest("many-exec"
+  ${disable_format_tests}
+  NAME_SUFFIX -format
+  BUILD_TARGET clang-format-check)
 
 _build_and_ctest("many-exec"
   NAME_SUFFIX -omit-formatter
@@ -78,11 +80,10 @@ _add_use_project("many-exec")
 
 # == libsingle ==
 
-if(NOT broken_symlink)
-  _build_and_ctest("libsingle"
-    NAME_SUFFIX -format
-    BUILD_TARGET clang-format-check)
-endif()
+_build_and_ctest("libsingle"
+  ${disable_format_tests}
+  NAME_SUFFIX -format
+  BUILD_TARGET clang-format-check)
 
 _build_and_ctest("libsingle"
   BUILD_OPTIONS -DLIBSINGLE_ENABLE_TESTS=ON
@@ -113,11 +114,10 @@ _file_exists("libsingle" -license-exists "${licenses_dir}/LICENSE.md")
 
 # == libcomponents ==
 
-if(NOT broken_symlink)
-  _build_and_ctest("libcomponents"
-    NAME_SUFFIX -format
-    BUILD_TARGET clang-format-check)
-endif()
+_build_and_ctest("libcomponents"
+  ${disable_format_tests}
+  NAME_SUFFIX -format
+  BUILD_TARGET clang-format-check)
 
 _build_and_ctest("libcomponents"
   NAME_SUFFIX -omit-extra
@@ -150,11 +150,11 @@ _add_use_project("libcomponents")
 
 # == libheaders ==
 
-if(NOT broken_symlink)
-  _build_and_ctest("libheaders"
-    NAME_SUFFIX -format
-    BUILD_TARGET clang-format-check)
-endif()
+_build_and_ctest("libheaders"
+  ${disable_format_tests}
+  OUT_TEST_NAME libheaders-format-test
+  NAME_SUFFIX -format
+  BUILD_TARGET clang-format-check)
 
 _build_and_ctest("libheaders"
   FIXTURES_SETUP "libheaders-fixture"
@@ -171,11 +171,10 @@ _file_exists("libheaders" -license-exists
 
 # == libcstr ==
 
-if(NOT broken_symlink)
-  _build_and_ctest("libcstr"
-    NAME_SUFFIX -format
-    BUILD_TARGET clang-format-check)
-endif()
+_build_and_ctest("libcstr"
+  ${disable_format_tests}
+  NAME_SUFFIX -format
+  BUILD_TARGET clang-format-check)
 
 _build_and_ctest("libcstr"
   FIXTURES_SETUP "libcstr-fixture"
@@ -203,7 +202,7 @@ jcm_add_component_options(
   DEFAULT_OFF_COMPONENTS "extra"
   OUT_COMPONENTS enabled_components
   MISSING_DEPENDENCY_ACTION "ENABLE"
-  COMPONENT_DEPENDENCIES_JSON [[ 
+  COMPONENT_DEPENDENCIES_JSON [[
     {
       "extra": [ "io", "core" ],
       "io": []
