@@ -59,7 +59,7 @@ Examples
 
 .. code-block:: cmake
 
-  # additionally considers executables "clang-format-14.0" and "clang-format-14"
+  # considers executables "clang-format-14.0" and "clang-format-14" before "clang-format"
 
   find_package(ClangFormat 14.0 REQUIRED)
 
