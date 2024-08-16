@@ -47,7 +47,8 @@ endfunction()
 
 function(_build_and_ctest project_name)
   jcm_parse_arguments(
-    ONE_VALUE_KEYWORDS "NAME_SUFFIX" "BUILD_TARGET" "FIXTURES_SETUP"
+    OPTIONS "DISABLED"
+    ONE_VALUE_KEYWORDS "NAME_SUFFIX" "BUILD_TARGET" "FIXTURES_SETUP" "OUT_TEST_NAME"
     MULTI_VALUE_KEYWORDS "BUILD_OPTIONS" "DEPENDS"
     ARGUMENTS "${ARGN}")
 
@@ -84,6 +85,16 @@ function(_build_and_ctest project_name)
 
   if(DEFINED ARGS_DEPENDS)
     set_tests_properties(${test_name} PROPERTIES DEPENDS "${ARGS_DEPENDS}")
+  endif()
+
+  if(ARGS_DISABLED)
+    set_tests_properties(${test_name} PROPERTIES DISABLED "True")
+  else()
+    set_tests_properties(${test_name} PROPERTIES DISABLED "False")
+  endif()
+
+  if(DEFINED ARGS_OUT_TEST_NAME)
+    set("${ARGS_OUT_TEST_NAME}" "${test_name}" PARENT_SCOPE)
   endif()
 endfunction()
 

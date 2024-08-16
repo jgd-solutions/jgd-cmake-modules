@@ -25,6 +25,8 @@ The following variables are defined:
   -Wconversion
   -Wsign-conversion
   -Weffc++
+  -Wno-non-virtual-dtor
+  -Wdelete-non-virtual-dtor
 
 :cmake:variable:`JCM_DEFAULT_C_COMPILE_OPTIONS_GNU`
   -Wall
@@ -62,7 +64,8 @@ list(
   -Wpedantic
   -Wconversion
   -Wsign-conversion
-  -Weffc++)
+  -Weffc++
+  -Wno-non-virtual-dtor)
 
 list(
   APPEND
