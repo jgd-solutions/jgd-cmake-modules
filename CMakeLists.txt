@@ -20,6 +20,12 @@ include(JcmConfigureFiles)
 jcm_setup_project(PREFIX_NAME "JCM")
 jcm_configure_vcpkg_manifest_file()
 
+jcm_add_option(
+  NAME JCM_INSTALL_LICENSES
+  DESCRIPTION "Triggers the installation to install license files"
+  TYPE BOOL
+  DEFAULT ON)
+
 if(JCM_ENABLE_TESTS)
   # Preemptively finding ClangFormat to see what ClangFormat the test projects will use
   find_package(ClangFormat)
@@ -31,7 +37,13 @@ if(JCM_ENABLE_DOCS)
   add_subdirectory("${JCM_PROJECT_DOCS_DIR}")
 endif()
 
+if(JCM_INSTALL_LICENSES)
+  set(install_licences_arg "INSTALL_LICENSES")
+else()
+  unset(install_licences_arg)
+endif()
+
 jcm_install_config_file_package(
-  INSTALL_LICENSES
+  ${install_licences_arg}
   CONFIGURE_PACKAGE_CONFIG_FILES
   CMAKE_MODULES "${PROJECT_NAME}")
