@@ -177,7 +177,9 @@ function(jcm_add_option)
       "${ARGS_CONDITION_MET_DEFAULT}"
       "${ARGS_CONDITION}"
       "${ARGS_DEFAULT}")
-    set_property(CACHE "${ARGS_NAME}" PROPERTY TYPE "${ARGS_TYPE}")
+    if(DEFINED CACHE{ARGS_NAME})
+      set_property(CACHE "${ARGS_NAME}" PROPERTY TYPE "${ARGS_TYPE}")
+    endif()
   else()
     set(${ARGS_NAME} ${ARGS_DEFAULT} CACHE ${ARGS_TYPE} ${ARGS_DESCRIPTION})
   endif()
