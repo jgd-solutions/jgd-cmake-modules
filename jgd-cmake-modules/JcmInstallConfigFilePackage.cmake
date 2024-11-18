@@ -199,7 +199,7 @@ function(jcm_install_config_file_package)
     endif()
     jcm_package_config_file_name(${comp_arg} OUT_VAR config_file_name)
 
-    if(DEFINED ARGS_CONFIGURE_PACKAGE_CONFIG_FILES)
+    if(ARGS_CONFIGURE_PACKAGE_CONFIG_FILES)
       set(in_config_file "${config_file_name}${JCM_IN_FILE_EXTENSION}")
       string(PREPEND in_config_file "${JCM_PROJECT_CMAKE_DIR}/")
 
