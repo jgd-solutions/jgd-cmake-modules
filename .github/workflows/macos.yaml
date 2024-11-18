@@ -20,7 +20,7 @@ on:
       - main
 jobs:
   build-test-mac:
-    runs-on: macos-12
+    runs-on: macos-15
     strategy:
       matrix:
         generator: ["Ninja"]
