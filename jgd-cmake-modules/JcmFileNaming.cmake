@@ -129,8 +129,7 @@ macro(_JCM_JOINED_FILE_NAME)
     set(
       ${ARGS_OUT_VAR}
       "${project}${delim}${ARGS_COMPONENT}${delim}${suffix}"
-      PARENT_SCOPE
-    )
+      PARENT_SCOPE)
   endif()
 
   unset(suffix)
@@ -140,8 +139,8 @@ endmacro()
 
 # handles parsing arguments for the following *_file_name commands, as they all accept similar
 # arguments.
-macro(_JCM_FILE_NAMING_ARGUMENTS with_component args)
-  if(${with_component})
+macro(_JCM_FILE_NAMING_ARGUMENTS accept_component args)
+  if(${accept_component})
     set(comp_keyword COMPONENT)
   else()
     unset(comp_keyword)
@@ -150,8 +149,7 @@ macro(_JCM_FILE_NAMING_ARGUMENTS with_component args)
   jcm_parse_arguments(
     ONE_VALUE_KEYWORDS "${comp_keyword};PROJECT;OUT_VAR"
     REQUIRES_ALL "OUT_VAR"
-    ARGUMENTS "${args}"
-  )
+    ARGUMENTS "${args}")
   if(DEFINED ARGS_PROJECT)
     set(proj_arg PROJECT ${ARGS_PROJECT})
   else()
@@ -177,8 +175,7 @@ jcm_package_config_file_name
     jcm_package_config_file_name(
       [PROJECT <project>]
       [COMPONENT <component>]
-      OUT_VAR <out-var>
-    )
+      OUT_VAR <out-var>)
 
 Constructs a consistent kebab-case package configuration file name based on the
 :cmake:variable:`PROJECT`, which defaults to :cmake:variable:`PROJECT_NAME`, and
@@ -217,8 +214,7 @@ Examples
   jcm_package_config_file_name(
     PROJECT libimage
     COMPONENT core
-    OUT_VAR file_name
-  )
+    OUT_VAR file_name)
 
 --------------------------------------------------------------------------
 
@@ -229,8 +225,7 @@ function(jcm_package_config_file_name)
     ${proj_arg}
     ${comp_arg}
     SUFFIX "config.cmake"
-    OUT_VAR "${ARGS_OUT_VAR}"
-  )
+    OUT_VAR "${ARGS_OUT_VAR}")
 endfunction()
 
 #[=======================================================================[.rst:
@@ -244,8 +239,7 @@ jcm_package_version_file_name
 
     jcm_package_version_file_name(
       [PROJECT <project>]
-      OUT_VAR <out-var>
-    )
+      OUT_VAR <out-var>)
 
 Constructs a consistent kebab-case package version file name based on the :cmake:variable:`PROJECT`,
 which defaults to :cmake:variable:`PROJECT_NAME`. The resulting file name will be placed in the
@@ -281,8 +275,7 @@ function(jcm_package_version_file_name)
   _jcm_joined_file_name(
     ${proj_arg}
     SUFFIX "config-version.cmake"
-    OUT_VAR "${ARGS_OUT_VAR}"
-  )
+    OUT_VAR "${ARGS_OUT_VAR}")
 endfunction()
 
 #
@@ -313,8 +306,7 @@ jcm_package_targets_file_name
     jcm_package_targets_file_name(
       [PROJECT <project>]
       [COMPONENT <component>]
-      OUT_VAR <out-var>
-    )
+      OUT_VAR <out-var>)
 
 Constructs a consistent kebab-case package targets file name based on the :cmake:variable:`PROJECT`,
 which defaults to :cmake:variable:`PROJECT_NAME`, and :cmake:variable:`COMPONENT`, if provided.  The
@@ -354,8 +346,7 @@ Examples
   jcm_package_targets_file_name(
     PROJECT libimage
     COMPONENT core
-    OUT_VAR file_name
-  )
+    OUT_VAR file_name)
 
 --------------------------------------------------------------------------
 
@@ -366,6 +357,5 @@ function(jcm_package_targets_file_name)
     ${proj_arg}
     ${comp_arg}
     SUFFIX "targets.cmake"
-    OUT_VAR ${ARGS_OUT_VAR}
-  )
+    OUT_VAR ${ARGS_OUT_VAR})
 endfunction()

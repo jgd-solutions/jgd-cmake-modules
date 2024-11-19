@@ -75,6 +75,10 @@ function(jcm_library_naming)
     "OUT_OUTPUT_NAME"
     ARGUMENTS "${ARGN}")
 
+  if(ARGS_COMPONENT STREQUAL project_name) 
+    message(FATAL_ERROR "The library component name cannot be the project name, ${PROJECT_NAME}")
+  endif()
+
   # Resolve project name
   if(ARGS_PROJECT)
     set(project_name ${ARGS_PROJECT})
@@ -83,7 +87,7 @@ function(jcm_library_naming)
   endif()
 
   # Resolve component
-  if(DEFINED ARGS_COMPONENT AND NOT ARGS_COMPONENT STREQUAL project_name)
+  if(DEFINED ARGS_COMPONENT)
     set(component ${ARGS_COMPONENT})
   else()
     unset(component)
@@ -180,8 +184,11 @@ function(jcm_executable_naming)
     "OUT_TARGET"
     "OUT_EXPORT_NAME"
     "OUT_OUTPUT_NAME"
-    ARGUMENTS "${ARGN}"
-  )
+    ARGUMENTS "${ARGN}")
+
+  if(ARGS_COMPONENT STREQUAL project_name) 
+    message(FATAL_ERROR "The execute component name cannot be the project name, ${PROJECT_NAME}")
+  endif()
 
   # Resolve project name
   if(ARGS_PROJECT)
@@ -191,7 +198,7 @@ function(jcm_executable_naming)
   endif()
 
   # Resolve component
-  if(DEFINED ARGS_COMPONENT AND NOT ARGS_COMPONENT STREQUAL project_name)
+  if(DEFINED ARGS_COMPONENT)
     set(component ${ARGS_COMPONENT})
   else()
     unset(component)
