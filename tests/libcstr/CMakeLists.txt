@@ -6,7 +6,9 @@ if(PROJECT_IS_TOP_LEVEL)
 endif()
 
 find_package(jgd-cmake-modules CONFIG REQUIRED)
-find_package(ClangFormat)
+if(PROJECT_IS_TOP_LEVEL)
+  find_package(ClangFormat)
+endif()
 
 include(JcmAllModules)
 jcm_setup_project()

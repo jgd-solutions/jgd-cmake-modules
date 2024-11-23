@@ -13,7 +13,9 @@ jcm_add_component_options(
   OUT_COMPONENTS libcomponents_components
   OUT_TARGETS libcomponents_targets)
 
-find_package(ClangFormat)
+if(PROJECT_IS_TOP_LEVEL)
+  find_package(ClangFormat)
+endif()
 
 jcm_source_subdirectories(
   ADD_SUBDIRS

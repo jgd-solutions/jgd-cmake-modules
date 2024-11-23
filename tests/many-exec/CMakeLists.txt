@@ -2,7 +2,9 @@ cmake_minimum_required(VERSION 3.23)
 project(many-exec VERSION 0.0.0 LANGUAGES CXX)
 
 find_package(jgd-cmake-modules CONFIG REQUIRED)
-find_package(ClangFormat)
+if(PROJECT_IS_TOP_LEVEL)
+  find_package(ClangFormat)
+endif()
 
 include(JcmAllModules)
 jcm_setup_project()
