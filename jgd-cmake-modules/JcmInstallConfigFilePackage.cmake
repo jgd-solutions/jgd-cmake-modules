@@ -229,7 +229,8 @@ function(jcm_install_config_file_package)
 
   # Resolve components' package config files, append to cmake files to be installed
   foreach(target ${ARGS_TARGETS})
-    get_target_property(component ${target} COMPONENT)
+    get_target_property(component ${target} EXPORT_NAME)
+
     if(NOT component)
       continue()
     endif()
@@ -275,11 +276,12 @@ function(jcm_install_config_file_package)
   # == Install targets via export sets ==
 
   foreach(target ${ARGS_TARGETS})
-    unset(target_component)
+    unset(target_export_component)
     unset(comp_arg)
-    get_target_property(target_component ${target} COMPONENT)
-    if(target_component)
-      set(comp_arg COMPONENT ${target_component})
+    get_target_property(target_export_component ${target} EXPORT_NAME)
+
+    if(target_export_component)
+      set(comp_arg COMPONENT ${target_export_component})
     endif()
 
     jcm_package_targets_file_name(${comp_arg} OUT_VAR targets_file)
