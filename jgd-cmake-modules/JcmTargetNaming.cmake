@@ -213,10 +213,11 @@ function(jcm_executable_naming)
 
   # Export name
   if(DEFINED ARGS_OUT_EXPORT_NAME)
-    # there's a component and the project doesn't start with JCM_LIB_PREFIX
+    # the project is an executable project and this executable is a component
     if(DEFINED component AND no_prefix STREQUAL project_name)
       set(${ARGS_OUT_EXPORT_NAME} ${component} PARENT_SCOPE)
     else()
+    # the project is a library project or this executable is not a component
       set(${ARGS_OUT_EXPORT_NAME} ${base_name} PARENT_SCOPE)
     endif()
   endif()
