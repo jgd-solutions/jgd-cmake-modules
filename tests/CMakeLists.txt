@@ -221,16 +221,16 @@ _install_project("daemon" FIXTURES_REQUIRED daemon-fixture)
 _find_use_project("daemon" COMPONENTS libdaemon)
 _add_use_project("daemon")
 
-# set(cmake_install_dir "${test_install_dir}/share/cmake/daemon-0.0.0/")
-# _file_exists("daemon" -license1-exists "${licenses_dir}/license1.txt")
-# _file_exists("daemon" -license2-exists "${licenses_dir}/license2.txt")
+set(cmake_install_dir "${test_install_dir}/share/daemon-0.0.0")
+_file_exists("daemon" -project-config-exists "${cmake_install_dir}/daemon-config.cmake")
+_file_exists("daemon" -project-targets-exists "${cmake_install_dir}/daemon-targets.cmake")
+_file_exists("daemon" -lib-config-exists "${cmake_install_dir}/daemon-libdaemon-config.cmake")
+_file_exists("daemon" -lib-targets-exists "${cmake_install_dir}/daemon-libdaemon-targets.cmake")
 
-# set_tests_properties("daemon-license1-exists" "daemon-license2-exists"
-#   PROPERTIES FIXTURES_REQUIRED daemon-install-fixture)
-
-# is libdaemon present
-# can libdaemon be installed independently
-
+set_tests_properties(
+  "daemon-project-config-exists" "daemon-project-targets-exists"
+  "daemon-lib-config-exists" "daemon-lib-config-exists"
+  PROPERTIES FIXTURES_REQUIRED daemon-install-fixture)
 
 # == independent tests ==
 
