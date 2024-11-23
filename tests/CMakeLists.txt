@@ -204,6 +204,33 @@ _file_exists("libcstr" -license2-exists "${licenses_dir}/license2.txt")
 set_tests_properties("libcstr-license1-exists" "libcstr-license2-exists"
   PROPERTIES FIXTURES_REQUIRED libcstr-install-fixture)
 
+# == daemon ==
+
+_build_and_ctest("daemon"
+  ${disable_format_tests}
+  OUT_TEST_NAME daemon-format-test
+  NAME_SUFFIX -format
+  BUILD_TARGET clang-format-check)
+ignore_clang_format_violations(${daemon-format-test})
+
+_build_and_ctest("daemon"
+  FIXTURES_SETUP "daemon-fixture"
+  DEPENDS daemon-format)
+
+_install_project("daemon" FIXTURES_REQUIRED daemon-fixture)
+_find_use_project("daemon" COMPONENTS libdaemon)
+_add_use_project("daemon")
+
+# set(cmake_install_dir "${test_install_dir}/share/cmake/daemon-0.0.0/")
+# _file_exists("daemon" -license1-exists "${licenses_dir}/license1.txt")
+# _file_exists("daemon" -license2-exists "${licenses_dir}/license2.txt")
+
+# set_tests_properties("daemon-license1-exists" "daemon-license2-exists"
+#   PROPERTIES FIXTURES_REQUIRED daemon-install-fixture)
+
+# is libdaemon present
+# can libdaemon be installed independently
+
 
 # == independent tests ==
 

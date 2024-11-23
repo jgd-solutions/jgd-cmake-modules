@@ -111,6 +111,15 @@ elseif(test_name MATCHES "libcstr")
   add_executable(${test_name} use_libcstr.c)
   target_link_libraries(${test_name} PRIVATE libcstr::libcstr)
 
+elseif(test_name MATCHES "daemon")
+  # use daemon executable
+  add_test(NAME ${test_name}-exec COMMAND daemon::daemon)
+
+  # use libdaemon library
+  add_executable(${test_name} use_libdaemon.cpp)
+  target_link_libraries(${test_name} PRIVATE daemon::libdaemon)
+  __copy_dependency_dlls(${test_name} copy_dll_tests daemon::libdaemon)
+
 else()
   message(FATAL_ERROR "${test_name} is not a recognized test name in ${PROJECT_NAME}")
 endif()

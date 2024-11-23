@@ -27,6 +27,7 @@ Test Layout
 .. _libheaders_link:               https://github.com/jgd-solutions/jgd-cmake-modules/tree/main/tests/libheaders
 .. _many-exec_link:                https://github.com/jgd-solutions/jgd-cmake-modules/tree/main/tests/many-exec
 .. _libcstr_link:                  https://github.com/jgd-solutions/jgd-cmake-modules/tree/main/tests/libcstr
+.. _daemon_link:                   https://github.com/jgd-solutions/jgd-cmake-modules/tree/main/tests/daemon
 
 - `test-project-consumption <test-project-consumption_link_>`__: A project that finds and consumes each of the following test projects.
   This ensures projects created with JCM can be consumed properly.
@@ -37,3 +38,4 @@ Test Layout
 - `libheaders <libheaders_link_>`__: Produces a single header-only library.
 - `many-exec <many-exec_link_>`__: Produces multiple executables through a single project, offered as executable components.
 - `libcstr <libcstr_link_>`__: Produces a single library in C, in order to test and exemplify usage of a C project
+- `daemon` <daemon_link_>`__: Produces an executable AND a supplementary library.
