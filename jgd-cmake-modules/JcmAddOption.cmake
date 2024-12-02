@@ -383,7 +383,10 @@ One Value
   The document structure is an object where keys are names of optional components, and  values 
   are arrays of component names. When the component named by one of the object entries is enabled by
   its respective build option, all the build options for the components named in the value array
-  will also be enabled. Although unnecessary, required component can be named in the value array.
+  must also be enabled to fulfill the dependency. Based on the value of 
+  :cmake:variable`MISSING_DEPENDENCY_ACTION`, any disabled component dependencies will either be
+  automatically enabled or cause an error will be emitted. Although unnecessary, required component
+  can be named in the value array.
 
   This argument must be accompanied by :cmake:variable:`MISSING_DEPENDENCY_ACTION`.
 
@@ -485,7 +488,7 @@ function(jcm_add_component_options)
     endif()
   endif()
 
-  set(available_actions "FORCE|ENABLE")
+  set(available_actions "ERROR|ENABLE")
   if(DEFINED ARGS_MISSING_DEPENDENCY_ACTION AND 
     NOT ARGS_MISSING_DEPENDENCY_ACTION MATCHES "${available_actions}")
     message(FATAL_ERROR "MISSING_DEPENDENCY_ACTIONS must be one of ${available_actions}")
@@ -499,7 +502,6 @@ function(jcm_add_component_options)
   list(TRANSFORM option_names TOUPPER)
   list(TRANSFORM option_names PREPEND "${JCM_PROJECT_PREFIX_NAME}_ENABLE_")
 
-  set(forced_dependencies_message)
   foreach(control IN ZIP_LISTS ARGS_OPTIONAL_COMPONENTS option_names)
     set(component "${control_0}")
     set(option_name "${control_1}")
@@ -529,7 +531,6 @@ function(jcm_add_component_options)
       continue()
     endif()
 
-    set(forced_dependencies) 
     math(EXPR max_dep_index "${num_deps} - 1")
     foreach(dependency_idx RANGE ${max_dep_index})
       # 1. get associated build option of named dependency from JSON
@@ -544,7 +545,10 @@ function(jcm_add_component_options)
 
       # 3. if not, take the action specified by MISSING_DEPENDENCY_ACTION
       if(ARGS_MISSING_DEPENDENCY_ACTION STREQUAL ENABLE)
-        set(${option_name} ON)
+        message(NOTICE
+          "Project component '${dependency}' is disabled but required by the enabled component, "
+          "'${component}'. Enabling via the option ${dependency_option_name}")
+        set(${dependency_option_name} ON)
       else()
         message(FATAL_ERROR
           "The project component '${component}' depends upon component '${dependency}', but this "
