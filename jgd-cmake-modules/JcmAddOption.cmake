@@ -268,54 +268,6 @@ macro(_verify_component_dependencies_json)
   endif(num_entries STREQUAL "0")
 endmacro()
 
-macro(_verify_component_dependencies_json)
-  string(JSON num_entries LENGTH "${ARGS_COMPONENT_DEPENDENCIES_JSON}")
-  if(NOT num_entries STREQUAL "0")
-    math(EXPR max_index "${num_entries} - 1")
-    foreach(entry_idx RANGE ${max_index})
-      string(JSON entry_key MEMBER "${ARGS_COMPONENT_DEPENDENCIES_JSON}" ${entry_idx})
-      if(NOT entry_key IN_LIST ARGS_OPTIONAL_COMPONENTS)
-        message(FATAL_ERROR "${json_err_msg_base}" "Entry '${}' is not named in OPTIONAL_COMPONENTS")
-      endif()
-
-      # # 2. is this the value an array
-      string(JSON dependencies GET "${ARGS_COMPONENT_DEPENDENCIES_JSON}" ${entry_key})
-      string(JSON json_kind TYPE "${dependencies}")
-      if(NOT json_kind STREQUAL "ARRAY")
-        message(FATAL_ERROR
-          "${json_err_msg_base}" "Values of the dependencies object must be arrays; found "
-          "'${json_kind}' @ COMPONENT_DEPENDENCIES_JSON[${entry_key}]")
-      endif()
-
-      # # 3. is every entry in the array a string naming an optional or required component?
-      string(JSON num_deps LENGTH "${dependencies}")
-      if(num_deps STREQUAL "0")
-        continue()
-      endif()
-
-      math(EXPR max_dep_index "${num_deps} - 1")
-      foreach(dependency_idx RANGE ${max_dep_index})
-        string(JSON dependency GET "${dependencies}" ${dependency_idx})
-        string(JSON json_kind TYPE "${dependencies}" ${dependency_idx})
-        if(NOT json_kind STREQUAL "STRING")
-          message(FATAL_ERROR
-            "${json_err_msg_base}" "Elements of every component dependencies array must contain "
-            " strings; found '${json_kind}' @ "
-            "COMPONENT_DEPENDENCIES_JSON[${entry_key}][${dependency_idx}]")
-        endif()
-
-        if(NOT (dependency IN_LIST ARGS_OPTIONAL_COMPONENTS OR 
-                dependency IN_LIST ARGS_REQUIRED_COMPONENTS))
-          message(FATAL_ERROR
-            "${json_err_msg_base}" "Component '${dependency}', named as dependency of ${entry_key} "
-            "is not named in OPTIONAL_COMPONENTS nor REQUIRED_COMPONENTS - "
-            "COMPONENT_DEPENDENCIES_JSON[${entry_key}][${dependency_idx}]")
-        endif()
-      endforeach()
-    endforeach()
-  endif()
-endmacro()
-
 
 #[=======================================================================[.rst:
 
@@ -484,7 +436,7 @@ function(jcm_add_component_options)
     if(NOT num_unknown STREQUAL "0")
       message(FATAL_ERROR
       "The following components are mentioned in DEFAULT_OFF_COMPONENTS but are not named in "
-      "OPTIONAL_COMPONENTS: ${unknown_components}, ${}")
+      "OPTIONAL_COMPONENTS: ${unknown_components}")
     endif()
   endif()
 
@@ -520,11 +472,11 @@ function(jcm_add_component_options)
       DEFAULT ${default_value}
       DESCRIPTION "${option_description}")
 
-    # overwrite based on dependencies
-    if(NOT ARGS_COMPONENT_DEPENDENCIES_JSON)
+    if(NOT ${option_name} OR  NOT ARGS_COMPONENT_DEPENDENCIES_JSON)
       continue()
     endif()
 
+    # overwrite based on dependencies
     string(JSON dependencies GET "${ARGS_COMPONENT_DEPENDENCIES_JSON}" ${component})
     string(JSON num_deps LENGTH "${dependencies}")
     if(num_deps STREQUAL "0")
@@ -547,13 +499,13 @@ function(jcm_add_component_options)
       if(ARGS_MISSING_DEPENDENCY_ACTION STREQUAL ENABLE)
         message(NOTICE
           "Project component '${dependency}' is disabled but required by the enabled component, "
-          "'${component}'. Enabling via the option ${dependency_option_name}")
+          "'${component}'. Enabling '${dependency}' via the option ${dependency_option_name}")
         set(${dependency_option_name} ON)
       else()
         message(FATAL_ERROR
-          "The project component '${component}' depends upon component '${dependency}', but this "
-          "component is disabled. Enable ${PROJECT_NAME}::${dependency} with the option "
-          "${dependency_option_name}")
+          "The project component '${component}' is enabled by option '${option_name}' and depends "
+          "upon the disabled component '${dependency}'. Enable ${PROJECT_NAME}::${dependency} with "
+          "the option ${dependency_option_name} or disable component '${component}'")
       endif()
     endforeach()
   endforeach()
