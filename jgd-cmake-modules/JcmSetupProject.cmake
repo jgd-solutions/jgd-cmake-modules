@@ -228,6 +228,7 @@ macro(JCM_SETUP_PROJECT)
   endif()
   _jcm_warn_set(CMAKE_OPTIMIZE_DEPENDENCIES ON)
   _jcm_warn_set(CMAKE_LINK_WHAT_YOU_USE ON)
+  _jcm_warn_set(CMAKE_LINK_LIBRARIES_ONLY_TARGETS ON)
   _jcm_warn_set(CMAKE_COLOR_DIAGNOSTICS ON)
   _jcm_warn_set(CMAKE_DEBUG_POSTFIX "-debug")
 
