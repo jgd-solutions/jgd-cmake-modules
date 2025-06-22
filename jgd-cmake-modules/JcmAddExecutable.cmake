@@ -62,6 +62,7 @@ This function will:
   - OUTPUT_NAME
   - EXPORT_NAME
   - COMPILE_OPTIONS
+  - LINK_OPTIONS
   - INCLUDE_DIRECTORIES
   - COMPONENT (custom property to JCM)
 
@@ -221,7 +222,8 @@ function(jcm_add_executable)
   set_target_properties(${target_name}
     PROPERTIES OUTPUT_NAME ${output_name}
     EXPORT_NAME ${export_name}
-    COMPILE_OPTIONS "${JCM_DEFAULT_COMPILE_OPTIONS}")
+    COMPILE_OPTIONS "${JCM_DEFAULT_COMPILE_OPTIONS}"
+    LINK_OPTIONS "${JCM_DEFAULT_LINK_OPTIONS}")
 
   # include directories on the executable
   if(executable_headers)

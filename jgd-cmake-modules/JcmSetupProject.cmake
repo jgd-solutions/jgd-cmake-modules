@@ -79,7 +79,6 @@ This function will:
 
     - :cmake:variable:`CMAKE_BUILD_TYPE`
     - :cmake:variable:`CMAKE_EXPORT_COMPILE_COMMANDS`
-    - :cmake:variable:`CMAKE_LINK_WHAT_YOU_USE`
     - :cmake:variable:`CMAKE_COLOR_DIAGNOSTICS`
     - :cmake:variable:`CMAKE_INSTALL_PREFIX`
     - :cmake:variable:`CMAKE_DEBUG_POSTFIX`
@@ -227,7 +226,6 @@ macro(JCM_SETUP_PROJECT)
     _jcm_warn_set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE BOOL "Control generation of compilation DB" FORCE)
   endif()
   _jcm_warn_set(CMAKE_OPTIMIZE_DEPENDENCIES ON)
-  _jcm_warn_set(CMAKE_LINK_WHAT_YOU_USE ON)
   _jcm_warn_set(CMAKE_LINK_LIBRARIES_ONLY_TARGETS ON)
   _jcm_warn_set(CMAKE_COLOR_DIAGNOSTICS ON)
   _jcm_warn_set(CMAKE_DEBUG_POSTFIX "-debug")

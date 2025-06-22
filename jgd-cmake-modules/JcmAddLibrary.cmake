@@ -71,6 +71,7 @@ This function will:
   - EXPORT_NAME
   - PREFIX
   - COMPILE_OPTIONS
+  - LINK_OPTIONS
   - INTERFACE_INCLUDE_DIRECTORIES
   - INCLUDE_DIRECTORIES
   - VERSION
@@ -335,7 +336,8 @@ function(jcm_add_library)
     OUTPUT_NAME ${output_name}
     PREFIX "" # JCM already mandates 'lib' prefix; don't prepend another
     EXPORT_NAME ${export_name}
-    COMPILE_OPTIONS "${JCM_DEFAULT_COMPILE_OPTIONS}")
+    COMPILE_OPTIONS "${JCM_DEFAULT_COMPILE_OPTIONS}"
+    LINK_OPTIONS "${JCM_DEFAULT_LINK_OPTIONS}")
 
   # shared library versioning
   if(PROJECT_VERSION AND lib_type STREQUAL "SHARED")
