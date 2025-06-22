@@ -24,11 +24,6 @@ jobs:
     strategy:
       matrix:
         generator: ["Ninja"]
-    # apple-clang doesn't support one-ranges proposal, which
-    # is used in automated tests. Not concerned with test C/C++ code, just CMake.
-    env:
-      CC: gcc-14
-      CXX: g++-14
     steps:
       - name: Checkout
         uses: actions/checkout@v3

@@ -11,6 +11,7 @@ jcm_add_library(
 # a subdirectory that's "complex" enough to warrant a separate CMakeLists.txt file.
 add_subdirectory(material)
 
+target_compile_features(${target} PUBLIC cxx_std_11)
 target_compile_features(${target} PRIVATE cxx_std_17)
 
 jcm_add_test_executable(
