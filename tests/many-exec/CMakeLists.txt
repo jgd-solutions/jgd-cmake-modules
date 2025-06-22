@@ -15,6 +15,8 @@ many_exec_get_enabled_targets(
   OUT_BUILD_TARGETS  "MANY_EXEC_ENABLE_TARGETS"
   OUT_FORMAT_TARGETS "MANY_EXEC_CLANG_FORMAT_TARGETS")
 
+message(WARNING "CMAKE_CXX_STANDARD: ${CMAKE_CXX_STANDARD}")
+
 jcm_source_subdirectories(ADD_SUBDIRS WITH_TESTS_DIR)
 
 jcm_install_config_file_package(

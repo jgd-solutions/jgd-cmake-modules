@@ -5,6 +5,7 @@ jcm_add_test_executable(
   NAME equality-ut
   SOURCES equality.test.cpp
   LIBS libheaders::libheaders)
+
 jcm_add_test_executable(
   NAME sum-ut
   SOURCES sum.test.cpp
