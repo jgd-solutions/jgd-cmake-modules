@@ -5,18 +5,13 @@
 
 namespace headers {
 
-template <std::ranges::input_range Rng, typename Val = std::ranges::range_value_t<Rng>>
-requires requires(Val first, const Val second) {
-  {
-    first + second
-  } -> std::same_as<Val>;
-  first = second;
-}
-Val sum(const Rng& rng)
+template <std::ranges::input_range Rng>
+requires(std::integral<std::ranges::range_value_t<Rng>>)
+[[nodiscard]] std::ranges::range_value_t<Rng> sum(const Rng& rng)
 {
-  int sum{};
+  std::ranges::range_value_t<Rng> sum{};
   for (const auto v : rng) {
-    sum = sum + v;
+    sum += v;
   }
   return sum;
 }
