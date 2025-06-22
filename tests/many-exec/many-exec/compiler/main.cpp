@@ -1,7 +1,6 @@
 #include <iostream>
 #include <many-exec/compiler/compile.hpp>
 #include <many-exec/many_exec_config.hpp>
-#include <string>
 
 int main(const int argc, const char* const argv[])
 {
