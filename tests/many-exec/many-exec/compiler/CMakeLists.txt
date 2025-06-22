@@ -4,7 +4,8 @@ jcm_add_executable(
   SOURCES main.cpp "${many-exec_config_file}"
   LIB_SOURCES ../shared.hpp compile.hpp)
 
-target_compile_features(${compiler-target} PUBLIC cxx_std_20)
+target_compile_features(${compiler-target} PUBLIC cxx_std_11)
+target_compile_features(${compiler-target}-library INTERFACE cxx_std_20)
 
 jcm_add_test_executable(
   NAME ${PROJECT_NAME}-compiler_ut
