@@ -33,6 +33,7 @@ jcm_install_config_file_package
 
     jcm_install_config_file_package(
       [CONFIGURE_PACKAGE_CONFIG_FILES]
+      [RUNTIME_DEPENDENCIES [arg...]]
       <[TARGETS <target>...]
        [CMAKE_MODULES <path>...]
        [INSTALL_LICENSES] >)
@@ -107,6 +108,20 @@ Multi Value
   Relative or absolute paths to additional CMake modules, or directories containing CMake modules,
   to install.
 
+:cmake:variable:`RUNTIME_DEPENDENCIES`
+  A list of arguments provided under the `RUNTIME_DEPENDENCIES` keyword of internal
+  :cmake:command:`install(TARGETS)` invocation. This is used to install runtime dependencies (shared
+  object libraries and modules that the listed targets depend on) along with your project artifacts.
+  By default, no runtime dependencies will be installed.
+
+  Provide :cmake:variable:`RUNTIME_DEPENDENCIES` without any values to install all 
+  runtime dependencies.
+
+  Provide :cmake:variable:`RUNTIME_DEPENDENCIES` with the arguments defined
+  `here <https://cmake.org/cmake/help/latest/command/file.html#handling-runtime-binaries>`_
+  to install the runtime dependencies allowed by the arguments.
+
+
 Examples
 ########
 
@@ -122,11 +137,23 @@ Examples
     TARGETS libbbq::core libbbq::meat libbbq::veg
     CMAKE_MODULES "${JCM_PROJECT_CMAKE_DIR}")
 
+.. code-block:: cmake
+
+  # installing only runtime dependencies mathing libpython\..*
+  jcm_install_config_file_package(
+    CONFIGURE_PACKAGE_CONFIG_FILES
+    INSTALL_LICENSES
+    TARGETS libbbq::core libbbq::meat libbbq::veg
+    CMAKE_MODULES "${JCM_PROJECT_CMAKE_DIR}"
+    RUNTIME_DEPENDENCIES
+      POST_INCLUDE_REGEXES "libpython\..*"
+      POST_EXCLUDE_REGEXES ".*")
+
 #]=======================================================================]
 function(jcm_install_config_file_package)
   jcm_parse_arguments(
     OPTIONS "CONFIGURE_PACKAGE_CONFIG_FILES" "INSTALL_LICENSES"
-    MULTI_VALUE_KEYWORDS "TARGETS;CMAKE_MODULES"
+    MULTI_VALUE_KEYWORDS "TARGETS;CMAKE_MODULES;RUNTIME_DEPENDENCIES"
     REQUIRES_ANY "TARGETS;CMAKE_MODULES;INSTALL_LICENSES"
     ARGUMENTS "${ARGN}")
 
@@ -146,6 +173,12 @@ function(jcm_install_config_file_package)
         "Cannot install target ${target}. The target does not exist!")
     endif()
   endforeach()
+
+  if(DEFINED ARGS_RUNTIME_DEPENDENCIES)
+    list(APPEND runtime_dependencies_arg RUNTIME_DEPENDENCIES ${ARGS_RUNTIME_DEPENDENCIES})
+  else()
+    unset(runtime_dependencies_arg)
+  endif()
 
   # Install Options
   jcm_add_option(
@@ -298,6 +331,7 @@ function(jcm_install_config_file_package)
 
     install(
       TARGETS ${target}
+      ${runtime_dependencies_arg}
       EXPORT ${export_set_name}
       RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
       COMPONENT ${PROJECT_NAME}_runtime
