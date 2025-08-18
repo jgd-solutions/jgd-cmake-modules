@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.24)
+cmake_minimum_required(VERSION 3.25)
 project(libcstr VERSION 0.0.0 LANGUAGES C)
 
 if(PROJECT_IS_TOP_LEVEL)
