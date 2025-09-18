@@ -35,8 +35,7 @@ macro(_JCM_CHECK_ADD_SUBDIR out_added_subdirs)
     OPTIONS "ADD_SUBDIRS" "FATAL"
     ONE_VALUE_KEYWORDS "SUBDIR"
     REQUIRES_ALL "SUBDIR"
-    ARGUMENTS "${ARGN}"
-  )
+    ARGUMENTS "${ARGN}")
 
   function(on_fatal_message msg)
     if(ARGS_FATAL)
@@ -182,33 +181,27 @@ function(jcm_source_subdirectories)
   jcm_canonical_lib_subdir(OUT_VAR lib_subdir)
   _jcm_check_add_subdir(subdirs_added ${add_subdirs_arg} SUBDIR "${lib_subdir}")
 
-  # library component subdirectories
-  if(DEFINED ARGS_LIB_COMPONENTS)
-    # add all library components' subdirectories
-    foreach(component ${ARGS_LIB_COMPONENTS})
-      jcm_canonical_lib_subdir(COMPONENT ${component} OUT_VAR subdir_path)
+  # add all library components' subdirectories, foreach skipped if arg not defined
+  foreach(component ${ARGS_LIB_COMPONENTS})
+    jcm_canonical_lib_subdir(COMPONENT ${component} OUT_VAR subdir_path)
 
-      set(JCM_CURRENT_COMPONENT ${component})
-      _jcm_check_add_subdir(subdirs_added FATAL ${add_subdirs_arg} SUBDIR "${subdir_path}")
-      unset(JCM_CURRENT_COMPONENT)
-    endforeach()
-  endif()
+    set(JCM_CURRENT_COMPONENT ${component})
+    _jcm_check_add_subdir(subdirs_added FATAL ${add_subdirs_arg} SUBDIR "${subdir_path}")
+    unset(JCM_CURRENT_COMPONENT)
+  endforeach()
 
   # add single executable subdirectory, if it exists
   jcm_canonical_exec_subdir(OUT_VAR exec_subdir)
   _jcm_check_add_subdir(subdirs_added ${add_subdirs_arg} SUBDIR "${exec_subdir}")
 
-  # executable component subdirectories
-  if(DEFINED ARGS_EXEC_COMPONENTS)
-    # add all executable components' subdirectories
-    foreach(component ${ARGS_EXEC_COMPONENTS})
-      jcm_canonical_exec_subdir(COMPONENT ${component} OUT_VAR subdir_path)
+  # add all executable components' subdirectories, foreach skipped if arg not defined
+  foreach(component ${ARGS_EXEC_COMPONENTS})
+    jcm_canonical_exec_subdir(COMPONENT ${component} OUT_VAR subdir_path)
 
-      set(JCM_CURRENT_COMPONENT ${component})
-      _jcm_check_add_subdir(subdirs_added FATAL ${add_subdirs_arg} SUBDIR "${subdir_path}")
-      unset(JCM_CURRENT_COMPONENT)
-    endforeach()
-  endif()
+    set(JCM_CURRENT_COMPONENT ${component})
+    _jcm_check_add_subdir(subdirs_added FATAL ${add_subdirs_arg} SUBDIR "${subdir_path}")
+    unset(JCM_CURRENT_COMPONENT)
+  endforeach()
 
   # Ensure at least one subdirectory was added
   if(NOT subdirs_added)
