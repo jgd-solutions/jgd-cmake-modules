@@ -474,7 +474,7 @@ function(jcm_verify_sources)
   if("${ARGS_TARGET_TYPE}" STREQUAL "EXECUTABLE" AND DEFINED ARGS_INTERFACE_HEADERS)
     message(AUTHOR_WARNING
       "No interface headers should be added as sources to an executable target. The interface"
-      "headers to target 'k{ARGS_TARGET}' will be ignored.")
+      "headers to target '${ARGS_TARGET}' will be ignored.")
     unset(ARGS_INTERFACE_HEADERS)
   endif()
 
