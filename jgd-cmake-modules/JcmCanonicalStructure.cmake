@@ -68,7 +68,7 @@ set(JCM_IN_FILE_EXTENSION ".in")
 
 set(JCM_CXX_HEADER_EXTENSION ".hpp")
 set(JCM_CXX_SOURCE_EXTENSION ".cpp")
-set(JCM_CXX_MODULE_EXTENSION ".mpp") # cmake doesn't support modules, but for future
+set(JCM_CXX_MODULE_EXTENSION ".mpp")
 set(JCM_CXX_UTEST_SOURCE_EXTENSION ".test${JCM_CXX_SOURCE_EXTENSION}")
 
 set(JCM_C_HEADER_EXTENSION ".h")
