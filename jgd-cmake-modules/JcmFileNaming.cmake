@@ -1,3 +1,5 @@
+include_guard()
+
 #[=======================================================================[.rst:
 
 JcmFileNaming
@@ -23,19 +25,23 @@ character.
 - :cmake:variable:`JCM_SOURCE_REGEX`
 - :cmake:variable:`JCM_UTEST_SOURCE_REGEX`
 
-Additional, non-languages specific variables with regular expressions for file names are introduced:
+Additional, specific variables with regular expressions for file names are introduced:
 
 - :cmake:variable:`JCM_CMAKE_MODULE_REGEX`. This is for normal CMake modules, not package-config files.
-- :cmake:variable:`JCM_IN_FILE_REGEX`
-- :cmake:variable:`JCM_CXX_MODULE_REGEX`
+- :cmake:variable:`JCM_IN_FILE_REGEX`.
+- :cmake:variable:`JCM_CXX_MODULE_REGEX`. C++ interface module or partition units (i.e. contains the
+  `export` keyword). :cmake:variable:`JCM_SOURCE_REGEX` does not include this regex, as C++ interface
+  modules are distinct from sources, and must be included in a
+  *CXX_MODULES* `file set
+  <https://cmake.org/cmake/help/latest/command/target_sources.html#file-sets>`_.
 
 --------------------------------------------------------------------------
 
 #]=======================================================================]
 
+include(JcmParseArguments)
 include(JcmCanonicalStructure)
 
-# non-package-config cmake modules
 set(JCM_CMAKE_MODULE_REGEX "^([A-Z][a-z]*)+\\.cmake$")
 set(JCM_IN_FILE_REGEX "\\${JCM_IN_FILE_EXTENSION}$")
 
@@ -87,11 +93,6 @@ if(_jcm_languages)
 endif()
 
 unset(_jcm_languages)
-
-
-include_guard()
-
-include(JcmParseArguments)
 
 #
 # Private macro to the module. Constructs a consistent file name based on the PROJECT argument or
