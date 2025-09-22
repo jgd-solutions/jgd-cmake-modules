@@ -158,8 +158,20 @@ function(jcm_add_library)
   jcm_parse_arguments(
     OPTIONS "WITHOUT_CANONICAL_PROJECT_CHECK" "WITHOUT_FILE_NAMING_CHECK"
     ONE_VALUE_KEYWORDS "COMPONENT;NAME;TYPE;OUT_TARGET"
-    MULTI_VALUE_KEYWORDS "INTERFACE_HEADERS;PUBLIC_HEADERS;PRIVATE_HEADERS;SOURCES"
-    REQUIRES_ANY "INTERFACE_HEADERS;PUBLIC_HEADERS;PRIVATE_HEADERS;SOURCES"
+    MULTI_VALUE_KEYWORDS
+      INTERFACE_HEADERS
+      PUBLIC_HEADERS
+      PRIVATE_HEADERS
+      PUBLIC_CXX_MODULES
+      PRIVATE_CXX_MODULES
+      SOURCES
+    REQUIRES_ANY
+      INTERFACE_HEADERS
+      PUBLIC_HEADERS
+      PRIVATE_HEADERS
+      PUBLIC_CXX_MODULES
+      PRIVATE_CXX_MODULES
+      SOURCES
     ARGUMENTS "${ARGN}")
 
   # library component argument
@@ -268,7 +280,6 @@ function(jcm_add_library)
     # add_library already sensitive to BUILD_SHARED_LIBS when type isn't defined
   endif()
 
-
   # resolve library names
   if(DEFINED ARGS_NAME)
     set(target_name ${ARGS_NAME})
@@ -293,21 +304,8 @@ function(jcm_add_library)
     "${ARGS_PUBLIC_HEADERS}"
     "${ARGS_PRIVATE_HEADERS}"
     "${ARGS_SOURCES}")
+
   add_library(${PROJECT_NAME}::${export_name} ALIAS ${target_name})
-
-  # == Generate an export header ==
-
-  if(NOT DEFINED ARGS_TYPE OR ARGS_TYPE STREQUAL "SHARED")
-    set(base_name ${JCM_PROJECT_PREFIX_NAME})
-    if(DEFINED comp_arg)
-      string(APPEND base_name "_${comp_upper}")
-    endif()
-
-    generate_export_header(
-      ${target_name}
-      BASE_NAME ${base_name}
-      EXPORT_FILE_NAME "export_macros.hpp")
-  endif()
 
   # == Set Target Properties ==
 
@@ -316,25 +314,23 @@ function(jcm_add_library)
     set_target_properties(${target_name} PROPERTIES ${comp_arg})
   endif()
 
-  # header properties
-  if(ARGS_INTERFACE_HEADERS)
-    jcm_create_file_sets(INTERFACE
-      TYPE HEADERS
-      TARGET ${target_name}
-      FILES "${ARGS_INTERFACE_HEADERS}")
-  elseif(ARGS_PRIVATE_HEADERS)
-    jcm_create_file_sets(PRIVATE
-      TYPE HEADERS
-      TARGET ${target_name}
-      FILES "${ARGS_PRIVATE_HEADERS}")
-  endif()
+  foreach(scope IN ITEMS INTERFACE PUBLIC PRIVATE)
+    if(ARGS_${scope}_HEADERS)
+      jcm_create_file_sets(${scope}
+        TYPE HEADERS
+        TARGET ${target_name}
+        FILES "${ARGS_${scope}_HEADERS}")
+    endif()
+  endforeach()
 
-  if(NOT DEFINED ARGS_TYPE OR ARGS_TYPE STREQUAL "SHARED")
-    jcm_create_file_sets(PUBLIC
-      TYPE HEADERS
-      TARGET ${target_name}
-      FILES "${ARGS_PUBLIC_HEADERS}" "${CMAKE_CURRENT_BINARY_DIR}/export_macros.hpp")
-  endif()
+  foreach(scope IN ITEMS INTERFACE PUBLIC PRIVATE)
+    if(ARGS_${scope}_CXX_MODULES)
+      jcm_create_file_sets(${scope}
+        TYPE CXX_MODULES
+        TARGET ${target_name}
+        FILES "${ARGS_${scope}_CXX_MODULES}")
+    endif()
+  endforeach()
 
   # common properties
   set_target_properties(${target_name}
@@ -351,5 +347,36 @@ function(jcm_add_library)
       PROPERTIES
       VERSION ${PROJECT_VERSION}
       SOVERSION ${PROJECT_VERSION_MAJOR})
+  endif()
+
+  # == Generate an export header ==
+
+  if(NOT DEFINED ARGS_TYPE OR ARGS_TYPE STREQUAL "SHARED")
+    set(base_name ${JCM_PROJECT_PREFIX_NAME})
+    if(DEFINED comp_arg)
+      string(APPEND base_name "_${comp_upper}")
+    endif()
+
+    get_property(enabled_languages GLOBAL PROPERTY ENABLED_LANGUAGES)
+    # ordered languages by precidence of generated header
+    # ex. if C & CUDA are enabled, prefer .h over .cuh
+    foreach (lang IN ITEMS "CXX" "C" "OBJCXX" "OBJC" "CUDA" "HIP")
+      if(lang IN_LIST enabled_languages)
+        set(export_file_extension "${JCM_${lang}_HEADER_EXTENSION}")
+        break()
+      endif()
+    endforeach()
+
+    set(export_file export_macros${export_file_extension})
+    message(DEBUG "Generating export header '${export_file}' for target '${target_name}'")
+    generate_export_header(
+      ${target_name}
+      BASE_NAME ${base_name}
+      EXPORT_FILE_NAME "${export_file}")
+
+    jcm_create_file_sets(PUBLIC
+      TYPE HEADERS
+      TARGET ${target_name}
+      FILES "${CMAKE_CURRENT_BINARY_DIR}/${export_file}")
   endif()
 endfunction()
