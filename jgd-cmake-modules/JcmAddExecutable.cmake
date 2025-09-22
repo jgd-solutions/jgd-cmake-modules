@@ -173,7 +173,6 @@ function(jcm_add_executable)
     endif()
   endif()
 
-
   if(ARGS_WITHOUT_FILE_NAMING_CHECK)
     set(verify_file_naming_arg "WITHOUT_FILE_NAMING_CHECK")
   else()
