@@ -148,10 +148,8 @@ function(jcm_create_file_sets scope)
   # Parse named arguments
   jcm_parse_arguments(
     ONE_VALUE_KEYWORDS "TARGET" "TYPE"
-    MULTI_VALUE_KEYWORDS "HEADERS" "CXX_MODULES"
-    REQUIRES_ALL "TARGET" "TYPE"
-    REQUIRES_ANY "HEADERS" "CXX_MODULES"
-    MUTUALLY_EXCLUSIVE "HEADERS" "CXX_MODULES"
+    MULTI_VALUE_KEYWORDS "FILES"
+    REQUIRES_ALL "TARGET" "TYPE" "FILES"
     ARGUMENTS "${ARGN}")
 
   # Usage Guards
@@ -175,11 +173,12 @@ function(jcm_create_file_sets scope)
     INPUT "${ARGS_FILES}"
     OUT_MATCHED ARGS_FILES
     OUT_MISMATCHED invalid_files
+    TRANSFORM FILENAME
     REGEX "${file_regex}")
   if(invalid_files)
     message(FATAL_ERROR
       "The FILES provided to ${CMAKE_CURRENT_FUNCTION} do not conform to the regular expression "
-      "for a file-set of type '${ARGS_TYPE}': ${invalid_files}")
+      "'${file_regex}' for a file-set of type '${ARGS_TYPE}': ${invalid_files}")
   endif()
 
   # Transform file pahts to normalized absolute paths
