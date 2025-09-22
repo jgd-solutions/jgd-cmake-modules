@@ -113,6 +113,12 @@ Multi Value
   functionality as :cmake:variable:`MUTUALLY_INCLUSIVE`, but through separate variables so multiple
   inclusivity constraints can be enforced simultaneously. Each constraint is independently verified.
 
+:cmake:variable:`ACCEPT_MISSING`
+  A list of keywords for arguments that may be empty or missing a value without generating an error.
+  When :cmake:variable:`WITHOUT_MISSING_VALUES_CHECK` is set, this argument has no effect. The
+  keywords listed here may also be listed in :cmake:variable:`REQUIRES_ALL`, where simply the
+  presence of the keyword will satisfy the requires clause.
+
 Examples
 ########
 
@@ -177,10 +183,9 @@ macro(JCM_PARSE_ARGUMENTS)
     # one-value
     "PREFIX"
     # multi-value
-    [[ARGUMENTS;OPTIONS;ONE_VALUE_KEYWORDS;MULTI_VALUE_KEYWORDS;REQUIRES_ALL;REQUIRES_ANY;REQUIRES_ANY_1;REQUIRES_ANY_2;REQUIRES_ANY_3;MUTUALLY_EXCLUSIVE;MUTUALLY_EXCLUSIVE_1;MUTUALLY_EXCLUSIVE_2;MUTUALLY_EXCLUSIVE_3;MUTUALLY_INCLUSIVE;MUTUALLY_INCLUSIVE_1;MUTUALLY_INCLUSIVE_2;MUTUALLY_INCLUSIVE_3]]
+    [[ARGUMENTS;OPTIONS;ONE_VALUE_KEYWORDS;MULTI_VALUE_KEYWORDS;REQUIRES_ALL;REQUIRES_ANY;REQUIRES_ANY_1;REQUIRES_ANY_2;REQUIRES_ANY_3;MUTUALLY_EXCLUSIVE;MUTUALLY_EXCLUSIVE_1;MUTUALLY_EXCLUSIVE_2;MUTUALLY_EXCLUSIVE_3;MUTUALLY_INCLUSIVE;MUTUALLY_INCLUSIVE_1;MUTUALLY_INCLUSIVE_2;MUTUALLY_INCLUSIVE_3;ACCEPT_MISSING]]
     # function arguments
     "${ARGN}")
-
 
   # == Argument Validation of jcm_parse_arguments ==
 
@@ -220,8 +225,11 @@ macro(JCM_PARSE_ARGUMENTS)
 
   # validate keywords that must all be present
   foreach(keyword ${INS_REQUIRES_ALL})
-    if(NOT DEFINED ${INS_PREFIX}_${keyword})
-      message(FATAL_ERROR "${keyword} was not provided or may be missing its value(s).")
+    list(FIND ${INS_PREFIX}_KEYWORDS_MISSING_VALUES ${keyword} missing_value_index)
+
+    # not defined, and wasn't provided without a value -> wasn't provided at all
+    if(NOT DEFINED ${INS_PREFIX}_${keyword} AND missing_value_index EQUAL -1)
+      message(FATAL_ERROR "${keyword} was not provided")
     endif()
   endforeach()
 
@@ -312,9 +320,12 @@ macro(JCM_PARSE_ARGUMENTS)
   endforeach()
 
   # validate caller's argument format
-  if(NOT INS_WITHOUT_MISSING_VALUES_CHECK AND ${INS_PREFIX}_KEYWORDS_MISSING_VALUES)
-    message(FATAL_ERROR "Keywords provided without any values: "
-      "${${INS_PREFIX}_KEYWORDS_MISSING_VALUES}")
+  if(NOT INS_WITHOUT_MISSING_VALUES_CHECK)
+    list(REMOVE_ITEM ${INS_PREFIX}_KEYWORDS_MISSING_VALUES ${INS_ACCEPT_MISSING})
+    if(${INS_PREFIX}_KEYWORDS_MISSING_VALUES)
+      message(FATAL_ERROR "Keywords provided without any values: "
+        "${${INS_PREFIX}_KEYWORDS_MISSING_VALUES}")
+    endif()
   endif()
 
   if(NOT INS_WITHOUT_UNPARSED_CHECK AND ${INS_PREFIX}_UNPARSED_ARGUMENTS)
