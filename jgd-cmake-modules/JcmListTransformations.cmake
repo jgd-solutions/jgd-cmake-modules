@@ -22,7 +22,7 @@ jcm_separate_list
   .. code-block:: cmake
 
     jcm_separate_list(
-      INPUT <item>...
+      INPUT [item]...
       <[OUT_MATCHED <out-var>]
        [OUT_MISMATCHED <out-var>] >
       <REGEX <regex> | IS_DIRECTORY | IS_SYMLINK | IS_ABSOLUTE | IS_TARGET | EVAL_TRUE>
@@ -82,7 +82,8 @@ Multi Value
 ~~~~~~~~~~~
 
 :cmake:variable:`INPUT`
-  List of elements to split based on :cmake:variable:`REGEX`.
+  List of elements to split based on :cmake:variable:`REGEX`. An empty list is accepted, so long as
+  the *INPUT* keyword is provided.
 
 Examples
 ########
@@ -123,7 +124,19 @@ function(jcm_separate_list)
     REQUIRES_ANY "OUT_MATCHED" "OUT_MISMATCHED"
     REQUIRES_ANY_1 "REGEX" "IS_DIRECTORY" "IS_SYMLINK" "IS_ABSOLUTE" "EVAL_TRUE"
     MUTUALLY_EXCLUSIVE "REGEX" "IS_DIRECTORY" "IS_SYMLINK" "IS_ABSOLUTE" "IS_TARGET" "EVAL_TRUE"
+    ACCEPT_MISSING "INPUT"
     ARGUMENTS "${ARGN}")
+
+  if(NOT ARGS_INPUT)
+    if(DEFINED ARGS_OUT_MATCHED)
+      set(${ARGS_OUT_MATCHED} "" PARENT_SCOPE)
+    endif()
+    if(DEFINED ARGS_OUT_MISMATCHED)
+      set(${ARGS_OUT_MISMATCHED} "" PARENT_SCOPE)
+    endif()
+
+    return()
+  endif()
 
   # additional argument validation
   set(supported_transforms "FILENAME|ALIASED_TARGET")
