@@ -13,7 +13,7 @@ include(JcmParseArguments)
 include(JcmListTransformations)
 include(JcmFileNaming)
 include(JcmTargetNaming)
-include(JcmHeaderFileSet)
+include(JcmFileSet)
 
 #[=======================================================================[.rst:
 
@@ -36,31 +36,24 @@ jcm_add_target_sources
 After validating and cleaning the paths of the provided sources with
 :cmake:command:`jcm_verify_sources`, adds them to the given target, :cmake:variable:`TARGET`, using
 CMake's built-in :cmake:command:`target_sources` command and JCM's
-:cmake:command:`jcm_header_file_sets`. Alias targets are supported, unlike
+:cmake:command:`jcm_create_file_sets`. Alias targets are supported, unlike
 :cmake:command:`target_sources`.
 
 This function will:
 
 - for the detected target type, given by the target's :cmake:variable:`TYPE` property, ensure the
-  appropriate source file types are provided based on the :cmake:variable:`INTERFACE_HEADERS`,
-  :cmake:variable:`PUBLIC_HEADERS`, and :cmake:variable:`PRIVATE_HEADERS` arguments.
+  appropriate file types are provided 
 - transform all input file paths into normalized, absolute paths
 - verify the file names as conforming to JCM's file naming conventions based on the regular
   expressions in *JcmFileNaming.cmake*
 - verify the locations of the input files as conforming to the `Canonical Project Structure`_ for
   the given target.
-- create PRIVATE, PUBLIC, and INTERFACE header sets with :cmake:command:`jcm_header_file_sets` using
-  the respective *\*_HEADERS* parameters and any headers found in :cmake:variable:`SOURCES` for
-  executable targets. This is what sets the *\*INCLUDE_DIRECTORIES* properties.
+- create PRIVATE, PUBLIC, and INTERFACE header sets with :cmake:command:`jcm_create_file_sets` using
+  the respective *\*_HEADERS* parameters. This is what sets the *\*INCLUDE_DIRECTORIES* properties.
+- create PRIVATE and PUBLIC C++ module file-sets with :cmake:command:`target_sources` using
+  the respective *\*_CXX_MODULES* parameters.
 - Add the files specified by :cmake:variable:`PRIVATE_HEADERS` and :cmake:variable:`SOURCES` as
   *private* target sources via :cmake:command:`target_sources`
-
-This function is designed for use with both executable and library targets. As such, should the
-target's :cmake:variable:`TYPE` property be an executable, headers and source files may be
-provided via the :cmake:variable:`SOURCES` argument. For library targets, headers must be provided
-in the :cmake:variable:`INTERFACE_HEADERS`, :cmake:variable:`PUBLIC_HEADERS`, and
-:cmake:variable:`PRIVATE_HEADERS` arguments, as header files in :cmake:variable:`SOURCES` will be
-rejected by naming convention filters.
 
 Parameters
 ##########
@@ -84,25 +77,43 @@ Multi Value
 :cmake:variable:`INTERFACE_HEADERS`
   A list of relative or absolute paths to header files required by consumers of the potential
   target, but not by the target itself. Interface header files, and therefore this parameter, are
-  only meaningful for library targets. Required when :cmake:variable:`TARGET_TYPE` is
-  *INTERFACE_LIBRARY*.
+  only meaningful for library targets. Required when the target's :cmake:variable:`TYPE` property is
+  *INTERFACE_LIBRARY*, and prohibited when :cmake:variable:`TARGET_TYPE` is *EXECUTABLE*.
 
 :cmake:variable:`PUBLIC_HEADERS`
   A list of relative or absolute paths to header files required by consumers of the potential
-  target, and by the target itself. Prohibited when :cmake:variable:`TARGET_TYPE` is
-  *INTERFACE_LIBRARY*.
+  target, and by the target itself. Prohibited when the target's :cmake:variable:`TYPE` property is
+  *INTERFACE_LIBRARY* or *EXECUTABLE*.
 
 :cmake:variable:`PRIVATE_HEADERS`
   A list of relative or absolute paths to header files required exclusively by the target itself;
-  not by consumers of the potential target. Prohibited when :cmake:variable:`TARGET_TYPE` is
+  not by consumers of the potential target. Prohibited when the target's :cmake:variable:`TYPE`
+  property is
   *INTERFACE_LIBRARY*.
 
+:cmake:variable:`PUBLIC_CXX_MODULES`
+  A list of relative or absolute paths to C++ module files required by consumers of the potential
+  target, and by the target itself. C++ files that don't export anything (`import` only), are just
+  normal `SOURCES` and should not be included here. Only C++ module interface units and C++ module
+  partition units that are part of the target's public interface should be included.  Prohibited
+  when the target's :cmake:variable:`TYPE` property is *INTERFACE_LIBRARY* or *EXECUTABLE*.
+
+:cmake:variable:`PRIVATE_CXX_MODULES`
+  A list of relative or absolute paths to C++ module files required exclusively by the target
+  itself; not by consumers of the potential target. 
+  C++ files that don't export anything (`import` only), are just normal `SOURCES` and should not be
+  included here. Only C++ module interface units and C++ module partition units that are part of the
+  target's public interface should be included.
+  Prohibited when the target's :cmake:variable:`TYPE` property is *INTERFACE_LIBRARY*.
+
 :cmake:variable:`SOURCES`
-  A list of relative or absolute paths to sources files to build the potential target. Prohibited
-  when :cmake:variable:`TARGET_TYPE` is *INTERFACE_LIBRARY*.
-  For executable targets, private header files may be included in this list, and will have the
-  same effect as providing them through :cmake:variable:`PRIVATE_HEADERS`. For other target types,
-  any header files found in this parameter will cause an error.
+  A list of relative or absolute paths to sources files to build the potential target. For
+  executable targets, private header files and module files may be included in this list. This will
+  have the same effect as providing them through :cmake:variable:`PRIVATE_HEADERS` and
+  :cmake:variable:`PRIVATE_CXX_MODULES`, respectively.  For other target types, any header or C++ modules
+  files found in this parameter will cause an error.
+  Prohibited when the target's :cmake:variable:`TYPE` property is *INTERFACE_LIBRARY*.
+
 
 Examples
 ########
@@ -119,34 +130,37 @@ Examples
 
   jcm_add_target_sources(
     TARGET netman::netman
+    PRIVATE_HEADERS
+      cli.hpp
+      protocols.hpp
+      buffers.hpp
+      tracing.hpp
+    PRIVATE_CXX_MODULES
+      io.mpp
     SOURCES
-      "main.cpp"
-      "cli.hpp"
-      "cli.cpp"
-      "protocols.hpp"
-      "protocols.cpp"
-      "buffers.hpp"
-      "buffers.cpp"
-      "tracing.hpp")
+      main.cpp
+      cli.cpp
+      protocols.cpp
+      buffers.cpp)
 
 #]=======================================================================]
 function(jcm_add_target_sources)
   jcm_parse_arguments(
     OPTIONS "WITHOUT_FILE_NAMING_CHECK"
-    ONE_VALUE_KEYWORDS "TARGET"
-    MULTI_VALUE_KEYWORDS "INTERFACE_HEADERS;PUBLIC_HEADERS;PRIVATE_HEADERS;SOURCES"
-    REQUIRES_ALL "TARGET"
+    ONE_VALUE_KEYWORDS TARGET
+    MULTI_VALUE_KEYWORDS
+      INTERFACE_HEADERS
+      PUBLIC_HEADERS
+      PRIVATE_HEADERS
+      PUBLIC_CXX_MODULES
+      PRIVATE_CXX_MODULES
+      SOURCES
+    REQUIRES_ALL TARGET
     ARGUMENTS "${ARGN}")
 
   if(NOT TARGET ${ARGS_TARGET})
     message(FATAL_ERROR
       "The target provided to ${CMAKE_CURRENT_FUNCTION}, '${ARGS_TARGET}', does not exist.")
-  endif()
-
-  if(NOT DEFINED ARGS_SOURCES)
-    message(FATAL_ERROR
-      "SOURCES must be provided to ${CMAKE_CURRENT_FUNCTION} when adding sources to non-interface "
-      "libraries. Refer to jcm_header_file_sets for adding exclusively headers to targets.")
   endif()
 
   get_target_property(target_type "${ARGS_TARGET}" TYPE)
@@ -182,29 +196,35 @@ function(jcm_add_target_sources)
     OUT_PRIVATE_HEADERS ARGS_PRIVATE_HEADERS
     OUT_SOURCES ARGS_SOURCES)
 
-  # header properties
-  if(ARGS_INTERFACE_HEADERS)
-    jcm_header_file_sets(INTERFACE TARGET ${ARGS_TARGET} HEADERS "${ARGS_INTERFACE_HEADERS}")
-  elseif(ARGS_PRIVATE_HEADERS)
-    jcm_header_file_sets(PRIVATE TARGET ${ARGS_TARGET} HEADERS "${ARGS_PRIVATE_HEADERS}")
-  endif()
-
-  # header file sets - already assured header sources are appropriate for target
-  foreach(header_scope IN ITEMS INTERFACE PUBLIC PRIVATE)
-    set(header_source "ARGS_${header_scope}_HEADERS")
-    if(NOT "${${header_source}}")
+  # header file sets
+  foreach(scope IN ITEMS INTERFACE PUBLIC PRIVATE)
+    set(files "ARGS_${scope}_HEADERS")
+    if(NOT "${${files}}")
       continue()
     endif()
-    jcm_header_file_sets(${header_scope}
+    jcm_create_file_sets(${scope}
+      TYPE HEADERS
       TARGET "${ARGS_TARGET}"
-      HEADERS "${${header_source}}")
+      FILES "${${files}}")
+  endforeach()
+
+  # module file sets
+  foreach(scope IN ITEMS PUBLIC PRIVATE)
+    set(files "ARGS_${scope}_CXX_MODULES")
+    if(NOT "${${files}}")
+      continue()
+    endif()
+
+    jcm_create_file_sets(${scope}
+      TYPE CXX_MODULES
+      TARGET "${ARGS_TARGET}"
+      FILES "${${files}}")
   endforeach()
 
   # sources
   # Note: empty values are considered relative paths by target_sources, which therefore adds
   # a directory as a target source. Avoid this.
   jcm_aliased_target(TARGET "${ARGS_TARGET}" OUT_TARGET ARGS_TARGET)
-
   if(ARGS_PRIVATE_HEADERS)
     target_sources(${ARGS_TARGET} PRIVATE "${ARGS_PRIVATE_HEADERS}")
   endif()
@@ -515,6 +535,7 @@ function(jcm_verify_sources)
       if("${ARGS_${file_type}}")
         message(FATAL_ERROR
           "Interface libraries only have interface requirements, and therefore cannot accept '${file_type}'")
+      endif()
     endforeach()
   endif()
 
