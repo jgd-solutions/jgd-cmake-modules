@@ -19,7 +19,7 @@ release = "@PROJECT_VERSION@"  # full version string
 extensions = [
     "sphinxcontrib.moderncmakedomain",
     "sphinxnotes.strike",
-    "sphinx_collapse",
+    "sphinx_collapse"
 ]
 
 templates_path = ["_templates"]

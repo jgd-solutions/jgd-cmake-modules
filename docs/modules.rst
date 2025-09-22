@@ -19,7 +19,7 @@ Modules
 .. cmake-module:: ../jgd-cmake-modules/JcmConfigureFiles.cmake
 .. cmake-module:: ../jgd-cmake-modules/JcmParseArguments.cmake
 .. cmake-module:: ../jgd-cmake-modules/JcmStandardDirs.cmake
-.. cmake-module:: ../jgd-cmake-modules/JcmHeaderFileSet.cmake
+.. cmake-module:: ../jgd-cmake-modules/JcmFileSet.cmake
 .. cmake-module:: ../jgd-cmake-modules/JcmListTransformations.cmake
 .. cmake-module:: ../jgd-cmake-modules/JcmExpandDirectories.cmake
 .. cmake-module:: ../jgd-cmake-modules/JcmSymlinks.cmake
