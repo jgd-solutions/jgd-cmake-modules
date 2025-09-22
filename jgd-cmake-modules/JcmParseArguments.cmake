@@ -225,10 +225,9 @@ macro(JCM_PARSE_ARGUMENTS)
 
   # validate keywords that must all be present
   foreach(keyword ${INS_REQUIRES_ALL})
-    list(FIND ${INS_PREFIX}_KEYWORDS_MISSING_VALUES ${keyword} missing_value_index)
-
     # not defined, and wasn't provided without a value -> wasn't provided at all
-    if(NOT DEFINED ${INS_PREFIX}_${keyword} AND missing_value_index EQUAL -1)
+    if(NOT DEFINED ${INS_PREFIX}_${keyword}
+        AND NOT "${keyword}" IN_LIST ${INS_PREFIX}_KEYWORDS_MISSING_VALUES)
       message(FATAL_ERROR "${keyword} was not provided")
     endif()
   endforeach()
