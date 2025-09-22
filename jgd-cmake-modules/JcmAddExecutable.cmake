@@ -11,10 +11,11 @@ JcmAddExecutable
 
 include(JcmParseArguments)
 include(JcmTargetNaming)
-include(JcmHeaderFileSet)
+include(JcmFileSet)
 include(JcmCanonicalStructure)
 include(JcmDefaultCompileOptions)
 include(JcmTargetSources)
+include(JcmListTransformations)
 
 
 #[=======================================================================[.rst:
@@ -52,7 +53,7 @@ This function will:
 - optionally create an object library, `<target>-library`, with an associated alias
   <PROJECT_NAME>::<EXPORT_NAME>-library
   (<PROJECT_NAME>::<EXPORT_NAME>) - both following JCM's target naming conventions
-- create header sets with :cmake:command:`jcm_header_file_sets` for both the main executable target,
+- create file-sets with :cmake:command:`jcm_create_file_sets` for both the main executable target,
   and the optional library target. PRIVATE header sets will be added to the executable using header
   files found in :cmake:variable:`SOURCES`, while PUBLIC or INTERFACE header sets will be added to
   the object/interface library using header files found in :cmake:variable:`LIB_SOURCES`.
@@ -185,12 +186,29 @@ function(jcm_add_executable)
     unset(verify_target_component_arg)
   endif()
 
+  jcm_separate_list(
+    INPUT "${ARGS_SOURCES}"
+    OUT_MATCHED pure_headers
+    OUT_MISMATCHED remaining
+    TRANSFORM FILENAME
+    REGEX "${JCM_HEADER_REGEX}")
+
+  jcm_separate_list(
+    INPUT "${remaining}"
+    OUT_MATCHED ARGS_SOURCES
+    OUT_MISMATCHED pure_modules
+    TRANSFORM FILENAME
+    REGEX "${JCM_SOURCE_REGEX}")
+
   jcm_verify_sources(
     ${verify_file_naming_arg}
     ${verify_target_component_arg}
     TARGET_TYPE "EXECUTABLE"
+    PRIVATE_HEADERS "${pure_headers}"
+    PRIVATE_CXX_MODULES "${pure_modules}"
     SOURCES "${ARGS_SOURCES}"
     OUT_PRIVATE_HEADERS executable_headers
+    OUT_PRIVATE_CXX_MODULES executable_modules
     OUT_SOURCES executable_sources)
 
   # == Create Executable ==
@@ -227,9 +245,17 @@ function(jcm_add_executable)
 
   # include directories on the executable
   if(executable_headers)
-    jcm_header_file_sets(PRIVATE
+    jcm_create_file_sets(PRIVATE
+      TYPE HEADERS
       TARGET ${target_name}
-      HEADERS "${executable_headers}")
+      FILES "${executable_headers}")
+  endif()
+
+  if(executable_modules)
+    jcm_create_file_sets(PRIVATE
+      TYPE CXX_MODULES
+      TARGET ${target_name}
+      FILES "${executable_modules}")
   endif()
 
   # custom component property
@@ -241,16 +267,33 @@ function(jcm_add_executable)
 
   # create library of exec's sources, allowing unit testing of exec's sources
   if(DEFINED ARGS_LIB_SOURCES)
+    jcm_separate_list(
+      INPUT "${ARGS_LIB_SOURCES}"
+      OUT_MATCHED pure_headers
+      OUT_MISMATCHED remaining
+      TRANSFORM FILENAME
+      REGEX "${JCM_HEADER_REGEX}")
+
+    jcm_separate_list(
+      INPUT "${remaining}"
+      OUT_MATCHED ARGS_LIB_SOURCES
+      OUT_MISMATCHED pure_modules
+      TRANSFORM FILENAME
+      REGEX "${JCM_SOURCE_REGEX}")
+
     jcm_verify_sources(
       ${verify_file_naming_arg}
       ${verify_target_component_arg}
       TARGET_TYPE "EXECUTABLE"
+      PRIVATE_HEADERS "${pure_headers}"
+      PRIVATE_CXX_MODULES "${pure_modules}"
       SOURCES "${ARGS_LIB_SOURCES}"
       OUT_PRIVATE_HEADERS library_headers
+      OUT_PRIVATE_CXX_MODULES library_modules
       OUT_SOURCES library_sources)
 
     # create object or interface library
-    if(library_sources)
+    if(library_sources OR library_modules)
       set(include_dirs_scope PUBLIC)
       add_library(${target_name}-library OBJECT "${library_headers}" "${library_sources}")
       target_compile_options(${target_name}-library PRIVATE "${JCM_DEFAULT_COMPILE_OPTIONS}")
@@ -262,9 +305,17 @@ function(jcm_add_executable)
     add_library(${PROJECT_NAME}::${export_name}-library ALIAS ${target_name}-library)
 
     if(library_headers)
-      jcm_header_file_sets(${include_dirs_scope}
+      jcm_create_file_sets(${include_dirs_scope}
+        TYPE HEADERS
         TARGET ${target_name}-library
-        HEADERS "${library_headers}")
+        FILES "${library_headers}")
+    endif()
+
+    if(library_modules)
+      jcm_create_file_sets(${include_dirs_scope}
+        TYPE CXX_MODULES
+        TARGET ${target_name}-library
+        FILES "${library_modules}")
     endif()
 
     # link target to associated object files &/or usage requirements
