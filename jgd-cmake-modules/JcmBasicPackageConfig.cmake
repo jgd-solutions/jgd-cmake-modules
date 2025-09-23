@@ -112,7 +112,7 @@ macro(JCM_BASIC_PACKAGE_CONFIG project)
   if(${project}_FIND_COMPONENTS)
     # include specified components
     foreach(jcm_find_component ${${project}_FIND_COMPONENTS})
-      if(jcm_find_component STREQUAL project)
+      if(jcm_find_component STREQUAL "${project}")
         continue()
       endif()
 
@@ -139,7 +139,7 @@ macro(JCM_BASIC_PACKAGE_CONFIG project)
     unset(jcm_component_config)
     unset(jcm_component_targets)
   else()
-    # include all components' config files
+    # include all installed components' config files
     file(
       GLOB
       jcm_components_configs
