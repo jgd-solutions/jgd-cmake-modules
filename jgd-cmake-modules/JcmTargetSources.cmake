@@ -500,7 +500,8 @@ function(jcm_verify_sources)
 
   # transform arguments to normalized absolute paths
   foreach(source_type IN ITEMS
-    "INTERFACE_HEADERS" "PUBLIC_HEADERS" "PRIVATE_HEADERS" "SOURCES" "TARGET_SOURCE_DIR")
+      "INTERFACE_HEADERS" "PUBLIC_HEADERS" "PRIVATE_HEADERS" "PUBLIC_CXX_MODULES"
+      "PRIVATE_CXX_MODULES" "SOURCES" "TARGET_SOURCE_DIR")
     set(arg_name ARGS_${source_type})
     if(DEFINED ${arg_name})
       jcm_transform_list(ABSOLUTE_PATH INPUT "${${arg_name}}" OUT_VAR ${arg_name})
@@ -624,7 +625,8 @@ function(jcm_verify_sources)
   endif()
 
   # Results
-  foreach(source_type "INTERFACE_HEADERS" "PUBLIC_HEADERS" "PRIVATE_HEADERS" "SOURCES")
+  foreach(source_type INTERFACE_HEADERS PUBLIC_HEADERS PRIVATE_HEADERS
+      PUBLIC_CXX_MODULES PRIVATE_CXX_MODULES SOURCES)
     set(in_arg_name ARGS_${source_type}) # path values have been transformed
     set(out_arg_name ARGS_OUT_${source_type})
     if(DEFINED ${out_arg_name})
