@@ -22,7 +22,7 @@ extensions = [
     "sphinx_collapse"
 ]
 
-templates_path = ["_templates"]
+templates_path = ["@CMAKE_CURRENT_SOURCE_DIR@"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 
