@@ -166,7 +166,7 @@ function(jcm_install_config_file_package)
       "consumption and all versions will be installed into the same directory")
   endif()
 
-  foreach(target ${ARGS_TARGETS})
+  foreach(target IN LISTS ARGS_TARGETS)
     if(NOT TARGET ${target})
       message(
         FATAL_ERROR
@@ -223,7 +223,7 @@ function(jcm_install_config_file_package)
 
   # == Install CMake Files==
 
-  # Function to configure and find package config file for components or project
+  # Function to configure and find config-file for components or project
   function(_jcm_get_package_config_file provided_component out_var)
     if(provided_component)
       set(comp_arg COMPONENT ${provided_component})
@@ -261,7 +261,7 @@ function(jcm_install_config_file_package)
   endfunction()
 
   # Resolve components' package config files, append to cmake files to be installed
-  foreach(target ${ARGS_TARGETS})
+  foreach(target IN LISTS ARGS_TARGETS)
     get_target_property(component ${target} EXPORT_NAME)
 
     if(NOT component)
@@ -308,7 +308,7 @@ function(jcm_install_config_file_package)
 
   # == Install targets via export sets ==
 
-  foreach(target ${ARGS_TARGETS})
+  foreach(target IN LISTS ARGS_TARGETS)
     unset(target_export_component)
     unset(comp_arg)
     get_target_property(target_export_component ${target} EXPORT_NAME)
@@ -320,28 +320,37 @@ function(jcm_install_config_file_package)
     jcm_package_targets_file_name(${comp_arg} OUT_VAR targets_file)
     cmake_path(GET targets_file STEM export_set_name)
 
+    set(file_set_args)
     jcm_aliased_target(TARGET "${target}" OUT_TARGET target)
     get_target_property(interface_header_sets ${target} INTERFACE_HEADER_SETS)
-    set(file_set_args)
-    if(interface_header_sets)
-      foreach(interface_header_set ${interface_header_sets})
-        set(file_set_args ${file_set_args} FILE_SET ${interface_header_set} DESTINATION "${install_include_dir}")
-      endforeach()
-    endif()
+    get_target_property(interface_module_sets ${target} INTERFACE_CXX_MODULE_SETS)
+    foreach(file_set IN LISTS interface_header_sets interface_module_sets)
+      list(APPEND file_set_args
+        FILE_SET ${file_set}
+        DESTINATION "${install_include_dir}"
+        COMPONENT ${PROJECT_NAME}_devel)
+    endforeach()
+
+    message(
+      FATAL_ERROR "CMake's install command currently requires all private modules to be installed, which is an error"
+      "https://gitlab.kitware.com/cmake/cmake/-/issues/27255"
+    )
 
     install(
       TARGETS ${target}
       ${runtime_dependencies_arg}
       EXPORT ${export_set_name}
-      RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
-      COMPONENT ${PROJECT_NAME}_runtime
-      LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-      COMPONENT ${PROJECT_NAME}_runtime
-      NAMELINK_COMPONENT ${PROJECT_NAME}_devel
-      ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-      COMPONENT ${PROJECT_NAME}_devel
+      RUNTIME
+        DESTINATION "${CMAKE_INSTALL_BINDIR}"
+        COMPONENT ${PROJECT_NAME}_runtime
+      LIBRARY
+        DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+        COMPONENT ${PROJECT_NAME}_runtime
+        NAMELINK_COMPONENT ${PROJECT_NAME}_devel
+      ARCHIVE
+        DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+        COMPONENT ${PROJECT_NAME}_devel
       ${file_set_args}
-      COMPONENT ${PROJECT_NAME}_devel
       INCLUDES DESTINATION "${install_include_dir}")
 
     install(
