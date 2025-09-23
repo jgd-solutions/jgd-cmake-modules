@@ -1,4 +1,4 @@
-#include <daemon/exec.hpp>
+import daemon.exec_library;
 
 int main()
 {

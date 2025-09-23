@@ -1,9 +1,9 @@
-#pragma once
+export module daemon;
 
 namespace daemon {
 
-struct Protocol {
+export struct Protocol {
   [[nodiscard]] int field() const noexcept;
 };
 
-}  // namespace execlib
+}  // namespace daemon

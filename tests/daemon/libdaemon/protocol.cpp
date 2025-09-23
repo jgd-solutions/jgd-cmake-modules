@@ -1,9 +1,7 @@
-#include <libdaemon/protocol.hpp>
+module daemon;
 
 namespace daemon {
 
-int Protocol::field() const noexcept {
-  return 0;
-}
+[[nodiscard]] int Protocol::field() const noexcept { return 0; }
 
-}
+}  // namespace daemon

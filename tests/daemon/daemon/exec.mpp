@@ -1,0 +1,13 @@
+export module daemon.exec_library;
+
+import daemon;
+
+namespace daemon {
+
+export int exec()
+{
+  const Protocol protoc{};
+  return protoc.field();
+}
+
+}

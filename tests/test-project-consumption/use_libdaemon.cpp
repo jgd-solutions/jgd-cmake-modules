@@ -1,4 +1,4 @@
-#include <libdaemon/protocol.hpp>
+import daemon;
 
 int main () {
   daemon::Protocol protoc{};

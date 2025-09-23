@@ -2,11 +2,11 @@ jcm_add_executable(
   OUT_TARGET exec-target
   SOURCES
     main.cpp
+    features.mpp
   LIB_SOURCES
-    exec.hpp
-    exec.cpp)
+    exec.mpp)
 
-target_compile_features(${exec-target} PRIVATE cxx_std_17)
+target_compile_features(${exec-target} PRIVATE cxx_std_20)
 
 target_link_libraries(${exec-target}-library PRIVATE daemon::libdaemon)
 

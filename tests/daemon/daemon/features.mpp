@@ -1,0 +1,15 @@
+// The executable has an associated library for the majority of its behaviour, allowing unit
+// testing. This file represents code exclusively for the executable, that does not make sense to
+// separately test. It is separated out from main.cpp to illustrate how a larger project may split
+// the executable's sources.
+
+export module daemon.exec;
+
+namespace daemon {
+
+export {
+  inline bool has_feature_A{true};
+  inline bool has_feature_B{true};
+}
+
+}  // namespace daemon
