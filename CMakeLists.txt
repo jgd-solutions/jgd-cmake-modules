@@ -4,9 +4,7 @@ project(
   VERSION 3.10.0
   DESCRIPTION "CMake library for standardized CMake projects for JGD"
   HOMEPAGE_URL "https://jgd-solutions.github.io/jgd-cmake-modules/"
-  LANGUAGES NONE)
-
-set(CMAKE_INSTALL_LIBDIR "lib") # not used - set to calm GNUInstallDirs
+  LANGUAGES C) # GnuInstallDirs requires system arch, most reliably resolved by enabling a compiled lang
 
 # must amend module path, as we can't find_package on ourself
 list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}")
