@@ -223,7 +223,7 @@ macro(_verify_component_dependencies_json)
           "${json_err_msg_base}" "Entry '${entry_key}' is not named in OPTIONAL_COMPONENTS")
       endif()
 
-      # 2. is this the value an array
+      # 2. is this value an array
       string(JSON dependencies GET "${ARGS_COMPONENT_DEPENDENCIES_JSON}" ${entry_key})
       string(JSON json_kind TYPE "${dependencies}")
       if(NOT json_kind STREQUAL "ARRAY")
@@ -244,7 +244,7 @@ macro(_verify_component_dependencies_json)
         string(JSON json_kind TYPE "${dependencies}" ${dependency_idx})
         if(NOT json_kind STREQUAL "STRING")
           message(FATAL_ERROR
-            "${json_err_msg_base}" "Elements of every component dependencies array must contain "
+            "${json_err_msg_base}" "Elements of every component dependencies array must be"
             " strings; found '${json_kind}' @ "
             "COMPONENT_DEPENDENCIES_JSON[${entry_key}][${dependency_idx}]")
         endif()
@@ -331,13 +331,13 @@ One Value
   by prefixing each with `${PROJECT_NAME}::`.
 
 :cmake:variable:`COMPONENT_DEPENDENCIES_JSON`
-  Optional string containing a JSON document detailing the components dependencies on one another. 
+  Optional string containing a JSON document detailing the components' dependencies on one another. 
   The document structure is an object where keys are names of optional components, and  values 
   are arrays of component names. When the component named by one of the object entries is enabled by
   its respective build option, all the build options for the components named in the value array
   must also be enabled to fulfill the dependency. Based on the value of 
   :cmake:variable`MISSING_DEPENDENCY_ACTION`, any disabled component dependencies will either be
-  automatically enabled or cause an error will be emitted. Although unnecessary, required component
+  automatically enabled or trigger an error. Although unnecessary, required component
   can be named in the value array.
 
   This argument must be accompanied by :cmake:variable:`MISSING_DEPENDENCY_ACTION`.
