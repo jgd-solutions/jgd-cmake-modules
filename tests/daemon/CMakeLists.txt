@@ -17,9 +17,6 @@ jcm_aliased_target(
 get_target_property(interface_header_sets ${target} INTERFACE_HEADER_SETS)
 get_target_property(interface_module_sets ${target} INTERFACE_CXX_MODULE_SETS)
 get_target_property(module_sets ${target} CXX_MODULE_SETS)
-message(NOTICE "interface header sets: '${interface_header_sets}'")
-message(NOTICE "interface module sets: '${interface_module_sets}'")
-message(NOTICE "module sets: '${module_sets}'")
 
 get_target_property(interface_link ${target} INTERFACE_LINK_LIBRARIES)
 message(NOTICE "interface link: ${interface_link}")
