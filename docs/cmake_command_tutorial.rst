@@ -99,16 +99,16 @@ All default build targets from :ref:`configuring <configuringcmake>` can be buil
 
   cmake --build <build-dir>
 
-Specific targets can be individually built using the flag :code:`target`:
+Specific targets can be individually built using the flag :code:`--target`:
 
 .. code-block:: bash
 
   cmake --build <build-dir> --target <target>
   # Ex. cmake --build build-release --target json-parser
 
-For multi-configuration generators (Ninja Multi-Config, MSVC), those that correspond to
-build-systems which support multiple build-types in a single build-directory, add the
-:code:`--config` flag to build commands:
+Certain build-systems (Ninja Multi-Config, MSVC, Xode) support multiple
+build-types in a single build-directory. With these, the desired build-type is
+specified  with the :code:`--config` flag to build commands:
 
 .. code-block:: bash
 
@@ -159,9 +159,10 @@ remove any debug symbols or unneeded dynamic library links.
   cmake --install build-release --strip
   # Ex. cmake --install build-release --strip --prefix ./install
 
-Like the build step, on multi-configuration generators (Ninja Multi-Config, MSVC), add the
-:code:`--config` option to install commands. When unspecified, CMake will choose the first
-configuration your buildsystem supports, which may or may not be the configuration built above:
+Like the build step, on multi-configuration generators (Ninja Multi-Config,
+MSVC, Xcode), add the :code:`--config` option to install commands. When
+unspecified, CMake will choose the first configuration your buildsystem
+supports, which may or may not be the configuration built above:
 
 .. code-block:: bash
 
@@ -226,10 +227,12 @@ as they're off by default.
 CMake Presets
 ~~~~~~~~~~~~~
 
-CMake `presets <https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html>`_ exist in the
-files `CMakePresets.json` and `CMakeUserPresets.json`. The former is checked into version control,
-while the latter is for personal use. These include JSON descriptions of settings for `cmake` (and
-`ctest`), which can be invoked by simply naming the desired preset.
+CMake `presets
+<https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html>`_ exist in
+the files `CMakePresets.json` and `CMakeUserPresets.json`. The former is
+checked into version control, while the latter is for personal use. These
+include reusable JSON descriptions of settings for `cmake` (and `ctest`) to
+configure, build, test, and/or package a project.
 
 .. code-block:: bash
 
@@ -237,12 +240,20 @@ while the latter is for personal use. These include JSON descriptions of setting
   cmake --build --preset <build-preset> # build using preset
   ctest --preset <test-preset>          # test using preset
 
-For example, if a project's `CMakePresets.json` named a config preset called *debug-tests*, and
-build preset called *unit-tests*, and a test preset called *core-tests*, a user's workflow could be
-simplified to the following commands, instead of manually providing numerous command-line options.
+For example, if a project's `CMakePresets.json` named a config preset called
+*debug-tests*, and build preset called *unit-tests*, and a test preset called
+*core-tests*, a user's workflow could be simplified to the following commands,
+instead of manually providing numerous command-line options.
 
 .. code-block:: bash
 
   cmake --preset debug-tests        # configure using preset
   cmake --build --preset unit-tests # build using preset
   ctest --preset core-tests         # test using preset
+
+If this workflow is common, it can be defined in a `workflow preset
+<https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html#workflow-preset>`_,
+and invoked as one command:
+
+.. code-block:: bash
+  cmake --workflow --preset core-unit-tests
