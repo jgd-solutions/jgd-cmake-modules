@@ -12,7 +12,7 @@ to the liburing library via CMake targets and variables. This module does not ta
 (:cmake:variable:`CMAKE_SYSTEM_NAME` `link
 <https://cmake.org/cmake/help/latest/variable/CMAKE_SYSTEM_NAME.html>`_) into account. To avoid
 searching for liburing on non-Linux machines, explicitly wrap the
-:cmake:command:`find_packge(liburing)` call in a condition. 
+:cmake:command:`find_package(liburing)` call in a condition. 
 
 Cache Variables
 ~~~~~~~~~~~~~~~~
