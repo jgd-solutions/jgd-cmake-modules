@@ -50,6 +50,11 @@ those CMake built-ins, this function provides:
    :cmake:variable:`WITHOUT_NAME_PREFIX_CHECK`, for cases described in the below Parameters.
 #. Restrict the option's value to one of :cmake:variable:`ACCEPT_VALUES`.
 
+A message will be printed at the end of the top-level project's configuration for every option
+created with this function, including in sub-projects. This reveals what options were created,
+similar to cmake-gui. The deferred message call will have the id :cmake:`id_${NAME}`, allowing
+callers to cancel it. See `cmake_language(DEFER) <https://cmake.org/cmake/help/latest/command/cmake_language.html#defer>`_.
+
 Parameters
 ##########
 
@@ -154,6 +159,10 @@ function(jcm_add_option)
       "it names type '${ARGS_TYPE}'")
   endif()
 
+  if(DEFINED ARGS_ACCEPT_VALUES AND ARGS_TYPE STREQUAL "BOOL")
+    message(FATAL_ERROR "'ACCEPT_VALUES' cannot be provided when the argument TYPE is BOOL")
+  endif()
+
   # Option naming scheme
   set(expected_option_prefix "${JCM_PROJECT_PREFIX_NAME}_")
   if(NOT ARGS_WITHOUT_NAME_PREFIX_CHECK AND NOT ARGS_NAME MATCHES "^${expected_option_prefix}*")
@@ -193,6 +202,17 @@ function(jcm_add_option)
         "'${pretty_accept_values}'. Its value, '${${ARGS_NAME}}', is not one of these")
     endif()
   endif()
+
+  if(ARGS_TYPE STREQUAL "BOOL")
+    unset(type_message)
+  else()
+    set(type_message "(${ARGS_TYPE})")
+  endif()
+
+  # square brackets create possibly multi-line, literal strings to avoid variable evaluation when invoked.
+  cmake_language(EVAL CODE "
+    cmake_language(DEFER DIRECTORY \"${CMAKE_SOURCE_DIR}\" ID id_${ARGS_NAME} CALL message STATUS [[${ARGS_NAME}]] \" = ${${ARGS_NAME}}\" [[${type_message}: ${ARGS_DESCRIPTION}]])
+  ")
 endfunction()
 
 
@@ -458,9 +478,7 @@ function(jcm_add_component_options)
   foreach(control IN ZIP_LISTS ARGS_OPTIONAL_COMPONENTS option_names)
     set(component "${control_0}")
     set(option_name "${control_1}")
-    set(option_description
-        [[Enables the configuration of project component ${component}. Useful to skip finding its \
-          dependencies when ${PROJECT_NAME}::${component} is unused]])
+    set(option_description "Enables the configuration of project component '${component}' (${PROJECT_NAME}::${component})")
 
     set(default_value ON)
     if("${component}" IN_LIST ARGS_DEFAULT_OFF_COMPONENTS)

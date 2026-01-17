@@ -234,6 +234,8 @@ set_tests_properties(
 
 # == independent tests ==
 
+# test that disabled component dependencies are automatically enabled when they're depended upon by
+# other enabled components
 set(JCM_ENABLE_EXTRA ON)
 jcm_add_component_options(
   REQUIRED_COMPONENTS "core"
@@ -250,3 +252,9 @@ jcm_add_component_options(
 if(NOT JCM_ENABLE_IO)
   message(FATAL_ERROR "jcm_add_component_options failed to enable missing dependency")
 endif()
+
+unset(CACHE{JCM_ENABLE_IO})
+unset(CACHE{JCM_ENABLE_EXTRA})
+cmake_language(DEFER DIRECTORY "${CMAKE_SOURCE_DIR}" CANCEL_CALL id_JCM_ENABLE_IO)
+cmake_language(DEFER DIRECTORY "${CMAKE_SOURCE_DIR}" CANCEL_CALL id_JCM_ENABLE_EXTRA)
+
