@@ -61,8 +61,8 @@ macro(_JCM_CHECK_ADD_SUBDIR out_added_subdirs)
     # directory and file exist, deal with subdirectory
     list(APPEND ${out_added_subdirs} "${ARGS_SUBDIR}")
     if(ARGS_ADD_SUBDIRS)
-      message(VERBOSE "${CMAKE_CURRENT_FUNCTION}: Adding directory '${ARGS_SUBDIR}' to project\
-                       '${PROJECT_NAME}'")
+      message(VERBOSE
+        "${CMAKE_CURRENT_FUNCTION}: Adding directory '${ARGS_SUBDIR}' to project '${PROJECT_NAME}'")
       add_subdirectory("${ARGS_SUBDIR}")
     endif()
   endif()
