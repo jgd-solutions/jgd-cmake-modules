@@ -22,7 +22,7 @@ jcm_separate_list
   .. code-block:: cmake
 
     jcm_separate_list(
-      INPUT <item>...
+      INPUT [item]...
       <[OUT_MATCHED <out-var>]
        [OUT_MISMATCHED <out-var>] >
       <REGEX <regex> | IS_DIRECTORY | IS_SYMLINK | IS_ABSOLUTE | IS_TARGET | EVAL_TRUE>
@@ -82,7 +82,7 @@ Multi Value
 ~~~~~~~~~~~
 
 :cmake:variable:`INPUT`
-  List of elements to split based on :cmake:variable:`REGEX`.
+  List of elements to split. Empty lists are supported.
 
 Examples
 ########
@@ -123,6 +123,7 @@ function(jcm_separate_list)
     REQUIRES_ANY "OUT_MATCHED" "OUT_MISMATCHED"
     REQUIRES_ANY_1 "REGEX" "IS_DIRECTORY" "IS_SYMLINK" "IS_ABSOLUTE" "EVAL_TRUE"
     MUTUALLY_EXCLUSIVE "REGEX" "IS_DIRECTORY" "IS_SYMLINK" "IS_ABSOLUTE" "IS_TARGET" "EVAL_TRUE"
+    ALLOW_EMPTY_MULTI_VALUE
     ARGUMENTS "${ARGN}")
 
   # additional argument validation
@@ -240,7 +241,7 @@ jcm_transform_list
 
     jcm_transform_list(
       <ABSOLUTE_PATH [BASE <path>] | NORMALIZE_PATH | PARENT_PATH | FILENAME | ALIASED_TARGET>
-      INPUT <item>...
+      INPUT [item]...
       OUT_VAR <out-var>)
 
 Transforms the items in :cmake:variable:`INPUT` with the given transformation into the list
@@ -290,7 +291,7 @@ Multi Value
 ~~~~~~~~~~~
 
 :cmake:variable:`INPUT`
-  List of elements to transform.
+  List of elements to transform. Empty lists are supported.
 
 Examples
 ########
@@ -334,6 +335,7 @@ function(jcm_transform_list)
     REQUIRES_ALL "OUT_VAR"
     REQUIRES_ANY "ABSOLUTE_PATH" "NORMALIZE_PATH" "FILENAME"
     MUTUALLY_EXCLUSIVE "ABSOLUTE_PATH" "NORMALIZE_PATH" "PARENT_PATH" "FILENAME" "ALIASED_TARGET"
+    ALLOW_EMPTY_MULTI_VALUE
     ARGUMENTS "${ARGN}")
 
   # check for missing values on other variables, besides INPUT
@@ -416,7 +418,7 @@ jcm_regex_find_list
       REGEX <regex>
       <[OUT_IDX <out-var>]
        [OUT_ELEMENT <out-var>] >
-      INPUT <item>...)
+      INPUT [item]...)
 
 Searches :cmake:variable:`INPUT` for an item that either matches or mismatches
 (when :cmake:variable:`MISMATCH` is provided) the regular expression :cmake:variable:`REGEX`.
@@ -447,7 +449,7 @@ Multi Value
 ~~~~~~~~~~~
 
 :cmake:variable:`INPUT`
-  List of elements to search for a matching item.
+  List of elements to search for a matching item. Empty lists are supported.
 
 Examples
 ########
@@ -476,6 +478,7 @@ function(jcm_regex_find_list)
     MULTI_VALUE_KEYWORDS "INPUT"
     REQUIRES_ANY "OUT_IDX" "OUT_ELEMENT"
     REQUIRES_ALL "REGEX" "INPUT"
+    ALLOW_EMPTY_MULTI_VALUE
     ARGUMENTS "${ARGN}")
 
   if(ARGS_MISMATCH)
