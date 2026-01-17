@@ -217,7 +217,7 @@ function(jcm_add_executable)
   endif()
 
   # create executable target
-  add_executable(${target_name} "${executable_headers}" "${executable_sources}")
+  add_executable(${target_name} "${executable_sources}")
   add_executable(${PROJECT_NAME}::${export_name} ALIAS ${target_name})
 
   # == Set Target Properties ==
@@ -256,7 +256,7 @@ function(jcm_add_executable)
     # create object or interface library
     if(library_sources)
       set(include_dirs_scope PUBLIC)
-      add_library(${target_name}-library OBJECT "${library_headers}" "${library_sources}")
+      add_library(${target_name}-library OBJECT "${library_sources}")
       target_compile_options(${target_name}-library PRIVATE "${JCM_DEFAULT_COMPILE_OPTIONS}")
     else()
       set(include_dirs_scope INTERFACE)
@@ -389,7 +389,9 @@ function(jcm_add_test_executable)
       TARGET_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}"
       SOURCES "${standard_sources}"
       OUT_PRIVATE_HEADERS test_headers
-      OUT_SOURCES standard_test_sources)
+      OUT_SOURCES standard_sources)
+  else()
+    unset(test_headers)
   endif()
 
   # Default test name
@@ -400,8 +402,14 @@ function(jcm_add_test_executable)
   endif()
 
   # Test executable
-  add_executable(${ARGS_NAME} "${ARGS_SOURCES}")
+  add_executable(${ARGS_NAME} "${standard_sources}" "${unit_test_sources}")
   add_test(NAME ${test_name} COMMAND ${ARGS_NAME})
+
+  if(test_headers)
+    jcm_header_file_sets(PRIVATE
+      TARGET ${target_name}
+      HEADERS "${test_headers}")
+  endif()
 
   # Default properties
   set_target_properties(

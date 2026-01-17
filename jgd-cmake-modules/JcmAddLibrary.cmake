@@ -288,11 +288,7 @@ function(jcm_add_library)
 
   # == Create Library Target ==
 
-  add_library("${target_name}" ${lib_type}
-    "${ARGS_INTERFACE_HEADERS}"
-    "${ARGS_PUBLIC_HEADERS}"
-    "${ARGS_PRIVATE_HEADERS}"
-    "${ARGS_SOURCES}")
+  add_library("${target_name}" ${lib_type} "${ARGS_SOURCES}")
   add_library(${PROJECT_NAME}::${export_name} ALIAS ${target_name})
 
   # == Generate an export header ==

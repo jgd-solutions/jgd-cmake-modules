@@ -338,7 +338,7 @@ One Value
   number of entries as provided in :cmake:variable:`SOURCES`. For executable targets,
   this will contain a cleaned path for the entries in :cmake:variable:`SOURCES`, excluding the
   cleaned paths for header files found in :cmake:variable:`SOURCES`, which are moved to
-  :cmake:variable:`OUT_PRIVATE_HEADERS`.
+  :cmake:variable:`OUT_PRIVATE_HEADERS` (headers are removed).
 
 Multi Value
 ~~~~~~~~~~~
