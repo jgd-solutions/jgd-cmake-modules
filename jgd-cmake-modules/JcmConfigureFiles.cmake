@@ -272,18 +272,20 @@ jcm_configure_vcpkg_manifest_file
 
     jcm_configure_vcpkg_manifest_file()
 
-Configures a config template of a vcpkg manifest file located in
-:cmake:variable:`JCM_PROJECT_CMAKE_DIR` to :cmake:variable:`PROJECT_SOURCE_DIR`, using `@`
-substitution, only. This function provides consistency of configuring vcpkg manifests across
-projects, and has no effect if the project is not the top-level project. Furthermore, seeing as this
-function merely configures a file, it doesn't prescribe vcpkg as the dependency manager, or the use
-of vcpkg in any capacity.
+Updates fields in the `vcpkg <https://vcpkg.io/en/>`_ manifest file located at the project's root
+(:cmake:variable:`JCM_PROJECT_CMAKE_DIR`) using values from the :cmake:`project()` command,
+effectively configuring the file in-place. The fields *name*, *version*, *license*, *description*,
+and *homepage* will be set to the respective :cmake:`project()` arguments *PROJECT_NAME*,
+*PROJECT_VERSION*, *PROJECT_SPDX_LICENSE*, *PROJECT_DESCRIPTION*, and *PROJECT_HOMEPAGE_URL*, if
+they were provided. The purpose is to keep the project description DRY and minimize duplicate info.
 
-Using the vcpkg toolchain file to operate in manifest mode will invoke vcpkg with the project's
-manifest file *before* configuring the project. As such, adding dependencies to the template won't
-be found by :cmake:command:`find_package` because vcpkg will have already run by the time this
-function configures the manifest file, and will therefore not have installed them. Simply configure
-the project again, and the updated manifest file will be available for vcpkg.
+This function provides has no effect if the project is not the top-level project. Furthermore,
+seeing as this function merely configures a file, it doesn't prescribe vcpkg as the dependency
+manager, or the use of vcpkg in any capacity, so builders/packagers may resolve dependencies
+however they choose.
+
+- `vcpkg manifest reference <https://learn.microsoft.com/en-us/vcpkg/reference/vcpkg-json>`_
+- `cmake project() reference <https://cmake.org/cmake/help/latest/command/project.html>`_
 
 Examples
 ########
@@ -300,12 +302,36 @@ function(jcm_configure_vcpkg_manifest_file)
     return()
   endif()
 
-  set(in_manifest_file "${JCM_PROJECT_CMAKE_DIR}/vcpkg.json${JCM_IN_FILE_EXTENSION}")
+  set(old_manifest_input_file "${JCM_PROJECT_CMAKE_DIR}/vcpkg.json.in")
+  set(manifest_file_path "${PROJECT_SOURCE_DIR}/vcpkg.json")
 
-  if(NOT EXISTS "${in_manifest_file}")
-    message(FATAL_ERROR "Cannot configure a vcpkg manifest file for project ${PROJECT_NAME}. "
-      "Could not find file ${in_manifest_file}.")
+  if(EXISTS "${old_manifest_input_file}")
+    message(AUTHOR_WARNING "vcpkg manifest files are now configured in-place, ${old_manifest_input_file} can be deleted")
   endif()
 
-  configure_file("${in_manifest_file}" "${PROJECT_SOURCE_DIR}/vcpkg.json" @ONLY)
+  if(NOT EXISTS "${manifest_file_path}")
+    message(FATAL_ERROR "Cannot configure a vcpkg manifest file for project ${PROJECT_NAME}. "
+      "Could not find file ${manifest_file_path}")
+  endif()
+
+  file(READ "${manifest_file_path}" manifest)
+
+  set(json_keys "name" "version" "license" "description" "homepage")
+  set(cmake_vars "PROJECT_NAME" "PROJECT_VERSION" "PROJECT_SPDX_LICENSE" "PROJECT_DESCRIPTION" "PROJECT_HOMEPAGE_URL")
+  foreach(key_var IN ZIP_LISTS json_keys cmake_vars)
+    set(json_key ${key_var_0})
+    set(cmake_var ${key_var_1})
+    if(NOT ${cmake_var})
+      continue()
+    endif()
+
+    string(JSON manifest ERROR_VARIABLE json_error SET "${manifest}" ${json_key} "\"${${cmake_var}}\"")
+    if(json_error)
+      message(AUTHOR_WARNING
+        "Failed to configure vcpkg manifest while setting field '${json_key}' to the value of "
+        "${cmake_var}, ${${cmake_var}}: ${json_error}")
+    endif()
+  endforeach()
+
+  file(WRITE "${manifest_file_path}" "${manifest}")
 endfunction()
