@@ -1,7 +1,12 @@
+if(CMAKE_EXPERIMENTAL_EXPORT_PACKAGE_INFO)
+  set(spdx_license_arg SPDX_LICENSE BSD-3-Clause)
+endif()
+
 cmake_minimum_required(VERSION 3.25)
 project(
   jgd-cmake-modules
-  VERSION 3.10.2
+  VERSION 3.10.3
+  ${spdx_license_arg}
   DESCRIPTION "CMake library for standardized CMake projects for JGD"
   HOMEPAGE_URL "https://jgd-solutions.github.io/jgd-cmake-modules/"
   LANGUAGES C) # GnuInstallDirs requires system arch, most reliably resolved by enabling a compiled lang
