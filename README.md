@@ -1,6 +1,10 @@
-# jgd-cmake-modules
+<div align="center">
+  <img src="data/logo.png" width=20%/>
+  
+  <h2>JGD CMake Modules</h2>
+</div>
 
-CMake library of CMake modules to easily and consistently develop proper CMake projects.
+Library of CMake modules to easily and consistently develop proper CMake projects.
 
 [![Build & Test (MacOS)](https://github.com/jgd-solutions/jgd-cmake-modules/actions/workflows/macos.yaml/badge.svg)](https://github.com/jgd-solutions/jgd-cmake-modules/actions/workflows/macos.yaml)
 [![Build & Test (Ubuntu)](https://github.com/jgd-solutions/jgd-cmake-modules/actions/workflows/ubuntu.yaml/badge.svg)](https://github.com/jgd-solutions/jgd-cmake-modules/actions/workflows/ubuntu.yaml)

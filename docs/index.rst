@@ -1,12 +1,13 @@
 .. jgd-cmake-modules documentation master file
 
-Welcome to JCM's documentation!
+JGD CMake Modules documentation
 ===============================
 
-jgd-cmake-modules
------------------
+.. image:: ../data/logo.png
+   :width: 30%
+   :align: center
 
-CMake library of CMake modules to easily and consistently develop proper CMake projects.
+Library of CMake modules to easily and consistently develop proper CMake projects.
 
 
 Pages
