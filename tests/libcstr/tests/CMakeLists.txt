@@ -1,5 +1,5 @@
 # Create basic test to ensure validity of sample code
-include(JcmAddTestExecutable)
+include(JcmAddExecutable)
 jcm_add_test_executable(
   NAME ${PROJECT_NAME}-test
   SOURCES test.c

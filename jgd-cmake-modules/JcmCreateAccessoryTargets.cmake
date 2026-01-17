@@ -42,11 +42,11 @@ jcm_create_message_target
 
 Creates a custom target with the name specified by :cmake:variable:`NAME` that will emit all of the
 messages provided to :cmake:variable:`MESSAGES` at the given log level, :cmake:variable:`LEVEL`.
-This function and the generated target are used to easily report messages to users from a target at
-**a specific log level**. This differs from a target running the `echo` cmake command (``cmake -E
-echo``) because *echo* only emits messages to stdout, and without log levels. Alternative solutions
-are to use `JcmArbitraryScript`_ directly, or generate a script file in project configuration and
-create a target that parses it as the command.
+This function and the generated target are used to easily report messages to users when a target is
+built, at **a specific log level**. This differs from a target running ``cmake -E echo`` because
+*echo* only emits messages to stdout, and without log levels. Alternative solutions are to use
+`JcmArbitraryScript`_ directly, or generate a script file in project configuration and create a
+target that parses it as the command.
 
 Parameters
 ##########

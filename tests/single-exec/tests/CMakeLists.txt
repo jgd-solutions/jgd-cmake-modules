@@ -1,5 +1,5 @@
 include(JcmTargetNaming)
-include(JcmAddTestExecutable)
+include(JcmAddExecutable)
 
 # Run the main executable to test its operation
 jcm_executable_naming(OUT_TARGET exec-target)

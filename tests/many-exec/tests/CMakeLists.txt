@@ -1,4 +1,4 @@
-include(JcmAddTestExecutable)
+include(JcmAddExecutable)
 
 # Run the executables to test its operation
 add_test(NAME run_compiler COMMAND many-exec::compiler arg COMMAND_EXPAND_LISTS)

@@ -2,7 +2,7 @@ if(NOT LIBCOMPONENTS_ENABLE_EXTRA)
   return()
 endif()
 
-include(JcmAddTestExecutable)
+include(JcmAddExecutable)
 
 jcm_add_test_executable(
   NAME components-test
