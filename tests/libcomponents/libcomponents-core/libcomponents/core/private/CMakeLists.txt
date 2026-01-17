@@ -1,5 +1,5 @@
-jcm_header_file_sets(PRIVATE
+jcm_add_target_sources(
   TARGET ${core-target}
-  HEADERS "private.hpp")
+  PRIVATE_HEADERS "private.hpp")
 
 target_sources(${core-target} PRIVATE private.hpp private.cpp)

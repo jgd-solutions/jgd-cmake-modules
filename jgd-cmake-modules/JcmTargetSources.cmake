@@ -140,19 +140,31 @@ function(jcm_add_target_sources)
 
   if(NOT TARGET ${ARGS_TARGET})
     message(FATAL_ERROR
-      "The target provided to ${CMAKE_CURRENT_FUNCTION}, '${ARGS_TARGET}', does not exist.")
-  endif()
-
-  if(NOT DEFINED ARGS_SOURCES)
-    message(FATAL_ERROR
-      "SOURCES must be provided to ${CMAKE_CURRENT_FUNCTION} when adding sources to non-interface "
-      "libraries. Refer to jcm_header_file_sets for adding exclusively headers to targets.")
+      "The target provided to ${CMAKE_CURRENT_FUNCTION} does not exist: ${ARGS_TARGET}")
   endif()
 
   get_target_property(target_type "${ARGS_TARGET}" TYPE)
   get_target_property(target_source_dir "${ARGS_TARGET}" SOURCE_DIR)
+  get_target_property(target_sources "${ARGS_TARGET}" SOURCES)
   get_target_property(target_binary_dir "${ARGS_TARGET}" BINARY_DIR)
   get_target_property(target_component "${ARGS_TARGET}" COMPONENT)
+
+  # sources property may contain headers along with actual sources. remove headers.
+  # mismatched w/ header regex ensures jcm_verify_sources() still reports incorrect filenames.
+  jcm_separate_list(
+    INPUT ${target_sources}
+    REGEX "${JCM_HEADER_REGEX}"
+    TRANSFORM "FILENAME"
+    OUT_MISMATCHED target_sources)
+
+  list(APPEND target_sources "${ARGS_SOURCES}")
+  if(NOT target_type STREQUAL "INTERFACE_LIBRARY" AND NOT target_sources)
+    message(FATAL_ERROR
+      "Target ${ARGS_TARGET} is of type ${target_type}, which requires source files, but it does "
+      "not have any existing sources, nor have any been provided to ${CMAKE_CURRENT_FUNCTION}. "
+      "Although sources may be added at a later point, this cannot be verified and the files are "
+      "considered missing. Refer to jcm_header_file_sets for adding exclusively headers to targets.")
+  endif()
 
   # form conditional arguments for verify
   if(ARGS_WITHOUT_FILE_NAMING_CHECK)
@@ -176,18 +188,11 @@ function(jcm_add_target_sources)
     INTERFACE_HEADERS "${ARGS_INTERFACE_HEADERS}"
     PUBLIC_HEADERS "${ARGS_PUBLIC_HEADERS}"
     PRIVATE_HEADERS "${ARGS_PRIVATE_HEADERS}"
-    SOURCES "${ARGS_SOURCES}"
+    SOURCES "${target_sources}"
     OUT_INTERFACE_HEADERS ARGS_INTERFACE_HEADERS
     OUT_PUBLIC_HEADERS ARGS_PUBLIC_HEADERS
     OUT_PRIVATE_HEADERS ARGS_PRIVATE_HEADERS
     OUT_SOURCES ARGS_SOURCES)
-
-  # header properties
-  if(ARGS_INTERFACE_HEADERS)
-    jcm_header_file_sets(INTERFACE TARGET ${ARGS_TARGET} HEADERS "${ARGS_INTERFACE_HEADERS}")
-  elseif(ARGS_PRIVATE_HEADERS)
-    jcm_header_file_sets(PRIVATE TARGET ${ARGS_TARGET} HEADERS "${ARGS_PRIVATE_HEADERS}")
-  endif()
 
   # header file sets - already assured header sources are appropriate for target
   foreach(header_scope IN ITEMS INTERFACE PUBLIC PRIVATE)
@@ -201,14 +206,10 @@ function(jcm_add_target_sources)
   endforeach()
 
   # sources
-  # Note: empty values are considered relative paths by target_sources, which therefore adds
-  # a directory as a target source. Avoid this.
-  jcm_aliased_target(TARGET "${ARGS_TARGET}" OUT_TARGET ARGS_TARGET)
-
-  if(ARGS_PRIVATE_HEADERS)
-    target_sources(${ARGS_TARGET} PRIVATE "${ARGS_PRIVATE_HEADERS}")
-  endif()
   if(ARGS_SOURCES)
+    # Note: empty values are considered relative paths by target_sources, which therefore adds
+    # a directory as a target source. Avoid this with if() clause
+    jcm_aliased_target(TARGET "${ARGS_TARGET}" OUT_TARGET ARGS_TARGET)
     target_sources(${ARGS_TARGET} PRIVATE "${ARGS_SOURCES}")
   endif()
 endfunction()
