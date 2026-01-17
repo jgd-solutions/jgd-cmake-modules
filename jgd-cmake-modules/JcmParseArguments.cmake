@@ -38,7 +38,8 @@ jcm_parse_arguments
 
 
 A wrapper around CMake's :cmake:command:`cmake_parse_arguments` that provides sensible defaults,
-named arguments, and handles argument validation. Errors will result in fatal errors being emitted.
+named arguments, consistent support for empty values, and handles argument validation. Errors will
+result in fatal errors being emitted.
 
 Parameters
 ##########
@@ -53,6 +54,11 @@ Options
 :cmake:variable:`WITHOUT_UNPARSED_CHECK`
   When provided, this macro will *not* check for unparsed keywords in :cmake:variable:`ARGUMENTS`.
   That is keywords that were provided but not included in the following lists of keywords.
+
+:cmake:variable:`ALLOW_EMPTY_MULTI_VALUE`
+  Normally, empty multi-value arguments are rejected in the same way as the keyword being omitted.
+  When provided, this flag will cause multi-value arguments that are provided as empty or are
+  missing values to be defined as empty values.
 
 One Value
 ~~~~~~~~~
@@ -130,16 +136,23 @@ Examples
       ARGUMENTS "${ARGN}")
 
     if(ARGS_USE_PERL_REGEX)
+      # USE_PERL_REGEX was given to separate_list()
       # example usage of option
+    else()
+      # USE_PERL_REGEX was NOT given to separate_list()
     endif()
 
     if(DEFINED ARGS_OUT_MATCHED)
+      # OUT_MATCHED was given to separate_list()
       # example usage of one-value argument
     endif()
 
-    foreach(input IN LISTS ARGS_INPUT)
-      # example usage of multi-value argument
-    endforeach()
+    if(DEFINED ARGS_INPUT)
+      # non-empty INPUT was given to separate_list()
+      foreach(input IN LISTS ARGS_INPUT)
+        # example usage of multi-value argument
+      endforeach()
+    endif()
 
     # ...
   endfunction()
@@ -173,14 +186,13 @@ macro(JCM_PARSE_ARGUMENTS)
   # Arguments to jcm_parse_arguments
   cmake_parse_arguments(INS
     # options
-    "WITHOUT_MISSING_VALUES_CHECK;WITHOUT_UNPARSED_CHECK"
+    "WITHOUT_MISSING_VALUES_CHECK;WITHOUT_UNPARSED_CHECK;ALLOW_EMPTY_MULTI_VALUE"
     # one-value
     "PREFIX"
     # multi-value
     [[ARGUMENTS;OPTIONS;ONE_VALUE_KEYWORDS;MULTI_VALUE_KEYWORDS;REQUIRES_ALL;REQUIRES_ANY;REQUIRES_ANY_1;REQUIRES_ANY_2;REQUIRES_ANY_3;MUTUALLY_EXCLUSIVE;MUTUALLY_EXCLUSIVE_1;MUTUALLY_EXCLUSIVE_2;MUTUALLY_EXCLUSIVE_3;MUTUALLY_INCLUSIVE;MUTUALLY_INCLUSIVE_1;MUTUALLY_INCLUSIVE_2;MUTUALLY_INCLUSIVE_3]]
     # function arguments
     "${ARGN}")
-
 
   # == Argument Validation of jcm_parse_arguments ==
 
@@ -190,20 +202,35 @@ macro(JCM_PARSE_ARGUMENTS)
       "values: ${INS_KEYWORDS_MISSING_VALUES}")
   endif()
   if(INS_UNPARSED_ARGUMENTS)
-    message(WARNING "Unparsed arguments provided to jcm_parse_arguments: "
+    message(WARNING "Unrecognized arguments provided to jcm_parse_arguments: "
       "${INS_UNPARSED_ARGUMENTS}")
   endif()
 
-  # ensure required keywords are a subset of the function's parsed keywords
-  set(parsed_keywords ${INS_OPTIONS} ${INS_ONE_VALUE_KEYWORDS} ${INS_MULTI_VALUE_KEYWORDS})
-
-  foreach(req_keyword IN LISTS
-    INS_REQUIRES_ALL INS_REQUIRES_ANY INS_REQUIRES_ANY_1 INS_REQUIRES_ANY_2 INS_REQUIRES_ANY_3)
-    if(NOT "${req_keyword}" IN_LIST parsed_keywords)
+  # ensure combinatorial keywords are a subset of the function's available keywords
+  set(parsed_keywords ${INS_ONE_VALUE_KEYWORDS} ${INS_MULTI_VALUE_KEYWORDS})
+  foreach(keyword IN LISTS INS_REQUIRES_ALL)
+    if("${keyword}" IN_LIST INS_OPTIONS)
       message(FATAL_ERROR
-        "The required keyword '${req_keyword}' is not in the list of function keywords, "
-        "'${parsed_keywords}'. This keyword cannot be required if it is not a function parameter")
+        "The required keyword '${keyword}' names a function option, which cannot be always "
+        "required, as this would render the option useless")
+    elseif(NOT "${keyword}" IN_LIST parsed_keywords)
+      message(FATAL_ERROR
+        "The required keyword '${keyword}' is not a function keyword; one of '${parsed_keywords}'")
     endif()
+  endforeach()
+
+  list(APPEND parsed_keywords ${INS_OPTIONS})
+  foreach(comb_list IN ITEMS
+      INS_REQUIRES_ANY INS_REQUIRES_ANY_1 INS_REQUIRES_ANY_2 INS_REQUIRES_ANY_3
+      INS_MUTUALLY_EXCLUSIVE INS_MUTUALLY_EXCLUSIVE_1 INS_MUTUALLY_EXCLUSIVE_2 INS_MUTUALLY_EXCLUSIVE_3
+      INS_MUTUALLY_INCLUSIVE INS_MUTUALLY_INCLUSIVE_1 INS_MUTUALLY_INCLUSIVE_2 INS_MUTUALLY_INCLUSIVE_3)
+    foreach(keyword IN LISTS ${comb_list})
+      if(NOT "${keyword}" IN_LIST parsed_keywords)
+        message(FATAL_ERROR
+          "The keyword '${keyword}' provided to ${comb_list} is not a function keyword; one of "
+          "'${parsed_keywords}'")
+      endif()
+    endforeach()
   endforeach()
 
   unset(parsed_keywords)
@@ -218,14 +245,31 @@ macro(JCM_PARSE_ARGUMENTS)
   cmake_parse_arguments(${INS_PREFIX} "${INS_OPTIONS}" "${INS_ONE_VALUE_KEYWORDS}"
     "${INS_MULTI_VALUE_KEYWORDS}" "${INS_ARGUMENTS}")
 
+
+  block(SCOPE_FOR VARIABLES)
+
+  if(INS_ALLOW_EMPTY_MULTI_VALUE)
+    # cmake_parse_arguments() will not define the argument value when it's empty or completely
+    # omitted. Define argument values to empty for every multi-value keyword provided w/o a value
+    foreach(keyword IN LISTS ${INS_PREFIX}_KEYWORDS_MISSING_VALUES)
+      if(keyword IN_LIST INS_MULTI_VALUE_KEYWORDS)
+        set(${INS_PREFIX}_${keyword} "")
+        list(REMOVE_ITEM ${INS_PREFIX}_KEYWORDS_MISSING_VALUES ${keyword})
+      endif()
+    endforeach()
+  endif()
+
   # validate keywords that must all be present
-  foreach(keyword ${INS_REQUIRES_ALL})
-    if(NOT DEFINED ${INS_PREFIX}_${keyword})
-      message(FATAL_ERROR "${keyword} was not provided or may be missing its value(s).")
+  # note: none of these keywords can be options
+  foreach(keyword IN LISTS INS_REQUIRES_ALL)
+    if(DEFINED ${INS_PREFIX}_${keyword})
+      set(at_least_one_defined TRUE)
+      break()
     endif()
   endforeach()
 
   # validate keywords that must have one present
+  # note: for the keywords that are options, they'll always be defined
   foreach(requires_any_arg IN ITEMS
     INS_REQUIRES_ANY INS_REQUIRES_ANY_1 INS_REQUIRES_ANY_2 INS_REQUIRES_ANY_3)
     if(NOT ${requires_any_arg})
@@ -233,8 +277,9 @@ macro(JCM_PARSE_ARGUMENTS)
     endif()
 
     set(at_least_one_defined FALSE)
-    foreach(param_keyword IN LISTS ${requires_any_arg})
-      if(DEFINED ${INS_PREFIX}_${param_keyword})
+    foreach(keyword IN LISTS ${requires_any_arg})
+      if(${INS_PREFIX}_${keyword} OR
+        (DEFINED ${INS_PREFIX}_${keyword} AND NOT keyword IN_LIST INS_OPTIONS))
         set(at_least_one_defined TRUE)
         break()
       endif()
@@ -242,10 +287,8 @@ macro(JCM_PARSE_ARGUMENTS)
 
     if(NOT at_least_one_defined)
       message(FATAL_ERROR
-        "None of the following keywords were provided or may be missing their values: "
-        "'${${requires_any_arg}}'")
+        "None of the following keywords were provided: '${${requires_any_arg}}'")
     endif()
-    unset(at_least_one_defined)
   endforeach()
 
 
@@ -256,35 +299,23 @@ macro(JCM_PARSE_ARGUMENTS)
     INS_MUTUALLY_EXCLUSIVE_2
     INS_MUTUALLY_EXCLUSIVE_3)
 
-    unset(first_keyword)
-    unset(second_keyword)
-
     # foreach IN LISTS won't execute body if list isn't defined :)
     foreach(keyword IN LISTS ${mutex_list})
-      if(NOT "${keyword}" IN_LIST INS_ARGUMENTS)
+      if(NOT DEFINED ${INS_PREFIX}_${keyword} OR
+          (NOT ${INS_PREFIX}_${keyword} AND keyword IN_LIST INS_OPTIONS))
         continue()
       endif()
 
       if(DEFINED first_keyword)
-        set(second_keyword ${keyword})
-        set(violated_mutex_list ${mutex_list})
+        message(FATAL_ERROR
+          "The keywords ${first_keyword} and ${keyword} cannot be provided together. Providing "
+          "any one of the following keywords precludes providing any other: '${${mutex_list}}'")
         break()
       else()
         set(first_keyword ${keyword})
       endif()
     endforeach()
-    
-    if(DEFINED second_keyword)
-      message(FATAL_ERROR
-        "The keywords ${first_keyword} and ${second_keyword} cannot be provided togehter. They're "
-        "part of the mutually exclusive list of function arguments, '${${mutex_list}}'. Providing "
-        "any one of these precludes providing any other.")
-    endif()
   endforeach()
-
-
-  unset(first_keyword)
-  unset(second_keyword)
 
   # validate keywords that are mutually inclusive
   foreach(inclusive_list IN ITEMS 
@@ -293,17 +324,17 @@ macro(JCM_PARSE_ARGUMENTS)
     INS_MUTUALLY_INCLUSIVE_2
     INS_MUTUALLY_INCLUSIVE_3)
 
-    if(NOT DEFINED ${inclusive_list})
-      continue()
-    endif()
+    set(missing_keywords)
+    foreach(keyword IN LISTS ${inclusive_list})
+      if(NOT DEFINED ${INS_PREFIX}_${keyword} OR
+          (NOT ${INS_PREFIX}_${keyword} AND keyword IN_LIST INS_OPTIONS))
+        list(APPEND missing_keywords ${keyword})
+      endif()
+    endforeach()
 
-    set(missing_keywords "${${inclusive_list}}")
-    list(REMOVE_ITEM missing_keywords ${INS_ARGUMENTS}) 
-    if(missing_keywords STREQUAL "${${inclusive_list}}")
-      # all keywords in inclusivity list are missing: condition satisfied
-      continue()
-    endif()
-    if(missing_keywords)
+    list(LENGTH missing_keywords num_missing)
+    list(LENGTH ${inclusive_list} inclusive_size)
+    if(NOT num_missing EQUAL 0 AND NOT num_missing EQUAL inclusive_size)
       message(FATAL_ERROR
         "The following keywords are missing: '${missing_keywords}'. They're part of the mutually "
         "inclusive list of function arguments, '${${inclusive_list}}'. Providing any one of "
@@ -320,4 +351,6 @@ macro(JCM_PARSE_ARGUMENTS)
   if(NOT INS_WITHOUT_UNPARSED_CHECK AND ${INS_PREFIX}_UNPARSED_ARGUMENTS)
     message(WARNING "Unparsed arguments provided: ${${INS_PREFIX}_UNPARSED_ARGUMENTS} ")
   endif()
+
+  endblock()
 endmacro()
