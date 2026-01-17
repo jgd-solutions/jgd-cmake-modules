@@ -256,4 +256,5 @@ If this workflow is common, it can be defined in a `workflow preset
 and invoked as one command:
 
 .. code-block:: bash
+
   cmake --workflow --preset core-unit-tests
