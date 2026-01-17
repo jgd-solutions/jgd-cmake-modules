@@ -3,5 +3,5 @@
   "description" : "CMake library for standardized CMake projects for JGD",
   "homepage" : "https://jgd-solutions.github.io/jgd-cmake-modules/",
   "name" : "jgd-cmake-modules",
-  "version" : "3.10.1"
+  "version" : "3.10.2"
 }
