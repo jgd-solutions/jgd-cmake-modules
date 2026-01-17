@@ -221,7 +221,7 @@ function(jcm_add_library)
     # commonly used (build-wide) build-shared option
     jcm_add_option(
       NAME BUILD_SHARED_LIBS
-      DESCRIPTION "Build libraries with unspecified types shared."
+      DESCRIPTION "Common, global option to build all libraries with unspecified types shared. "
       WITHOUT_NAME_PREFIX_CHECK
       TYPE BOOL
       DEFAULT OFF)

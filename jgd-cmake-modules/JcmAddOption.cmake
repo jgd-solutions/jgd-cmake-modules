@@ -209,6 +209,9 @@ function(jcm_add_option)
     set(type_message "(${ARGS_TYPE})")
   endif()
 
+  # cancel any previous message to avoid duplicate messages with duplicate jcm_add_option()
+  cmake_language(DEFER DIRECTORY "${CMAKE_SOURCE_DIR}" CANCEL_CALL id_${ARGS_NAME})
+
   # square brackets create possibly multi-line, literal strings to avoid variable evaluation when invoked.
   cmake_language(EVAL CODE "
     cmake_language(DEFER DIRECTORY \"${CMAKE_SOURCE_DIR}\" ID id_${ARGS_NAME} CALL message STATUS [[${ARGS_NAME}]] \" = ${${ARGS_NAME}}\" [[${type_message}: ${ARGS_DESCRIPTION}]])
