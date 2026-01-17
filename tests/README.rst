@@ -38,4 +38,4 @@ Test Layout
 - `libheaders <libheaders_link_>`__: Produces a single header-only library.
 - `many-exec <many-exec_link_>`__: Produces multiple executables through a single project, offered as executable components.
 - `libcstr <libcstr_link_>`__: Produces a single library in C, in order to test and exemplify usage of a C project
-- `daemon` <daemon_link_>`__: Produces an executable AND a supplementary library.
+- `daemon <daemon_link_>`__: Produces an executable AND a supplementary library.
