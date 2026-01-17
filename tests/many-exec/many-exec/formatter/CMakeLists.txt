@@ -2,7 +2,7 @@ jcm_add_executable(
   COMPONENT formatter
   OUT_TARGET formatter-target
   SOURCES main.cpp
-  LIB_SOURCES ../shared.hpp reformat.hpp  empty.cpp)
+  LIB_SOURCES ../shared.hpp reformat.hpp empty.cpp)
 
 add_subdirectory(formats) # organize files into dirs to test jcm_add_target_sources
 

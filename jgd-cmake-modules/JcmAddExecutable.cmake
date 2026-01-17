@@ -128,7 +128,7 @@ Examples
   jcm_add_executable(
     OUT_TARGET target
     SOURCES main.cpp
-    LIB_SOURCES xml.cpp)
+    LIB_SOURCES xml.hpp xml.cpp)
 
   jcm_add_test_executable(
     NAME test_parser
@@ -142,7 +142,7 @@ Examples
   jcm_add_executable(
     OUT_TARGET target
     SOURCES main.cpp
-    LIB_SOURCES coffee.hpp)
+    LIB_SOURCES coffee.hpp coffee.hpp)
 
 #]=======================================================================]
 function(jcm_add_executable)
@@ -347,7 +347,7 @@ Examples
   jcm_add_executable(
     OUT_TARGET target
     SOURCES main.cpp
-    LIB_SOURCES engine.cpp)
+    LIB_SOURCES engine.hpp engine.cpp)
 
   jcm_add_test_executable(
     NAME test_engine
