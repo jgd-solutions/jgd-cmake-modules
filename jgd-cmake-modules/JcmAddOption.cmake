@@ -289,10 +289,10 @@ jcm_add_component_options
 
 Creates build options with :cmake:command:`jcm_add_option` named
 `${JCM_PROJECT_PREFIX_NAME}_ENABLE_<component>`, where *component* is the name of a standard project
-component, i.e a library or executable component. An option will be for every component in the list
-:cmake:variable:`OPTIONAL_COMPONENTS`. The result variables will contain all optional components
-that have been enabled by their respective build option, and all required components; those named
-in :cmake:variable:`REQUIRED_COMPONENTS`.
+component, i.e a library or executable component. An option will be created for every component in
+the list :cmake:variable:`OPTIONAL_COMPONENTS`. The result variables will contain all optional
+components that have been enabled by their respective build option, and all required components;
+those named in :cmake:variable:`REQUIRED_COMPONENTS`.
 
 Every project component produces a single *installed* target. Targets can be selectively built by
 CMake with the command-line option `--target`, such as `cmake --build build --target
@@ -300,14 +300,14 @@ libcomponents_libcomponents-core`, which will exclusively build the *core* compo
 *libcomponents*. However, the configuration of undesired components may also be worth avoiding if
 their configuration is very long or introduces additional dependencies. For example, if the *extra*
 component of *libcomponents* requires eight dependencies that aren't required by *core*, users of
-*core* may not want to acquire dependencies they don't use. For this purpose, project options can be
-introduced to selectively configure project components.
+*core* may not want to acquire dependencies they don't use. For this purpose, project component
+*options can be introduced to selectively configure project components.
 
 This function is merely a wrapper around :cmake:command`jcm_add_option` adding simplicity and
 consistency for the use-case. Using this function does not preclude creating any project options
 through other means, nor do all project components need to be provided to this function.
 
-Component names cannot have any regex characters in them
+Component names cannot have any regex characters in them.
 
 
 Parameters
@@ -332,15 +332,16 @@ One Value
 
 :cmake:variable:`COMPONENT_DEPENDENCIES_JSON`
   Optional string containing a JSON document detailing the components dependencies on one another. 
-  The document structure is an object where keys are names of optional components, and  values 
-  are arrays of component names. When the component named by one of the object entries is enabled by
-  its respective build option, all the build options for the components named in the value array
-  must also be enabled to fulfill the dependency. Based on the value of 
-  :cmake:variable`MISSING_DEPENDENCY_ACTION`, any disabled component dependencies will either be
-  automatically enabled or cause an error will be emitted. Although unnecessary, required component
-  can be named in the value array.
-
-  This argument must be accompanied by :cmake:variable:`MISSING_DEPENDENCY_ACTION`.
+  The document structure is an object where keys are names of optional components, and  values are
+  arrays of component names. When the component named by one of the object entries is enabled by its
+  respective build option, all the build options for the components named in the value array must
+  also be enabled to fulfill the dependency. For example, the value :code:`{"io": ["extra", "formats"]}`
+  declares that the *io* component depends upon *extra* **and** *formats*. Although unnecessary,
+  required component can be named in the value array.
+  
+  This argument must be accompanied by :cmake:variable:`MISSING_DEPENDENCY_ACTION`.  Based on the
+  value of :cmake:variable:`MISSING_DEPENDENCY_ACTION`, any disabled component dependencies will
+  either be automatically enabled or cause an error to be emitted. 
 
 :cmake:variable:`MISSING_DEPENDENCY_ACTION`
   Optional literal of either *ERROR* or *ENABLE* indicating what action will be taken when a 
@@ -384,14 +385,14 @@ Examples
 
   jcm_add_component_options(
     REQUIRED_COMPONENTS "core"
-    OPTIONAL_COMPONENTS "io" "extra"
+    OPTIONAL_COMPONENTS "io" "formats" "extra"
     DEFAULT_OFF_COMPONENTS "extra"
     OUT_COMPONENTS enabled_components
     MISSING_DEPENDENCY_ACTION "ENABLE"
     COMPONENT_DEPENDENCIES_JSON [=[ 
       {
-        "extra": [ "io", "core" ],
-        "io": [ "core" ]
+        "extra": [ "io", "formats" ],
+        "io": ["formats"]
       }
     ]=])
 
