@@ -1,8 +1,7 @@
 {
-  "dependencies" : [],
-  "description" : "CMake library for standardized CMake projects for JGD",
-  "homepage" : "https://jgd-solutions.github.io/jgd-cmake-modules/",
-  "license" : "BSD-3-Clause",
-  "name" : "jgd-cmake-modules",
-  "version" : "3.14.0"
+  "name": "jgd-cmake-modules",
+  "version": "3.14.2",
+  "description": "CMake library for standardized CMake projects for JGD",
+  "homepage": "https://jgd-solutions.github.io/jgd-cmake-modules/",
+  "license": "BSD-3-Clause"
 }

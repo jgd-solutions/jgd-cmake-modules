@@ -284,6 +284,9 @@ seeing as this function merely configures a file, it doesn't prescribe vcpkg as 
 manager, or the use of vcpkg in any capacity, so builders/packagers may resolve dependencies
 however they choose.
 
+The manifest file will be formatted with the vcpkg executable, if it's available on the system,
+ro with CMake's default JSON styling otherwise.
+
 - `vcpkg manifest reference <https://learn.microsoft.com/en-us/vcpkg/reference/vcpkg-json>`_
 - `cmake project() reference <https://cmake.org/cmake/help/latest/command/project.html>`_
 
@@ -310,12 +313,14 @@ function(jcm_configure_vcpkg_manifest_file)
   endif()
 
   if(NOT EXISTS "${manifest_file_path}")
-    message(FATAL_ERROR "Cannot configure a vcpkg manifest file for project ${PROJECT_NAME}. "
-      "Could not find file ${manifest_file_path}")
+    message(AUTHOR_WARNING "Cannot configure a vcpkg manifest file for project ${PROJECT_NAME}. "
+      "Manifest file does not exist: ${manifest_file_path}")
+    return()
   endif()
 
   file(READ "${manifest_file_path}" manifest)
 
+  set(wrote_field FALSE)
   set(json_keys "name" "version" "license" "description" "homepage")
   set(cmake_vars "PROJECT_NAME" "PROJECT_VERSION" "PROJECT_SPDX_LICENSE" "PROJECT_DESCRIPTION" "PROJECT_HOMEPAGE_URL")
   foreach(key_var IN ZIP_LISTS json_keys cmake_vars)
@@ -325,13 +330,38 @@ function(jcm_configure_vcpkg_manifest_file)
       continue()
     endif()
 
+    # avoid slow execute_process() by only writing changes to manifest file 
+    string(JSON current_value ERROR_VARIABLE json_error GET "${manifest}" ${json_key})
+    if(json_error)
+      message(AUTHOR_WARNING
+        "Failed to configure vcpkg manifest while reading field '${json_key}': ${json_error}")
+    endif()
+    if(current_value STREQUAL "${${cmake_var}}")
+      continue()
+    endif()
+
     string(JSON manifest ERROR_VARIABLE json_error SET "${manifest}" ${json_key} "\"${${cmake_var}}\"")
     if(json_error)
       message(AUTHOR_WARNING
         "Failed to configure vcpkg manifest while setting field '${json_key}' to the value of "
         "${cmake_var}, ${${cmake_var}}: ${json_error}")
     endif()
+    set(wrote_field TRUE)
   endforeach()
 
+  if(NOT wrote_field)
+    return()
+  endif()
+
   file(WRITE "${manifest_file_path}" "${manifest}")
+
+  # cmake stores vcpkg manifest in key-sorted order, and has weird spacing & styling.
+  # auto-format vcpkg manifest if vcpkg is available on the system.
+  find_program(vcpkg_EXECUTABLE vcpkg DOC "vcpkg package manager")
+  if(vcpkg_EXECUTABLE)
+    execute_process(
+      COMMAND "${vcpkg_EXECUTABLE}" format-manifest "${manifest_file_path}"
+      ECHO_OUTPUT_VARIABLE
+      ECHO_ERROR_VARIABLE)
+  endif()
 endfunction()
