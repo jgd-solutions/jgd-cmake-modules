@@ -5,7 +5,7 @@ endif()
 cmake_minimum_required(VERSION 3.25)
 project(
   jgd-cmake-modules
-  VERSION 3.14.1
+  VERSION 3.14.0
   ${spdx_license_arg}
   DESCRIPTION "CMake library for standardized CMake projects for JGD"
   HOMEPAGE_URL "https://jgd-solutions.github.io/jgd-cmake-modules/"

@@ -196,13 +196,13 @@ function(jcm_add_target_sources)
 
   # header file sets - already assured header sources are appropriate for target
   foreach(header_scope IN ITEMS INTERFACE PUBLIC PRIVATE)
-    set(header_source "ARGS_${header_scope}_HEADERS")
-    if(NOT "${${header_source}}")
+    set(headers_var "ARGS_${header_scope}_HEADERS")
+    if(NOT ${headers_var})
       continue()
     endif()
     jcm_header_file_sets(${header_scope}
       TARGET "${ARGS_TARGET}"
-      HEADERS "${${header_source}}")
+      HEADERS "${${headers_var}}")
   endforeach()
 
   # sources
