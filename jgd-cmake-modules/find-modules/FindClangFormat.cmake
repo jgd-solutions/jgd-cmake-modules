@@ -22,13 +22,15 @@ Cache Variables
 ~~~~~~~~~~~~~~~~
 
 :cmake:variable:`ClangFormat_EXECUTABLE`
-  Path to found clang-foramt executable
+  Absolute path to the found clang-format executable, used to minimize repeated searches
+  with repeated find_package(ClangFormat) calls. This value can be queried from the target's
+  *IMPORTED_LOCATION* property.
 
 Result Variables
 ~~~~~~~~~~~~~~~~
 
 :cmake:variable:`ClangFormat_FOUND`
-  True if the clang-format executable was found
+  Boolean indicating whether the requested version of clang-format was found.
 
 :cmake:variable:`ClangFormat_VERSION`
   The found version, where version is in the form *<major>.<minor>.<patch>*
@@ -46,7 +48,8 @@ Imported Targets
 ~~~~~~~~~~~~~~~~
 
 clang::format
-  The clang-format executable, as an imported CMake target
+  The clang-format executable, as an imported CMake target.
+  Has the *IMPORTED_LOCATION* property set.
 
 .. _ExamplesAnchor:
 
@@ -56,6 +59,8 @@ Examples
 .. code-block:: cmake
 
   find_package(ClangFormat)
+
+  jcm_create_clang_format_targets(SOURCE_TARGETS libbbq::libbbq)
 
 .. code-block:: cmake
 
@@ -68,9 +73,11 @@ Examples
 
 include(FindPackageHandleStandardArgs)
 
+block(PROPAGATE ClangFormat_FOUND ClangFormat_VERSION ClangFormat_VERSION_MAJOR ClangFormat_VERSION_MINOR ClangFormat_VERSION_PATCH)
+
 # these version variables are introduced by the find_package call which loaded this find-module
 if(ClangFormat_FIND_VERSION)
-  set(_ClangFormat_versioned_names
+  set(versioned_names
      "clang-format-${ClangFormat_FIND_VERSION}"
      "clang-format-${ClangFormat_FIND_VERSION_MAJOR}.${ClangFormat_FIND_VERSION_MINOR}"
      "clang-format-${ClangFormat_FIND_VERSION_MAJOR}")
@@ -78,50 +85,46 @@ endif()
 
 find_program(
   ClangFormat_EXECUTABLE
-  NAMES ${_ClangFormat_versioned_names} "clang-format"
-  DOC "Path to clang-format executable")
-unset(_ClangFormat_versioned_names)
+  NAMES ${versioned_names} "clang-format"
+  DOC "Cached path to clang-format executable for find_package(ClangFormat)")
 mark_as_advanced(ClangFormat_EXECUTABLE)
 
 # executable version
 if(ClangFormat_EXECUTABLE)
   execute_process(
     COMMAND "${ClangFormat_EXECUTABLE}" --version
-    OUTPUT_VARIABLE _ClangFormat_version_stdout
-    ERROR_VARIABLE _ClangFormat_version_stderr
+    OUTPUT_VARIABLE version_stdout
+    ERROR_VARIABLE version_stderr
     OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-  if(_ClangFormat_version_stderr)
+  if(version_stderr)
     message(WARNING
       "Failed to determine version of clang-format executable (${ClangFormat_EXECUTABLE})! Error:\n"
-      "${_ClangFormat_version_stderr}")
-  elseif(NOT _ClangFormat_version_stdout MATCHES
+      "${version_stderr}")
+  elseif(NOT version_stdout MATCHES
           "clang-format(-[\\.0-9]+)? version [0-9]+\\.[0-9]+\\.[0-9]+")
     message(WARNING
-      "clang-format's version output is not recognized by this find module"
-      " (${_ClangFormat_version_stdout})!)")
+      "clang-format's version output is not recognized by this find module (${version_stdout})!)")
   else()
     # extract version from stdout
     string(
       REGEX REPLACE ".*clang-format.* version " ""
-      ClangFormat_VERSION "${_ClangFormat_version_stdout}")
-    string(REPLACE "." ";" _ClangFormat_version_components "${ClangFormat_VERSION}")
-    list(GET _ClangFormat_version_components 0 ClangFormat_VERSION_MAJOR)
-    list(GET _ClangFormat_version_components 1 ClangFormat_VERSION_MINOR)
-    list(GET _ClangFormat_version_components 2 ClangFormat_VERSION_PATCH)
+      ClangFormat_VERSION "${version_stdout}")
+    string(REPLACE "." ";" version_components "${ClangFormat_VERSION}")
+    list(GET version_components 0 ClangFormat_VERSION_MAJOR)
+    list(GET version_components 1 ClangFormat_VERSION_MINOR)
+    list(GET version_components 2 ClangFormat_VERSION_PATCH)
   endif()
-
-  unset(_ClangFormat_version_components)
-  unset(_ClangFormat_version_stderr)
-  unset(_ClangFormat_version_stdout)
 endif()
 
+# ClangFormat_FOUND and CLANGFORMAT_FOUND automatically set
 find_package_handle_standard_args(ClangFormat
-  FOUND_VAR ClangFormat_FOUND
   REQUIRED_VARS ClangFormat_EXECUTABLE
   VERSION_VAR ClangFormat_VERSION)
 
 if(ClangFormat_FOUND AND NOT TARGET clang::format)
-  add_executable(clang::format IMPORTED)
+  add_executable(clang::format IMPORTED GLOBAL)
   set_target_properties(clang::format PROPERTIES IMPORTED_LOCATION "${ClangFormat_EXECUTABLE}")
 endif()
+
+endblock()
