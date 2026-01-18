@@ -277,18 +277,29 @@ Updates fields in the `vcpkg <https://vcpkg.io/en/>`_ manifest file located at t
 effectively configuring the file in-place. The fields *name*, *version*, *license*, *description*,
 and *homepage* will be set to the respective :cmake:`project()` arguments *PROJECT_NAME*,
 *PROJECT_VERSION*, *PROJECT_SPDX_LICENSE*, *PROJECT_DESCRIPTION*, and *PROJECT_HOMEPAGE_URL*, if
-they were provided. The purpose is to keep the project description DRY and minimize duplicate info.
+they were provided and differ from the current manifest values. The purpose is to keep the project
+description DRY and minimize duplicate info.
 
 This function provides has no effect if the project is not the top-level project. Furthermore,
 seeing as this function merely configures a file, it doesn't prescribe vcpkg as the dependency
 manager, or the use of vcpkg in any capacity, so builders/packagers may resolve dependencies
 however they choose.
 
-The manifest file will be formatted with the vcpkg executable, if it's available on the system,
-ro with CMake's default JSON styling otherwise.
+If a change is made to the manifest file, it will be formatted with the vcpkg executable, if it's
+available on the system AND :cmake:variable:`WITHOUT_VCPKG_FORMAT` isn't provided, or with CMake's
+default JSON styling otherwise.
 
 - `vcpkg manifest reference <https://learn.microsoft.com/en-us/vcpkg/reference/vcpkg-json>`_
 - `cmake project() reference <https://cmake.org/cmake/help/latest/command/project.html>`_
+
+Parameters
+##########
+
+Options
+~~~~~~~
+
+:cmake:variable:`WITHOUT_VCPKG_FORMAT`
+  Disables formatting the manifest file on writes with the vcpkg executable.
 
 Examples
 ########
@@ -297,10 +308,18 @@ Examples
 
   jcm_configure_vcpkg_manifest_file()
 
+.. code-block:: cmake
+
+  jcm_configure_vcpkg_manifest_file(WITHOUT_VCPKG_FORMAT)
+
 --------------------------------------------------------------------------
 
 #]=======================================================================]
 function(jcm_configure_vcpkg_manifest_file)
+  jcm_parse_arguments(
+    OPTIONS "WITHOUT_VCPKG_FORMAT"
+    ARGUMENTS "${ARGN}")
+
   if(NOT PROJECT_IS_TOP_LEVEL)
     return()
   endif()
@@ -354,6 +373,9 @@ function(jcm_configure_vcpkg_manifest_file)
   endif()
 
   file(WRITE "${manifest_file_path}" "${manifest}")
+  if(ARGS_WITHOUT_VCPKG_FORMAT)
+    return()
+  endif()
 
   # cmake stores vcpkg manifest in key-sorted order, and has weird spacing & styling.
   # auto-format vcpkg manifest if vcpkg is available on the system.
