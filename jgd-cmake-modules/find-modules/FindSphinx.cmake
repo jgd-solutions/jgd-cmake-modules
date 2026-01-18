@@ -16,7 +16,7 @@ Cache Variables
 
 :cmake:variable:`Sphinx_EXECUTABLE`
   Absolute path to the found sphinx-build executable, used to minimize repeated searches with
-  repeated find_package(Sphinx) calls. This value can be queried from the target's
+  repeated :cmake:`find_package(Sphinx)` calls. This value can be queried from the target's
   *IMPORTED_LOCATION* property.
 
 Result Variables

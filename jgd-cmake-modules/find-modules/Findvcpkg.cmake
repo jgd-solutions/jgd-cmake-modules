@@ -17,8 +17,8 @@ Cache Variables
 ~~~~~~~~~~~~~~~~
 
 :cmake:variable:`vcpkg_EXECUTABLE`
-  Absolute path to the found vcpkg executable, used to minimize repeated searches
-  with repeated find_package(vcpkg) calls. This value can be queried from the target's
+  Absolute path to the found vcpkg executable, used to minimize repeated searches with repeated
+  :cmake:`find_package(vcpkg)` calls. This value can be queried from the target's
   *IMPORTED_LOCATION* property.
 
 Result Variables

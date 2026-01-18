@@ -18,13 +18,13 @@ Cache Variables
 ~~~~~~~~~~~~~~~~
 
 :cmake:variable:`liburing_INCLUDE_DIR`
-  Absolute path to the found liburing include directory, used to minimize repeated searches
-  with repeated find_package(liburing) calls. This value can be queried from the target's
+  Absolute path to the found liburing include directory, used to minimize repeated searches with
+  repeated :cmake:`find_package(liburing)` calls. This value can be queried from the target's
   *INTERFACE_INCLUDE_DIRECTORIES* property.
 
 :cmake:variable:`liburing_LIBRARY`
   Absolute path to the found liburing shared/static library, used to minimize repeated searches with
-  repeated find_package(liburing) calls. This value can be queried from the target's
+  repeated :cmake:`find_package(liburing)` calls. This value can be queried from the target's
   *IMPORTED_LOCATION* property.
 
 Result Variables

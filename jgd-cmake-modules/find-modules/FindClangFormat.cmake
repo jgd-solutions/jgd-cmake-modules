@@ -22,8 +22,8 @@ Cache Variables
 ~~~~~~~~~~~~~~~~
 
 :cmake:variable:`ClangFormat_EXECUTABLE`
-  Absolute path to the found clang-format executable, used to minimize repeated searches
-  with repeated find_package(ClangFormat) calls. This value can be queried from the target's
+  Absolute path to the found clang-format executable, used to minimize repeated searches with
+  :cmake:`repeated find_package(ClangFormat)` calls. This value can be queried from the target's
   *IMPORTED_LOCATION* property.
 
 Result Variables
