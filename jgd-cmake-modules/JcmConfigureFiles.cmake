@@ -357,11 +357,27 @@ function(jcm_configure_vcpkg_manifest_file)
 
   # cmake stores vcpkg manifest in key-sorted order, and has weird spacing & styling.
   # auto-format vcpkg manifest if vcpkg is available on the system.
-  find_program(vcpkg_EXECUTABLE vcpkg DOC "vcpkg package manager")
-  if(vcpkg_EXECUTABLE)
-    execute_process(
-      COMMAND "${vcpkg_EXECUTABLE}" format-manifest "${manifest_file_path}"
-      ECHO_OUTPUT_VARIABLE
-      ECHO_ERROR_VARIABLE)
+
+  block(SCOPE_FOR POLICIES)
+    # The vcpkg tool uses the VCPKG_ROOT environment variable, so it's often set globally. It overlaps
+    # in name with CMake's find procedure, specifically with policy CMP0144, where <PACKAGENAME>_ROOT
+    # environment variable is used in addition to <PackageName>_ROOT. This is the correct behavior,
+    # and we'll explicitly opt-into it so projects with cmake version <3.27 don't warn about the policy.
+    cmake_policy(SET CMP0144 NEW)
+    find_package(vcpkg)
+  endblock()
+  if(NOT vcpkg_FOUND)
+    return()
+  endif()
+
+  execute_process(
+    COMMAND "${vcpkg_EXECUTABLE}" format-manifest "${manifest_file_path}"
+    RESULT_VARIABLE format_result
+    ECHO_OUTPUT_VARIABLE
+    ECHO_ERROR_VARIABLE)
+  if(format_result STREQUAL 0)
+    message(TRACE "vcpkg executable successfully formatted manifest file ${manifest_file_path}")
+  else()
+    message(WARNING "vcpkg executable and manifest files were found for formatting manifest, but formatting failed: ${format_result}")
   endif()
 endfunction()
