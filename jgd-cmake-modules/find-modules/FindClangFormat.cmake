@@ -73,7 +73,7 @@ Examples
 
 include(FindPackageHandleStandardArgs)
 
-block(PROPAGATE ClangFormat_FOUND ClangFormat_VERSION ClangFormat_VERSION_MAJOR ClangFormat_VERSION_MINOR ClangFormat_VERSION_PATCH)
+block(SCOPE_FOR VARIABLES PROPAGATE ClangFormat_FOUND ClangFormat_VERSION ClangFormat_VERSION_MAJOR ClangFormat_VERSION_MINOR ClangFormat_VERSION_PATCH)
 
 # these version variables are introduced by the find_package call which loaded this find-module
 if(ClangFormat_FIND_VERSION)
