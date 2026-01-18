@@ -86,7 +86,7 @@ endif()
 find_program(
   ClangFormat_EXECUTABLE
   NAMES ${versioned_names} "clang-format"
-  DOC "Cached path to clang-format executable for find_package(ClangFormat)")
+  DOC "Path to clang-format executable")
 mark_as_advanced(ClangFormat_EXECUTABLE)
 
 # executable version
