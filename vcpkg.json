@@ -1,6 +1,6 @@
 {
   "name": "jgd-cmake-modules",
-  "version": "3.15.1",
+  "version": "3.15.2",
   "description": "CMake library for standardized CMake projects for JGD",
   "homepage": "https://jgd-solutions.github.io/jgd-cmake-modules/",
   "license": "BSD-3-Clause"
