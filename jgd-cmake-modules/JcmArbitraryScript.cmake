@@ -5,11 +5,13 @@ JcmArbitraryScript
 
 :github:`JcmArbitraryScript`
 
+CMake scripts run at *configuration* time, while the build targets it generates run at *build* time.
 In most cases, CMake will reconfigure as necessary to update targets and files when it detects
-changes. However, it's sometimes necessary to enact some action as part of the project's build phase
-as opposed to its configure phase. This is often achieved in multiple steps by first generating the
-desired script at configure time, and then creating targets with commands that invoke an interpreter
-on that script, like `cmake -P ...`, `bash`, or `python`. 
+changes. However, it's sometimes necessary to enact some custom action as part of the project's
+*build* phase as opposed to its configure phase. This is often achieved in multiple steps by first
+generating the desired script at configure time, and then creating custom commands, like 
+`cmake -P ...`, `bash`, or `python`, to interpret the script at build time, which can be triggered 
+by attaching it to a build target.
 
 This module is designed to act as the generated script from configure time, but instead of
 containing specific code, it directly evaluates the CMake code provided in a command-line argument,
@@ -112,7 +114,7 @@ One Value
 ~~~~~~~~~
 
 :cmake:variable:`OUT_VAR`
-  The variable named will be set to the resultant command that is suitable for use as a
+  The variable named will be set to the resultant command, suitable for use as a
   :cmake:variable:`COMMAND` argument to functions such as :cmake:command:`add_custom_command()`.
   This will always be a semicolon separated list.
 
