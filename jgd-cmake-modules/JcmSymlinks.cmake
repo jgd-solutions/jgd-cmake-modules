@@ -31,9 +31,9 @@ jcm_check_symlinks_available
        [OUT_ERROR_MESSAGE <out-var>] >
       [USE_CACHE | SUCCESS_CACHE])
 
-Checks if the current build environment has symbolic links available to it by attempting to create
-a temporary symbolic link in :cmake:variable:`CMAKE_CURRENT_BINARY_DIR`. The resultant error message
-contains a helpful error message with a suggestion for resolving the issue on Windows OSs.
+Checks if the current build environment supports symbolic links by attempting to create a temporary
+symbolic link in :cmake:variable:`CMAKE_CURRENT_BINARY_DIR`. The resultant error message contains a
+helpful error message with a suggestion for resolving the issue on Windows OSs.
 
 Additionally, the function can use various levels of caching to avoid trying to build the symbolic
 link upon each invocation.
@@ -98,7 +98,7 @@ function(jcm_check_symlinks_available)
     "Failed to create a test symbolic link, indicating that symbolic links are not currently "
     "available in the present build environment. On a Windows OS, you may need to turn on "
     "'Developer Mode' to allows users to create symbolic links without elevated permissions. "
-    " Alternatively, specific users can be granted the 'Create symbolic links' privilege.")
+    "Alternatively, specific users can be granted the 'Create symbolic links' privilege.")
 
   macro(_set_out_args success_ error_message_)
     if(DEFINED ARGS_OUT_VAR)
@@ -162,7 +162,7 @@ jcm_check_symlinks_cloned
 
     jcm_check_symlinks_cloned(
       PATHS <path>...
-      <[OUT_BROKEN_SYMLINK <out-var>]
+      <[OUT_BROKEN_SYMLINKS <out-var>]
        [OUT_ERROR_MESSAGE <out-var>] >)
 
 Checks if all of the :cmake:variable:`PATHS` refer to symbolic links. All of the paths must exist, or
@@ -181,9 +181,9 @@ Parameters
 One Value
 ~~~~~~~~~
 
-:cmake:variable:`OUT_BROKEN_SYMLINK`
-  When a broken symlink exists, the variable named will be set to the absolute path of the broken
-  symlink. Otherwise, the variable named will be set to an empty string
+:cmake:variable:`OUT_BROKEN_SYMLINKS`
+  When a broken symlinks exists, the variable named will be set a list of the the absolute paths of
+  the broken symlinks. Otherwise, the variable named will be set to an empty string/list
 
 :cmake:variable:`OUT_ERROR_MESSAGE`
   When a broken symlink exists, the variable named will be set to a helpful error message with a
@@ -203,11 +203,11 @@ Examples
 .. code-block:: cmake
 
   jcm_check_symlinks_cloned(
-    OUT_BROKEN_SYMLINK broken_symlink
+    OUT_BROKEN_SYMLINKS broken_symlinks
     OUT_ERROR_MESSAGE warning_message
     PATHS "data/image_to_read.png")
 
-  if(broken_symlink)
+  if(broken_symlinks)
     message(WARNING "Will not build 'test-image' test:\n" ${warning_message})
     list(APPEND exclude_tests "test-image")
   endif()
@@ -217,15 +217,15 @@ Examples
 #]=======================================================================]
 function(jcm_check_symlinks_cloned)
   jcm_parse_arguments(
-    ONE_VALUE_KEYWORDS "OUT_BROKEN_SYMLINK" "OUT_ERROR_MESSAGE"
+    ONE_VALUE_KEYWORDS "OUT_BROKEN_SYMLINKS" "OUT_ERROR_MESSAGE"
     MULTI_VALUE_KEYWORDS "PATHS"
     REQUIRES_ALL "PATHS"
-    REQUIRES_ANY "OUT_BROKEN_SYMLINK" "OUT_ERROR_MESSAGE"
+    REQUIRES_ANY "OUT_BROKEN_SYMLINKS" "OUT_ERROR_MESSAGE"
     ARGUMENTS "${ARGN}")
 
   jcm_transform_list(ABSOLUTE_PATH INPUT "${ARGS_PATHS}" OUT_VAR ARGS_PATHS)
 
-  set(broken_symlink)
+  set(broken_symlinks)
   set(error_message)
 
   foreach(symlink_path IN LISTS ARGS_PATHS)
@@ -236,20 +236,24 @@ function(jcm_check_symlinks_cloned)
     endif()
 
     if(NOT IS_SYMLINK "${symlink_path}")
-      set(broken_symlink "${symlink_path}")
-      string(CONCAT error_message
+      list(APPEND broken_symlinks "${symlink_path}")
+      set(error_message
         "The following path in project ${PROJECT_NAME} is expected to be a symbolic link but is "
         "not. This is likely caused by improperly acquiring the project from source control, "
         "especially on Windows. With git, symbolic links can be enabled globally with "
         "`git config --global core.symlinks true`. Once enabled, Re-cloning the project will "
-        "preserve symbolic links. Broken symbolic link: ${broken_symlink}")
+        "preserve symbolic links.")
       break()
     endif()
   endforeach()
 
+  if(broken_symlinks)
+    STRING(APPEND error_message "\n  Broken symlinks: ${broken_symlinks}")
+  endif()
+
   # Result variables
-  if(DEFINED ARGS_OUT_BROKEN_SYMLINK)
-    set(${ARGS_OUT_BROKEN_SYMLINK} "${broken_symlink}" PARENT_SCOPE)
+  if(DEFINED ARGS_OUT_BROKEN_SYMLINKS)
+    set(${ARGS_OUT_BROKEN_SYMLINKS} "${broken_symlinks}" PARENT_SCOPE)
   endif()
 
   if(DEFINED ARGS_OUT_ERROR_MESSAGE)

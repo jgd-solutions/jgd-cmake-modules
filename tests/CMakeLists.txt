@@ -4,10 +4,10 @@ include("${CMAKE_CURRENT_SOURCE_DIR}/testingFunctions.cmake")
 file(GLOB_RECURSE format_files RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "*/.clang-format")
 jcm_check_symlinks_cloned(
   PATHS "${format_files}"
-  OUT_BROKEN_SYMLINK broken_symlink
+  OUT_BROKEN_SYMLINKS broken_symlinks
   OUT_ERROR_MESSAGE symlink_message)
 
-if(broken_symlink)
+if(broken_symlinks)
   message(WARNING "Project ${PROJECT_NAME} will not create any clang-format tests due to the "
     "following error:\n" ${symlink_message})
 
