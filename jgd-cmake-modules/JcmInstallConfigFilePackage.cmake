@@ -324,8 +324,11 @@ function(jcm_install_config_file_package)
     get_target_property(interface_header_sets ${target} INTERFACE_HEADER_SETS)
     set(file_set_args)
     if(interface_header_sets)
-      foreach(interface_header_set ${interface_header_sets})
-        set(file_set_args ${file_set_args} FILE_SET ${interface_header_set} DESTINATION "${install_include_dir}")
+      foreach(interface_header_set IN LISTS interface_header_sets)
+        list(APPEND file_set_args
+          FILE_SET ${interface_header_set}
+          DESTINATION "${install_include_dir}"
+          COMPONENT ${PROJECT_NAME}_devel)
       endforeach()
     endif()
 
@@ -341,7 +344,6 @@ function(jcm_install_config_file_package)
       ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
       COMPONENT ${PROJECT_NAME}_devel
       ${file_set_args}
-      COMPONENT ${PROJECT_NAME}_devel
       INCLUDES DESTINATION "${install_include_dir}")
 
     install(
