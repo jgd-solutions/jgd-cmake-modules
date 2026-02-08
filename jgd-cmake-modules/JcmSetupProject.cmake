@@ -68,11 +68,13 @@ This function will:
 
       ${JCM_PROJECT_PREFIX_NAME}_ENABLE_TESTS
         Enables/disables building project tests for this specific project. Default:
-        :cmake:variable:`BUILD_TESTING`
+        :cmake:variable:`BUILD_TESTING`. Omitted if the file
+        :cmake:`${JCM_PROJECT_TESTS_DIR}/CMakeLists.txt` doesn't exist.
 
       ${JCM_PROJECT_PREFIX_NAME}_ENABLE_DOCS
         Enables/disables building project documentation for this specific project. Default:
-        *OFF*
+        *OFF*. Omitted if the file
+        :cmake:`${JCM_PROJECT_DOCS_DIR}/CMakeLists.txt` doesn't exist.
 
   - set default values for CMake variables controlling the build when the current project is the
     top-level project
@@ -195,26 +197,30 @@ macro(JCM_SETUP_PROJECT)
     unset(prefix_temp)
   endif()
 
-  # == Invariable Project Options ==
+  # == Top-Level Project Options ==
 
-  if(BUILD_TESTING)
-    set(default_ENABLE_TESTS ON)
-  else()
-    set(default_ENABLE_TESTS OFF)
+  if(EXISTS "${JCM_PROJECT_TESTS_DIR}/CMakeLists.txt")
+    if(BUILD_TESTING)
+      set(default_ENABLE_TESTS ON)
+    else()
+      set(default_ENABLE_TESTS OFF)
+    endif()
+
+    jcm_add_option(
+      NAME ${JCM_PROJECT_PREFIX_NAME}_ENABLE_TESTS
+      DESCRIPTION "Build all automated tests for ${PROJECT_NAME}"
+      TYPE BOOL
+      DEFAULT ${default_ENABLE_TESTS})
+    unset(default_ENABLE_TESTS)
   endif()
 
-  jcm_add_option(
-    NAME ${JCM_PROJECT_PREFIX_NAME}_ENABLE_TESTS
-    DESCRIPTION "Build all automated tests for ${PROJECT_NAME}"
-    TYPE BOOL
-    DEFAULT ${default_ENABLE_TESTS})
-  unset(default_ENABLE_TESTS)
-
-  jcm_add_option(
-    NAME ${JCM_PROJECT_PREFIX_NAME}_ENABLE_DOCS
-    DESCRIPTION "Build all documentation for ${PROJECT_NAME}"
-    TYPE BOOL
-    DEFAULT OFF)
+  if(EXISTS "${JCM_PROJECT_DOCS_DIR}/CMakeLists.txt")
+    jcm_add_option(
+      NAME ${JCM_PROJECT_PREFIX_NAME}_ENABLE_DOCS
+      DESCRIPTION "Build all documentation for ${PROJECT_NAME}"
+      TYPE BOOL
+      DEFAULT OFF)
+  endif()
 
   # == Variables Setting Default Target Properties ==
 
@@ -291,7 +297,7 @@ macro(JCM_SETUP_PROJECT)
 
   # interprocedural/link-time optimization
 
-  if((NOT languages STREQUAL "NONE") AND (CMAKE_BUILD_TYPE MATCHES "Release|RelWithDepInfo"))
+  if((NOT languages STREQUAL "NONE") AND (CMAKE_BUILD_TYPE MATCHES "Release|RelWithDebInfo"))
     check_ipo_supported(RESULT ipo_supported OUTPUT err_msg)
     if(ipo_supported)
       _jcm_warn_set(CMAKE_INTERPROCEDURAL_OPTIMIZATION $<IF:$<CONFIG:DEBUG>,OFF,ON>)
