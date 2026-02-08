@@ -65,6 +65,9 @@ include(FindPackageHandleStandardArgs)
 
 block(PROPAGATE vcpkg_FOUND vcpkg_VERSION)
 
+# VCPKG_ROOT environment variable will be automatically used by find_package(),
+# since it follows the <PACKAGE-NAME>_ROOT pattern, so it doesn't need to be listed
+# as a hint to find_program
 find_program(
   vcpkg_EXECUTABLE
   NAMES vcpkg
