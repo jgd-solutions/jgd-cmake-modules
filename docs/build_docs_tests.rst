@@ -26,7 +26,7 @@ configuration. The configure preset *tests-ninja* will do this.
 .. code-block:: bash
 
   cmake -B <build-dir> -D JCM_ENABLE_TESTS=ON ... # manually
-  cmake --preset tests-ninja                     # using preset
+  cmake --preset tests-ninja                      # using preset
 
 Run Tests
 ~~~~~~~~~
@@ -90,5 +90,5 @@ documentation in `<build-dir>/docs/sphinx`.
 View Docs
 ~~~~~~~~~
 
-Open `<build-dir>/docs/sphinx/index.html` in your browser to view the documentation. Don't forget to
-refresh the page between builds.
+Open `file://<path-to-build-dir>/docs/sphinx/index.html` in your browser to view the documentation.
+Don't forget to refresh the page between builds.

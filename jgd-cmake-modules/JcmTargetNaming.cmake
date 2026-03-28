@@ -461,7 +461,8 @@ endfunction()
 #[=======================================================================[.rst:
 
 jcm_target_component_is_reserved
-^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 
 .. cmake:command:: jcm_target_component_is_reserved
 
@@ -474,9 +475,9 @@ jcm_target_component_is_reserved
 Compares the provided target component name against all the reserved component names in JCM, to
 avoid later encountering conflicting targets or build options.  For example, component names of
 "tests" and "docs" would cause functions like :cmake:`jcm_add_library`/:cmake:`jcm_add_executable`
-to create a component-specific build options (:cmake:`<project-name>_ENABLE_<component-name>`) that
-conflicts with project-specific options created by JCM to enable tests and documentation
-generation.
+to create component-specific build options (:cmake:`${PROJECT_NAME}_ENABLE_<component-name>`) that
+conflict with project-specific options for tests and documentation
+(:cmake:`${PROJECT_NAME}_ENABLE_TESTS`, :cmake:`${PROJECT_NAME}_ENABLE_DOCS`).
 
 Parameters
 ##########
