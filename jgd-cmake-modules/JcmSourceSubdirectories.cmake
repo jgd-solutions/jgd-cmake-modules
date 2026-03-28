@@ -13,6 +13,7 @@ include(JcmParseArguments)
 include(JcmCanonicalStructure)
 include(JcmStandardDirs)
 include(JcmListTransformations)
+include(JcmTargetNaming)
 
 #
 # Private macro to the module. After checking that it's a directory, appends the
@@ -164,6 +165,10 @@ function(jcm_source_subdirectories)
     MULTI_VALUE_KEYWORDS "LIB_COMPONENTS" "EXEC_COMPONENTS"
     REQUIRES_ANY "ADD_SUBDIRS" "OUT_VAR"
     ARGUMENTS "${ARGN}")
+
+  foreach(component IN LISTS ARGS_LIB_COMPONENTS ARGS_EXEC_COMPONENTS)
+    jcm_target_component_is_reserved(FATAL_ERROR COMPONENT "${component}")
+  endforeach()
 
   # Setup
   set(subdirs_added)

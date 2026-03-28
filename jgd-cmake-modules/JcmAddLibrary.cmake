@@ -85,8 +85,8 @@ Options
 ~~~~~~~~~~
 
 :cmake:variable:`WITHOUT_CANONICAL_PROJECT_CHECK`
-  When provided, will forgo the default check that the function is called within an executable
-  source subdirectory, as defined by the `Canonical Project Structure`_.
+  When provided, will forgo the default check that the function is called within an library source
+  subdirectory, as defined by the `Canonical Project Structure`_.
 
 :cmake:variable:`WITHOUT_FILE_NAMING_CHECK`
   When provided, will forgo the default check that provided header and source files conform to JCM's
@@ -163,7 +163,8 @@ function(jcm_add_library)
     ARGUMENTS "${ARGN}")
 
   # library component argument
-  if(DEFINED ARGS_COMPONENT AND NOT ARGS_COMPONENT STREQUAL PROJECT_NAME)
+  if(DEFINED ARGS_COMPONENT)
+    jcm_target_component_is_reserved(FATAL_ERROR COMPONENT "${ARGS_COMPONENT}")
     set(comp_arg COMPONENT ${ARGS_COMPONENT})
     set(comp_err_msg "component (${ARGS_COMPONENT}) ")
   else()
@@ -197,8 +198,8 @@ function(jcm_add_library)
     unset(verify_file_naming_arg)
   endif()
 
-  if(NOT target_component)
-    set(verify_target_component_arg TARGET_COMPONENT ${target_component})
+  if(ARGS_COMPONENT)
+    set(verify_target_component_arg TARGET_COMPONENT ${ARGS_COMPONENT})
   else()
     unset(verify_target_component_arg)
   endif()

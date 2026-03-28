@@ -11,6 +11,7 @@ JcmAddOption
 
 include(JcmParseArguments)
 include(JcmListTransformations)
+include(JcmTargetNaming)
 include(CMakeDependentOption)
 
 #[=======================================================================[.rst:
@@ -303,19 +304,19 @@ jcm_add_component_options
 
     jcm_add_component_options(
       [REQUIRED_COMPONENTS <component>...]
-      [DEFAULT_OFF_COMPONENTS <component>...]
       <OPTIONAL_COMPONENTS <component>...>
+      [DEFAULT_OFF_COMPONENTS <component>...]
       <[OUT_COMPONENTS <out-var>] >
        [OUT_TARGETS <out-targets>] >
       [<COMPONENT_DEPENDENCIES_JSON <json> 
       <MISSING_DEPENDENCY_ACTION <ENABLE|ERROR> > ])
 
 Creates build options with :cmake:command:`jcm_add_option` named
-`${JCM_PROJECT_PREFIX_NAME}_ENABLE_<component>`, where *component* is the name of a standard project
-component, i.e a library or executable component. An option will be created for every component in
-the list :cmake:variable:`OPTIONAL_COMPONENTS`. The result variables will contain all optional
-components that have been enabled by their respective build option, and all required components;
-those named in :cmake:variable:`REQUIRED_COMPONENTS`.
+:cmake:`${JCM_PROJECT_PREFIX_NAME}_ENABLE_<component>`, where *component* is the name of a standard
+project component, i.e a library or executable component. An option will be created for every
+component in the list :cmake:variable:`OPTIONAL_COMPONENTS`. The result variables will contain all
+optional components that have been enabled by their respective build option, and all required
+components; those named in :cmake:variable:`REQUIRED_COMPONENTS`.
 
 Every project component produces a single *installed* target. Targets can be selectively built by
 CMake with the command-line option `--target`, such as `cmake --build build --target
@@ -324,7 +325,7 @@ libcomponents_libcomponents-core`, which will exclusively build the *core* compo
 their configuration is very long or introduces additional dependencies. For example, if the *extra*
 component of *libcomponents* requires eight dependencies that aren't required by *core*, users of
 *core* may not want to acquire dependencies they don't use. For this purpose, project component
-*options can be introduced to selectively configure project components.
+options can be introduced to selectively configure project components.
 
 This function is merely a wrapper around :cmake:command`jcm_add_option` adding simplicity and
 consistency for the use-case. Using this function does not preclude creating any project options
@@ -435,6 +436,10 @@ function(jcm_add_component_options)
     REQUIRES_ALL "OPTIONAL_COMPONENTS"
     MUTUALLY_INCLUSIVE "COMPONENT_DEPENDENCIES_JSON" "MISSING_DEPENDENCY_ACTION"
     ARGUMENTS "${ARGN}")
+
+  foreach(component IN LISTS ARGS_REQUIRED_COMPONENTS ARGS_OPTIONAL_COMPONENTS)
+    jcm_target_component_is_reserved(FATAL_ERROR COMPONENT "${component}")
+  endforeach()
 
   if(DEFINED ARGS_REQUIRED_COMPONENTS)
     # ensure there is no overlap between required and optional components

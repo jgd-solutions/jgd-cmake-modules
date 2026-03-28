@@ -75,8 +75,10 @@ function(jcm_library_naming)
     "OUT_OUTPUT_NAME"
     ARGUMENTS "${ARGN}")
 
-  if(ARGS_COMPONENT STREQUAL project_name) 
-    message(FATAL_ERROR "The library component name cannot be the project name, ${PROJECT_NAME}")
+  if(ARGS_COMPONENT)
+    jcm_target_component_is_reserved(
+      FATAL_ERROR
+      COMPONENT "${ARGS_COMPONENT}")
   endif()
 
   # Resolve project name
@@ -186,8 +188,10 @@ function(jcm_executable_naming)
     "OUT_OUTPUT_NAME"
     ARGUMENTS "${ARGN}")
 
-  if(ARGS_COMPONENT STREQUAL project_name) 
-    message(FATAL_ERROR "The execute component name cannot be the project name, ${PROJECT_NAME}")
+  if(ARGS_COMPONENT)
+    jcm_target_component_is_reserved(
+      FATAL_ERROR
+      COMPONENT "${ARGS_COMPONENT}")
   endif()
 
   # Resolve project name
@@ -251,8 +255,9 @@ jcm_target_type_component_from_name
        [OUT_COMPONENT <out-var>] >)
 
 JCM's target naming conventions denote both the the target's type and component within the naming
-structure. This function will, considering the project name, compute the target type and component
-from a given target name. The named target doesn't have to exist.
+structure. This function will, considering the project name from CMake variable
+:cmake:`${PROJECT_NAME}`, compute the target type and component from a given target name. The named
+target doesn't have to exist.
 
 Parameters
 ##########
@@ -358,6 +363,17 @@ function(jcm_target_type_component_from_name)
     endif()
   endif()
 
+  if(component) 
+    jcm_target_component_is_reserved(
+      COMPONENT "${component}"
+      OUT_CONFLICT_MESSAGE conflict_message)
+    if(conflict_message)
+      message(WARNING
+        "The target component '${component}' deduced from target name '${}' is reserved: "
+        ${conflict_message})
+    endif()
+  endif()
+
   # Set output variables
   if(DEFINED ARGS_OUT_TYPE)
     set(${ARGS_OUT_TYPE} ${type} PARENT_SCOPE)
@@ -395,9 +411,10 @@ One Value
 ~~~~~~~~~
 
 :cmake:variable:`TARGET`
-
+  The name of the target alias. For example, mylib::core
 
 :cmake:variable:`OUT_TARGET`
+  The variable named will be set to the resolved unaliased target name. For example, mylib_mylib-core
 
 Examples
 ########
@@ -438,4 +455,103 @@ function(jcm_aliased_target)
   endwhile()
 
   set(${ARGS_OUT_TARGET} "${aliased_target}" PARENT_SCOPE)
+endfunction()
+
+
+#[=======================================================================[.rst:
+
+jcm_target_component_is_reserved
+^^^^^^^^^^^^^^^^^^
+
+.. cmake:command:: jcm_target_component_is_reserved
+
+  .. code-block:: cmake
+
+    jcm_target_component_is_reserved(
+      COMPONENT <component-name>
+      <FATAL_ERROR | OUT_CONFLICT_MESSAGE <out-var>>)
+
+Compares the provided target component name against all the reserved component names in JCM, to
+avoid later encountering conflicting targets or build options.  For example, component names of
+"tests" and "docs" would cause functions like :cmake:`jcm_add_library`/:cmake:`jcm_add_executable`
+to create a component-specific build options (:cmake:`<project-name>_ENABLE_<component-name>`) that
+conflicts with project-specific options created by JCM to enable tests and documentation
+generation.
+
+Parameters
+##########
+
+Options
+~~~~~~~~
+
+:cmake:variable:`FATAL_ERROR`
+  When provided, instead of setting :cmake:variable:`OUT_CONFLICT_MESSAGE` when a conflict is
+  encountered, this message will be emitted as a FATAL_ERROR. Using option prohibits providing
+  :cmake:variable:`OUT_CONFLICT_MESSAGE`.
+
+One Value
+~~~~~~~~~
+
+:cmake:variable:`COMPONENT`
+  The component name of the target. For example, "extra".
+
+:cmake:variable:`OUT_CONFLICT_MESSAGE`
+  When a conflict with a reserved component name is encountered, the variable named will be set to
+  message detailing the reserved name conflict. Otherwise, when :cmake:`COMPONENT` is not a reserved
+  name, the named variable will be set as empty. Using option prohibits providing
+  :cmake:variable:`FATAL_ERROR`.
+
+Examples
+########
+
+.. code-block:: cmake
+
+  jcm_target_component_is_reserved(
+    COMPONENT "tests"
+    OUT_CONFLICT_MESSAGE message)
+
+  if(message)
+    message(STATUS ${message})
+  endif()
+
+.. code-block:: cmake
+
+  jcm_target_component_is_reserved(
+    FATAL_ERROR
+    COMPONENT "extra")
+
+--------------------------------------------------------------------------
+
+#]=======================================================================]
+function(jcm_target_component_is_reserved)
+  jcm_parse_arguments(
+    OPTIONS "FATAL_ERROR"
+    ONE_VALUE_KEYWORDS "COMPONENT" "OUT_CONFLICT_MESSAGE"
+    REQUIRES_ALL "COMPONENT"
+    REQUIRES_ANY "FATAL_ERROR" "OUT_CONFLICT_MESSAGE"
+    MUTUALLY_EXCLUSIVE "FATAL_ERROR" "OUT_CONFLICT_MESSAGE"
+    ARGUMENTS "${ARGN}")
+
+  set(conflict_message)
+  if(ARGS_COMPONENT STREQUAL project_name)
+    set("Target component names cannot be the project name, ${PROJECT_NAME}")
+  else()
+    foreach(reserved_name "tests" "docs")
+      if(ARGS_COMPONENT STREQUAL reserved_name)
+        string(CONCAT conflict_message
+          "The component name '${reserved_name}' is reserved, as it "
+          "conflicts with project-specific build options")
+        break()
+      endif()
+    endforeach()
+  endif()
+
+
+  if(ARGS_FATAL_ERROR AND conflict_message)
+    message(FATAL_ERROR ${conflict_message})
+  elseif(conflict_message)
+    set("${ARGS_OUT_CONFLICT_MESSAGE}" "${conflict_message}" PARENT_SCOPE)
+  else()
+    set("${ARGS_OUT_CONFLICT_MESSAGE}" PARENT_SCOPE)
+  endif()
 endfunction()

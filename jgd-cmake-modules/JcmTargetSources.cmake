@@ -173,7 +173,7 @@ function(jcm_add_target_sources)
     unset(without_file_naming_arg)
   endif()
 
-  if(NOT target_component)
+  if(target_component)
     set(target_component_arg TARGET_COMPONENT ${target_component})
   else()
     unset(target_component_arg)
@@ -451,6 +451,10 @@ function(jcm_verify_sources)
     set(ARGS_TARGET_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}")
   endif()
 
+  if(ARGS_TARGET_COMPONENT)
+    jcm_target_component_is_reserved(FATAL_ERROR COMPONENT "${ARGS_TARGET_COMPONENT}")
+  endif()
+
   # transform arguments to normalized absolute paths
   foreach(source_type IN ITEMS
     "INTERFACE_HEADERS" "PUBLIC_HEADERS" "PRIVATE_HEADERS" "SOURCES" "TARGET_SOURCE_DIR")
@@ -485,7 +489,7 @@ function(jcm_verify_sources)
     endif()
   endif()
 
-  # extract any headers from sources
+  # extract any headers from sources for executables only
   if(DEFINED ARGS_OUT_SOURCES AND "${ARGS_TARGET_TYPE}" STREQUAL "EXECUTABLE")
     jcm_separate_list(
       INPUT "${ARGS_SOURCES}"
@@ -551,12 +555,11 @@ function(jcm_verify_sources)
 
   # verify file locations
   set(acceptable_file_root_dirs)
-  list(
-    APPEND acceptable_file_root_dirs
+  list(APPEND 
+    acceptable_file_root_dirs
     "${PROJECT_BINARY_DIR}" "${ARGS_TARGET_SOURCE_DIR}" "${ARGS_TARGET_BINARY_DIR}")
 
-  if(DEFINED ARGS_COMPONENT AND NOT ARGS_COMPONENT STREQUAL PROJECT_NAME
-    AND "${ARGS_TARGET_TYPE}" STREQUAL "EXECUTABLE")
+  if(DEFINED ARGS_TARGET_COMPONENT AND ARGS_TARGET_TYPE STREQUAL "EXECUTABLE")
     cmake_path(GET ARGS_TARGET_SOURCE_DIR PARENT_PATH exec_component_parent_dir)
     list(APPEND acceptable_file_root_dirs "${exec_component_parent_dir}")
   endif()
@@ -573,15 +576,15 @@ function(jcm_verify_sources)
     "${ARGS_SOURCES}")
   if(misplaced_files)
     message(FATAL_ERROR
-      "The following files aren't placed within an acceptable location.\n"
-      "Acceptable Locations: ${acceptable_file_root_dirs}\n"
-      "Misplaced Files: ${misplaced_files}")
+      "The following files aren't within locations following the Canonical Project Structure.\n"
+      "Misplaced Files: ${misplaced_files}\n"
+      "Acceptable Locations: ${acceptable_file_root_dirs}")
   endif()
 
   # Results
 
   # separate all headers in sources into PRIVATE_HEADERS to keep output categories pure
-  if("${ARGS_TARGET_TYPE}" STREQUAL "EXECUTABLE")
+  if(ARGS_TARGET_TYPE STREQUAL "EXECUTABLE")
     set(ARGS_SOURCES "${non_headers_in_sources}")
 
     if(headers_in_sources)
