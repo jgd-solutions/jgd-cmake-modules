@@ -302,25 +302,49 @@ function(jcm_create_clang_format_targets)
     get_target_property(interface_sources ${target} INTERFACE_SOURCES)
     get_target_property(sources ${target} SOURCES)
 
-    foreach(sources_variable interface_sources sources)
+    get_target_property(interface_cxx_module_sets ${target} INTERFACE_CXX_MODULE_SETS)
+    get_target_property(cxx_module_sets ${target} CXX_MODULE_SETS)
+    get_target_property(interface_header_sets ${target} INTERFACE_HEADER_SETS)
+    get_target_property(header_sets ${target} HEADER_SETS)
+
+    set(target_files_to_format)
+    foreach(set_name IN LISTS "interface_cxx_module_sets" "cxx_module_sets")
+      get_target_property(set_files ${target} CXX_MODULE_SET_${set_name})
+      if(NOT set_files)
+        continue()
+      endif()
+      list(APPEND target_files_to_format "${set_files}")
+    endforeach()
+
+    foreach(set_name IN LISTS "interface_header_sets" "header_sets")
+      get_target_property(set_files ${target} HEADER_SET_${set_name})
+      if(NOT set_files)
+        continue()
+      endif()
+      list(APPEND target_files_to_format "${set_files}")
+    endforeach()
+
+    foreach(sources_variable IN ITEMS "interface_sources" "sources")
       set(sources_variable "${${sources_variable}}")
       if(NOT sources_variable)
         continue()
       endif()
-
-      jcm_transform_list(
-        ABSOLUTE_PATH
-        BASE "${source_dir}"
-        INPUT "${sources_variable}"
-        OUT_VAR absolute_source_paths)
-
-      jcm_transform_list(NORMALIZE_PATH
-        INPUT "${absolute_source_paths}"
-        OUT_VAR absolute_source_paths)
-
-      list(APPEND files_to_format "${absolute_source_paths}")
+      list(APPEND target_files_to_format "${sources_variable}")
     endforeach()
+
+
+    jcm_transform_list(
+      ABSOLUTE_PATH
+      BASE "${source_dir}"
+      INPUT "${target_files_to_format}"
+      OUT_VAR target_files_to_format)
+
+    list(APPEND files_to_format "${target_files_to_format}")
   endforeach()
+
+  jcm_transform_list(NORMALIZE_PATH
+    INPUT "${files_to_format}"
+    OUT_VAR files_to_format)
 
   list(REMOVE_DUPLICATES files_to_format)
 
@@ -370,7 +394,7 @@ function(jcm_create_clang_format_targets)
     set(verbose_flag ";--verbose")
   endif()
 
-  set(base_cmd "${clang_format_cmd}" -style=file:\"${format_style_file}\" ${verbose_flag})
+  set(base_cmd "${clang_format_cmd}" "-style=file:\"${format_style_file}\"" ${verbose_flag})
 
   # Warn about targets already being created to prevent less expressive warning later
   if(NOT TARGET clang-format)
