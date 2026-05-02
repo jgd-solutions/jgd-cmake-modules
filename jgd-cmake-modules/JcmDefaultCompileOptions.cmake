@@ -49,7 +49,23 @@ The following variables are defined:
 
 :cmake:variable:`JCM_DEFAULT_COMPILE_OPTIONS`
   A generator expression that will resolve to the appropriate set of the variables above based on
-  the compiler and language. This is used to initialize targets' `COMPILE_OPTIONS`.
+  the compiler and language. This is used to initialize targets' `COMPILE_OPTIONS` property.
+
+:cmake:variable:`JCM_DEFAULT_LINK_OPTIONS_GNU`
+  Expands to *LINKER:--as-needed* when the target's
+  `LINK_WHAT_YOU_USE <https://cmake.org/cmake/help/latest/prop_tgt/LINK_WHAT_YOU_USE.html>`_ property
+  is not set and the configuration is not Debug. This flag will cause the linker to only add
+  dependencies that are actually used by the target.
+
+:cmake:variable:`JCM_DEFAULT_LINK_OPTIONS_CLANG`
+  Same as :cmake:variable:`JCM_DEFAULT_LINK_OPTIONS_GNU`
+
+:cmake:variable:`JCM_DEFAULT_LINK_OPTIONS_MSVC`
+  Empty, as MSVC doesn't have an equivalent to `--as-needed`.
+
+:cmake:variable:`JCM_DEFAULT_LINK_OPTIONS`
+  A generator expression that will resolve to the appropriate set of the variables above based on
+  the compiler and language. This is used to initialize targets' `LINK_OPTIONS` property.
 
 --------------------------------------------------------------------------
 
@@ -84,11 +100,9 @@ set(JCM_DEFAULT_C_COMPILE_OPTIONS_MSVC /W4 /WX)
 list(
   APPEND
   JCM_DEFAULT_LINK_OPTIONS_GNU
-  "$<IF:$<BOOL:${CMAKE_LINK_WHAT_YOU_USE}>,,$<IF:$<CONFIG:Debug>,LINKER:--as-needed,>>")
+  "$<IF:$<TARGET_PROPERTY:LINK_WHAT_YOU_USE>,,$<IF:$<CONFIG:Debug>,,LINKER:--as-needed>>")
 set(JCM_DEFAULT_LINK_OPTIONS_CLANG ${JCM_DEFAULT_COMPILE_OPTIONS_GNU})
-
-set(JCM_DEFAULT_CXX_LINK_OPTIONS_MSVC)
-set(JCM_DEFAULT_C_LINK_OPTIONS_MSVC)
+set(JCM_DEFAULT_LINK_OPTIONS_MSVC)
 
 
 string(CONCAT JCM_DEFAULT_COMPILE_OPTIONS
@@ -109,5 +123,5 @@ string(CONCAT JCM_DEFAULT_LINK_OPTIONS
   "$<REMOVE_DUPLICATES:"
     "$<$<OR:$<CXX_COMPILER_ID:GNU>,$<C_COMPILER_ID:GNU>>:${JCM_DEFAULT_LINK_OPTIONS_GNU}>"
     "$<$<OR:$<CXX_COMPILER_ID:Clang,AppleClang>,$<C_COMPILER_ID:Clang,AppleClang>>:${JCM_DEFAULT_LINK_OPTIONS_CLANG}>"
-    "$<$<OR:$<CXX_COMPILER_ID:MSVC>,$<C_COMPILER_ID:MSVC>>:${JCM_DEFAULT_LINK__OPTIONS_MSVC}>"
+    "$<$<OR:$<CXX_COMPILER_ID:MSVC>,$<C_COMPILER_ID:MSVC>>:${JCM_DEFAULT_LINK_OPTIONS_MSVC}>"
   ">")
