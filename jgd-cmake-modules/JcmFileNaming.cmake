@@ -51,7 +51,7 @@ foreach(ext_var
 
   string(REPLACE "_EXTENSION" "_REGEX" regex_var "${ext_var}")
   string(REPLACE "." "\\\\." ${regex_var} "${${ext_var}}")
-  set(${regex_var} "^[a-z][a-z0-9_]*${${regex_var}}$")
+  set(${regex_var} "^[a-z][a-z0-9_]*(\.[a-z0-9_]+)*${${regex_var}}$")
 endforeach()
 
 # Create cumulative regexes for all currently enabled languages
