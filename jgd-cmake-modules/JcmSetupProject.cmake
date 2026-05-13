@@ -297,18 +297,23 @@ macro(JCM_SETUP_PROJECT)
 
   # interprocedural/link-time optimization
 
-  if((NOT languages STREQUAL "NONE") AND (CMAKE_BUILD_TYPE MATCHES "Release|RelWithDebInfo"))
-    check_ipo_supported(RESULT ipo_supported OUTPUT err_msg)
-    if(ipo_supported)
-      _jcm_warn_set(CMAKE_INTERPROCEDURAL_OPTIMIZATION $<IF:$<CONFIG:DEBUG>,OFF,ON>)
-    else()
-      _jcm_warn_set(CMAKE_INTERPROCEDURAL_OPTIMIZATION OFF)
-      message(NOTICE
-        "Interprocedural linker optimization is not supported: ${err_msg}\n"
-        "Continuing without it.")
+  if(NOT languages STREQUAL "NONE")
+    get_property(is_multi_config GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+    if(is_multi_config OR NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
+      check_ipo_supported(RESULT ipo_supported OUTPUT err_msg)
+      if(ipo_supported)
+        # CMAKE_INTERPROCEDURAL_OPTIMIZATION_<CONFIG> variables could also be used
+        _jcm_warn_set(CMAKE_INTERPROCEDURAL_OPTIMIZATION $<IF:$<CONFIG:Debug>,OFF,ON>)
+      else()
+        _jcm_warn_set(CMAKE_INTERPROCEDURAL_OPTIMIZATION OFF)
+        message(NOTICE
+          "Interprocedural linker optimization is not supported: ${err_msg}\n"
+          "Continuing without it.")
+      endif()
+      unset(ipo_supported)
+      unset(err_msg)
     endif()
-    unset(ipo_supported)
-    unset(err_msg)
+    unset(is_multi_config)
   endif()
 
   unset(languages)

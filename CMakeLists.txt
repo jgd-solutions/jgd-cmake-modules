@@ -1,11 +1,11 @@
-if(CMAKE_EXPERIMENTAL_EXPORT_PACKAGE_INFO)
+if(CMAKE_EXPERIMENTAL_EXPORT_PACKAGE_INFO OR CMAKE_VERSION VERSION_GREATER "4.3")
   set(spdx_license_arg SPDX_LICENSE BSD-3-Clause)
 endif()
 
 cmake_minimum_required(VERSION 3.25)
 project(
   jgd-cmake-modules
-  VERSION 3.16.5
+  VERSION 3.16.6
   ${spdx_license_arg}
   DESCRIPTION "CMake library for standardized CMake projects for JGD"
   HOMEPAGE_URL "https://jgd-solutions.github.io/jgd-cmake-modules/"
