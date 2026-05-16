@@ -266,7 +266,7 @@ function(jcm_add_library)
   elseif(build_project_shared)
     set(lib_type SHARED)
   else()
-    # add_library already sensitive to BUILD_SHARED_LIBS when type isn't defined
+    # add_library already sensitive to BUILD_SHARED_LIBS when type isn't explicitly provided
   endif()
 
 

@@ -202,16 +202,17 @@ outcomes will be recorded and summarized by CTest.
 
 Although CTest is a powerful tool which supports publishing to dashboards, test scripts, test
 parallelization, and even building entire CMake projects, basic examples to test an existing project
-are shown below - these options can be joined:
+are shown below - these options can be combined:
 
 .. code-block:: bash
 
-  ctest --test-dir <build-dir>                     # run all tests, and show summary at the end
-  ctest --test-dir <build-dir> --output-on-failure # print output from failed tests
-  ctest --test-dir <build-dir> --stop-on-failure   # stop all testing when a single failure occurs
-  ctest --test-dir <build-dir> --rerun-failed      # only run tests that did not previously pass
-  ctest --test-dir <build-dir> -R <regex>          # run all tests matching <regex>
-  ctest --test-dir <build-dir> -E <regex>          # exclude all tests matching <regex>
+  ctest --test-dir <build-dir>                     # run tests, and show summary at the end
+  ctest --test-dir <build-dir> --show-only         # list available tests by name
+  ctest --test-dir <build-dir> --output-on-failure # run tests and print output from failed tests
+  ctest --test-dir <build-dir> --stop-on-failure   # run tests, stopping when any failure occurs
+  ctest --test-dir <build-dir> --rerun-failed      # run only the tests that previously failed
+  ctest --test-dir <build-dir> -R <regex>          # run all tests whose name matches <regex>
+  ctest --test-dir <build-dir> -E <regex>          # run tests, excluding those whose name matches <regex>
   ctest --test-dir --output-junit <file>           # produce junit formatted test summary in <file>
 
   ctest --test-dir --build-config <cfg>            # Desired config for Multi-Config generators

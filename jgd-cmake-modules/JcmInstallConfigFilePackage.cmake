@@ -308,16 +308,20 @@ function(jcm_install_config_file_package)
 
   # == Install targets via export sets ==
 
-  foreach(target ${ARGS_TARGETS})
-    unset(target_export_component)
-    unset(comp_arg)
-    get_target_property(target_export_component ${target} EXPORT_NAME)
+  foreach(target IN LISTS ARGS_TARGETS)
+    unset(target_export_name)
+    unset(component_arg)
+    get_target_property(target_export_name ${target} EXPORT_NAME)
 
-    if(target_export_component)
-      set(comp_arg COMPONENT ${target_export_component})
+    if(target_export_name)
+      set(component_arg COMPONENT ${target_export_name})
     endif()
 
-    jcm_package_targets_file_name(${comp_arg} OUT_VAR targets_file)
+    # TODO: using the export name is correct, here, but the _file_name() functions
+    # should be more rigorous in accepting EXPORT_NAME instead of COMPONENT or a 
+    # TARGET from which the properties can be extracted
+
+    jcm_package_targets_file_name(${component_arg} OUT_VAR targets_file)
     cmake_path(GET targets_file STEM export_set_name)
 
     jcm_aliased_target(TARGET "${target}" OUT_TARGET target)
