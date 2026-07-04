@@ -370,7 +370,7 @@ function(jcm_add_test_executable)
   # Additional naming considerations for unit test sources
   jcm_separate_list(
     INPUT "${ARGS_SOURCES}"
-    REGEX "${JCM_UTEST_SOURCE_REGEX}"
+    REGEX "${JCM_UNIT_TEST_SOURCE_REGEX}"
     TRANSFORM "FILENAME"
     OUT_MATCHED unit_test_sources
     OUT_MISMATCHED standard_sources)
