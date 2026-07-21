@@ -182,7 +182,7 @@ Examples
     REGEX ".*$d")
 
 #]=======================================================================]
-macro(JCM_PARSE_ARGUMENTS)
+function(jcm_parse_arguments)
   # Arguments to jcm_parse_arguments
   cmake_parse_arguments(INS
     # options
@@ -244,9 +244,6 @@ macro(JCM_PARSE_ARGUMENTS)
   # parse the caller's arguments
   cmake_parse_arguments(${INS_PREFIX} "${INS_OPTIONS}" "${INS_ONE_VALUE_KEYWORDS}"
     "${INS_MULTI_VALUE_KEYWORDS}" "${INS_ARGUMENTS}")
-
-
-  block(SCOPE_FOR VARIABLES)
 
   if(INS_ALLOW_EMPTY_MULTI_VALUE)
     # cmake_parse_arguments() will not define the argument value when it's empty or completely
@@ -352,5 +349,12 @@ macro(JCM_PARSE_ARGUMENTS)
     message(WARNING "Unparsed arguments provided: ${${INS_PREFIX}_UNPARSED_ARGUMENTS} ")
   endif()
 
-  endblock()
-endmacro()
+  # == Expose parsed arguments to parent scope ==
+  set(parsed_args)
+  foreach(keyword IN LISTS INS_OPTIONS INS_ONE_VALUE_KEYWORDS INS_MULTI_VALUE_KEYWORDS)
+    list(APPEND parsed_args ${INS_PREFIX}_${keyword})
+  endforeach()
+
+  cmake_policy(SET CMP0140 NEW)
+  return(PROPAGATE ${parsed_args})
+endfunction()

@@ -41,7 +41,7 @@ include(JcmCanonicalStructure)
 set(JCM_CMAKE_MODULE_REGEX "^([A-Z][a-z]*)+\\.cmake$")
 set(JCM_IN_FILE_REGEX "\\${JCM_IN_FILE_EXTENSION}$")
 
-# Create regexs of file names based on file extensions from JcmCanonicalStructure.
+# Create regexes of file names based on file extensions from JcmCanonicalStructure.
 # Variables of the same name, but with _EXTENSION replaced with _REGEX
 foreach(ext_var
     JCM_CXX_HEADER_EXTENSION JCM_CXX_SOURCE_EXTENSION JCM_CXX_UNIT_TEST_SOURCE_EXTENSION JCM_CXX_UTEST_SOURCE_EXTENSION JCM_CXX_MODULE_EXTENSION
@@ -52,7 +52,7 @@ foreach(ext_var
     JCM_HIP_HEADER_EXTENSION JCM_HIP_SOURCE_EXTENSION JCM_HIP_UNIT_TEST_SOURCE_EXTENSION JCM_HIP_UTEST_SOURCE_EXTENSION)
 
   string(REPLACE "_EXTENSION" "_REGEX" regex_var "${ext_var}")
-  string(REPLACE "." "\\\\." ${regex_var} "${${ext_var}}")
+  string(REPLACE "." "\\." ${regex_var} "${${ext_var}}")
   set(${regex_var} "^[a-z][a-z0-9_]*(\.[a-z0-9_]+)*${${regex_var}}$")
 endforeach()
 
